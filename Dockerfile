@@ -1,4 +1,5 @@
 FROM python:3.9
+MAINTAINER Derilinx
 
 WORKDIR /usr/src/app
 
