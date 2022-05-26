@@ -4,7 +4,7 @@ import requests
 
 from fastapi import FastAPI
 
-SOLR_URL = f'http://{os.environ.get("SOLR_HOST")}/solr/ckan/select'
+SOLR_URL = f'http://solr:8983/solr/ckan/select'
 
 app = FastAPI()
 
@@ -55,7 +55,6 @@ async def root():
     print(SOLR_URL)
     r = requests.get(SOLR_URL, params=solr_params)
 
-    print (r.text)
     data = r.json()
     print(json.dumps(data['response']['docs'][0], indent=2))
 
