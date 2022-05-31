@@ -5,29 +5,26 @@ DEFAULT_FACET_FIELDS = ['txt_knowsAbout', 'name', 'txt_knowsLanguage', 'txt_nati
 
 
 class SolrQueryBuilder:
+    params = {}
 
-    def __init__(self, search=None):
-        self.search = search
-        self._set_basic_parmas()
-
-    def _set_basic_parmas(self):
-        self.params = {
-            'facet.limit': 20,
-            'q': '*:*',
-            "start": "0",
-            "sort": "score desc, indexed_ts desc",
-            "facet.mincount": "1",
-            "rows": "10",
-            "facet": "true",
-        }
+    def __init__(self, rows=10, facet_min_count=1, start=0, query='*:*', sort='score desc, indexed_ts desc'):
+        self.params['q'] = query
+        self.params['sort'] = sort
+        self.params['rows'] = rows
+        self.params['facet.mincount'] = facet_min_count
+        self.params['start'] = start
 
     def add_facet_fields(self, facet_fields=None):
         self.params["facet.field"] = facet_fields if facet_fields else DEFAULT_FACET_FIELDS
 
-    def add_search_fq(self):
-        self.params["fq"] = self.build_fq()
 
-    def build_fq(self):
+class SolarSearchQueryBuilder(SolrQueryBuilder):
+
+    def __init__(self, search):
+        super().__init__()
+        self.search = search
+
+    def _build_fq(self):
         fq = []
         if self.search.text:
             fq.append(f"+text:({self.search.text})")
@@ -35,3 +32,5 @@ class SolrQueryBuilder:
             fq.append(f'+type:{self.search.type}')
         return fq
 
+    def add_search_fq(self):
+        self.params["fq"] = self._build_fq()
