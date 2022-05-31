@@ -1,16 +1,21 @@
-import json
-import os
 import requests
+from pydantic import BaseModel
 
 from fastapi import FastAPI
 
-SOLR_URL = f'http://solr:8983/solr/ckan/select'
+# SOLR_URL = f'http://solr:8983/solr/ckan/select'
+SOLR_URL = f'http://localhost:8983/solr/ckan/select'
 
 app = FastAPI()
 
 
-@app.get("/")
-async def root():
+class Search(BaseModel):
+    text: str
+
+
+@app.get("/search")
+async def root(search: Search):
+    # search_word = 'Calcium'
     solr_params = {
         'facet.limit': 20,
         'q': '*:*',
@@ -38,7 +43,7 @@ async def root():
             #        '+text:"https://edmo.seadatanet.org/report/784"',
             #        '-txt_parentOrganization:"https://edmo.seadatanet.org/report/784"',
             #        '+type:Event',
-            "+text:Calcium",
+            f"+text:({search.text})",
             #        "+txt_keywords:Calcium",
             #        "+type:ResearchProject",
             #        "+text:Scientist",
@@ -52,12 +57,9 @@ async def root():
         "facet": "true",
     }
 
-    print(SOLR_URL)
+    print(f'sending request to: {SOLR_URL}')
     r = requests.get(SOLR_URL, params=solr_params)
 
     data = r.json()
-    print(json.dumps(data['response']['docs'][0], indent=2))
 
-    print(json.dumps(json.loads(data['response']['docs'][0]['json_source']), indent=2))
-
-    print(json.dumps(data['facet_counts'], indent=2))
+    return data['response']['docs']
