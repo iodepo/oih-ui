@@ -7,12 +7,13 @@ DEFAULT_FACET_FIELDS = ['txt_knowsAbout', 'name', 'txt_knowsLanguage', 'txt_nati
 class SolrQueryBuilder:
     params = {}
 
-    def __init__(self, rows=10, facet_min_count=1, start=0, query='*:*', sort='score desc, indexed_ts desc'):
+    def __init__(self, rows=10, facet_min_count=1, start=0, query='*:*', sort='score desc, indexed_ts desc', facet='true'):
         self.params['q'] = query
         self.params['sort'] = sort
         self.params['rows'] = rows
         self.params['facet.mincount'] = facet_min_count
         self.params['start'] = start
+        self.params["facet"] = facet
 
     def add_facet_fields(self, facet_fields=None):
         self.params["facet.field"] = facet_fields if facet_fields else DEFAULT_FACET_FIELDS

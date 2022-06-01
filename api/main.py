@@ -5,8 +5,8 @@ from api.util.solr_query_builder import SolrQueryBuilder, SolarSearchQueryBuilde
 from api.models.Search import Search
 
 # SOLR_URL = f'http://solr:8983/solr/ckan/select'
-SOLR_URL = f'http://localhost:8983/solr/ckan/select'
-# SOLR_URL = 'http://oih.staging.derilinx.com:8983/solr/ckan/select'
+# SOLR_URL = f'http://localhost:8983/solr/ckan/select'
+SOLR_URL = 'http://oih.staging.derilinx.com:8983/solr/ckan/select'
 
 app = FastAPI()
 
@@ -22,12 +22,13 @@ async def search(search: Search):
 
 
 @app.get("/count")
-async def count():
+async def count(field_to_count: str):
     solr_search_query = SolrQueryBuilder()
-    solr_search_query.add_facet_fields(['type'])
+    solr_search_query.add_facet_fields([field_to_count])
+    print(solr_search_query)
     res = requests.get(SOLR_URL, params=solr_search_query.params)
     data = res.json()
-    response = await _convert_counts_array_to_response_dict(data['facet_counts']['facet_fields']['type'])
+    response = await _convert_counts_array_to_response_dict(data['facet_counts']['facet_fields'][field_to_count])
     return response
 
 
