@@ -12,5 +12,5 @@ class TestCountApi(unittest.TestCase):
         expected_counts = {"counts": {"CreativeWork": 40966, "Person": 20116, "Organization": 10610, "Dataset": 4166,
                                       "ResearchProject": 2771, "Event": 2394, "Course": 967, "Vehicle": 84,
                                       "DataCatalog": 1}}
-        res = requests.get(COUNT_URL + '?field=type')
+        res = requests.get(COUNT_URL + '?field_to_count=type')
         self.assertEqual(res.json(), expected_counts)
