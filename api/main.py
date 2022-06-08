@@ -1,4 +1,5 @@
 import requests
+import urllib.parse
 
 from fastapi import FastAPI
 from api.util.solr_query_builder import SolrQueryBuilder, SolarSearchQueryBuilder
@@ -12,8 +13,18 @@ app = FastAPI()
 
 
 @app.get("/search")
-async def search(search: Search):
-    solr_search_query = SolarSearchQueryBuilder(search)
+async def search(text, document_type: str = None):
+
+    if isinstance(text, str):
+        search_text = text
+    else:
+        search_text = urllib.parse.unquote(text)
+    solr_search_query = SolarSearchQueryBuilder(
+        Search(
+            search_text,
+            document_type if document_type else 'Person'
+        )
+    )
     solr_search_query.add_search_fq()
     solr_search_query.add_facet_fields()
     res = requests.get(SOLR_URL, params=solr_search_query.params)
