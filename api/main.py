@@ -2,6 +2,8 @@ import requests
 import urllib.parse
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from api.util.solr_query_builder import SolrQueryBuilder, SolarSearchQueryBuilder
 from api.models.Search import Search
 
@@ -11,10 +13,14 @@ SOLR_URL = 'http://oih.staging.derilinx.com:8983/solr/ckan/select'
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*']
+)
+
 
 @app.get("/search")
 async def search(text, document_type: str = None):
-
     if isinstance(text, str):
         search_text = text
     else:
