@@ -5,9 +5,9 @@ DEFAULT_FACET_FIELDS = ['txt_knowsAbout', 'name', 'txt_knowsLanguage', 'txt_nati
 
 
 class SolrQueryBuilder:
-    params = {}
 
     def __init__(self, rows=10, facet_min_count=1, start=0, query='*:*', sort='score desc, indexed_ts desc', facet='true'):
+        self.params = dict()
         self.params['q'] = query
         self.params['sort'] = sort
         self.params['rows'] = rows
