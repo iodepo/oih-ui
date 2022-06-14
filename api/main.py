@@ -21,13 +21,10 @@ app.add_middleware(
 
 @app.get("/search")
 async def search(text, document_type: str = None):
-    if isinstance(text, str):
-        search_text = text
-    else:
-        search_text = urllib.parse.unquote(text)
-        solr_search_query = SolarSearchQueryBuilder(
-            Search(search_text, document_type)
-        )
+    search_text = urllib.parse.unquote(text)
+    solr_search_query = SolarSearchQueryBuilder(
+        Search(search_text, document_type)
+    )
     solr_search_query.add_search_fq()
     solr_search_query.add_facet_fields()
     res = requests.get(SOLR_URL, params=solr_search_query.params)
