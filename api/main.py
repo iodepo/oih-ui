@@ -29,8 +29,8 @@ async def search(text, document_type: str = None):
     solr_search_query.add_facet_fields()
     res = requests.get(SOLR_URL, params=solr_search_query.params)
     data = res.json()
-    response = data['response']['docs']
-    response.append(await _convert_counts_array_to_response_dict(data['facet_counts']['facet_fields']['type']))
+    response = [{'docs': data['response']['docs']},
+                await _convert_counts_array_to_response_dict(data['facet_counts']['facet_fields']['type'])]
     return response
 
 
