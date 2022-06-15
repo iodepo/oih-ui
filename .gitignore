@@ -4,3 +4,5 @@
 .env
 .idea
 venv/
+
+package-lock.json
