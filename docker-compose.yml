@@ -29,7 +29,7 @@ services:
       - "8000:8000"
 
   frontend:
-    build: frontend/Dockerfile
+    build: ./frontend
     ports:
       - "3000:3000"
     links:
