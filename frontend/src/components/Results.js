@@ -38,7 +38,7 @@ export default function Results({searchText}) {
     ];
 
     useEffect(() => {
-        fetch(encodeURI(`http://backend-api:8000/search?text=${searchText}&document_type=${searchType}`))
+        fetch(encodeURI(`http://oih.staging.derilinx.com:8000/search?text=${searchText}&document_type=${searchType}`))
             .then(response => response.json())
             .then(json => {
                 setResults(json.docs)

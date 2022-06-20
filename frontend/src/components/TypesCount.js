@@ -20,7 +20,7 @@ export default function TypesCount() {
     const [counts, setCounts] = useState(defaultCountState);
 
     useEffect(() => {
-        fetch('http://backend-api:8000/count?field_to_count=type')
+        fetch('http://oih.staging.derilinx.com:8000/count?field_to_count=type')
             .then(response => response.json())
             .then(json => setCounts(json))
     }, []);

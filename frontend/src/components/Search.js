@@ -4,10 +4,12 @@ import {Button} from 'react-bootstrap';
 
 
 export default function Search({setSearchText, isDisplaySearch, setIsDisplaySearch}) {
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState(' ');
 
 
     const handleChange = () => {
+        console.log('handleChange()')
+        console.log(searchQuery.length)
         if (searchQuery.length > 0)
         {
             setSearchText(searchQuery);
@@ -27,7 +29,8 @@ export default function Search({setSearchText, isDisplaySearch, setIsDisplaySear
 
     const suggestionLink = (event) => {
         setSearchQuery(event.currentTarget.textContent)
-        handleChange()
+        setSearchText(event.currentTarget.textContent);
+        setIsDisplaySearch(true);
     }
 
     return (
