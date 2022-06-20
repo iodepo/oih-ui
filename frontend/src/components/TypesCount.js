@@ -34,7 +34,7 @@ export default function TypesCount() {
                     <Col id="topCol"><p id="bubbleCount">{counts['counts']['CreativeWork']}</p><p id="bubbleText">Documents</p></Col>
                     <Col id="topCol"><p id="bubbleCount">{counts['counts']['Course']}</p><p id="bubbleText">Training</p></Col>
                 </Row>
-                <Row id="topBubbleBottom">
+                <Row id="bottomBubbleRow">
                     <Col id="topCol"><p id="bubbleCount">{counts['counts']['Vehicle']}</p><p id="bubbleText">Vessels</p></Col>
                     <Col id="topCol"><p id="bubbleCount">{counts['counts']['ResearchProject']}</p><p id="bubbleText">Projects</p></Col>
                     <Col id="topCol"><p id="bubbleCount">0</p><p id="bubbleText">Spatial Data & Maps</p></Col>
