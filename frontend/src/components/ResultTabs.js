@@ -2,9 +2,15 @@ import 'react-tabs/style/react-tabs.css';
 import {Tab, Tabs, TabList} from 'react-tabs';
 
 export default function ResultTabs({tabList, setSearchType}) {
-    // console.log('onClick')
+
     function changeSearchType(event){
-        setSearchType(event.target.id);
+        // console.log(event.target)
+        // console.log(event.target.className)
+        if (event.target.className === 'tabSpan') {
+            setSearchType(event.target.id);
+        } else {
+            setSearchType(event.target.children[0].id);
+        }
     }
 
     return (
@@ -14,8 +20,8 @@ export default function ResultTabs({tabList, setSearchType}) {
                 {
                     tabList.map((tab, i) => {
                             return (
-                                <Tab key={tab.title}>
-                                    <span onClick={changeSearchType} id={tab.title}>{tab.tab_name}</span>
+                                <Tab onClick={changeSearchType} key={tab.title}>
+                                    <span className='tabSpan' id={tab.title}>{tab.tab_name}</span>
                                 </Tab>
                             )
                         }
