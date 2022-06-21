@@ -2,14 +2,12 @@ import os
 import requests
 import urllib.parse
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.util.solr_query_builder import SolrQueryBuilder, SolarSearchQueryBuilder
 from api.models.Search import Search
 
-# SOLR_URL = f'http://solr:8983/solr/ckan/select'
-# SOLR_URL = f'http://localhost:8983/solr/ckan/select'
 
 SOLR_URL = os.path.join(os.environ['SOLR_URL'], 'select')
 AVAILABLE_FACETS = ['txt_knowsAbout', 'txt_knowsLanguage', 'txt_nationality', 'txt_jobTitle', 'txt_contributor',
@@ -25,17 +23,16 @@ app.add_middleware(
 
 
 @app.get("/search")
-async def search(text, document_type: str = None, facetType: str = None, facetName: str = None):
+async def search(text, document_type: str = None, facetType: list = Query(default=[]), facetName: list = Query(default=[])):
     search_text = urllib.parse.unquote(text)
     solr_search_query = SolarSearchQueryBuilder(
         Search(search_text, document_type)
     )
     solr_search_query.add_search_fq()
     solr_search_query.add_facet_fields()
-    if facetType and facetName:
-        solr_search_query.add_custom_fq(facetType, facetName)
-
-    print(solr_search_query.params)
+    if (facetType and facetName) and (len(facetType) == len(facetName)):
+        for facet_search in zip(facetType, facetName):
+            solr_search_query.add_custom_fq(facet_search[0], facet_search[1])
 
     res = requests.get(SOLR_URL, params=solr_search_query.params)
     data = res.json()
