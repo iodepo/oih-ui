@@ -43,11 +43,11 @@ async def search(text, document_type: str = None, facetType: str = None, facetNa
 
     response.update(await _convert_counts_array_to_response_dict(data['facet_counts']['facet_fields']['type']))
     response['facets'] = []
-    await _add_facets(response)
+    await _add_facets(data, response)
     return response
 
 
-async def _add_facets(response):
+async def _add_facets(data, response):
     for facet in AVAILABLE_FACETS:
         if data['facet_counts']['facet_fields'][facet]:
             response['facets'].append(
