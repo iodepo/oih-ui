@@ -115,6 +115,7 @@ color:#0b4ccb;
   text-align: left;
   margin-top: 2%;
   max-width: 20%;
+  background: #d8d2d2;
 }
 
 #resultsFacets p {
@@ -226,5 +227,3 @@ input[type=text] {
     color: #0b096b;
     font-size: larger;
 }
-
-
