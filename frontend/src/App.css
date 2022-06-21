@@ -91,6 +91,26 @@ color:#0b4ccb;
   text-align: left;
 }
 
+#factsHeading {
+  overflow: hidden;
+}
+
+#factsHeading h3 {
+  float: left;
+}
+
+#clearFacet {
+  color: red;
+  float: right;
+  padding-right: 5%;
+  font-size: x-large;
+}
+
+#clearFacet:hover {
+  cursor: pointer;
+  color: #ec8b8b;
+}
+
 .resultsHeading {
   color: #0078A8;
   padding-left: 20%
@@ -116,6 +136,7 @@ color:#0b4ccb;
   margin-top: 2%;
   max-width: 20%;
   background: #d8d2d2;
+  width: 100%;
 }
 
 #resultsFacets p {

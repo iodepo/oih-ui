@@ -7,12 +7,6 @@ import { dataServiceUrl } from '../config/environment';
 
 export default function Results({searchText}) {
 
-    const [searchType, setSearchType] = useState('CreativeWork');
-    const [results, setResults] = useState([]);
-    const [resultCount, setResultCount] = useState(0);
-    const [facets, setFacets] = useState([]);
-    const [facetQuery, setFacetQuery] = useState(null);
-
     const tabs = [
         {
             title: 'CreativeWork',
@@ -39,9 +33,15 @@ export default function Results({searchText}) {
             tab_name: 'Spatial Data & Maps',
         }
     ];
+    const [searchType, setSearchType] = useState('CreativeWork');
+    const [results, setResults] = useState([]);
+    const [resultCount, setResultCount] = useState(0);
+    const [facets, setFacets] = useState([]);
+    const [facetQuery, setFacetQuery] = useState(null);
 
     useEffect(() => {
-        let URI = `${dataServiceUrl}/search?text=${searchText}&document_type=${searchType}`
+        // let URI = `${dataServiceUrl}/search?text=${searchText}&document_type=${searchType}`
+        let URI = `https://api.oih.staging.derilinx.com/search?text=${searchText}&document_type=${searchType}`
         if (facetQuery) {
             URI += facetQuery
         }
@@ -64,15 +64,25 @@ export default function Results({searchText}) {
     }
 
     const facetSearch = (event) => {
-        const facetType = event.target.className
-        const facetName = event.target.text
-        setFacetQuery(`&facetType=${facetType}&facetName=${facetName}`)
+        const clickedFacetQuery = `&facetType=${event.target.className}&facetName=${event.target.text}`
+        if (facetQuery) {
+            setFacetQuery(facetQuery + clickedFacetQuery)
+        } else {
+            setFacetQuery(clickedFacetQuery)
+        }
+    }
+
+    const clearFactQuery = () => {
+        setFacetQuery('')
     }
 
     return (
         <div id='resultsMain'>
             <div id="resultsFacets">
-                <h3><b>Filter By:</b></h3>
+                <div id='factsHeading'>
+                    <h3><b>Filter By:</b></h3>
+                    <a id='clearFacet' onClick={clearFactQuery}>clear</a>
+                </div>
                         {
                             facets.map((facet, i) => {
                                 return (
@@ -89,7 +99,7 @@ export default function Results({searchText}) {
                         }
                     </div>
             <div id="resultsBackground">
-                <ResultTabs tabList={tabs} setSearchType={setSearchType}/>
+                <ResultTabs tabList={tabs} setSearchType={setSearchType} clearFactQuery={clearFactQuery}/>
                 <h3 className="resultsHeading">Search Query: {searchText}</h3>
                 <h4 className="resultsHeading">{mapSearchTypeToProfile(searchType)}</h4>
                 <h6 className="resultsHeading"> Total results found {resultCount || 0}</h6>
@@ -99,7 +109,7 @@ export default function Results({searchText}) {
                             results.map((data, i) => {
                                 if (data['type'] === 'Person') {
                                     return (<div key={i}>
-                                        <Expert expert={data}></Expert>
+                                        <Expert expert={data} clearFactQuery={clearFactQuery}></Expert>
                                     </div>)
                                 }
                                 return (
