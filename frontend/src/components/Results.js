@@ -3,6 +3,7 @@ import React, {useEffect, useState} from "react";
 import Expert from './Expert'
 import DescriptionResult from "./results/descriptionResult";
 import ResultTabs from "./ResultTabs";
+import { dataServiceUrl } from '../config/environment';
 
 export default function Results({searchText}) {
 
@@ -40,7 +41,7 @@ export default function Results({searchText}) {
     ];
 
     useEffect(() => {
-        let URI = `http://localhost:8000/search?text=${searchText}&document_type=${searchType}`
+        let URI = `${dataServiceUrl}/search?text=${searchText}&document_type=${searchType}`
         if (facetQuery) {
             URI += facetQuery
         }

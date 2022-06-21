@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Col, Container, Row} from "react-bootstrap";
 
+import { dataServiceUrl } from '../config/environment';
 
 const defaultCountState = {
     "counts": {
@@ -20,7 +21,7 @@ export default function TypesCount() {
     const [counts, setCounts] = useState(defaultCountState);
 
     useEffect(() => {
-        fetch('http://oih.staging.derilinx.com:8000/count?field_to_count=type')
+        fetch(`${dataServiceUrl}/count?field_to_count=type`)
             .then(response => response.json())
             .then(json => setCounts(json))
     }, []);
