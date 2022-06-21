@@ -111,9 +111,10 @@ color:#0b4ccb;
 
 #resultsFacets {
   float: left;
-    margin-left: 2%;
-    text-align: left;
-    margin-top: 2%;
+  margin-left: 2%;
+  text-align: left;
+  margin-top: 2%;
+  max-width: 20%;
 }
 
 #resultsFacets p {
