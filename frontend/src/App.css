@@ -1,10 +1,6 @@
-/*#NavContainer {*/
-/*  border-bottom: 2px solid;*/
-/*  border-left: 2px solid;*/
-/*  border-right: 2px solid;*/
-/*  border-color: #92d3f6;*/
-/*  border-radius: 4%;*/
-/*}*/
+p a:hover{
+  cursor: pointer;
+}
 
 .bg-light {
   background-color: transparent !important;
@@ -97,6 +93,7 @@ color:#0b4ccb;
 
 .resultsHeading {
   color: #0078A8;
+  padding-left: 20%
 }
 
 #expertDetails {
@@ -107,6 +104,25 @@ color:#0b4ccb;
   margin-bottom: 1%;
 }
 
+#resultsMain {
+  width: 100%;
+  overflow: hidden;
+}
+
+#resultsFacets {
+  float: left;
+    margin-left: 2%;
+    text-align: left;
+    margin-top: 2%;
+}
+
+#resultsFacets p {
+  font-size: 11px;
+}
+
+#resultsInfo {
+  margin-left: 20%;
+}
 
 /*=====*/
 /* Style the search field */
@@ -164,7 +180,7 @@ input[type=text] {
 }
 
 #controlled-tabs {
-  padding-right: 20%;
+  padding-left: 20%;
 }
 
 /*=====*/
