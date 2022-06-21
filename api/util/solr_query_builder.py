@@ -38,4 +38,4 @@ class SolarSearchQueryBuilder(SolrQueryBuilder):
 
     def add_custom_fq(self, name, value):
         if self.params["fq"]:
-            self.params['fq'].append(f"+{name}:({value})")
+            self.params['fq'].append(f'+{name}:("{value}")')
