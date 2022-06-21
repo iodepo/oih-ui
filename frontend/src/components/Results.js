@@ -3,6 +3,7 @@ import React, {useEffect, useState} from "react";
 import Expert from './Expert'
 import DescriptionResult from "./results/descriptionResult";
 import ResultTabs from "./ResultTabs";
+import { dataServiceUrl } from '../config/environment';
 
 export default function Results({searchText}) {
 
@@ -38,7 +39,7 @@ export default function Results({searchText}) {
     ];
 
     useEffect(() => {
-        fetch(encodeURI(`http://oih.staging.derilinx.com:8000/search?text=${searchText}&document_type=${searchType}`))
+        fetch(encodeURI(`${dataServiceUrl}/search?text=${searchText}&document_type=${searchType}`))
             .then(response => response.json())
             .then(json => {
                 setResults(json.docs)
