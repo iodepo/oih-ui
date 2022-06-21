@@ -12,6 +12,9 @@ from api.models.Search import Search
 # SOLR_URL = f'http://localhost:8983/solr/ckan/select'
 
 SOLR_URL = os.path.join(os.environ['SOLR_URL'], 'select')
+AVAILABLE_FACETS = ['txt_knowsAbout', 'txt_knowsLanguage', 'txt_nationality', 'txt_jobTitle', 'txt_contributor',
+                    'txt_keywords',
+                    'txt_memberOf', 'txt_parentOrganization', 'id_provider', 'id_includedInDataCatalog', 'keys']
 
 app = FastAPI()
 
@@ -20,36 +23,32 @@ app.add_middleware(
     allow_origins=['*']
 )
 
-##### TEMP CODE #####
-import json
-
-# Opening JSON file
-# f = open('/Users/cormac/PycharmProjects/unesco-oih/api/sample_result.json')
-f = open('/usr/src/app/api/sample_result.json')
-
-# returns JSON object as
-# a dictionary
-data = json.load(f)
-##### TEMP CODE #####
 
 @app.get("/search")
-async def search(text, document_type: str = None):
-    #### GOOD CODE #####
-    # search_text = urllib.parse.unquote(text)
-    # solr_search_query = SolarSearchQueryBuilder(
-    #     Search(search_text, document_type)
-    # )
-    # solr_search_query.add_search_fq()
-    # solr_search_query.add_facet_fields()
-    # res = requests.get(SOLR_URL, params=solr_search_query.params)
-    # data = res.json()
-    # response = {'docs': data['response']['docs']}
-    #### GOOD CODE #####
+async def search(text, document_type: str = None, facetType: str = None, facetName: str = None):
+    search_text = urllib.parse.unquote(text)
+    solr_search_query = SolarSearchQueryBuilder(
+        Search(search_text, document_type)
+    )
+    solr_search_query.add_search_fq()
+    solr_search_query.add_facet_fields()
+    if facetType and facetName:
+        solr_search_query.add_custom_fq(facetType, facetName)
+
+    print(solr_search_query.params)
+
+    res = requests.get(SOLR_URL, params=solr_search_query.params)
+    data = res.json()
     response = {'docs': data['response']['docs']}
+
     response.update(await _convert_counts_array_to_response_dict(data['facet_counts']['facet_fields']['type']))
     response['facets'] = []
-    for facet in ['txt_knowsAbout', 'txt_knowsLanguage', 'txt_nationality', 'txt_jobTitle', 'txt_contributor', 'txt_keywords',
-                  'txt_memberOf', 'txt_parentOrganization', 'id_provider', 'id_includedInDataCatalog', 'keys']:
+    await _add_facets(response)
+    return response
+
+
+async def _add_facets(response):
+    for facet in AVAILABLE_FACETS:
         if data['facet_counts']['facet_fields'][facet]:
             response['facets'].append(
                 {
@@ -57,7 +56,6 @@ async def search(text, document_type: str = None):
                     "counts": await _convert_facet_counts(
                         data['facet_counts']['facet_fields'][facet])
                 })
-    return response
 
 
 @app.get("/count")
