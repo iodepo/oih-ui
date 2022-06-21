@@ -1,3 +1,4 @@
+import os
 import requests
 import urllib.parse
 
@@ -9,7 +10,8 @@ from api.models.Search import Search
 
 # SOLR_URL = f'http://solr:8983/solr/ckan/select'
 # SOLR_URL = f'http://localhost:8983/solr/ckan/select'
-SOLR_URL = 'http://oih.staging.derilinx.com:8983/solr/ckan/select'
+
+SOLR_URL = os.path.join(os.environ['SOLR_URL'], 'select')
 
 app = FastAPI()
 
