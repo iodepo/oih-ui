@@ -6,25 +6,24 @@ networks:
   default:
 
 services:
-  solr:
-    image: "repository.staging.derilinx.com/solr_8.8:$IMAGE_TAG"
-    #image: "library/solr:8.8"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: 50m
-    ports:
-      - 8983:8983
-    environment:
-      - SOLR_JAVA_MEM=-Xms1g -Xmx1g
-      - SOLR_OPTS=-Dlog4j2.formatMsgNoLookups=true
-    volumes:
-      - "./solr:/var/solr/data/ckan/"
-      - solr-data:/var/solr/data/ckan/data:rw
+#  solr:
+#    image: "repository.staging.derilinx.com/solr_8.8:$IMAGE_TAG"
+#    #image: "library/solr:8.8"
+#    logging:
+#      driver: "json-file"
+#      options:
+#        max-size: 50m
+#    ports:
+#      - 8983:8983
+#    environment:
+#      - SOLR_JAVA_MEM=-Xms1g -Xmx1g
+#      - SOLR_OPTS=-Dlog4j2.formatMsgNoLookups=true
+#    volumes:
+#      - "./solr:/var/solr/data/ckan/"
+#      - solr-data:/var/solr/data/ckan/data:rw
 
   fast-api:
     build: .
     ports:
       - 8000:8000
-    links:
-      - "solr"
+
