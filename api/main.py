@@ -14,7 +14,7 @@ from api.models.Search import Search
 SOLR_URL = os.path.join(os.environ['SOLR_URL'], 'select')
 AVAILABLE_FACETS = ['txt_knowsAbout', 'txt_knowsLanguage', 'txt_nationality', 'txt_jobTitle', 'txt_contributor',
                     'txt_keywords',
-                    'txt_memberOf', 'txt_parentOrganization', 'id_provider', 'id_includedInDataCatalog', 'keys']
+                    'txt_memberOf', 'txt_parentOrganization', 'id_provider', 'id_includedInDataCatalog']
 
 app = FastAPI()
 
