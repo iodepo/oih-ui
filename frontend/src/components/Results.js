@@ -41,7 +41,8 @@ export default function Results({searchText}) {
     ];
 
     useEffect(() => {
-        let URI = `${dataServiceUrl}/search?text=${searchText}&document_type=${searchType}`
+        let URI = `${dataServiceUrl}
+        search?text=${searchText}&document_type=${searchType}`
         if (facetQuery) {
             URI += facetQuery
         }
