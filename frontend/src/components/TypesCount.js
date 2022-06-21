@@ -21,7 +21,7 @@ export default function TypesCount() {
     const [counts, setCounts] = useState(defaultCountState);
 
     useEffect(() => {
-        fetch(`${dataServiceUrl}count?field_to_count=type`)
+        fetch(`${dataServiceUrl}/count?field_to_count=type`)
             .then(response => response.json())
             .then(json => setCounts(json))
     }, []);
