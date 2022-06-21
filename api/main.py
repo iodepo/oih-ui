@@ -22,8 +22,8 @@ app.add_middleware(
 import json
 
 # Opening JSON file
-f = open('/Users/cormac/PycharmProjects/unesco-oih/api/sample_result.json')
-# f = open('/usr/src/app/api/sample_result.json')
+# f = open('/Users/cormac/PycharmProjects/unesco-oih/api/sample_result.json')
+f = open('/usr/src/app/api/sample_result.json')
 
 # returns JSON object as
 # a dictionary
