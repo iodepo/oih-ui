@@ -5,7 +5,7 @@ export default function Expert({expert}) {
             <p><b>Job Title:</b> {expert['txt_jobTitle']}</p>
             <p><b>Knows About:</b> {expert['txt_knowsAbout']}</p>
             <p><b>Language:</b> {expert['txt_knowsLanguage']}</p>
-            <p><b>Text Nationality:</b> {expert['txt_nationality']}</p>
+            <p><b>Nationality:</b> {expert['txt_nationality']}</p>
         </div>
     )
 }

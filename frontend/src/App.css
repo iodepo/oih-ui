@@ -100,15 +100,16 @@ color:#0b4ccb;
 }
 
 #clearFacet {
-  color: red;
+  color: #399f12;
   float: right;
-  padding-right: 5%;
-  font-size: x-large;
+  padding-right: 2%;
+  margin-top: -2%;
+  font-size: xx-large;
 }
 
 #clearFacet:hover {
   cursor: pointer;
-  color: #ec8b8b;
+  color: #96d28a;
 }
 
 .resultsHeading {
@@ -127,16 +128,21 @@ color:#0b4ccb;
 #resultsMain {
   width: 100%;
   overflow: hidden;
+  background: white;
 }
 
 #resultsFacets {
   float: left;
   margin-left: 2%;
+  padding-left: 1%;
+  padding-top: 1%;
+  padding-right: 1%;
   text-align: left;
-  margin-top: 2%;
-  max-width: 20%;
-  background: #d8d2d2;
+  margin-top: 1%;
+  max-width: 25%;
+  background: #ebf0f7;
   width: 100%;
+  border-radius: 15px;
 }
 
 #resultsFacets p {

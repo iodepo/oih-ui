@@ -40,8 +40,7 @@ export default function Results({searchText}) {
     const [facetQuery, setFacetQuery] = useState(null);
 
     useEffect(() => {
-        // let URI = `${dataServiceUrl}/search?text=${searchText}&document_type=${searchType}`
-        let URI = `https://api.oih.staging.derilinx.com/search?text=${searchText}&document_type=${searchType}`
+        let URI = `${dataServiceUrl}/search?text=${searchText}&document_type=${searchType}`;
         if (facetQuery) {
             URI += facetQuery
         }
@@ -81,13 +80,13 @@ export default function Results({searchText}) {
             <div id="resultsFacets">
                 <div id='factsHeading'>
                     <h3><b>Filter By:</b></h3>
-                    <a id='clearFacet' onClick={clearFactQuery}>clear</a>
+                    <a id='clearFacet' onClick={clearFactQuery}>Clear</a>
                 </div>
                         {
                             facets.map((facet, i) => {
                                 return (
                                     <div key={i}>
-                                        <h6>{facet.name}</h6>
+                                        <h6>{facet.name.substring(4)}</h6>
                                         {
                                             facet.counts.map((facetCount, i) => {
                                                 return <p><a className={facet.name} onClick={facetSearch}>{facetCount.name}</a> ({facetCount.count})</p>
