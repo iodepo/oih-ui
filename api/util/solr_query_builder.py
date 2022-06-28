@@ -18,24 +18,7 @@ class SolrQueryBuilder:
     def add_facet_fields(self, facet_fields=None):
         self.params["facet.field"] = facet_fields if facet_fields else DEFAULT_FACET_FIELDS
 
-
-class SolarSearchQueryBuilder(SolrQueryBuilder):
-
-    def __init__(self, search):
-        super().__init__()
-        self.search = search
-
-    def _build_fq(self):
-        fq = []
-        if self.search.text:
-            fq.append(f"+text:({self.search.text})")
-        if self.search.type:
-            fq.append(f'+type:{self.search.type}')
-        return fq
-
-    def add_search_fq(self):
-        self.params["fq"] = self._build_fq()
-
-    def add_custom_fq(self, name, value):
-        if self.params["fq"]:
-            self.params['fq'].append(f'+{name}:("{value}")')
+    def add_fq(self, name, value):
+        if "fq" not in self.params:
+            self.params['fq'] = []
+        self.params['fq'].append(f'+{name}:({value})')
