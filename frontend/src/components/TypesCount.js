@@ -3,25 +3,15 @@ import {Col, Container, Row} from "react-bootstrap";
 
 import { dataServiceUrl } from '../config/environment';
 
-const defaultCountState = {
-    "counts": {
-        "CreativeWork": 0,
-        "Person": 0,
-        "Organization": 0,
-        "Dataset": 0,
-        "ResearchProject": 0,
-        "Event": 0,
-        "Course": 0,
-        "Vehicle": 0
-    }
-}
+const doc_types = ['CreativeWork', 'Person', 'Organization', 'Dataset', 'ResearchProject', 'Event', 'Course', 'Vehicle']
+const defaultCountState = {'counts': Object.fromEntries(doc_types.map(e => [e, 0]))}
 
 
 export default function TypesCount() {
     const [counts, setCounts] = useState(defaultCountState);
 
     useEffect(() => {
-        fetch(`${dataServiceUrl}/count?field_to_count=type`)
+        fetch(`${dataServiceUrl}/count?field=type`)
             .then(response => response.json())
             .then(json => setCounts(json))
     }, []);

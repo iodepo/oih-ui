@@ -1,9 +1,37 @@
-import React, {useEffect, useState} from "react";
+import React, {Component, useEffect, useState} from "react";
 
 import Expert from './Expert'
-import DescriptionResult from "./results/descriptionResult";
 import ResultTabs from "./ResultTabs";
-import { dataServiceUrl } from '../config/environment';
+import {dataServiceUrl} from '../config/environment';
+import {Col, Container, Row} from "react-bootstrap";
+import DocumentResult from "./results/DocumentResult";
+import CourseResult from "./results/CourseResult";
+import VesselResult from "./results/VesselResult";
+import ProjectResult from "./results/ProjectResult";
+
+
+const typeMap = {
+    CreativeWork: {
+        Component: DocumentResult,
+        type: "Document",
+    },
+    Person: {
+        Component: Expert,
+        type: "Experts",
+    },
+    Course: {
+        Component: CourseResult,
+        type: "Training",
+    },
+    Vehicle: {
+        Component: VesselResult,
+        type: "Vessels",
+    },
+    ResearchProject: {
+        Component: ProjectResult,
+        type: "Projects",
+    },
+};
 
 export default function Results({searchText}) {
 
@@ -40,7 +68,9 @@ export default function Results({searchText}) {
     const [facetQuery, setFacetQuery] = useState(null);
 
     useEffect(() => {
-        let URI = `${dataServiceUrl}/search?text=${searchText}&document_type=${searchType}`;
+        let URI = `${dataServiceUrl}/search?`;
+        const params = new URLSearchParams({'search_text': searchText, 'document_type': searchType})
+        URI += params.toString()
         if (facetQuery) {
             URI += facetQuery
         }
@@ -75,6 +105,14 @@ export default function Results({searchText}) {
         setFacetQuery('')
     }
 
+    function resolveAsUrl(url) {
+        const pattern = /^((http|https):\/\/)/;
+        if (!pattern.test(url)) {
+            return "http://" + url;
+        }
+        return url
+    }
+
     return (
         <div id='resultsMain'>
             <div id="resultsFacets">
@@ -82,21 +120,23 @@ export default function Results({searchText}) {
                     <h3><b>Filter By:</b></h3>
                     <a id='clearFacet' onClick={clearFactQuery}>Clear</a>
                 </div>
-                        {
-                            facets.map((facet, i) => {
-                                return (
-                                    <div key={i}>
-                                        <h6>{facet.name.substring(4)}</h6>
-                                        {
-                                            facet.counts.map((facetCount, i) => {
-                                                return <p><a className={facet.name} onClick={facetSearch}>{facetCount.name}</a> ({facetCount.count})</p>
-                                            })
-                                        }
-                                    </div>
-                                )
-                            })
-                        }
-                    </div>
+                {
+                    facets.map((facet, i) => {
+                        return (
+                            <div key={i}>
+                                <h6>{facet.name.substring(4)}</h6>
+                                {
+                                    facet.counts.map((facetCount, i) => {
+                                        return <p><a className={facet.name}
+                                                     onClick={facetSearch}>{facetCount.name}</a> ({facetCount.count})
+                                        </p>
+                                    })
+                                }
+                            </div>
+                        )
+                    })
+                }
+            </div>
             <div id="resultsBackground">
                 <ResultTabs tabList={tabs} setSearchType={setSearchType} clearFactQuery={clearFactQuery}/>
                 <h3 className="resultsHeading">Search Query: {searchText}</h3>
@@ -105,15 +145,27 @@ export default function Results({searchText}) {
                 <div>
                     <div id="resultsInfo">
                         {
-                            results.map((data, i) => {
-                                if (data['type'] === 'Person') {
-                                    return (<div key={i}>
-                                        <Expert expert={data} clearFactQuery={clearFactQuery}></Expert>
-                                    </div>)
-                                }
+                            results.map((result, i) => {
+                                const {Component} = typeMap[result['type']]
                                 return (
-                                    <div>
-                                        <DescriptionResult result={data}/>
+                                    <div id="expertDetails">
+                                        <h6>Name: <a
+                                            href={result['txt_url'] || resolveAsUrl(result['id'])}> {result['name']}</a>
+                                        </h6>
+                                        <Container>
+                                            <Row>
+                                                <Col id="topBubbleRow" className="col col-lg-4">
+                                                    <Component result={result}/>
+                                                </Col>
+                                                {'description' in result && result['type'] !== 'Person' &&
+                                                    (
+                                                        <Col id="topBubbleBottom">
+                                                            <p>{result['description']}</p>
+                                                        </Col>
+                                                    )
+                                                }
+                                            </Row>
+                                        </Container>
                                     </div>
                                 )
                             })

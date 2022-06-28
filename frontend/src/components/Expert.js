@@ -1,11 +1,15 @@
-export default function Expert({expert}) {
+import React from "react";
+import DocumentAttributeList from "./results/DocumentAttributeList";
+
+export default function Expert({result}) {
     return (
-        <div id="expertDetails">
-            <h6>Expert: <a href={expert['id']}>{expert['name']}</a></h6>
-            <p><b>Job Title:</b> {expert['txt_jobTitle']}</p>
-            <p><b>Knows About:</b> {expert['txt_knowsAbout']}</p>
-            <p><b>Language:</b> {expert['txt_knowsLanguage']}</p>
-            <p><b>Nationality:</b> {expert['txt_nationality']}</p>
+        <div id="expert">
+            <p><b>Job Title:</b> {result['txt_jobTitle']}</p>
+            <p><b>Knows About:</b></p>
+            {'txt_knowsAbout' in result && <DocumentAttributeList results={result['txt_knowsAbout']}/>}
+            <p><b>Language:</b></p>
+            {'txt_knowsLanguage' in result && <DocumentAttributeList results={result['txt_knowsLanguage']}/>}
+            <p><b>Nationality:</b> {result['txt_nationality']}</p>
         </div>
     )
 }

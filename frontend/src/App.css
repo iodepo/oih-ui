@@ -12,12 +12,12 @@ p a:hover{
   className:"d-inline-block align-top";
 }
 
-#infohubH {
+.infohubH {
   color: white;
   text-align: left !important;
 }
 
-#infohubH b {
+.infohubH b {
 color:#0b4ccb;
 }
 
@@ -33,6 +33,9 @@ color:#0b4ccb;
     /*width: 20%;*/
 }
 
+#expert {
+  width: 300%;
+}
 
 #topBubbleRow {
   padding-bottom: 2%;

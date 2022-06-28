@@ -35,12 +35,12 @@ export default function Search({setSearchText, isDisplaySearch, setIsDisplaySear
 
     return (
         <div id="SearchSection">
-            <h1 id="infohubH">SEARCH THE <b>Global</b></h1>
-            <h1 id="infohubH">OCEAN INFOHUB</h1>
+            <h1 className="infohubH">SEARCH THE <b>Global</b></h1>
+            <h1 className="infohubH">OCEAN INFOHUB</h1>
             <div className="searchForm">
                 <input type="text" placeholder="Search for content" defaultValue={searchQuery} onChange={updateSearchQuery} onKeyDown={searchOnEnterKey} name="search"/>
                 <Button onClick={handleChange} id="SearchBtn"><i className="fa fa-search">Search</i></Button>
-                <h3 id="infohubH" hidden={isDisplaySearch}>
+                <h3 className="infohubH" hidden={isDisplaySearch}>
                     TRY: &nbsp;
                     <a className="searchSuggestionLink" onClick={suggestionLink}>Coral Reefs</a>&nbsp;
                     <a className="searchSuggestionLink" onClick={suggestionLink}>Rare Species</a>
