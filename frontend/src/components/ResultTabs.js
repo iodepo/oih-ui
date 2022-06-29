@@ -1,10 +1,10 @@
 import 'react-tabs/style/react-tabs.css';
 import {Tab, Tabs, TabList} from 'react-tabs';
 
-export default function ResultTabs({tabList, setSearchType, clearFactQuery}) {
+export default function ResultTabs({tabList, setSearchType, clearFacetQuery}) {
 
     function changeSearchType(event){
-        clearFactQuery()
+        clearFacetQuery()
         if (event.target.className === 'tabSpan') {
             setSearchType(event.target.id);
         } else {

@@ -101,7 +101,7 @@ export default function Results({searchText}) {
         }
     }
 
-    const clearFactQuery = () => {
+    const clearFacetQuery = () => {
         setFacetQuery('')
     }
 
@@ -118,7 +118,7 @@ export default function Results({searchText}) {
             <div id="resultsFacets">
                 <div id='factsHeading'>
                     <h3><b>Filter By:</b></h3>
-                    <a id='clearFacet' onClick={clearFactQuery}>Clear</a>
+                    <a id='clearFacet' onClick={clearFacetQuery}>Clear</a>
                 </div>
                 {
                     facets.map((facet, i) => {
@@ -138,7 +138,7 @@ export default function Results({searchText}) {
                 }
             </div>
             <div id="resultsBackground">
-                <ResultTabs tabList={tabs} setSearchType={setSearchType} clearFactQuery={clearFactQuery}/>
+                <ResultTabs tabList={tabs} setSearchType={setSearchType} clearFacetQuery={clearFacetQuery}/>
                 <h3 className="resultsHeading">Search Query: {searchText}</h3>
                 <h4 className="resultsHeading">{mapSearchTypeToProfile(searchType)}</h4>
                 <h6 className="resultsHeading"> Total results found {resultCount || 0}</h6>
