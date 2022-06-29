@@ -8,6 +8,7 @@ import DocumentResult from "./results/DocumentResult";
 import CourseResult from "./results/CourseResult";
 import VesselResult from "./results/VesselResult";
 import ProjectResult from "./results/ProjectResult";
+import FacetsSidebar from "./results/FacetsSidebar";
 
 
 const typeMap = {
@@ -93,7 +94,8 @@ export default function Results({searchText}) {
     }
 
     const facetSearch = (event) => {
-        const clickedFacetQuery = `&facetType=${event.target.className}&facetName=${event.target.text}`
+        const selectedIndex = event.target.selectedIndex;
+        const clickedFacetQuery = `&facetType=${event.target.children[selectedIndex].className}&facetName=${event.target.value}`
         if (facetQuery) {
             setFacetQuery(facetQuery + clickedFacetQuery)
         } else {
@@ -115,28 +117,7 @@ export default function Results({searchText}) {
 
     return (
         <div id='resultsMain'>
-            <div id="resultsFacets">
-                <div id='factsHeading'>
-                    <h3><b>Filter By:</b></h3>
-                    <a id='clearFacet' onClick={clearFacetQuery}>Clear</a>
-                </div>
-                {
-                    facets.map((facet, i) => {
-                        return (
-                            <div key={i}>
-                                <h6>{facet.name.substring(4)}</h6>
-                                {
-                                    facet.counts.map((facetCount, i) => {
-                                        return <p><a className={facet.name}
-                                                     onClick={facetSearch}>{facetCount.name}</a> ({facetCount.count})
-                                        </p>
-                                    })
-                                }
-                            </div>
-                        )
-                    })
-                }
-            </div>
+            <FacetsSidebar facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} />
             <div id="resultsBackground">
                 <ResultTabs tabList={tabs} setSearchType={setSearchType} clearFacetQuery={clearFacetQuery}/>
                 <h3 className="resultsHeading">Search Query: {searchText}</h3>
