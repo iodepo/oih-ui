@@ -21,4 +21,6 @@ class SolrQueryBuilder:
     def add_fq(self, name, value):
         if "fq" not in self.params:
             self.params['fq'] = []
-        self.params['fq'].append(f'+{name}:({value})')
+        if name == 'text':
+            self.params['fq'].append(f'+{name}:({value})')
+        self.params['fq'].append(f'+{name}:"{value}"')
