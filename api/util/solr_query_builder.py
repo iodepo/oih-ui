@@ -23,4 +23,5 @@ class SolrQueryBuilder:
             self.params['fq'] = []
         if name == 'text':
             self.params['fq'].append(f'+{name}:({value})')
-        self.params['fq'].append(f'+{name}:"{value}"')
+        else:
+            self.params['fq'].append(f'+{name}:"{value}"')
