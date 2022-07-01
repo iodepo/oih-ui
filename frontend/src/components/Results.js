@@ -1,4 +1,6 @@
 import React, {Component, useEffect, useState} from "react";
+import {useNavigate} from "react-router-dom";
+import {useLocation} from "react-router";
 
 import Expert from './Expert'
 import ResultTabs from "./ResultTabs";
@@ -33,7 +35,7 @@ const typeMap = {
     },
 };
 
-export default function Results({searchText}) {
+export default function Results({searchText, setSearchText}) {
 
     const tabs = [
         {
@@ -67,20 +69,47 @@ export default function Results({searchText}) {
     const [facets, setFacets] = useState([]);
     const [facetQuery, setFacetQuery] = useState(null);
 
+    const navigate = useNavigate();
+    const location = useLocation()
+
     useEffect(() => {
-        let URI = `${dataServiceUrl}/search?`;
-        const params = new URLSearchParams({'search_text': searchText, 'document_type': searchType})
-        URI += params.toString()
-        if (facetQuery) {
-            URI += facetQuery
+        const doFetch = async () => {
+            let URI = `${dataServiceUrl}/search?`;
+            const params = new URLSearchParams({'search_text': searchText, 'document_type': searchType})
+            URI += params.toString()
+            if (facetQuery) {
+                URI += facetQuery
+            }
+            fetch(encodeURI(URI))
+                .then(response => response.json())
+                .then(json => {
+                    setResults(json.docs)
+                    setResultCount(json.counts[searchType])
+                    setFacets(json.facets)
+                })
         }
-        fetch(encodeURI(URI))
-            .then(response => response.json())
-            .then(json => {
-                setResults(json.docs)
-                setResultCount(json.counts[searchType])
-                setFacets(json.facets)
-            })
+
+        const checkParams = async () => {
+            if (searchText === '') {
+                const params = decodeURIComponent(location['pathname'].replace('/results/', ''))
+                for (const url_parameter of params.split('/')) {
+                    if (url_parameter.startsWith('search_text')) {
+                        setSearchText(url_parameter.replace('search_text=', ''))
+                    } else if (url_parameter.startsWith('document_type')) {
+                        setSearchType(url_parameter.replace('document_type=', ''))
+                    } else if (url_parameter.startsWith('facetSearch=')) {
+                        setFacetQuery(url_parameter.replace('facetSearch=', ''))
+                    }
+                }
+            }
+        }
+
+        checkParams().then(() => {
+            if (searchText !== '') {
+                doFetch().catch(console.error)
+            }
+        })
+
     }, [searchText, searchType, facetQuery]);
 
     function mapSearchTypeToProfile(searchType) {
@@ -92,17 +121,24 @@ export default function Results({searchText}) {
         return 'unknown type'
     }
 
-    const facetSearch = (event) => {
+    const facetSearch = async (event) => {
         const clickedFacetQuery = `&facetType=${event.target.className}&facetName=${event.target.text}`
         if (facetQuery) {
-            setFacetQuery(facetQuery + clickedFacetQuery)
+             setFacetQuery(facetQuery + clickedFacetQuery)
+            navigate(`${location['pathname'].replace('/results/', '')}/facetSearch=${facetQuery + clickedFacetQuery}`)
         } else {
             setFacetQuery(clickedFacetQuery)
+            navigate(`${location['pathname'].replace('/results/', '')}/facetSearch=${clickedFacetQuery}`)
         }
+    }
+
+    const resetDefaultSearchUrl = (searchType) => {
+        navigate(`/results/search_text=${searchText}/document_type=${searchType}`)
     }
 
     const clearFacetQuery = () => {
         setFacetQuery('')
+        resetDefaultSearchUrl(searchType)
     }
 
     function resolveAsUrl(url) {
@@ -138,7 +174,7 @@ export default function Results({searchText}) {
                 }
             </div>
             <div id="resultsBackground">
-                <ResultTabs tabList={tabs} setSearchType={setSearchType} clearFacetQuery={clearFacetQuery}/>
+                <ResultTabs tabList={tabs} setSearchType={setSearchType} searchType={searchType} clearFacetQuery={clearFacetQuery} resetDefaultSearchUrl={resetDefaultSearchUrl}/>
                 <h3 className="resultsHeading">Search Query: {searchText}</h3>
                 <h4 className="resultsHeading">{mapSearchTypeToProfile(searchType)}</h4>
                 <h6 className="resultsHeading"> Total results found {resultCount || 0}</h6>

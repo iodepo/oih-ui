@@ -1,19 +1,20 @@
 import React, {useState} from "react";
+import { useNavigate } from "react-router-dom";
 
 import {Button} from 'react-bootstrap';
 
 
 export default function Search({setSearchText, isDisplaySearch, setIsDisplaySearch}) {
+    const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState(' ');
 
 
     const handleChange = () => {
-        console.log('handleChange()')
-        console.log(searchQuery.length)
         if (searchQuery.length > 0)
         {
             setSearchText(searchQuery);
             setIsDisplaySearch(true);
+            navigate(`/results/search_text=${searchQuery}/document_type=CreativeWork`)
         }
     };
 
@@ -31,6 +32,7 @@ export default function Search({setSearchText, isDisplaySearch, setIsDisplaySear
         setSearchQuery(event.currentTarget.textContent)
         setSearchText(event.currentTarget.textContent);
         setIsDisplaySearch(true);
+        navigate(`/results/search_text=${event.currentTarget.textContent}/document_type=CreativeWork`)
     }
 
     return (
