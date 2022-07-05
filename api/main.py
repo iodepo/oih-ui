@@ -81,8 +81,6 @@ def spatial(search_text: str=None, document_type: str=None, facetType: list=Quer
     
     query = Query(search_text, document_type, facetType, facetName, facetFields=[], rows=GEOJSON_ROWS, flList=GEOJSON_FIELDS | {'the_geom'})
     data = query.json().get('response',{})
-
-    log.error(data)
     
     geometries = {
         'type': 'FeatureCollection',
