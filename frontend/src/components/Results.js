@@ -66,15 +66,13 @@ export default function Results({searchText}) {
     const [results, setResults] = useState([]);
     const [resultCount, setResultCount] = useState(0);
     const [facets, setFacets] = useState([]);
-    const [facetQuery, setFacetQuery] = useState(null);
+    const [facetQuery, setFacetQuery] = useState('');
 
     useEffect(() => {
         let URI = `${dataServiceUrl}/search?`;
         const params = new URLSearchParams({'search_text': searchText, 'document_type': searchType})
-        URI += params.toString()
-        if (facetQuery) {
-            URI += facetQuery
-        }
+        URI += [params.toString(), facetQuery].filter(e=>e).join("&")
+
         fetch(URI)
             .then(response => response.json())
             .then(json => {
@@ -97,11 +95,8 @@ export default function Results({searchText}) {
         const selectedIndex = event.target.selectedIndex;
         const clickedFacetQuery = new URLSearchParams({facetType:event.target.children[selectedIndex].className,
 						       facetName:event.target.value}).toString()
-        if (facetQuery) {
-            setFacetQuery(facetQuery + clickedFacetQuery)
-        } else {
-            setFacetQuery(clickedFacetQuery)
-        }
+	setFacetQuery([facetQuery , clickedFacetQuery].filter(e=>e).join("&"))
+
     }
 
     const clearFacetQuery = () => {
