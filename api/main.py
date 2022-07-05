@@ -1,17 +1,32 @@
 import os
 import requests
+import re
 import urllib.parse
+
+import shapely
+import shapely.wkt
+import shapely.geometry
 
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.util.solr_query_builder import SolrQueryBuilder
 
+import logging
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
+
 
 SOLR_URL = os.path.join(os.environ.get('SOLR_URL', 'http://solr'), 'select')
 AVAILABLE_FACETS = ['txt_knowsAbout', 'txt_knowsLanguage', 'txt_nationality', 'txt_jobTitle', 'txt_contributor',
                     'txt_keywords',
                     'txt_memberOf', 'txt_parentOrganization', 'id_provider', 'id_includedInDataCatalog']
+
+
+GEOJSON_FIELDS = { 'id', 'type' }
+GEOJSON_ROWS = 10000
+DEFAULT_GEOMETRY = "[50,-10 TO 60,10]"
+DEFAULT_GEOMETRY = "[-90,-180 TO 90,180]"
 
 app = FastAPI()
 
@@ -40,6 +55,47 @@ def count(field: str):
     return response
 
 
+@app.get("/spatial.geojson")
+def spatial(search_text: str=None, document_type: str=None, facetType: list=Query(default=[]), facetName: list=Query(default=[])):
+
+    if 'the_geom' not in facetType:
+        facetType.append('the_geom')
+        facetName.append(DEFAULT_GEOMETRY)
+    else:
+        fq = {k:v for k,v in zip(facetType, facetName)}
+        if not validate_geom(fq['the_geom']):
+            raise ParameterError("Invalid Geometry")
+    
+    query = Query(search_text, document_type, facetType, facetName, facetFields=[], rows=GEOJSON_ROWS, flList=GEOJSON_FIELDS | {'the_geom'})
+    data = query.json().get('response',{})
+
+    log.error(data)
+    
+    geometries = {
+        'type': 'FeatureCollection',
+        "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}},
+        'features': (_toFeature(result) for result in data.get('docs',[]))
+    }
+    return geometries
+
+
+def _toFeature(result):
+    geometry = shapely.geometry.mapping(shapely.wkt.loads(result['the_geom']))
+    properties = {field:result[field] for field in GEOJSON_FIELDS if field in result}
+    return {
+        'type': 'Feature',
+        'properties': properties,
+        'geometry': geometry
+    }
+
+def validate_geom(the_geom):
+    """
+    Should be something like: "[##,## TO ##,##]"
+    """
+    number = r"-?\d+(\.\d+)?"  # optional sign, digits, optional decimal + more digits
+    return re.match(rf"\[{number},{number} +TO +{number},{number}]$", the_geom)
+    
+class ParameterError(Exception): pass
 
 class Query:
     def __init__(self, search_text=None, document_type=None, facetType=[], facetName=[], facetFields=[], **kwargs):
