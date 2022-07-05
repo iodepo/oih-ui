@@ -75,7 +75,7 @@ export default function Results({searchText}) {
         if (facetQuery) {
             URI += facetQuery
         }
-        fetch(encodeURI(URI))
+        fetch(URI)
             .then(response => response.json())
             .then(json => {
                 setResults(json.docs)
@@ -95,7 +95,8 @@ export default function Results({searchText}) {
 
     const facetSearch = (event) => {
         const selectedIndex = event.target.selectedIndex;
-        const clickedFacetQuery = `&facetType=${event.target.children[selectedIndex].className}&facetName=${event.target.value}`
+        const clickedFacetQuery = new URLSearchParams({facetType:event.target.children[selectedIndex].className,
+						       facetName:event.target.value}).toString()
         if (facetQuery) {
             setFacetQuery(facetQuery + clickedFacetQuery)
         } else {
