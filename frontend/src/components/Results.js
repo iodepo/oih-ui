@@ -64,31 +64,76 @@ export default function Results({searchText}) {
             tab_name: 'Projects',
         },
         {
+            title: 'Organization',
+            tab_name: 'Organizations',
+        },
+        {
             title: 'SpatialData',
             tab_name: 'Spatial Data & Maps',
-        }
+        },
     ];
     const [searchType, setSearchType] = useState('CreativeWork');
     const [results, setResults] = useState([]);
     const [resultCount, setResultCount] = useState(0);
     const [facets, setFacets] = useState([]);
     const [facetQuery, setFacetQuery] = useState('');
-
+    const [geoJsonUrl, setGeoJsonUrl] = useState('');
+    const [showMap, setShowMap ] = useState(false);
+    
     useEffect(() => {
-        let URI = `${dataServiceUrl}/search?`;
-        const params = new URLSearchParams({'search_text': searchText, 'document_type': searchType})
-        URI += [params.toString(), facetQuery].filter(e=>e).join("&")
+	const fetchResultList = (searchText, searchType, facetQuery) => {
+            let URI = `${dataServiceUrl}/search?`;
+            const params = new URLSearchParams({'search_text': searchText, 'document_type': searchType})
+            URI += [params.toString(), facetQuery].filter(e=>e).join("&")
 
-        fetch(URI)
-            .then(response => response.json())
-            .then(json => {
-                setResults(json.docs)
-                setResultCount(json.counts[searchType])
-                setFacets(json.facets)
-            })
-    }, [searchText, searchType, facetQuery]);
+            fetch(URI)
+		.then(response => response.json())
+		.then(json => {
+                    setResults(json.docs)
+                    setResultCount(json.counts[searchType])
+                    setFacets(json.facets)
+		})
+	}
+		
+	const fetchFacets = (searchText, searchType, facetQuery) => {
+            let URI = `${dataServiceUrl}/search?`;
+            const params = new URLSearchParams({
+		'search_text': searchText,
+		'document_type': searchType,
+		'rows': 0,
+	    })
+            URI += [params.toString(), facetQuery].filter(e=>e).join("&")
+
+            fetch(URI)
+		.then(response => response.json())
+		.then(json => {
+                    setResultCount(json.counts[searchType])
+                    setFacets(json.facets)
+		})
+	}
+
+	if (showMap) {
+	    fetchFacets(searchText, searchType, facetQuery);
+	} else {
+	    fetchResultList(searchText, searchType, facetQuery);
+	}
+	
+    }, [searchText, searchType, facetQuery, showMap]);
+
+    const calcGeoJsonUrl = (searchText, searchType, facetQuery) => {
+	let URI =  `${dataServiceUrl}/spatial.geojson?`;
+	const params = new URLSearchParams({
+	    'search_text': searchText,
+	    'document_type': searchType,
+	    'facetType': 'the_geom',
+	    'facetName': "[-90,-180 TO 90,180]", // UNDONE, set the bounds to the screen.
+	})
+        URI += [params.toString(), facetQuery].filter(e=>e).join("&")
+	setGeoJsonUrl(URI)
+    }
 
     function mapSearchTypeToProfile(searchType) {
+	// could be tabs.filter(e=>e.title===searchType).map(e=>e.tab_name).shift() || 'unknown_type'
         for (const tab of tabs) {
             if (tab['title'] === searchType) {
                 return tab['tab_name']
@@ -117,6 +162,10 @@ export default function Results({searchText}) {
         return url
     }
 
+    if (showMap) {
+	calcGeoJsonUrl(searchText, searchType, facetQuery);
+    }
+    
     return (
         <div id='resultsMain'>
             <FacetsSidebar facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} />
