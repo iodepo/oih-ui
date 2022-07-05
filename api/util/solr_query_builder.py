@@ -20,7 +20,7 @@ class SolrQueryBuilder:
             self.params['fl'] = ','.join(flList)
         
     def add_facet_fields(self, facet_fields=None):
-        self.params["facet.field"] = facet_fields if facet_fields is not None else DEFAULT_FACET_FIELDS
+        self.params["facet.field"] = facet_fields if (facet_fields is not None) else DEFAULT_FACET_FIELDS
 
 
     formats = {
@@ -29,7 +29,7 @@ class SolrQueryBuilder:
         }
 
     def _fmt(self, name):
-        return self.formats.get(name, '+%(name):"%(value)"')
+        return self.formats.get(name, '+%(name)s:"%(value)s"')
     
     def add_fq(self, name, value):
         if "fq" not in self.params:
