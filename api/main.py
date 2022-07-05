@@ -23,18 +23,8 @@ app.add_middleware(
 
 @app.get("/search")
 def search(search_text: str, document_type: str = None, facetType: list = Query(default=[]), facetName: list = Query(default=[])):
-    solr_search_query = SolrQueryBuilder()
-    solr_search_query.add_fq(name='text', value=search_text)
-    if document_type:
-        solr_search_query.add_fq(name='type', value=document_type)
-
-    solr_search_query.add_facet_fields()
-    if (facetType and facetName) and (len(facetType) == len(facetName)):
-        for facet_search in zip(facetType, facetName):
-            solr_search_query.add_fq(facet_search[0], facet_search[1])
-
-    res = requests.get(SOLR_URL, params=solr_search_query.params)
-    data = res.json()
+    query = Query(search_text, document_type, facetType, facetName)
+    data = query.json()
     response = {'docs': data['response']['docs']}
     response.update(_convert_counts_array_to_response_dict(data['facet_counts']['facet_fields']['type']))
     response['facets'] = []
@@ -44,13 +34,34 @@ def search(search_text: str, document_type: str = None, facetType: list = Query(
 
 @app.get("/count")
 def count(field: str):
-    solr_search_query = SolrQueryBuilder()
-    solr_search_query.add_facet_fields([field])
-    res = requests.get(SOLR_URL, params=solr_search_query.params)
-    data = res.json()
+    query = Query(facetFields=[field])
+    data = query.json()
     response = _convert_counts_array_to_response_dict(data['facet_counts']['facet_fields'][field])
     return response
 
+
+
+class Query:
+    def __init__(self, search_text=None, document_type=None, facetType=[], facetName=[], facetFields=[], **kwargs):
+        solr_search_query = SolrQueryBuilder(**kwargs)
+        if search_text:
+            solr_search_query.add_fq(name='text', value=search_text)
+        if document_type:
+            solr_search_query.add_fq(name='type', value=document_type)
+
+        solr_search_query.add_facet_fields(facetFields)
+        if (facetType and facetName) and (len(facetType) == len(facetName)):
+            for facet_search in zip(facetType, facetName):
+                solr_search_query.add_fq(facet_search[0], facet_search[1])
+
+        self._query = solr_search_query
+
+    def json(self):
+        res = requests.get(SOLR_URL, params=self._query.params)
+        return res.json()
+
+
+            
 
 def _add_facets(data, response):
     for facet in AVAILABLE_FACETS:
