@@ -8,6 +8,8 @@ import DocumentResult from "./results/DocumentResult";
 import CourseResult from "./results/CourseResult";
 import VesselResult from "./results/VesselResult";
 import ProjectResult from "./results/ProjectResult";
+import OrganizationResult from "./results/OrganizationResult";
+
 import FacetsSidebar from "./results/FacetsSidebar";
 
 
@@ -31,6 +33,10 @@ const typeMap = {
     ResearchProject: {
         Component: ProjectResult,
         type: "Projects",
+    },
+    Organization: {
+	Component: OrganizationResult,
+	type: "Organizations",
     },
 };
 
