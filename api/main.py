@@ -1,3 +1,4 @@
+import json
 import os
 import requests
 import re
@@ -15,7 +16,6 @@ from api.util.solr_query_builder import SolrQueryBuilder
 import logging
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
-
 
 SOLR_URL = os.path.join(os.environ.get('SOLR_URL', 'http://solr'), 'select')
 AVAILABLE_FACETS = ['txt_knowsAbout', 'txt_knowsLanguage', 'txt_nationality', 'txt_jobTitle', 'txt_contributor',
@@ -53,6 +53,19 @@ def count(field: str):
     data = query.json()
     response = _convert_counts_array_to_response_dict(data['facet_counts']['facet_fields'][field])
     return response
+
+
+@app.get("/detail")
+def detail(id: str):
+    params = {
+        'q': '*:*',
+        'fq': ['+id:"%s"' % id],
+        'rows': "1",
+    }
+
+    res = requests.get(SOLR_URL, params=params)
+    data = res.json()
+    return data.get('response',{}).get('docs',[])[:1] or {}
 
 
 @app.get("/spatial.geojson")
