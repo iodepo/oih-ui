@@ -47,7 +47,16 @@ const INITIAL_BOUNDS =  [ { lon:-20, lat:-50},  // w s
                           { lon:320, lat:50}   // e n
                         ];
 
+const DEFAULT_QUERY_BOUNDS = '[-50,-20 TO 50,320]';
 
+const mapboxBounds_toQuery = (mb) => {
+      /* convert '{"_sw":{"lng":17.841823484137535,"lat":-59.72391567923438},"_ne":{"lng":179.1301535622635,"lat":49.99895151432449}}'
+        to [_sw.lat,_sw.lng TO _ne.lat,_ne.lng] ([-90,-180 TO 90,180])
+      */
+    const {_sw, _ne} = mb;
+    if (!_sw) { return DEFAULT_QUERY_BOUNDS; }
+    return `[${_sw.lat},${_sw.lng} TO ${_ne.lat},${_ne.lng}]`;
+};
 
 function resolveAsUrl(url) {
     const pattern = /^((http|https):\/\/)/;
@@ -113,11 +122,13 @@ export default function Results({searchText}) {
                 });
         };
 
-        const fetchFacets = (searchText, searchType, facetQuery) => {
+        const fetchFacets = (searchText, searchType, facetQuery, mapBounds) => {
             let URI = `${dataServiceUrl}/search?`;
             const params = new URLSearchParams({
                 'search_text': searchText,
                 'document_type': searchType,
+                'facetType': 'the_geom',
+                'facetName': mapboxBounds_toQuery(mapBounds),
                 'rows': 0,
             });
             URI += [params.toString(), facetQuery].filter(e=>e).join("&");
@@ -131,20 +142,20 @@ export default function Results({searchText}) {
         };
 
         if (showMap) {
-            fetchFacets(searchText, searchType, facetQuery);
+            fetchFacets(searchText, searchType, facetQuery, mapBounds);
         } else {
             fetchResultList(searchText, searchType, facetQuery);
         }
 
-    }, [searchText, searchType, facetQuery, showMap]);
+    }, [searchText, searchType, facetQuery, showMap, mapBounds]);
 
-    const calcGeoJsonUrl = (searchText, searchType, facetQuery) => {
+    const calcGeoJsonUrl = (searchText, searchType, facetQuery, mapBounds) => {
         let URI =  `${dataServiceUrl}/spatial.geojson?`;
         const params = new URLSearchParams({
             'search_text': searchText,
             'document_type': searchType,
             'facetType': 'the_geom',
-            'facetName': "[-90,-180 TO 90,180]", // UNDONE, set the bounds to the screen.
+            'facetName': mapboxBounds_toQuery(mapBounds),
         });
         URI += [params.toString(), facetQuery].filter(e=>e).join("&");
         return URI;
@@ -171,7 +182,7 @@ export default function Results({searchText}) {
 
     let layers, geoJsonUrl;
     if (showMap) {
-        geoJsonUrl = calcGeoJsonUrl(searchText, searchType, facetQuery);
+        geoJsonUrl = calcGeoJsonUrl(searchText, searchType, facetQuery, mapBounds);
         layers = [{
             id:'search_results_layer',
             label:'Search Results',
@@ -198,9 +209,9 @@ export default function Results({searchText}) {
                   <ReMap
                     externalLayers={layers}
                     bounds = {INITIAL_BOUNDS}
+                    handleBoundsChange={setMapBounds}
                     layersState={[true]}
                   /> :
-
                   <ResultList results={results} />
                 }
               </div>
