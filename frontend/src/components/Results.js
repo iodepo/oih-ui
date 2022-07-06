@@ -13,7 +13,7 @@ import ProjectResult from "./results/ProjectResult";
 import OrganizationResult from "./results/OrganizationResult";
 
 import FacetsSidebar from "./results/FacetsSidebar";
-
+import ReMap from './map/ReMap';
 
 const typeMap = {
     CreativeWork: {
@@ -43,12 +43,18 @@ const typeMap = {
 };
 
 
+const INITIAL_BOUNDS =  [ { lon:-20, lat:-50},  // w s
+                          { lon:320, lat:50}   // e n
+                        ];
+
+
+
 function resolveAsUrl(url) {
     const pattern = /^((http|https):\/\/)/;
     if (!pattern.test(url)) {
         return "http://" + url;
     }
-    return url
+    return url;
 }
 
 
@@ -89,8 +95,7 @@ export default function Results({searchText}) {
     const [resultCount, setResultCount] = useState(0);
     const [facets, setFacets] = useState([]);
     const [facetQuery, setFacetQuery] = useState('');
-    const [geoJsonUrl, setGeoJsonUrl] = useState('');
-    const [showMap, setShowMap ] = useState(false);
+    const [showMap, setShowMap ] = useState(true);
     const [mapBounds, setMapBounds ] = useState(false);
 
     useEffect(() => {
@@ -142,7 +147,7 @@ export default function Results({searchText}) {
             'facetName': "[-90,-180 TO 90,180]", // UNDONE, set the bounds to the screen.
         });
         URI += [params.toString(), facetQuery].filter(e=>e).join("&");
-        setGeoJsonUrl(URI);
+        return URI;
     };
 
     function mapSearchTypeToProfile(searchType) {
@@ -164,8 +169,15 @@ export default function Results({searchText}) {
 
     const clearFacetQuery = () => setFacetQuery('');
 
+    let layers, geoJsonUrl;
     if (showMap) {
-        calcGeoJsonUrl(searchText, searchType, facetQuery);
+        geoJsonUrl = calcGeoJsonUrl(searchText, searchType, facetQuery);
+        layers = [{
+            id:'search_results_layer',
+            label:'Search Results',
+            type:'geojson',
+            url:geoJsonUrl
+        }];
     }
 
     return (
@@ -178,9 +190,17 @@ export default function Results({searchText}) {
             <h4 className="resultsHeading">{mapSearchTypeToProfile(searchType)}</h4>
             <h6 className="resultsHeading"> Total results found {resultCount || 0}</h6>
             <div>
-              <div id="resultsInfo">
+              <div
+                id="resultsInfo"
+                style={{minHeight: "500px"}}
+              >
                 { showMap ?
-                  <ReMap/> :
+                  <ReMap
+                    externalLayers={layers}
+                    bounds = {INITIAL_BOUNDS}
+                    layersState={[true]}
+                  /> :
+
                   <ResultList results={results} />
                 }
               </div>
