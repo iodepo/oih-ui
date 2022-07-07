@@ -97,11 +97,34 @@ def flatten(l):
             continue
         yield item
 
+
+## wrapper of the function to do test generation against the "generic" class
 @test_generation(post=lambda x:x)
 def genericTest(_type, orig):
     return genericType_toAtts(orig)
 
 def genericType_toAtts(orig):
+    """
+     This is a generic entity -> solr atts table for json-ld structures.
+    dictionary => dictionary
+
+    * For items that are common, (name, type, description) we add them
+      to the corresponding field.
+
+    * For items with specific names, we dispatch to name specific
+      parsers, which return an Att or list of Atts
+
+    * For text items, we add them directly, as txt_[field] = value
+
+    * For dictionaries, we call out to extract the data from the
+      dictionary. This may be single valued, or it may be multivalued,
+      including creating and referencing other graph nodes.
+
+    * For lists, we add all of the individual items, either extracted
+      from dictionaries or a list of string.
+
+
+    """
     try:
         _id = orig.get('@id', orig.get('url',''))
         if not _id:
