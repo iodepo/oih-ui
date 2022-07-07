@@ -33,13 +33,13 @@ solr_params = {
 def convert_place(d):
     _formats = {'polygon': 'POLYGON ((%s))',
                 'point': 'POINT (%s)'}
-    
+
     geo = d.get('geo', None)
     if geo and geo['@type'] != 'GeoShape':
         for field, fmt in _formats.items():
             val = geo.get(field,None)
             if val:
-                return ('geom', fmt % val)    
+                return ('geom', fmt % val)
 
     lat = d.get('latitude', None)
     lon = d.get('longitude', None)
@@ -49,17 +49,17 @@ def convert_place(d):
     address = d.get('address', None)
     if address:
         return ('txt', address)
-    
+
     return ('txt', '')
 
 def _extract_dict(d):
     _id = d.get('@id', None)
     _type = d.get('@type', None)
-    
+
     if _id and _type not in {'PropertyValue'}:
         upsert(_id, d)
-        return ('id', _id)    
-        
+        return ('id', _id)
+
     _map = {'ProgramMembership': 'programName',
             'Organization': 'url',
             'PropertyValue': 'value',
@@ -79,7 +79,7 @@ def _extract_dict(d):
     member = d.get('member', None)
     if member:
         return _extract_dict(member)
-    
+
     return ('txt', d.get('name', d.get('description','')))
 
 
@@ -104,9 +104,9 @@ def upsert(url, data):
         orig_source.update(data)
     except:
         orig_source = data
-    
+
     index_one(orig_source)
-    
+
 
 
 def index_one(orig):
@@ -122,7 +122,7 @@ def index_one(orig):
     if not data['id']:
         #UNDONE Hash name instead?
         data['id'] = str(uuid.uuid4())
-    
+
     for k,v in orig.items():
         if not v: continue
         if k in {'@id','@type','@context'}:
@@ -142,7 +142,7 @@ def index_one(orig):
                     _val = [elt[1] for elt in val if elt[1]]
                     if _val:
                         data['%s_%s' %(prefix,k)] = _val
-                        
+
         if isinstance(v, dict):
             prefix, val = _extract_dict(v)
             if not val: continue
@@ -155,7 +155,7 @@ def index_one(orig):
 #    print (json.dumps(data, indent=2))
     data['json_source'] = json.dumps(orig)
     # UNDONE -- there's a race condition here that's led to ~ 700 documents being included multiple times.
-    # UNDONE -- refactor into transform (internal) and index. 
+    # UNDONE -- refactor into transform (internal) and index.
     session.post(delete_url, params={"commit":"true"}, json={"delete":{"query":'id:"%s"' % data['id']}})
     solr_post = session.post(solr_url, params=solr_params, json=data)
     solr_post.raise_for_status()
@@ -253,7 +253,7 @@ def fetch_dups():
 def remove_dups():
     for url in fetch_dups():
         reindex(url)
-    
+
 
 if __name__ == '__main__':
     #session.post(delete_url, params={"commit":"true"}, json={"delete":{"query":'type:"PropertyValue"'}})
@@ -265,5 +265,3 @@ if __name__ == '__main__':
     #import_file('obis/df819829c4cc82c0442d5ebb00ea9aadaa7d0842.jsonld')
     #import_file('oceanexperts/5ec3b5b61e65100386448c5e8eb078ad9790c37f.jsonld')
     #import_file('oceanexperts/fff3e882eb655768de60f6f2b1ae09e09af1bb7e.jsonld')
-
-    

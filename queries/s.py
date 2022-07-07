@@ -50,8 +50,11 @@ r = requests.get(solr_url, params=solr_params)
 
 #print (r.text)
 data =  r.json()
-print (json.dumps(data['response']['docs'][0], indent=2))
+print (json.dumps(data, indent=2))
 
-print (json.dumps(json.loads(data['response']['docs'][0]['json_source']), indent=2))
+exit
+#print (json.dumps(data['response']['docs'][0], indent=2))
+
+#print (json.dumps(json.loads(data['response']['docs'][0]['json_source']), indent=2))
 
 print (json.dumps(data['facet_counts'], indent=2))
