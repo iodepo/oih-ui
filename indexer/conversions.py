@@ -38,7 +38,10 @@ def Place(d):
     lat = d.get('latitude', None)
     lon = d.get('longitude', None)
     if lat is not None and lon is not None:
-        return Att('geom', _formats['point'] % ('%s %s'% (lon, lat)))
+        return [
+            Att('the', _formats['point'] % ('%s %s'% (lon, lat)), 'geom'),
+            Att('has', True, 'geom')
+            ]
 
     address = d.get('address', None)
     if address:

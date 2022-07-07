@@ -116,6 +116,7 @@ schema. In this case the version should be set to the next CKAN version number.
     <dynamicField name="dt_*" type="date" indexed="true" stored="true" multiValued="true" />
     <dynamicField name="n_*" type="double" indexed="true" stored="true" multiValued="true"/>
     <field name="the_geom" type="geom" indexed="true" />
+    <field name="has_geom" type="boolean" indexed="true" />
     
     <!-- store a list of keys so that we can facet on this -->
     <field name="keys" type="string" indexed="true" multiValued="true"/>
