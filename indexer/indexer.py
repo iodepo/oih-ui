@@ -35,11 +35,16 @@ solr_params = {
 # - Add the source file name hash id as graph_id
 
 import conversions
+from conversions import UnhandledDispatchException
+
 from test_utils import test_generation
 
 @test_generation
 def dispatch(_type, d):
-    return getattr(conversions, _type)(d)
+    try:
+        return getattr(conversions, _type)(d)
+    except (KeyError, AttributeError):
+        raise UnhandledDispatchException()
 
 def _extract_dict(d):
     _id = d.get('@id', d.get('url', None))
@@ -48,7 +53,7 @@ def _extract_dict(d):
     try:
         if _type:
             return dispatch(_type, d)
-    except (TypeError): pass
+    except (UnhandledDispatchException): pass
 
     if _id and _type not in {'PropertyValue'}:
         upsert(_id, d)
@@ -154,7 +159,7 @@ def genericType_toAtts(orig):
             else:
                 data.extend(att)
             continue
-        except (KeyError, AttributeError): pass
+        except (UnhandledDispatchException): pass
         if isinstance(v, str):
             data.append(Att('txt', [v], k))
             continue

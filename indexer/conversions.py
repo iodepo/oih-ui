@@ -2,7 +2,7 @@ from models import Att
 from test_utils import test_generation
 
 class UnhandledFormatException(Exception): pass
-
+class UnhandledDispatchException(Exception): pass
 
 
 def _extract(fieldName):
@@ -12,8 +12,11 @@ def _extract(fieldName):
 
 @test_generation
 def _dispatch(_type, d):
-    mod = __import__('conversions')
-    return getattr(mod, _type)(d)
+    try:
+        mod = __import__('conversions')
+        return getattr(mod, _type)(d)
+    except (KeyError, AttributeError):
+        raise UnhandledDispatchException()
 
 ###
 #  Types
@@ -50,19 +53,18 @@ def GeoShape(geo):
     for field, fmt in _formats.items():
         val = geo.get(field,None)
         if val:
-            return Att('the', fmt % val, 'geom')
+            return [Att('the', fmt % val, 'geom'), Att('has', True, 'geom')]
     raise UnhandledFormatException("Didn't handle %s in GeoShape" % json.dumps(geo))
 
 
 def CourseInstance(data):
-
     atts = [_dispatch(field, data.get(field, None)) for field in ('startDate', 'endDate')]
     if 'location' in data:
         loc = data['location']
         if loc.get('@type',None):
             try:
                 atts.append(_dispatch(loc['@type'], loc))
-            except (TypeError): pass
+            except (UnhandledDispatchException): pass
     atts.append(Att('txt', data.get('name', data.get('description', ''))))
     return [a for a in atts if a and a.value]
 
