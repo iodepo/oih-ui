@@ -48,7 +48,7 @@ def _extract_dict(d):
     try:
         if _type:
             return dispatch(_type, d)
-    except (KeyError, AttributeError): pass
+    except (TypeError): pass
 
     if _id and _type not in {'PropertyValue'}:
         upsert(_id, d)
@@ -200,13 +200,6 @@ def index_one(orig):
     #break
 
 
-paths = ('./person.txt',
-         './research_project.txt',
-         './course.txt',
-         './creative_work.txt',
-         )
-
-#paths = ('./research_project.txt',)
 
 
 
@@ -291,6 +284,14 @@ def remove_dups():
     for url in fetch_dups():
         reindex(url)
 
+
+paths = ('./person.txt',
+         './research_project.txt',
+         './course.txt',
+         './creative_work.txt',
+         )
+
+#paths = ('./research_project.txt',)
 
 if __name__ == '__main__':
     #session.post(delete_url, params={"commit":"true"}, json={"delete":{"query":'type:"PropertyValue"'}})

@@ -54,18 +54,31 @@ def GeoShape(geo):
     raise UnhandledFormatException("Didn't handle %s in GeoShape" % json.dumps(geo))
 
 
+def CourseInstance(data):
+
+    atts = [_dispatch(field, data.get(field, None)) for field in ('startDate', 'endDate')]
+    if 'location' in data:
+        loc = data['location']
+        if loc.get('@type',None):
+            try:
+                atts.append(_dispatch(loc['@type'], loc))
+            except (TypeError): pass
+    atts.append(Att('txt', data.get('name', data.get('description', ''))))
+    return [a for a in atts if a and a.value]
 
 ###
 #   Individual Fields
 ###
 
-def _extractDate(d):
-    if isinstance(d, str):
-        return Att('dt', d)
-    dt = d.get('date', None)
-    if dt:
-        return Att('dt', dt)
-    return None
+def _extractDate(field):
+    def _extractor(d):
+        if isinstance(d, str):
+            return Att('dt', d, field)
+        dt = d.get('date', None)
+        if dt:
+            return Att('dt', dt, field)
+        return None
+    return _extractor
 
-endDate = _extractDate
-startDate = _extractDate
+endDate = _extractDate('endDate')
+startDate = _extractDate('startDate')

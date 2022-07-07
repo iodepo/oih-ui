@@ -9,8 +9,15 @@ from pathlib import Path
 from functools import wraps, partial
 
 def test_generation(func=None, post=None):
+
+    def dictize(x):
+        if isinstance(x, list):
+            return [elt.as_dict for elt in x]
+        else:
+            return x.as_dict
+
     if not post:
-        post = lambda x:x.as_dict
+        post = dictize
 
     if func is None:
         return partial(test_generation, post=post)
