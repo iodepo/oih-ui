@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import requests
 import json
 import os
@@ -14,12 +16,12 @@ query_url = "http://localhost:8983/solr/ckan/select"
 session = requests.Session()
 
 
-BASE_DIR='./../jsonld/summoned'
+BASE_DIR='./../../jsonld/summoned'
 
 
 solr_params = {
     'commit': 'true',
-#    'echo': 'true',
+    'echo': 'true',
 }
 
 
@@ -30,27 +32,12 @@ solr_params = {
 # - Geocoding of address in convert_place
 # - Add the source file name hash id as graph_id
 
-def convert_place(d):
-    _formats = {'polygon': 'POLYGON ((%s))',
-                'point': 'POINT (%s)'}
+import conversions
 
-    geo = d.get('geo', None)
-    if geo and geo['@type'] != 'GeoShape':
-        for field, fmt in _formats.items():
-            val = geo.get(field,None)
-            if val:
-                return ('geom', fmt % val)
-
-    lat = d.get('latitude', None)
-    lon = d.get('longitude', None)
-    if lat is not None and lon is not None:
-        return ('geom', _formats['point'] % ('%s %s'% (lon, lat)))
-
-    address = d.get('address', None)
-    if address:
-        return ('txt', address)
-
-    return ('txt', '')
+def dispatch(_type, d):
+    if conversions.GENERATE_TESTS:
+        conversions.test_generation(_type, d)
+    return getattr(conversions, _type)(d)
 
 def _extract_dict(d):
     _id = d.get('@id', None)
@@ -60,21 +47,10 @@ def _extract_dict(d):
         upsert(_id, d)
         return ('id', _id)
 
-    _map = {'ProgramMembership': 'programName',
-            'Organization': 'url',
-            'PropertyValue': 'value',
-            'DataDownload': 'contentUrl',
-            'Place': convert_place,
-            }
-    field =  _map.get(d.get('@type',None),None)
-
     try:
-        if field:
-            if callable(field):
-                return field(d)
-            else:
-                return ('txt', d[field])
-    except KeyError: pass
+        if _type:
+            return dispatch(_type, d)
+    except (KeyError, AttributeError): pass
 
     member = d.get('member', None)
     if member:
@@ -138,6 +114,7 @@ def index_one(orig):
                 continue
             elif isinstance(v[0], dict):
                 vals = sorted([_extract_dict(elt) for elt in v])
+                # this should be sorted (prefix1, val), (prefix1, val2), (prefix2, val2)
                 for prefix, val in itertools.groupby(vals, lambda x:x[0]):
                     _val = [elt[1] for elt in val if elt[1]]
                     if _val:
@@ -157,9 +134,10 @@ def index_one(orig):
     # UNDONE -- there's a race condition here that's led to ~ 700 documents being included multiple times.
     # UNDONE -- refactor into transform (internal) and index.
     session.post(delete_url, params={"commit":"true"}, json={"delete":{"query":'id:"%s"' % data['id']}})
+    print(json.dumps(data, indent=2))
     solr_post = session.post(solr_url, params=solr_params, json=data)
     solr_post.raise_for_status()
-    #print(solr_post.text)
+#    print(solr_post.text)
     print("added resource %s: %s to index" % (data['id'], data['type']))
     #break
 
@@ -203,11 +181,12 @@ def import_file(filename):
     #     print("Type %s, skipping %s" % (doc_type, filename))
     #     continue
 
-    try:
-        index_one(orig)
-    except Exception as msg:
-        print(json.dumps(orig, indent=2))
-        print(msg)
+    index_one(orig)
+    # try:
+    #     index_one(orig)
+    # except Exception as msg:
+    #     print(json.dumps(orig, indent=2))
+    #     print(msg)
 
 def index_all(paths):
     for path in paths:
@@ -258,10 +237,11 @@ def remove_dups():
 if __name__ == '__main__':
     #session.post(delete_url, params={"commit":"true"}, json={"delete":{"query":'type:"PropertyValue"'}})
     #index_all(['./all_indexed_files.txt'])
-    index_all(['./event.txt'])
+#    index_all(['./event.txt'])
     #index_all(paths + ('./organizations.txt', './spatial.txt'))
     #index_all(['./organizations.txt', './spatial.txt'])
     #remove_dups()
     #import_file('obis/df819829c4cc82c0442d5ebb00ea9aadaa7d0842.jsonld')
     #import_file('oceanexperts/5ec3b5b61e65100386448c5e8eb078ad9790c37f.jsonld')
-    #import_file('oceanexperts/fff3e882eb655768de60f6f2b1ae09e09af1bb7e.jsonld')
+    import_file('obis/42ce161b29ce021957e8db4b6a30cb9cf75646f7.jsonld')
+    #import_file('oceanexperts/fff4c32ad70f1767a3a6ff7dfa0181fd56f77753.jsonld')
