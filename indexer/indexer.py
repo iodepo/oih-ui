@@ -23,7 +23,8 @@ BASE_DIR='./../../jsonld/summoned'
 
 solr_params = {
     'commit': 'true',
-    'echo': 'true',
+    # echo implies a dry run
+#    'echo': 'true',
 }
 
 
