@@ -8,7 +8,7 @@ import itertools
 import uuid
 
 from multiprocessing import Pool
-
+from collections.abc import Iterable
 from models import Att
 
 solr_url = "http://localhost:8983/solr/ckan/update/json/docs"
@@ -47,7 +47,10 @@ def _extract_dict(d):
 
     if _id and _type not in {'PropertyValue'}:
         upsert(_id, d)
-        return Att('id', _id)
+        return [
+            Att('id', _id),
+            Att('txt', d.get('name', d.get('description','')))
+        ]
 
     try:
         if _type:
@@ -87,56 +90,75 @@ def upsert(url, data):
     index_one(orig_source)
 
 
+def flatten(l):
+    for item in l:
+        if isinstance(item, Iterable):
+            for subitem in item:
+                yield subitem
+            continue
+        yield item
 
-def index_one(orig):
+def genericType_toAtts(orig):
     try:
-        data = {
-            'id': orig.get('@id', orig.get('url','')),
-            'type': orig['@type'],
-        }
+        _id = orig.get('@id', orig.get('url',''))
+        if not _id:
+            #UNDONE Hash name instead?
+            _id = str(uuid.uuid4())
+        data = [
+            Att(None, _id, 'id'),
+            Att(None, orig['@type'], 'type'),
+        ]
     except KeyError as msg:
-        print("Error -- didn't get id or url")
+        print("Error -- didn't get id or url and type")
         return
-
-    if not data['id']:
-        #UNDONE Hash name instead?
-        data['id'] = str(uuid.uuid4())
 
     for k,v in orig.items():
         if not v: continue
         if k in {'@id','@type','@context'}:
             continue
         if k in {'name', 'description'}:
-            data[k] = v
+            data.append(Att(None, v, k))
             continue
         try:
             # check by name
             att = dispatch(k, v)
-            data['%s_%s' %(att.prefix,k)] = att.value
+            att.name = k
+            if isinstance(att, Att):
+                data.append(att)
+            else:
+                data.extend(att)
             continue
         except (KeyError, AttributeError): pass
         if isinstance(v, str):
-            data['txt_%s' %k ] = [v]
+            data.append(Att('txt', [v], k))
+            continue
         if isinstance(v, list):
             if isinstance(v[0], str):
-                data['txt_%s' %k ] = v
+                data.append(Att('txt', v, k))
                 continue
             elif isinstance(v[0], dict):
-                vals = sorted([_extract_dict(elt) for elt in v])
+                vals = sorted(flatten(_extract_dict(elt) for elt in v))
                 # this should be sorted (prefix1, val), (prefix1, val2), (prefix2, val2)
                 for prefix, val in itertools.groupby(vals, lambda x:x.prefix):
                     _val = [elt.value for elt in val if elt.value]
                     if _val:
-                        data['%s_%s' %(prefix,k)] = _val
+                        data.append(Att(prefix, _val, k))
 
         if isinstance(v, dict):
-            att = _extract_dict(v)
-            if not att.value: continue
-            if att.prefix == 'geom':
-                data['the_geom'] = att.value
-            else:
-                data['%s_%s' % (att.prefix,k) ] = att.value
+            atts = _extract_dict(v)
+            if not isinstance(atts, list):
+                atts = [atts]
+            for att in atts:
+                if not att.value: continue
+                if not att.name:
+                    att.name = k
+            data.extend(atts)
 
+    return {d.key:d.value for d in data if d.value}
+
+
+def index_one(orig):
+    data = genericType_toAtts(orig)
     data['keys'] = list(data.keys())
 #    print (json.dumps(data, indent=2))
     data['json_source'] = json.dumps(orig)

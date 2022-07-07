@@ -25,7 +25,7 @@ def test_generation(_type, d):
     mod = __import__('conversions')
     result = getattr(mod, _type)(d)
     with (base_path / 'dest' / ('%s.json' %file_hash)).open('w') as f:
-        json.dump([result.prefix, result.value],f)
+        json.dump(result.as_dict,f)
 
     print ("Generated test %s for %s" %(file_hash, _type))
 
@@ -41,6 +41,10 @@ def _dispatch(_type, d):
     if GENERATE_TESTS:
         test_generation(_type, d)
     return getattr(mod, _type)(d)
+
+###
+#  Types
+###
 
 ProgramMembership = _extract('programName')
 Organization = _extract('url')
@@ -73,12 +77,14 @@ def GeoShape(geo):
     for field, fmt in _formats.items():
         val = geo.get(field,None)
         if val:
-            return Att('geom', fmt % val)
+            return Att('the', fmt % val, 'geom')
     raise UnhandledFormatException("Didn't handle %s in GeoShape" % json.dumps(geo))
 
 
 
-### Individual Fields
+###
+#   Individual Fields
+###
 
 def _extractDate(d):
     if isinstance(d, str):
