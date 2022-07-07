@@ -42,8 +42,13 @@ def dispatch(_type, d):
     return getattr(conversions, _type)(d)
 
 def _extract_dict(d):
-    _id = d.get('@id', None)
+    _id = d.get('@id', d.get('url', None))
     _type = d.get('@type', None)
+
+    try:
+        if _type:
+            return dispatch(_type, d)
+    except (KeyError, AttributeError): pass
 
     if _id and _type not in {'PropertyValue'}:
         upsert(_id, d)
@@ -51,12 +56,6 @@ def _extract_dict(d):
             Att('id', _id),
             Att('txt', d.get('name', d.get('description','')))
         ]
-
-    try:
-        if _type:
-            return dispatch(_type, d)
-    except (KeyError, AttributeError): pass
-
 
     member = d.get('member', None)
     if member:
