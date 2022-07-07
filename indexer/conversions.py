@@ -1,3 +1,5 @@
+from models import Att
+
 class UnhandledFormatException(Exception): pass
 
 GENERATE_TESTS = True
@@ -23,14 +25,14 @@ def test_generation(_type, d):
     mod = __import__('conversions')
     result = getattr(mod, _type)(d)
     with (base_path / 'dest' / ('%s.json' %file_hash)).open('w') as f:
-        json.dump(result,f)
+        json.dump([result.prefix, result.value],f)
 
     print ("Generated test %s for %s" %(file_hash, _type))
 
 
 def _extract(fieldName):
     def _extractor(d):
-        return ('txt', d[fieldName])
+        return Att('txt', d[fieldName])
     return _extractor
 
 
@@ -56,13 +58,13 @@ def Place(d):
     lat = d.get('latitude', None)
     lon = d.get('longitude', None)
     if lat is not None and lon is not None:
-        return ('geom', _formats['point'] % ('%s %s'% (lon, lat)))
+        return Att('geom', _formats['point'] % ('%s %s'% (lon, lat)))
 
     address = d.get('address', None)
     if address:
-        return ('txt', address)
+        return Att('txt', address)
 
-    return ('txt', '')
+    return None
 
 def GeoShape(geo):
     _formats = {'polygon': 'POLYGON ((%s))',
@@ -71,5 +73,20 @@ def GeoShape(geo):
     for field, fmt in _formats.items():
         val = geo.get(field,None)
         if val:
-            return ('geom', fmt % val)
+            return Att('geom', fmt % val)
     raise UnhandledFormatException("Didn't handle %s in GeoShape" % json.dumps(geo))
+
+
+
+### Individual Fields
+
+def _extractDate(d):
+    if isinstance(d, str):
+        return Att('dt', d)
+    dt = d.get('date', None)
+    if dt:
+        return Att('dt', dt)
+    return None
+
+endDate = _extractDate
+startDate = _extractDate

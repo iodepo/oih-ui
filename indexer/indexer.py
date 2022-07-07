@@ -9,6 +9,8 @@ import uuid
 
 from multiprocessing import Pool
 
+from models import Att
+
 solr_url = "http://localhost:8983/solr/ckan/update/json/docs"
 delete_url = "http://localhost:8983/solr/ckan/update"
 query_url = "http://localhost:8983/solr/ckan/select"
@@ -45,18 +47,19 @@ def _extract_dict(d):
 
     if _id and _type not in {'PropertyValue'}:
         upsert(_id, d)
-        return ('id', _id)
+        return Att('id', _id)
 
     try:
         if _type:
             return dispatch(_type, d)
     except (KeyError, AttributeError): pass
 
+
     member = d.get('member', None)
     if member:
         return _extract_dict(member)
 
-    return ('txt', d.get('name', d.get('description','')))
+    return Att('txt', d.get('name', d.get('description','')))
 
 
 def upsert(url, data):
@@ -106,6 +109,12 @@ def index_one(orig):
         if k in {'name', 'description'}:
             data[k] = v
             continue
+        try:
+            # check by name
+            att = dispatch(k, v)
+            data['%s_%s' %(att.prefix,k)] = att.value
+            continue
+        except (KeyError, AttributeError): pass
         if isinstance(v, str):
             data['txt_%s' %k ] = [v]
         if isinstance(v, list):
@@ -115,18 +124,18 @@ def index_one(orig):
             elif isinstance(v[0], dict):
                 vals = sorted([_extract_dict(elt) for elt in v])
                 # this should be sorted (prefix1, val), (prefix1, val2), (prefix2, val2)
-                for prefix, val in itertools.groupby(vals, lambda x:x[0]):
-                    _val = [elt[1] for elt in val if elt[1]]
+                for prefix, val in itertools.groupby(vals, lambda x:x.prefix):
+                    _val = [elt.value for elt in val if elt.value]
                     if _val:
                         data['%s_%s' %(prefix,k)] = _val
 
         if isinstance(v, dict):
-            prefix, val = _extract_dict(v)
-            if not val: continue
-            if prefix == 'geom':
-                data['the_geom'] = val
+            att = _extract_dict(v)
+            if not att.value: continue
+            if att.prefix == 'geom':
+                data['the_geom'] = att.value
             else:
-                data['%s_%s' % (prefix,k) ] = val
+                data['%s_%s' % (att.prefix,k) ] = att.value
 
     data['keys'] = list(data.keys())
 #    print (json.dumps(data, indent=2))
@@ -243,5 +252,5 @@ if __name__ == '__main__':
     #remove_dups()
     #import_file('obis/df819829c4cc82c0442d5ebb00ea9aadaa7d0842.jsonld')
     #import_file('oceanexperts/5ec3b5b61e65100386448c5e8eb078ad9790c37f.jsonld')
-    import_file('obis/42ce161b29ce021957e8db4b6a30cb9cf75646f7.jsonld')
-    #import_file('oceanexperts/fff4c32ad70f1767a3a6ff7dfa0181fd56f77753.jsonld')
+    #import_file('obis/42ce161b29ce021957e8db4b6a30cb9cf75646f7.jsonld')
+    import_file('oceanexperts/fff4c32ad70f1767a3a6ff7dfa0181fd56f77753.jsonld')
