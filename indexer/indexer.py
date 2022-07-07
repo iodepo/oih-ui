@@ -35,10 +35,10 @@ solr_params = {
 # - Add the source file name hash id as graph_id
 
 import conversions
+from test_utils import test_generation
 
+@test_generation
 def dispatch(_type, d):
-    if conversions.GENERATE_TESTS:
-        conversions.test_generation(_type, d)
     return getattr(conversions, _type)(d)
 
 def _extract_dict(d):
@@ -96,6 +96,10 @@ def flatten(l):
                 yield subitem
             continue
         yield item
+
+@test_generation(post=lambda x:x)
+def genericTest(_type, orig):
+    return genericType_toAtts(orig)
 
 def genericType_toAtts(orig):
     try:
@@ -157,7 +161,8 @@ def genericType_toAtts(orig):
 
 
 def index_one(orig):
-    data = genericType_toAtts(orig)
+    data = genericTest('generic', orig)
+#    data = genericType_toAtts(orig)
     data['keys'] = list(data.keys())
 #    print (json.dumps(data, indent=2))
     data['json_source'] = json.dumps(orig)

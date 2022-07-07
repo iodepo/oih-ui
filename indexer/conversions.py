@@ -1,33 +1,8 @@
 from models import Att
+from test_utils import test_generation
 
 class UnhandledFormatException(Exception): pass
 
-GENERATE_TESTS = True
-
-import hashlib
-import json
-import os
-from pathlib import Path
-
-def test_generation(_type, d):
-    print ("Generating test %s" %( _type))
-    src = json.dumps(d)
-    base_path = Path(os.path.dirname(__file__)) / 'test' / _type
-    if not base_path.exists():
-        os.mkdir(base_path)
-        os.mkdir(base_path / 'src')
-        os.mkdir(base_path / 'dest')
-
-    file_hash = hashlib.md5(src.encode('utf-8')).hexdigest()[:10]
-    with (base_path / 'src' / ('%s.json' %file_hash)).open('w') as f:
-        f.write(src)
-
-    mod = __import__('conversions')
-    result = getattr(mod, _type)(d)
-    with (base_path / 'dest' / ('%s.json' %file_hash)).open('w') as f:
-        json.dump(result.as_dict,f)
-
-    print ("Generated test %s for %s" %(file_hash, _type))
 
 
 def _extract(fieldName):
@@ -35,11 +10,9 @@ def _extract(fieldName):
         return Att('txt', d[fieldName])
     return _extractor
 
-
+@test_generation
 def _dispatch(_type, d):
     mod = __import__('conversions')
-    if GENERATE_TESTS:
-        test_generation(_type, d)
     return getattr(mod, _type)(d)
 
 ###
