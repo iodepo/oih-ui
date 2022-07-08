@@ -263,7 +263,7 @@ def import_file(filename):
             itemListElements = orig.get('itemListElement',[])
             for elt in itemListElements:
                 try:
-                    index_one(elt['item'])
+                    upsert_one(elt['item'])
                 except Exception as msg:
                     print(msg)
                     try:
@@ -271,12 +271,26 @@ def import_file(filename):
                     except KeyError: pass
         return
 
+    if not doc_type:
+        graph = orig.get('@graph',[])
+        if graph:
+            for elt in graph:
+                try:
+                    upsert_one(elt)
+                except Exception as msg:
+                    print(msg)
+                    try:
+                        dump_exception(elt['item'])
+                    except KeyError: pass
+            return
+
+
     # if doc_type != 'Person':
     #     print("Type %s, skipping %s" % (doc_type, filename))
     #     continue
 
     try:
-        index_one(orig)
+        upsert_one(orig)
     except Exception as msg:
         print (msg)
         try:
