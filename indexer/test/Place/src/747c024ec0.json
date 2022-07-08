@@ -1,0 +1,1 @@
+{"@type": "Place", "geo": {"@type": "GeoShape", "polygon": "144.401499 13.11742,144.401499 15.622688,145.8872 15.622688,145.8872 13.11742,144.401499 13.11742"}, "additionalProperty": {"@type": "PropertyValue", "propertyID": "http://dbpedia.org/resource/Spatial_reference_system", "value": "http://www.w3.org/2003/01/geo/wgs84_pos#lat_long"}}
