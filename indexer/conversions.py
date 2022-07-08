@@ -6,10 +6,6 @@ class UnhandledFormatException(Exception): pass
 class UnhandledDispatchException(Exception): pass
 
 
-def _extract(fieldName):
-    def _extractor(d):
-        return Att('txt', d[fieldName])
-    return _extractor
 
 @test_generation
 def _dispatch(_type, d):
@@ -19,14 +15,21 @@ def _dispatch(_type, d):
     except (KeyError, AttributeError):
         raise UnhandledDispatchException()
 
+
 ###
 #  Types
 ###
 
-ProgramMembership = _extract('programName')
+def _extractField(fieldName):
+    def _extractor(d):
+        return Att('txt', d[fieldName])
+    return _extractor
+
+
+ProgramMembership = _extractField('programName')
 #Organization = _extract('url')
-PropertyValue = _extract('value')
-DataDownload = _extract('contentUrl')
+PropertyValue = _extractField('value')
+DataDownload = _extractField('contentUrl')
 
 def Place(d):
     _formats = {'polygon': 'POLYGON ((%s))',
