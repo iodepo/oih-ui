@@ -242,12 +242,19 @@ def import_file(filename):
 
     print (os.path.join(BASE_DIR,filename))
 
-    with open(os.path.join(BASE_DIR,filename), 'r') as f:
+    with open(os.path.join(BASE_DIR,filename), 'rb') as f:
         try:
             orig = json.load(f)
         except UnicodeDecodeError:
-            print ("Issue decoding %s, continuing" % filename)
-            return
+            f.seek(0)
+            file_bytes= f.read()
+            try:
+                file_string = file_bytes.decode('latin1')
+                orig = json.loads(file_string)
+            except Exception as msg:
+                print ("Issue decoding %s, continuing" % filename)
+                shutil.copy(os.path.join(BASE_DIR,filename), os.path.join('exceptions', filename.split('/')[-1]))
+                return
 
     doc_type = orig.get('@type', None)
 
