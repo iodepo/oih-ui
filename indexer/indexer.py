@@ -7,6 +7,7 @@ import subprocess
 import itertools
 import uuid
 import hashlib
+import shutil
 
 from multiprocessing import Pool
 from collections.abc import Iterable
@@ -39,7 +40,7 @@ solr_params = {
 import conversions
 from conversions import UnhandledDispatchException
 
-from test_utils import test_generation
+from test_utils import test_generation, dump_exception
 
 @test_generation
 def dispatch(_type, d):
@@ -71,7 +72,7 @@ def _extract_dict(d):
     return Att('txt', d.get('name', d.get('description','')))
 
 
-def upsert(url, data):
+def upsert(url, data, flReindex=False):
     solr_params = {
         'q': '*:*',
         "fl":"id,json_source",
@@ -82,14 +83,23 @@ def upsert(url, data):
         ],
         "rows":"1",
     }
-
     resp = session.get(query_url, params=solr_params).json()
     try:
         orig = resp['response']['docs'][0]
         orig_source = json.loads(orig['json_source'])
-        if sorted(list(orig_source.values())) == sorted(data.values()):
-            return
-        orig_source.update(data)
+
+        loc_trace = orig_source.get('location',None)
+
+        orig_vals = sorted(json.dumps(list(orig_source.values())))
+        if orig_vals != sorted(json.dumps(list(data.values()))):
+            orig_source.update(data)
+            new_vals = sorted(json.dumps(list(orig_source.values())))
+            if new_vals == orig_vals and not flReindex:
+                return
+            if json.dumps(loc_trace) and loc_trace != json.dumps(orig_source['location']):
+                dump_exception([loc_trace, orig_source['location']])
+        else:
+            if not flReindex: return
     except:
         orig_source = data
 
@@ -170,7 +180,11 @@ def genericType_toAtts(orig):
                 data.append(Att('txt', v, k))
                 continue
             elif isinstance(v[0], dict):
-                vals = sorted(flatten(_extract_dict(elt) for elt in v))
+                try:
+                    vals = sorted(flatten(_extract_dict(elt) for elt in v))
+                except TypeError:
+                    dump_exception(orig)
+                    continue
                 # this should be sorted (prefix1, val), (prefix1, val2), (prefix2, val2)
                 for prefix, val in itertools.groupby(vals, lambda x:x.prefix):
                     _val = [elt.value for elt in val if elt.value]
@@ -206,12 +220,20 @@ def index_one(orig):
     session.post(delete_url, params={"commit":"true"}, json={"delete":{"query":'id:"%s"' % data['id']}})
     #print(json.dumps(data, indent=2))
     solr_post = session.post(solr_url, params=solr_params, json=data)
-    solr_post.raise_for_status()
+    try:
+        solr_post.raise_for_status()
+        print("added resource %s: %s to index" % (data['id'], data['type']))
+    except:
+        dump_exception(solr_post.text)
+        return
 #    print(solr_post.text)
-    print("added resource %s: %s to index" % (data['id'], data['type']))
     #break
 
-
+def upsert_one(orig):
+    _id = orig.get('@id', orig.get('url',''))
+    if _id:
+        return upsert(_id, orig, True)
+    index_one(orig)
 
 
 
@@ -236,11 +258,9 @@ def import_file(filename):
                 try:
                     index_one(elt['item'])
                 except Exception as msg:
+                    print(msg)
                     try:
-                        src = json.dumps(elt['item'])
-                        filehash = hashlib.md5(src.encode('utf-8')).hexdigest()[:10]
-                        with open(os.path.join(os.path.dirname(__file__), 'exceptions', '%s.json' % filehash), 'w') as f:
-                            f.write(src)
+                        dump_exception(elt['item'])
                     except KeyError: pass
         return
 
@@ -248,7 +268,13 @@ def import_file(filename):
     #     print("Type %s, skipping %s" % (doc_type, filename))
     #     continue
 
-    index_one(orig)
+    try:
+        index_one(orig)
+    except Exception as msg:
+        print (msg)
+        try:
+            dump_exception(orig)
+        except KeyError: pass
     # try:
     #     index_one(orig)
     # except Exception as msg:

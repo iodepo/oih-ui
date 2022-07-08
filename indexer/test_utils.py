@@ -51,3 +51,15 @@ def test_generation(func=None, post=None):
         return result
 
     return inner
+
+def dump_exception(elt):
+    try:
+        if isinstance(elt, str):
+            src = elt
+        else:
+            src = json.dumps(elt)
+        filehash = hashlib.md5(src.encode('utf-8')).hexdigest()[:10]
+        with open(os.path.join(os.path.dirname(__file__), 'exceptions', '%s.json' % filehash), 'w') as f:
+            f.write(src)
+    except Exception as msg:
+        print ("Exception dumping exception: %s")
