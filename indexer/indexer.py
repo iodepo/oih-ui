@@ -6,6 +6,7 @@ import os
 import subprocess
 import itertools
 import uuid
+import hashlib
 
 from multiprocessing import Pool
 from collections.abc import Iterable
@@ -203,7 +204,7 @@ def index_one(orig):
     # UNDONE -- there's a race condition here that's led to ~ 700 documents being included multiple times.
     # UNDONE -- refactor into transform (internal) and index.
     session.post(delete_url, params={"commit":"true"}, json={"delete":{"query":'id:"%s"' % data['id']}})
-    print(json.dumps(data, indent=2))
+    #print(json.dumps(data, indent=2))
     solr_post = session.post(solr_url, params=solr_params, json=data)
     solr_post.raise_for_status()
 #    print(solr_post.text)
@@ -235,8 +236,12 @@ def import_file(filename):
                 try:
                     index_one(elt['item'])
                 except Exception as msg:
-                    print(msg)
-                    print(json.dumps(elt))
+                    try:
+                        src = json.dumps(elt['item'])
+                        filehash = hashlib.md5(src.encode('utf-8')).hexdigest()[:10]
+                        with open(os.path.join(os.path.dirname(__file__), 'exceptions', '%s.json' % filehash), 'w') as f:
+                            f.write(src)
+                    except KeyError: pass
         return
 
     # if doc_type != 'Person':
@@ -296,22 +301,31 @@ def remove_dups():
         reindex(url)
 
 
-paths = ('./person.txt',
-         './research_project.txt',
-         './course.txt',
-         './creative_work.txt',
-         )
-
-#paths = ('./research_project.txt',)
 
 if __name__ == '__main__':
+    paths = ('./person.txt',
+             './research_project.txt',
+             './course.txt',
+             './creative_work.txt',
+             )
+
+    #paths = ('./research_project.txt',)
+
     #session.post(delete_url, params={"commit":"true"}, json={"delete":{"query":'type:"PropertyValue"'}})
-    #index_all(['./all_indexed_files.txt'])
-#    index_all(['./event.txt'])
+    index_all(['../all_files.txt'])
+    #index_all(['./event.txt'])
     #index_all(paths + ('./organizations.txt', './spatial.txt'))
     #index_all(['./organizations.txt', './spatial.txt'])
     #remove_dups()
     #import_file('obis/df819829c4cc82c0442d5ebb00ea9aadaa7d0842.jsonld')
     #import_file('oceanexperts/5ec3b5b61e65100386448c5e8eb078ad9790c37f.jsonld')
-    #import_file('obis/42ce161b29ce021957e8db4b6a30cb9cf75646f7.jsonld')
-    import_file('oceanexperts/fff4c32ad70f1767a3a6ff7dfa0181fd56f77753.jsonld')
+
+    if False:
+        # polygon
+        import_file('obis/42ce161b29ce021957e8db4b6a30cb9cf75646f7.jsonld')
+        # knows about events
+        import_file('oceanexperts/fff4c32ad70f1767a3a6ff7dfa0181fd56f77753.jsonld')
+        # non-point locations, start/end dates for course instance
+        import_file('oceanexperts/d5cf2f2580f59f45c6ab86ed2e1740893b5a4b59.jsonld')
+        # provider
+        import_file('obis/c0f54b1a7d64ba983f1937d4d8708239804655d8.jsonld')

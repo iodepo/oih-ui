@@ -1,6 +1,6 @@
 
 
-GENERATE_TESTS = True
+GENERATE_TESTS = False
 
 import hashlib
 import json
