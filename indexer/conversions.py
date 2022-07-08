@@ -23,7 +23,7 @@ def _dispatch(_type, d):
 ###
 
 ProgramMembership = _extract('programName')
-Organization = _extract('url')
+#Organization = _extract('url')
 PropertyValue = _extract('value')
 DataDownload = _extract('contentUrl')
 
