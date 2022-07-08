@@ -46,7 +46,10 @@ def Place(d):
 
     address = d.get('address', None)
     if address:
-        return Att('txt', address)
+        return [
+            Att('txt', address),
+            Att('txt', regions.regionForAddress(address), 'region')
+            ]
 
     return None
 
@@ -71,6 +74,7 @@ def CourseInstance(data):
                 atts.append(_dispatch(loc['@type'], loc))
             except (UnhandledDispatchException): pass
     atts.append(Att('txt', data.get('name', data.get('description', ''))))
+    # UNDONE flatten
     return [a for a in atts if a and a.value]
 
 
@@ -80,7 +84,7 @@ def _geo(feature):
     returns: list of attributes
     """
     return [
-        Att('txt', regions.featureInRegion(feature), 'region'),
+        Att('txt', regions.regionsForFeature(feature), 'region'),
         Att('the', feature, 'geom'),
         Att('has', True, 'geom')
     ]
