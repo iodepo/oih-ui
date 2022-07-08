@@ -1,5 +1,6 @@
 from models import Att
 from test_utils import test_generation
+import regions
 
 class UnhandledFormatException(Exception): pass
 class UnhandledDispatchException(Exception): pass
@@ -38,16 +39,14 @@ def Place(d):
     lat = d.get('latitude', None)
     lon = d.get('longitude', None)
     if lat is not None and lon is not None:
-        return [
-            Att('the', _formats['point'] % ('%s %s'% (lon, lat)), 'geom'),
-            Att('has', True, 'geom')
-            ]
+        return _geo(_formats['point'] % ('%s %s'% (lon, lat)))
 
     address = d.get('address', None)
     if address:
         return Att('txt', address)
 
     return None
+
 
 def GeoShape(geo):
     _formats = {'polygon': 'POLYGON ((%s))',
@@ -56,7 +55,7 @@ def GeoShape(geo):
     for field, fmt in _formats.items():
         val = geo.get(field,None)
         if val:
-            return [Att('the', fmt % val, 'geom'), Att('has', True, 'geom')]
+            return _geo(fmt % val)
     raise UnhandledFormatException("Didn't handle %s in GeoShape" % json.dumps(geo))
 
 
@@ -70,6 +69,19 @@ def CourseInstance(data):
             except (UnhandledDispatchException): pass
     atts.append(Att('txt', data.get('name', data.get('description', ''))))
     return [a for a in atts if a and a.value]
+
+
+def _geo(feature):
+    """ Create the attributes for the geometric feature
+    feature: wkt representation of the feature
+    returns: list of attributes
+    """
+    return [
+        Att('txt', regions.featureInRegion(feature), 'region'),
+        Att('the', feature, 'geom'),
+        Att('has', True, 'geom')
+    ]
+
 
 ###
 #   Individual Fields
