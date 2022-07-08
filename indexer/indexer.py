@@ -154,7 +154,7 @@ def genericType_toAtts(orig):
         try:
             # check by name
             att = dispatch(k, v)
-            att.name = k
+            att.name = att.name or k
             if isinstance(att, Att):
                 data.append(att)
             else:
@@ -173,8 +173,13 @@ def genericType_toAtts(orig):
                 # this should be sorted (prefix1, val), (prefix1, val2), (prefix2, val2)
                 for prefix, val in itertools.groupby(vals, lambda x:x.prefix):
                     _val = [elt.value for elt in val if elt.value]
+                    names = [elt.name for elt in val if elt.name]
+                    if names:
+                        name = name.pop()
+                    else:
+                        name = k
                     if _val:
-                        data.append(Att(prefix, _val, k))
+                        data.append(Att(prefix, _val, name))
 
         if isinstance(v, dict):
             atts = _extract_dict(v)
