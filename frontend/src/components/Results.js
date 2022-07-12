@@ -1,6 +1,8 @@
 /* global URLSearchParams */
 
 import React, {Component, useEffect, useState} from "react";
+import {useNavigate} from "react-router-dom";
+import {useLocation} from "react-router";
 
 import Expert from './Expert';
 import ResultTabs from "./ResultTabs";
@@ -66,8 +68,7 @@ function resolveAsUrl(url) {
     return url;
 }
 
-
-export default function Results({searchText}) {
+export default function Results({searchText, setSearchText}) {
 
     const tabs = [
         {
@@ -104,10 +105,14 @@ export default function Results({searchText}) {
     const [resultCount, setResultCount] = useState(0);
     const [facets, setFacets] = useState([]);
     const [facetQuery, setFacetQuery] = useState('');
-    const [showMap, setShowMap ] = useState(true);
+    const [showMap, setShowMap ] = useState(false);
     const [mapBounds, setMapBounds ] = useState(false);
 
+    const navigate = useNavigate();
+    const location = useLocation()
+
     useEffect(() => {
+
         const fetchResultList = (searchText, searchType, facetQuery) => {
             let URI = `${dataServiceUrl}/search?`;
             const params = new URLSearchParams({'search_text': searchText, 'document_type': searchType});
@@ -141,11 +146,46 @@ export default function Results({searchText}) {
                 });
         };
 
-        if (showMap) {
-            fetchFacets(searchText, searchType, facetQuery, mapBounds);
-        } else {
-            fetchResultList(searchText, searchType, facetQuery);
+        // const doFetch = async () => {
+        //     let URI = `${dataServiceUrl}/search?`;
+        //     const params = new URLSearchParams({'search_text': searchText, 'document_type': searchType})
+        //     URI += params.toString()
+        //     if (facetQuery) {
+        //         URI += facetQuery
+        //     }
+        //     fetch(encodeURI(URI))
+        //         .then(response => response.json())
+        //         .then(json => {
+        //             setResults(json.docs)
+        //             setResultCount(json.counts[searchType])
+        //             setFacets(json.facets)
+        //         })
+        // }
+
+        const checkParams = async () => {
+            if (searchText === '') {
+                const params = decodeURIComponent(location['pathname'].replace('/results/', ''))
+                for (const url_parameter of params.split('/')) {
+                    if (url_parameter.startsWith('search_text')) {
+                        setSearchText(url_parameter.replace('search_text=', ''))
+                    } else if (url_parameter.startsWith('document_type')) {
+                        setSearchType(url_parameter.replace('document_type=', ''))
+                    } else if (url_parameter.startsWith('facetSearch=')) {
+                        setFacetQuery(url_parameter.replace('facetSearch=', ''))
+                    }
+                }
+            }
         }
+
+        checkParams().then(() => {
+            if (searchText !== '') {
+                if (showMap) {
+                    fetchFacets(searchText, searchType, facetQuery, mapBounds);
+                } else {
+                    fetchResultList(searchText, searchType, facetQuery);
+                }
+            }
+        })
 
     }, [searchText, searchType, facetQuery, showMap, mapBounds]);
 
@@ -176,9 +216,17 @@ export default function Results({searchText}) {
         const clickedFacetQuery = new URLSearchParams({facetType:event.target.children[selectedIndex].className,
                                                        facetName:event.target.value}).toString();
         setFacetQuery([facetQuery , clickedFacetQuery].filter(e=>e).join("&"));
+        navigate(`${location['pathname'].replace('/results/', '')}/facetSearch=${clickedFacetQuery}`)
     };
 
-    const clearFacetQuery = () => setFacetQuery('');
+    const resetDefaultSearchUrl = (searchType) => {
+        navigate(`/results/search_text=${searchText}/document_type=${searchType}`)
+    }
+
+    const clearFacetQuery = () => {
+        setFacetQuery('')
+        resetDefaultSearchUrl(searchType)
+    }
 
     let layers, geoJsonUrl;
     if (showMap) {
@@ -196,7 +244,7 @@ export default function Results({searchText}) {
           <FacetsSidebar
             facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} />
           <div id="resultsBackground">
-            <ResultTabs tabList={tabs} setSearchType={setSearchType} clearFacetQuery={clearFacetQuery}/>
+            <ResultTabs tabList={tabs} setSearchType={setSearchType} searchType={searchType} clearFacetQuery={clearFacetQuery} resetDefaultSearchUrl={resetDefaultSearchUrl}/>
             <h3 className="resultsHeading">Search Query: {searchText}</h3>
             <h4 className="resultsHeading">{mapSearchTypeToProfile(searchType)}</h4>
             <h6 className="resultsHeading"> Total results found {resultCount || 0}</h6>
