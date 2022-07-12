@@ -112,7 +112,7 @@ class Query:
     def __init__(self, search_text=None, document_type=None, facetType=None, facetName=None, facetFields=None, region=None, **kwargs):
         solr_search_query = SolrQueryBuilder(**kwargs)
         if search_text:
-            solr_search_query.addx_fq(name='text', value=search_text)
+            solr_search_query.add_fq(name='text', value=search_text)
         if document_type:
             solr_search_query.add_fq(name='type', value=document_type)
         if region:
