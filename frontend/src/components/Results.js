@@ -68,7 +68,7 @@ function resolveAsUrl(url) {
     return url;
 }
 
-export default function Results({searchText, setSearchText}) {
+export default function Results({searchText, setSearchText, region, setRegion}) {
 
     const tabs = [
         {
@@ -107,6 +107,7 @@ export default function Results({searchText, setSearchText}) {
     const [facetQuery, setFacetQuery] = useState('');
     const [showMap, setShowMap ] = useState(false);
     const [mapBounds, setMapBounds ] = useState(false);
+    const [isRegionInUrl, setIsRegionInUrl] = useState(false);
 
     const navigate = useNavigate();
     const location = useLocation()
@@ -114,8 +115,16 @@ export default function Results({searchText, setSearchText}) {
     useEffect(() => {
 
         const fetchResultList = (searchText, searchType, facetQuery) => {
+
+            if (!isRegionInUrl && region !== 'GLOBAL') {
+                navigate(`/results/search_text=${searchText}/document_type=${searchType}/selected_region=${region}`);
+                setIsRegionInUrl(true)
+            }
             let URI = `${dataServiceUrl}/search?`;
             const params = new URLSearchParams({'search_text': searchText, 'document_type': searchType});
+            if (region !== '') {
+                params.append('region', region)
+            }
             URI += [params.toString(), facetQuery].filter(e=>e).join("&");
 
             fetch(URI)
@@ -146,22 +155,6 @@ export default function Results({searchText, setSearchText}) {
                 });
         };
 
-        // const doFetch = async () => {
-        //     let URI = `${dataServiceUrl}/search?`;
-        //     const params = new URLSearchParams({'search_text': searchText, 'document_type': searchType})
-        //     URI += params.toString()
-        //     if (facetQuery) {
-        //         URI += facetQuery
-        //     }
-        //     fetch(encodeURI(URI))
-        //         .then(response => response.json())
-        //         .then(json => {
-        //             setResults(json.docs)
-        //             setResultCount(json.counts[searchType])
-        //             setFacets(json.facets)
-        //         })
-        // }
-
         const checkParams = async () => {
             if (searchText === '') {
                 const params = decodeURIComponent(location['pathname'].replace('/results/', ''))
@@ -172,6 +165,8 @@ export default function Results({searchText, setSearchText}) {
                         setSearchType(url_parameter.replace('document_type=', ''))
                     } else if (url_parameter.startsWith('facetSearch=')) {
                         setFacetQuery(url_parameter.replace('facetSearch=', ''))
+                    }  else if (url_parameter.startsWith('selected_region=')) {
+                        setRegion(url_parameter.replace('selected_region=', ''))
                     }
                 }
             }
@@ -187,7 +182,7 @@ export default function Results({searchText, setSearchText}) {
             }
         })
 
-    }, [searchText, searchType, facetQuery, showMap, mapBounds]);
+    }, [searchText, searchType, facetQuery, showMap, mapBounds, region]);
 
     const calcGeoJsonUrl = (searchText, searchType, facetQuery, mapBounds) => {
         let URI =  `${dataServiceUrl}/spatial.geojson?`;
@@ -220,7 +215,11 @@ export default function Results({searchText, setSearchText}) {
     };
 
     const resetDefaultSearchUrl = (searchType) => {
-        navigate(`/results/search_text=${searchText}/document_type=${searchType}`)
+        let region_search = ''
+        if (region !== 'GLOBAL') {
+             region_search = `/selected_region=${region}`
+        }
+        navigate(`/results/search_text=${searchText}/document_type=${searchType}${region_search}`)
     }
 
     const clearFacetQuery = () => {

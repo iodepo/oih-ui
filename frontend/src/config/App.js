@@ -13,6 +13,7 @@ import {Routes} from "react-router";
 
 function App() {
     const [searchText, setSearchText] = useState('');
+    const [region, setRegion] = useState('GLOBAL');
     const [isDisplaySearch, setIsDisplaySearch] = useState(false);
 
     return (
@@ -20,10 +21,10 @@ function App() {
         <BrowserRouter>
             <Header />
             <Search setSearchText={setSearchText} isDisplaySearch={isDisplaySearch}
-                         setIsDisplaySearch={setIsDisplaySearch} />
+                         setIsDisplaySearch={setIsDisplaySearch} region={region} setRegion={setRegion}/>
             <Routes>
                   <Route path="results/*" element={
-                      <Results searchText={searchText} setSearchText={setSearchText}/>} />
+                      <Results searchText={searchText} setSearchText={setSearchText} region={region} setRegion={setRegion}/>} />
                   <Route path="*" element={<TypesCount />} >
               </Route>
             </Routes>
