@@ -23,7 +23,9 @@ export default function Search({setSearchText, isDisplaySearch, setIsDisplaySear
         {
             setSearchText(searchQuery);
             setIsDisplaySearch(true);
-            navigate(`/results/search_text=${searchQuery}/document_type=CreativeWork`)
+            const selectedRegion = document.getElementById('selectRegion').value
+            setRegion(selectedRegion)
+            navigate(`/results/search_text=${searchQuery}/document_type=CreativeWork/selected_region=${selectedRegion}`)
         }
     };
 
@@ -41,15 +43,9 @@ export default function Search({setSearchText, isDisplaySearch, setIsDisplaySear
         setSearchQuery(event.currentTarget.textContent)
         setSearchText(event.currentTarget.textContent);
         setIsDisplaySearch(true);
-        navigate(`/results/search_text=${event.currentTarget.textContent}/document_type=CreativeWork`)
-    }
-
-    const updateSearchRegion = (event) => {
-        if (event.target.value.toUpperCase() !== 'GLOBAL') {
-            setRegion(event.target.value)
-        } else {
-            setRegion('')
-        }
+        const selectedRegion = document.getElementById('selectRegion').value
+        setRegion(selectedRegion)
+        navigate(`/results/search_text=${searchQuery}/document_type=CreativeWork/selected_region=${selectedRegion}`)
     }
 
     return (
@@ -57,7 +53,7 @@ export default function Search({setSearchText, isDisplaySearch, setIsDisplaySear
             <h1 className="infohubH">SEARCH THE <b>{region}</b></h1>
             <h1 className="infohubH">OCEAN INFOHUB</h1>
             <div className="searchForm">
-                <select onChange={updateSearchRegion}>
+                <select id='selectRegion'>
                     <option>Global</option>
                     {
                         availableRegions.map((region) => {

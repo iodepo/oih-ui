@@ -107,7 +107,6 @@ export default function Results({searchText, setSearchText, region, setRegion}) 
     const [facetQuery, setFacetQuery] = useState('');
     const [showMap, setShowMap ] = useState(false);
     const [mapBounds, setMapBounds ] = useState(false);
-    const [isRegionInUrl, setIsRegionInUrl] = useState(false);
 
     const navigate = useNavigate();
     const location = useLocation()
@@ -115,14 +114,10 @@ export default function Results({searchText, setSearchText, region, setRegion}) 
     useEffect(() => {
 
         const fetchResultList = (searchText, searchType, facetQuery) => {
-
-            if (!isRegionInUrl && region !== 'GLOBAL') {
-                navigate(`/results/search_text=${searchText}/document_type=${searchType}/selected_region=${region}`);
-                setIsRegionInUrl(true)
-            }
             let URI = `${dataServiceUrl}/search?`;
             const params = new URLSearchParams({'search_text': searchText, 'document_type': searchType});
-            if (region !== '') {
+            console.log(`Region is -> ${region}`)
+            if (region.toUpperCase() !== 'GLOBAL') {
                 params.append('region', region)
             }
             URI += [params.toString(), facetQuery].filter(e=>e).join("&");
@@ -166,7 +161,10 @@ export default function Results({searchText, setSearchText, region, setRegion}) 
                     } else if (url_parameter.startsWith('facetSearch=')) {
                         setFacetQuery(url_parameter.replace('facetSearch=', ''))
                     }  else if (url_parameter.startsWith('selected_region=')) {
-                        setRegion(url_parameter.replace('selected_region=', ''))
+                        const region = url_parameter.replace('selected_region=', '')
+                        if (region.toUpperCase() !== 'GLOBAL'){
+                            setRegion(region)
+                        }
                     }
                 }
             }
