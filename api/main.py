@@ -37,8 +37,8 @@ app.add_middleware(
 
 
 @app.get("/search")
-def search(search_text: str, document_type: str = None, facetType: list = Query(default=[]), facetName: list = Query(default=[])):
-    query = Query(search_text, document_type, facetType, facetName)
+def search(search_text: str, document_type: str = None,  region: str = None, facetType: list = Query(default=[]), facetName: list = Query(default=[])):
+    query = Query(search_text, document_type, facetType, facetName, region)
     data = query.json()
     response = {'docs': data['response']['docs']}
     response.update(_convert_counts_array_to_response_dict(data['facet_counts']['facet_fields']['type']))
@@ -69,7 +69,7 @@ def detail(id: str):
 
 
 @app.get("/spatial.geojson")
-def spatial(search_text: str=None, document_type: str=None, facetType: list=Query(default=[]), facetName: list=Query(default=[])):
+def spatial(search_text: str=None, document_type: str=None, region: str=None, facetType: list=Query(default=[]), facetName: list=Query(default=[])):
 
     if 'the_geom' not in facetType:
         facetType.append('the_geom')
@@ -79,7 +79,7 @@ def spatial(search_text: str=None, document_type: str=None, facetType: list=Quer
         if not validate_geom(fq['the_geom']):
             raise ParameterError("Invalid Geometry")
     
-    query = Query(search_text, document_type, facetType, facetName, facetFields=[], rows=GEOJSON_ROWS, flList=GEOJSON_FIELDS | {'the_geom'})
+    query = Query(search_text, document_type, facetType, facetName, facetFields=[], region=region, rows=GEOJSON_ROWS, flList=GEOJSON_FIELDS | {'the_geom'})
     data = query.json().get('response',{})
     
     geometries = {
@@ -109,12 +109,14 @@ def validate_geom(the_geom):
 class ParameterError(Exception): pass
 
 class Query:
-    def __init__(self, search_text=None, document_type=None, facetType=None, facetName=None, facetFields=None, **kwargs):
+    def __init__(self, search_text=None, document_type=None, facetType=None, facetName=None, facetFields=None, region=None, **kwargs):
         solr_search_query = SolrQueryBuilder(**kwargs)
         if search_text:
-            solr_search_query.add_fq(name='text', value=search_text)
+            solr_search_query.addx_fq(name='text', value=search_text)
         if document_type:
             solr_search_query.add_fq(name='type', value=document_type)
+        if region:
+            solr_search_query.add_fq(name='txt_region', value=region)
 
         solr_search_query.add_facet_fields(facetFields)
         if (facetType and facetName) and (len(facetType) == len(facetName)):
