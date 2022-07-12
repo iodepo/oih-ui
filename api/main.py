@@ -122,7 +122,6 @@ class Query:
         if (facetType and facetName) and (len(facetType) == len(facetName)):
             for facet_search in zip(facetType, facetName):
                 solr_search_query.add_fq(facet_search[0], facet_search[1])
-        print(solr_search_query.params)
         self._query = solr_search_query
 
     def json(self):
