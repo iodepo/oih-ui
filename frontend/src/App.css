@@ -165,17 +165,25 @@ color:#0b4ccb;
   margin-bottom: 1%;
 }
 
+#selectRegion {
+  float: left;
+  width: 20%;
+  padding-bottom: 1.2%;
+  font-size: 20px;
+  border-right: 0;
+}
+
 input[type=text] {
   padding: .6%;
   font-size: 17px;
   border: 1px solid grey;
   float: left;
-  width: 80%;
+  width: 60%;
   background: #f1f1f1;
 }
 
 #SearchBtn {
-  float: left;
+  float: right;
   width: 20%;
   padding: .6%;
   background: #2196F3;
