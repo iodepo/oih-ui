@@ -37,8 +37,8 @@ app.add_middleware(
 
 
 @app.get("/search")
-def search(search_text: str, document_type: str = None,  region: str = None, facetType: list = Query(default=[]), facetName: list = Query(default=[])):
-    query = Query(search_text, document_type, facetType, facetName, region)
+def search(search_text: str = None, document_type: str = None,  region: str = None, facetType: list = Query(default=[]), facetName: list = Query(default=[])):
+    query = Query(search_text, document_type, facetType, facetName, region=region)
     data = query.json()
     response = {'docs': data['response']['docs']}
     response.update(_convert_counts_array_to_response_dict(data['facet_counts']['facet_fields']['type']))
@@ -122,7 +122,7 @@ class Query:
         if (facetType and facetName) and (len(facetType) == len(facetName)):
             for facet_search in zip(facetType, facetName):
                 solr_search_query.add_fq(facet_search[0], facet_search[1])
-
+        print(solr_search_query.params)
         self._query = solr_search_query
 
     def json(self):
