@@ -6,7 +6,7 @@ networks:
   default:
 
 services:
- solr:
+  solr:
    image: "repository.staging.derilinx.com/solr_8.8:$IMAGE_TAG"
    #image: "library/solr:8.8"
    logging:
