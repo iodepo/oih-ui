@@ -165,14 +165,18 @@ export default function Results({searchText, setSearchText}) {
         const checkParams = async () => {
             if (searchText === '') {
                 const params = decodeURIComponent(location['pathname'].replace('/results/', ''))
+                let facetParams = ''
                 for (const url_parameter of params.split('/')) {
                     if (url_parameter.startsWith('search_text')) {
                         setSearchText(url_parameter.replace('search_text=', ''))
                     } else if (url_parameter.startsWith('document_type')) {
                         setSearchType(url_parameter.replace('document_type=', ''))
                     } else if (url_parameter.startsWith('facetSearch=')) {
-                        setFacetQuery(url_parameter.replace('facetSearch=', ''))
+                        facetParams += url_parameter.replace('facetSearch=', '')
                     }
+                }
+                if (facetParams) {
+                    setFacetQuery(facetParams)
                 }
             }
         }
