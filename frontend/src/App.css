@@ -41,6 +41,11 @@ color:#0b4ccb;
   padding-bottom: 2%;
 }
 
+.bubbleClickZone:hover {
+  cursor: pointer;
+}
+
+
 #bottomBubbleRow {
   padding-bottom: 5%;
   margin-bottom: 2%

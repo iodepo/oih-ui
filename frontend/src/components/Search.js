@@ -5,7 +5,7 @@ import {Button} from 'react-bootstrap';
 import {dataServiceUrl} from "../config/environment";
 
 
-export default function Search({setSearchText, isDisplaySearch, setIsDisplaySearch, region, setRegion}) {
+export default function Search({setSearchText, isDisplaySearch, setIsDisplaySearch, region, setRegion, setIsLoadingFromSharableURL}) {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState(' ');
     const [availableRegions, setAvailableRegions] = useState([]);
@@ -23,6 +23,7 @@ export default function Search({setSearchText, isDisplaySearch, setIsDisplaySear
         {
             setSearchText(searchQuery);
             setIsDisplaySearch(true);
+            setIsLoadingFromSharableURL(false)
             const selectedRegion = document.getElementById('selectRegion').value
             setRegion(selectedRegion)
             navigate(`/results/search_text=${searchQuery}/document_type=CreativeWork/selected_region=${selectedRegion}`)
@@ -43,6 +44,7 @@ export default function Search({setSearchText, isDisplaySearch, setIsDisplaySear
         setSearchQuery(event.currentTarget.textContent)
         setSearchText(event.currentTarget.textContent);
         setIsDisplaySearch(true);
+        setIsLoadingFromSharableURL(false)
         const selectedRegion = document.getElementById('selectRegion').value
         setRegion(selectedRegion)
         navigate(`/results/search_text=${searchQuery}/document_type=CreativeWork/selected_region=${selectedRegion}`)

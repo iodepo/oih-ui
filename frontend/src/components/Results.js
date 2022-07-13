@@ -68,7 +68,8 @@ function resolveAsUrl(url) {
     return url;
 }
 
-export default function Results({searchText, setSearchText, region, setRegion}) {
+export default function Results({searchText, setSearchText, region, setRegion, isLoadingFromSharableURL,
+                                    searchType, setSearchType}) {
 
     const tabs = [
         {
@@ -100,7 +101,6 @@ export default function Results({searchText, setSearchText, region, setRegion}) 
             tab_name: 'Spatial Data & Maps',
         },
     ];
-    const [searchType, setSearchType] = useState('CreativeWork');
     const [results, setResults] = useState([]);
     const [resultCount, setResultCount] = useState(0);
     const [facets, setFacets] = useState([]);
@@ -112,11 +112,12 @@ export default function Results({searchText, setSearchText, region, setRegion}) 
     const location = useLocation()
 
     useEffect(() => {
-
         const fetchResultList = (searchText, searchType, facetQuery) => {
             let URI = `${dataServiceUrl}/search?`;
-            const params = new URLSearchParams({'search_text': searchText, 'document_type': searchType});
-            console.log(`Region is -> ${region}`)
+            const params = new URLSearchParams({'document_type': searchType});
+            if (searchText !== '') {
+                params.append('search_text', searchText)
+            }
             if (region.toUpperCase() !== 'GLOBAL') {
                 params.append('region', region)
             }
@@ -151,7 +152,7 @@ export default function Results({searchText, setSearchText, region, setRegion}) 
         };
 
         const checkParams = async () => {
-            if (searchText === '') {
+            if (isLoadingFromSharableURL) {
                 const params = decodeURIComponent(location['pathname'].replace('/results/', ''))
                 for (const url_parameter of params.split('/')) {
                     if (url_parameter.startsWith('search_text')) {
@@ -171,12 +172,10 @@ export default function Results({searchText, setSearchText, region, setRegion}) 
         }
 
         checkParams().then(() => {
-            if (searchText !== '') {
-                if (showMap) {
-                    fetchFacets(searchText, searchType, facetQuery, mapBounds);
-                } else {
-                    fetchResultList(searchText, searchType, facetQuery);
-                }
+            if (showMap) {
+                fetchFacets(searchText, searchType, facetQuery, mapBounds);
+            } else {
+                fetchResultList(searchText, searchType, facetQuery);
             }
         })
 
