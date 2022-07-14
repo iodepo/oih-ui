@@ -154,6 +154,7 @@ export default function Results({searchText, setSearchText, region, setRegion, i
         const checkParams = async () => {
             if (isLoadingFromSharableURL) {
                 const params = decodeURIComponent(location['pathname'].replace('/results/', ''))
+                let facetParams = ''
                 for (const url_parameter of params.split('/')) {
                     if (url_parameter.startsWith('search_text')) {
                         setSearchText(url_parameter.replace('search_text=', ''))
@@ -166,7 +167,11 @@ export default function Results({searchText, setSearchText, region, setRegion, i
                         if (region.toUpperCase() !== 'GLOBAL'){
                             setRegion(region)
                         }
+                        facetParams += url_parameter.replace('facetSearch=', '')
                     }
+                }
+                if (facetParams) {
+                    setFacetQuery(facetParams)
                 }
             }
         }
