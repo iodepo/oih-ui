@@ -16,6 +16,7 @@ import OrganizationResult from "./results/OrganizationResult";
 
 import FacetsSidebar from "./results/FacetsSidebar";
 import ReMap from './map/ReMap';
+import {Popup} from 'react-map-gl';
 
 const typeMap = {
     CreativeWork: {
@@ -67,6 +68,8 @@ function resolveAsUrl(url) {
     }
     return url;
 }
+
+const fetchDetail = id => fetch(`${dataServiceUrl}/detail/?id=${id}`).then(r => r.json())
 
 export default function Results({searchText, setSearchText, region, setRegion, isLoadingFromSharableURL,
                                     searchType, setSearchType}) {
@@ -243,6 +246,30 @@ export default function Results({searchText, setSearchText, region, setRegion, i
         }];
     }
 
+    const [hoverElem, setHoverElem] = useState(null);
+    const [detail, setDetail] = useState(undefined);
+    useEffect(() => {
+        fetchDetail(hoverElem).then(d => {
+            if (!d || !d[0]) {
+                setDetail(null);
+                return
+            }
+            const matches = /POINT \((-?\d+\.\d+) (-?\d+\.\d+)\)/g.exec(d[0].the_geom)
+            const [_, lng, lat] = matches.map(i => parseFloat(i))
+            setDetail(
+                <Popup
+                    latitude={lat}
+                    longitude={lng}
+                    dynamicPosition={true}
+                    closeButton={false}
+                >
+                    <p>
+                        {d[0].name}
+                    </p>
+                </Popup>)
+        })
+    }, [hoverElem, setDetail])
+
     return (
         <div id='resultsMain'>
           <FacetsSidebar
@@ -263,6 +290,11 @@ export default function Results({searchText, setSearchText, region, setRegion, i
                     bounds = {INITIAL_BOUNDS}
                     handleBoundsChange={setMapBounds}
                     layersState={[true]}
+                    onMouseEnter={e => setHoverElem(e.features[0].properties.id)}
+                    onMouseLeave={e => {
+                        setHoverElem(null)
+                    }}
+                    popup={detail}
                   /> :
                   <ResultList results={results} />
                 }

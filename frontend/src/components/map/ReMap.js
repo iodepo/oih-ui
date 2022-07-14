@@ -342,9 +342,8 @@ class ReMap extends React.Component {
             details, title, layersSelector,
             titleComponent, selectedLayer,
             onMouseEnter, onMouseLeave, onHover,
-            marker,
+            marker, popup
           } = this.props;
-    console.log(externalLayers)
 
     const getCursor = ({isDragging, isHovering}) => {
       return isDragging ? 'grabbing' : isHovering ? 'pointer' : 'default';
@@ -367,13 +366,14 @@ class ReMap extends React.Component {
           onContextMenu={ e=> true }
           onKeyup={ e=> true }
           getCursor={getCursor}
-          interactiveLayerIds={ [selectedLayer, ...externalLayers].filter(l=>l).map(l=>l.id).filter(l=>l) }
+          interactiveLayerIds={ [selectedLayer, ...externalLayers].filter(l=>l).map(l=>`ext-${l.id}-point`).filter(l=>l) }
           clickRadius={2}
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
           onHover={onHover}
           // mapOptions={{projection:'naturalEarth'}} doesn't appear to be working
         >
+          {popup}
           { title && (<HTMLOverlay
                         captureClick={false}
                         captureScroll={false}
