@@ -246,10 +246,10 @@ export default function Results({searchText, setSearchText, region, setRegion, i
         }];
     }
 
-    const [hoverElem, setHoverElem] = useState(undefined);
+    const [selectedElem, setSelectedElem] = useState(undefined);
     const [detail, setDetail] = useState(undefined);
     useEffect(() => {
-        fetchDetail(hoverElem).then(d => {
+        fetchDetail(selectedElem).then(d => {
             if (!d || !d[0]) {
                 setDetail(undefined);
                 return
@@ -266,7 +266,7 @@ export default function Results({searchText, setSearchText, region, setRegion, i
                         {d[0].name}
                 </Popup>)
         })
-    }, [hoverElem, setDetail])
+    }, [selectedElem, setDetail])
 
     return (
         <div id='resultsMain'>
@@ -288,10 +288,8 @@ export default function Results({searchText, setSearchText, region, setRegion, i
                     bounds = {INITIAL_BOUNDS}
                     handleBoundsChange={setMapBounds}
                     layersState={[true]}
-                    onMouseEnter={e => setHoverElem(e.features[0].properties.id)}
-                    onMouseLeave={e => {
-                        setHoverElem(undefined)
-                    }}
+                    onMouseEnter={e => setSelectedElem(e.features[0].properties.id)}
+                    onMouseLeave={e => setSelectedElem(undefined)}
                     popup={detail}
                   /> :
                   <ResultList results={results} />
