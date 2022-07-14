@@ -246,12 +246,12 @@ export default function Results({searchText, setSearchText, region, setRegion, i
         }];
     }
 
-    const [hoverElem, setHoverElem] = useState(null);
+    const [hoverElem, setHoverElem] = useState(undefined);
     const [detail, setDetail] = useState(undefined);
     useEffect(() => {
         fetchDetail(hoverElem).then(d => {
             if (!d || !d[0]) {
-                setDetail(null);
+                setDetail(undefined);
                 return
             }
             const matches = /POINT \((-?\d+\.\d+) (-?\d+\.\d+)\)/g.exec(d[0].the_geom)
@@ -263,9 +263,7 @@ export default function Results({searchText, setSearchText, region, setRegion, i
                     dynamicPosition={true}
                     closeButton={false}
                 >
-                    <p>
                         {d[0].name}
-                    </p>
                 </Popup>)
         })
     }, [hoverElem, setDetail])
@@ -292,7 +290,7 @@ export default function Results({searchText, setSearchText, region, setRegion, i
                     layersState={[true]}
                     onMouseEnter={e => setHoverElem(e.features[0].properties.id)}
                     onMouseLeave={e => {
-                        setHoverElem(null)
+                        setHoverElem(undefined)
                     }}
                     popup={detail}
                   /> :
