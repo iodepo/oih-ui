@@ -129,6 +129,9 @@ export default function Results({searchText, setSearchText, region, setRegion, i
                     setResults(json.docs);
                     setResultCount(json.counts[searchType]);
                     setFacets(json.facets);
+                    if (json.docs.some(doc => doc.has_geom) && !showMap) {
+                        setShowMap(true);
+                    }
                 });
         };
 

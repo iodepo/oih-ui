@@ -11,6 +11,7 @@ import ReactMapGL, {NavigationControl, Source,
 import LayerControlDropdown from './MapLayerControl';
 import LayerControl from './LayerControl';
 import MapboxControl from './MapboxReactControl';
+import './map.scss'
 
 
 /**
@@ -343,6 +344,7 @@ class ReMap extends React.Component {
             onMouseEnter, onMouseLeave, onHover,
             marker,
           } = this.props;
+    console.log(externalLayers)
 
     const getCursor = ({isDragging, isHovering}) => {
       return isDragging ? 'grabbing' : isHovering ? 'pointer' : 'default';

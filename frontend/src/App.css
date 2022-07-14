@@ -270,14 +270,3 @@ input[type=text] {
     color: #0b096b;
     font-size: larger;
 }
-
-
-/* UNDONE, super hacky css to get the map to show up */
-.exp-map {
-  min-height: 500px;
-  height: 500px;
-  width: 100%;
-}
-.exp-map__title {
-  display: none;
-}
