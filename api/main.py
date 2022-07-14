@@ -37,7 +37,8 @@ app.add_middleware(
 
 
 @app.get("/search")
-def search(search_text: str = None, document_type: str = None,  region: str = None, facetType: list = Query(default=[]), facetName: list = Query(default=[])):
+def search(search_text: str = None, document_type: str = None,  region: str = None, facetType: list = Query(default=[]),
+           facetName: list = Query(default=[]), start=0):
     query = Query(search_text, document_type, facetType, facetName, region=region)
     data = query.json()
     response = {'docs': data['response']['docs']}
@@ -109,8 +110,9 @@ def validate_geom(the_geom):
 class ParameterError(Exception): pass
 
 class Query:
-    def __init__(self, search_text=None, document_type=None, facetType=None, facetName=None, facetFields=None, region=None, **kwargs):
-        solr_search_query = SolrQueryBuilder(**kwargs)
+    def __init__(self, search_text=None, document_type=None, facetType=None, facetName=None, facetFields=None, region=None,
+                 start=0, **kwargs):
+        solr_search_query = SolrQueryBuilder(start=start, **kwargs)
         if search_text:
             solr_search_query.add_fq(name='text', value=search_text)
         if document_type:
