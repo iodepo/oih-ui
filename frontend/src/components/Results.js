@@ -16,6 +16,7 @@ import OrganizationResult from "./results/OrganizationResult";
 
 import FacetsSidebar from "./results/FacetsSidebar";
 import ReMap from './map/ReMap';
+import Pagination from "./results/Pagination";
 
 const typeMap = {
     CreativeWork: {
@@ -107,6 +108,8 @@ export default function Results({searchText, setSearchText, region, setRegion, i
     const [facetQuery, setFacetQuery] = useState('');
     const [showMap, setShowMap ] = useState(false);
     const [mapBounds, setMapBounds ] = useState(false);
+    const [pageCount, setPageCount] = useState(0);
+    const [itemOffset, setItemOffset] = useState(0);
 
     const navigate = useNavigate();
     const location = useLocation()
@@ -114,7 +117,7 @@ export default function Results({searchText, setSearchText, region, setRegion, i
     useEffect(() => {
         const fetchResultList = (searchText, searchType, facetQuery) => {
             let URI = `${dataServiceUrl}/search?`;
-            const params = new URLSearchParams({'document_type': searchType});
+            const params = new URLSearchParams({'document_type': searchType, 'start': itemOffset });
             if (searchText !== '') {
                 params.append('search_text', searchText)
             }
@@ -135,12 +138,14 @@ export default function Results({searchText, setSearchText, region, setRegion, i
         const fetchFacets = (searchText, searchType, facetQuery, mapBounds) => {
             let URI = `${dataServiceUrl}/search?`;
             const params = new URLSearchParams({
-                'search_text': searchText,
                 'document_type': searchType,
                 'facetType': 'the_geom',
                 'facetName': mapboxBounds_toQuery(mapBounds),
                 'rows': 0,
             });
+            if (searchText !== '') {
+                params.append('search_text', searchText)
+            }
             URI += [params.toString(), facetQuery].filter(e=>e).join("&");
 
             fetch(URI)
@@ -176,15 +181,15 @@ export default function Results({searchText, setSearchText, region, setRegion, i
             }
         }
 
-        checkParams().then(() => {
+        checkParams().then(async () => {
             if (showMap) {
                 fetchFacets(searchText, searchType, facetQuery, mapBounds);
             } else {
-                fetchResultList(searchText, searchType, facetQuery);
+                await fetchResultList(searchText, searchType, facetQuery);
             }
         })
 
-    }, [searchText, searchType, facetQuery, showMap, mapBounds, region]);
+    }, [searchText, searchType, facetQuery, showMap, mapBounds, region, itemOffset]);
 
     const calcGeoJsonUrl = (searchText, searchType, facetQuery, mapBounds) => {
         let URI =  `${dataServiceUrl}/spatial.geojson?`;
@@ -245,7 +250,8 @@ export default function Results({searchText, setSearchText, region, setRegion, i
           <FacetsSidebar
             facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} />
           <div id="resultsBackground">
-            <ResultTabs tabList={tabs} setSearchType={setSearchType} searchType={searchType} clearFacetQuery={clearFacetQuery} resetDefaultSearchUrl={resetDefaultSearchUrl}/>
+            <ResultTabs tabList={tabs} setSearchType={setSearchType} searchType={searchType} clearFacetQuery={clearFacetQuery} resetDefaultSearchUrl={resetDefaultSearchUrl}
+            setPageCount={setPageCount} setItemOffset={setItemOffset}/>
             <h3 className="resultsHeading">Search Query: {searchText}</h3>
             <h4 className="resultsHeading">{mapSearchTypeToProfile(searchType)}</h4>
             <h6 className="resultsHeading"> Total results found {resultCount || 0}</h6>
@@ -261,7 +267,9 @@ export default function Results({searchText, setSearchText, region, setRegion, i
                     handleBoundsChange={setMapBounds}
                     layersState={[true]}
                   /> :
-                  <ResultList results={results} />
+                  <ResultList results={results} resultCount={resultCount} pageCount={pageCount} setPageCount={setPageCount} setItemOffset={setItemOffset}/>
+                }
+                  { !showMap? <Pagination resultCount={resultCount} pageCount={pageCount} setPageCount={setPageCount} setItemOffset={setItemOffset}/> : <div></div>
                 }
               </div>
             </div>
