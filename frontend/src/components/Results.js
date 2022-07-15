@@ -247,8 +247,8 @@ export default function Results({searchText, setSearchText, region, setRegion, i
 
     return (
         <div className="w-100 bg-light">
-          <FacetsSidebar
-            facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} />
+          {facets.length > 0 && <FacetsSidebar
+            facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} />}
           <div className="container py-3 w-50 text-start">
             <ResultTabs tabList={tabs} setSearchType={setSearchType} searchType={searchType} clearFacetQuery={clearFacetQuery} resetDefaultSearchUrl={resetDefaultSearchUrl}
             setPageCount={setPageCount} setItemOffset={setItemOffset}/>
