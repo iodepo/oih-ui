@@ -1,5 +1,3 @@
-import '../App.css';
-
 import React, {useState} from 'react';
 import {Route, BrowserRouter} from 'react-router-dom';
 

@@ -1,65 +1,19 @@
 #headerLogo {
   width: 60px;
   height: 60px;
-  className:"d-inline-block align-top";
+  @extend .d-inline-block, .align-top
 }
 
-#bubbleCount {
-  color: #0078A8;
-}
-
-#bubbleText {
-  color: #09074d;
-}
-
-.colLeft {
-    /*width: 20%;*/
-}
-
-#expert {
-  width: 300%;
-}
-
-.topBubbleRow {
-  padding-bottom: 2%;
-}
-
-.bubbleClickZone:hover {
-  cursor: pointer;
-}
-
-
-#bottomBubbleRow {
-  padding-bottom: 5%;
-  margin-bottom: 2%
-}
-
-#topCol {
-  margin-right: 8.5%;
-    background: white;
-    border-radius: 50%;
-    margin-left: 10%;
-    height: 100%;
-    padding-top: 4%;
-    margin-top: 4%;
-}
-
-#bottomCol {
-    background: white;
-    border-radius: 50%;
-    width: 200px;
-    height: 200px;
-}
-
-#bottomCol {
-  background: white;
-  border-radius: 50%;
+.bubble {
+  margin-right: 8.5% !important;
+  margin-left: 10% !important;
+  padding-top: 4% !important;
+  margin-top: 4% !important;
 }
 
 #root {
-    text-align: center;
-    /*background: lightblue;*/
-  background: linear-gradient(rgba(0,212,255,1) 0%, rgb(22, 22, 203) 35%, rgb(24, 16, 187) 100%);;
+  text-align: center;
+  background: linear-gradient(hsl(233, 70%, 50%) 0%, hsl(233, 70%, 30%) 35%, hsl(233, 70%, 33%) 100%);
 }
 
 /*=====*/
@@ -71,6 +25,10 @@
   padding-right: 20%;
   padding-top: 1%;
   text-align: left;
+}
+
+#expert {
+  width: 300%;
 }
 
 #factsHeading {

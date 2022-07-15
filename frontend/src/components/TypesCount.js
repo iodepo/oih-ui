@@ -7,6 +7,38 @@ import {useNavigate} from "react-router-dom";
 const doc_types = ['CreativeWork', 'Person', 'Organization', 'Dataset', 'ResearchProject', 'Event', 'Course', 'Vehicle']
 const defaultCountState = {'counts': Object.fromEntries(doc_types.map(e => [e, 0]))}
 
+const entries = counts => [
+    [
+        {
+            id: 'Person',
+            count: counts['Person'] + counts['Organization'],
+            text: 'Experts'
+        },
+        {
+            id: 'CreativeWork',
+            text: 'Documents'
+        },
+        {
+            id: 'Course',
+            text: 'Training'
+        }
+    ],
+    [
+        {
+            id: 'Vehicle',
+            text: 'Vessels'
+        },
+        {
+            id: 'ResearchProject',
+            text: 'Projects'
+        },
+        {
+            id: 'Spatial',
+            count: 0,
+            text: 'Spatial Data & Maps'
+        }
+    ]
+];
 
 export default function TypesCount({setIsLoadingFromSharableURL, setSearchType, setIsDisplaySearch}) {
     const [counts, setCounts] = useState(defaultCountState);
@@ -29,41 +61,16 @@ export default function TypesCount({setIsLoadingFromSharableURL, setSearchType, 
     return (
         <Container>
             <Row>
-                <Row id="topBubbleRow">
-                    <Col id="topCol">
-                        <div className='bubbleClickZone' id='bubble_Person' onClick={searchByType}>
-                            <p id="bubbleCount" >{counts['counts']['Person'] + counts['counts']['Organization']}</p>
-                            <p id="bubbleText">Experts</p>
-                        </div>
-                    </Col>
-                    <Col id="topCol">
-                        <div className='bubbleClickZone' id='bubble_CreativeWork' onClick={searchByType} >
-                            <p id="bubbleCount">{counts['counts']['CreativeWork']}</p><p id="bubbleText">Documents</p>
-                        </div>
-                    </Col>
-                    <Col id="topCol">
-                        <div className='bubbleClickZone' id='bubble_Course' onClick={searchByType} >
-                            <p id="bubbleCount">{counts['counts']['Course']}</p><p id="bubbleText">Training</p>
-                        </div>
-                    </Col>
-                </Row>
-                <Row id="bottomBubbleRow">
-                    <Col id="topCol">
-                        <div className='bubbleClickZone' id='bubble_Vehicle' onClick={searchByType} >
-                            <p id="bubbleCount">{counts['counts']['Vehicle']}</p><p id="bubbleText">Vessels</p>
-                        </div>
-                    </Col>
-                    <Col id="topCol">
-                        <div className='bubbleClickZone' id='bubble_ResearchProject' onClick={searchByType} >
-                            <p id="bubbleCount">{counts['counts']['ResearchProject']}</p><p id="bubbleText">Projects</p>
-                        </div>
-                    </Col>
-                    <Col id="topCol">
-                        <div className='bubbleClickZone' id='bubble_Spatial' onClick={searchByType} >
-                            <p id="bubbleCount">0</p><p id="bubbleText">Spatial Data & Maps</p>
-                        </div>
-                    </Col>
-                </Row>
+                {entries(counts.counts).map(row =>
+                    <Row className="pb-3 mb-2">
+                        {row.map(col =>
+                            <Col className="bg-light rounded-circle h-100 bubble" role="button" id={`bubble_${col.id}`} onClick={searchByType}>
+                                <p className="text-light-blue">{col.count ?? counts.counts[col.id] }</p>
+                                <p className="text-dark-blue">{col.text ?? col.id}</p>
+                            </Col>
+                        )}
+                    </Row>
+                )}
             </Row>
         </Container>
     )
