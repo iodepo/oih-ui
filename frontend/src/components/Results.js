@@ -241,17 +241,16 @@ export default function Results({searchText, setSearchText, region, setRegion, i
     }
 
     return (
-        <div id='resultsMain'>
+        <div className="w-100 bg-light">
           <FacetsSidebar
             facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} />
-          <div id="resultsBackground">
+          <div className="container py-3 w-50 text-start">
             <ResultTabs tabList={tabs} setSearchType={setSearchType} searchType={searchType} clearFacetQuery={clearFacetQuery} resetDefaultSearchUrl={resetDefaultSearchUrl}/>
-            <h3 className="resultsHeading">Search Query: {searchText}</h3>
-            <h4 className="resultsHeading">{mapSearchTypeToProfile(searchType)}</h4>
-            <h6 className="resultsHeading"> Total results found {resultCount || 0}</h6>
+            <h3 className="text-light-blue">Search Query: {searchText}</h3>
+            <h4 className="text-light-blue">{mapSearchTypeToProfile(searchType)}</h4>
+            <h6 className="text-light-blue"> Total results found {resultCount || 0}</h6>
             <div>
               <div
-                id="resultsInfo"
                 style={{minHeight: "500px"}}
               >
                 { showMap ?
@@ -276,22 +275,20 @@ const ResultList = ({results}) =>
           return (
               <div
                 key={result['id']}
-                className="expertDetails">
-                <h6>Name:
-                  <a
-                    href={result['txt_url'] || resolveAsUrl(result['id'])}
-                  >
-                    {result['name']}
-                  </a>
+                className="border border-info rounded-3 p-3 mb-2">
+                <h6>
+                    <a href={result['txt_url'] || resolveAsUrl(result['id'])}>
+                        {result['name']}
+                    </a>
                 </h6>
                 <Container>
                   <Row>
-                    <Col className="topBubbleRow col col-lg-4">
+                    <Col className="col-lg-4">
                       <Component result={result}/>
                     </Col>
                     {'description' in result && result['type'] !== 'Person' &&
                      (
-                         <Col id="topBubbleBottom">
+                         <Col>
                            <p>{result['description']}</p>
                          </Col>
                      )
