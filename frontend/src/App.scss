@@ -14,6 +14,7 @@
 #root {
   text-align: center;
   background: linear-gradient(hsl(233, 70%, 50%) 0%, hsl(233, 70%, 30%) 35%, hsl(233, 70%, 33%) 100%);
+  min-height: 100vh;
 }
 
 /*=====*/
@@ -109,50 +110,6 @@
 #controlled-tabs {
   padding-left: 20%;
 }
-
-/*=====*/
-/*Footer*/
-
-#footer {
-  /*padding-top: 2%;*/
-  margin-top: 2%;
-  margin-left: 20%;
-  background-color: #0b096b;
-}
-
-#footerTop {
-  padding-top: 2%;
-  padding-bottom: 3%;
-  text-align: left;
-  background-color: #0b096b;
-  /*float: left;*/
-}
-
-#footerTop h3{
-  color: #0596e1;
-}
-
-#footerTop p{
-  color: white;
-}
-
-#footerLeft {
-  float: left;
-  margin-left: 20%;
-  margin-right: 10%;
-  text-align: left;
-}
-
-#getInToughBtn {
-  	box-shadow:inset 0px 1px 0px 0px #90c2e0;
-	background:linear-gradient(to bottom, #3590bd 5%, #0596e1 100%);
-    padding: 1%;
-    border: none;
-    width: 14%;
-    color: #0b096b;
-    font-size: larger;
-}
-
 
 /* UNDONE, super hacky css to get the map to show up */
 .exp-map {
