@@ -1,24 +1,7 @@
-p a:hover{
-  cursor: pointer;
-}
-
-.bg-light {
-  background-color: transparent !important;
-}
-
 #headerLogo {
   width: 60px;
   height: 60px;
   className:"d-inline-block align-top";
-}
-
-.infohubH {
-  color: white;
-  text-align: left !important;
-}
-
-.infohubH b {
-color:#0b4ccb;
 }
 
 #bubbleCount {
@@ -71,15 +54,6 @@ color:#0b4ccb;
 #bottomCol {
   background: white;
   border-radius: 50%;
-}
-
-.searchSuggestionLink {
-  color: #3388ff;
-  text-decoration: underline;
-}
-
-.searchSuggestionLink:hover {
-  cursor:  pointer;
 }
 
 #root {
@@ -159,56 +133,6 @@ color:#0b4ccb;
 
 #resultsInfo {
   margin-left: 20%;
-}
-
-/*=====*/
-/* Style the search field */
-
-#SearchSection {
-  margin-left: 20%;
-  margin-right: 20%;
-  margin-bottom: 1%;
-}
-
-#selectRegion {
-  float: left;
-  width: 20%;
-  padding-bottom: 1.2%;
-  font-size: 20px;
-  border-right: 0;
-}
-
-input[type=text] {
-  padding: .6%;
-  font-size: 17px;
-  border: 1px solid grey;
-  float: left;
-  width: 60%;
-  background: #f1f1f1;
-}
-
-#SearchBtn {
-  float: right;
-  width: 20%;
-  padding: .6%;
-  background: #2196F3;
-  color: white;
-  font-size: 17px;
-  border: 1px solid grey;
-  border-left: none; /* Prevent double borders */
-  cursor: pointer;
-  border-radius: 0;
-}
-
-#SearchBtn:hover {
-  background: #0b7dda;
-}
-
-/* Clear floats */
-.searchForm::after {
-  content: "";
-  clear: both;
-  display: table;
 }
 
 .react-tabs__tab-list {
