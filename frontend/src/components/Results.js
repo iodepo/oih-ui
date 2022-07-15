@@ -242,12 +242,10 @@ export default function Results({searchText, setSearchText, region, setRegion, i
 
     return (
         <div className="w-100 bg-light">
-          <FacetsSidebar
-            facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} />
+          {facets.length > 0 && <FacetsSidebar
+            facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} />}
           <div className="container py-3 w-50 text-start">
             <ResultTabs tabList={tabs} setSearchType={setSearchType} searchType={searchType} clearFacetQuery={clearFacetQuery} resetDefaultSearchUrl={resetDefaultSearchUrl}/>
-            <h3 className="text-light-blue">Search Query: {searchText}</h3>
-            <h4 className="text-light-blue">{mapSearchTypeToProfile(searchType)}</h4>
             <h6 className="text-light-blue"> Total results found {resultCount || 0}</h6>
             <div>
               <div
