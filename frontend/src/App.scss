@@ -31,6 +31,11 @@
   max-width: 20%;
 }
 
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 /* UNDONE, super hacky css to get the map to show up */
 .exp-map {
   min-height: 500px;
