@@ -37,17 +37,18 @@ export default function ResultTabs({
     // var items = ul.getElementsByTagName("li");
     const div = document.getElementById('resultsPaginate')
     console.log(div.children[0].children)
-    console.log('div.children[0].children[0]')
-    console.log(div.children[0].children[0])
-    div.children[0].children[0].className = 'blah'
-    console.log('====')
-    const p = document.getElementById('pagination results')
-    console.log(p)
-    const li = p.getElementsByTagName('li')
+    console.log('div.children[0].children[1]')
+    const li = div.children[0].children[1]
+    li.class = 'page-item active'
     console.log(li)
-    // for (const o of p[0]){
-    //     console.log(o)
-    // }
+    console.log(div.children[0].children[1].children[0])
+    const a = div.children[0].children[1].children[0]
+    // a.className = ''
+    // div.children[0].children[0].className = 'blah'
+
+    for (const o of li){
+        console.log(o)
+    }
     // <a rel="canonical" role="button" class="page-link" tabindex="-1" aria-label="Page 1 is your current page" aria-current="page">1</a>
     // <a rel="next" role="button" class="page-link" tabindex="0" aria-label="Page 2">2</a>
     // <a role="button" class="page-link" tabindex="0" aria-label="Page 3">3</a>
