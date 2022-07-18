@@ -12,7 +12,7 @@ export default function Pagination({searchType, resultCount, setPage, page}) {
     return (
         <div id='resultsPaginate'>
             <ReactPaginate
-                key={searchType}
+                key={`${searchType}-${pageCount}`}
                 breakLabel="..."
                 nextLabel="next >"
                 onPageChange={handlePageClick}
@@ -31,6 +31,7 @@ export default function Pagination({searchType, resultCount, setPage, page}) {
                 nextLinkClassName={'page-link'}
                 activeClassName={'active'}
                 id='pagination results'
+                initialPage={Number(page)}
                 />
             </div>
     )
