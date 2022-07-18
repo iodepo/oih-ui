@@ -55,8 +55,8 @@ def search(search_text: str = None, document_type: str = None,  region: str = No
 
 
 @app.get("/count")
-def count(field: str, region: str = None):
-    query = Query(facetFields=[field], region=region)
+def count(field: str, region: str = None, search_text: str = None):
+    query = Query(facetFields=[field], region=region, search_text=search_text)
     data = query.json()
     response = _convert_counts_array_to_response_dict(data['facet_counts']['facet_fields'][field])
     return response
