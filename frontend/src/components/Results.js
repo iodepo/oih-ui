@@ -95,16 +95,13 @@ export default function Results() {
             tab_name: 'Projects',
         },
         {
-            title: 'Organization',
-            tab_name: 'Organizations',
-        },
-        {
             title: 'SpatialData',
             tab_name: 'Spatial Data & Maps',
         },
     ];
     const [results, setResults] = useState([]);
     const [resultCount, setResultCount] = useState(0);
+    const [counts, setCounts] = useState({})
     const [facets, setFacets] = useState([]);
     const [mapBounds, setMapBounds] = useState(false);
 
@@ -136,6 +133,10 @@ export default function Results() {
                     setFacets(json.facets);
                     setResultCount(Object.values(json.counts).reduce((x, y) => x + y, 0))
                 });
+            params.delete('document_type');
+            fetch(`${dataServiceUrl}/count?field=type&${[params.toString(), facetQuery].filter(e=>e).join("&")}`)
+                .then(response => response.json())
+                .then(json => setCounts(json.counts))
         } else {
             let URI = `${dataServiceUrl}/search?`;
             const params = new URLSearchParams({'document_type': searchType, 'start': page * ITEMS_PER_PAGE });
@@ -154,6 +155,10 @@ export default function Results() {
                     setResultCount(json.counts[searchType]);
                     setFacets(json.facets);
                 });
+            params.delete('document_type');
+            fetch(`${dataServiceUrl}/count?field=type&${[params.toString(), facetQuery].filter(e=>e).join("&")}`)
+                .then(response => response.json())
+                .then(json => setCounts(json.counts))
         }
     }, [searchText, searchType, facetQuery, showMap, mapBounds, region, page]);
 
@@ -232,7 +237,7 @@ export default function Results() {
           {facets.length > 0 && <FacetsSidebar
             facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} />}
           <div className="container py-3 w-50 text-start">
-            <ResultTabs tabList={tabs} searchType={searchType} resetDefaultSearchUrl={resetDefaultSearchUrl} />
+            <ResultTabs counts={counts} tabList={tabs} searchType={searchType} resetDefaultSearchUrl={resetDefaultSearchUrl} />
             <h6 className="text-light-blue"> Total results found {resultCount || 0}</h6>
             <div>
               <div

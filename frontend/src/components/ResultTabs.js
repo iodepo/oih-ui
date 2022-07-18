@@ -1,8 +1,10 @@
 import "react-tabs/style/react-tabs.css";
 import { Tab, Tabs, TabList } from "react-tabs";
 
+const formatter = Intl.NumberFormat([], { "notation": "compact" })
+
 export default function ResultTabs({
-  tabList,
+  tabList, counts,
   searchType,
   resetDefaultSearchUrl
 
@@ -19,7 +21,7 @@ export default function ResultTabs({
               selectedClassName="bg-light border border-primary border-bottom-0 rounded-0"
             >
               <span selected={tab.title === searchType}>
-                {tab.tab_name}
+                {tab.tab_name} {counts[tab.title] && <span className="badge bg-secondary">{formatter.format(counts[tab.title])}</span>}
               </span>
             </Tab>
         )}
