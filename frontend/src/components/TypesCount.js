@@ -3,6 +3,7 @@ import {Col, Container, Row} from "react-bootstrap";
 
 import { dataServiceUrl } from '../config/environment';
 import {useNavigate} from "react-router-dom";
+import useSearchParam from "../useSearchParam";
 
 const doc_types = ['CreativeWork', 'Person', 'Organization', 'Dataset', 'ResearchProject', 'Event', 'Course', 'Vehicle']
 const defaultCountState = {'counts': Object.fromEntries(doc_types.map(e => [e, 0]))}
@@ -11,7 +12,7 @@ const entries = counts => [
     [
         {
             id: 'Experts',
-            count: counts['Person'] + counts['Organization'],
+            count: (counts['Person'] || 0) + (counts['Organization'] || 0),
             text: 'Experts'
         },
         {
@@ -43,12 +44,13 @@ const entries = counts => [
 export default function TypesCount() {
     const [counts, setCounts] = useState(defaultCountState);
     const navigate = useNavigate();
+    const [region,] = useSearchParam("region")
 
     useEffect(() => {
-        fetch(`${dataServiceUrl}/count?field=type`)
+        fetch(`${dataServiceUrl}/count?field=type${region ? '&region=' + region : ''}`)
             .then(response => response.json())
             .then(json => setCounts(json))
-    }, []);
+    }, [region]);
     
     const searchByType = type => event => navigate(`/results/${type}`);
     
@@ -59,7 +61,7 @@ export default function TypesCount() {
                     <Row className="pb-3 mb-2">
                         {row.map(col =>
                             <Col className="bg-light rounded-circle h-100 bubble" role="button" id={`bubble_${col.id}`} onClick={searchByType(col.id)}>
-                                <p className="text-light-blue">{col.count ?? counts.counts[col.id] }</p>
+                                <p className="text-light-blue">{col.count ?? counts.counts[col.id] ?? 0 }</p>
                                 <p className="text-dark-blue">{col.text ?? col.id}</p>
                             </Col>
                         )}
