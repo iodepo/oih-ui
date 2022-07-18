@@ -38,7 +38,7 @@ export default function Search() {
                 handleChange()
             }}>
                 <select className="form-select w-25 rounded-0" value={region} onChange={e => setRegion(e.target.value)}>
-                    <option>Global</option>
+                    <option value="">Global</option>
                     {
                         availableRegions.map((region) => {
                             return <option>{region}</option>
