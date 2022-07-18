@@ -138,7 +138,7 @@ export default function Results({searchText, setSearchText, region, setRegion, i
         const fetchFacets = (searchText, searchType, facetQuery, mapBounds) => {
             let URI = `${dataServiceUrl}/search?`;
             const params = new URLSearchParams({
-                'document_type': searchType,
+                // 'document_type': 'Organization',
                 'facetType': 'the_geom',
                 'facetName': mapboxBounds_toQuery(mapBounds),
                 'rows': 0,
@@ -165,6 +165,9 @@ export default function Results({searchText, setSearchText, region, setRegion, i
                         setSearchText(url_parameter.replace('search_text=', ''))
                     } else if (url_parameter.startsWith('document_type')) {
                         setSearchType(url_parameter.replace('document_type=', ''))
+                        if (url_parameter.replace('document_type=', '') === 'SpatialData') {
+                            setShowMap(true)
+                        }
                     } else if (url_parameter.startsWith('facetSearch=')) {
                         setFacetQuery(url_parameter.replace('facetSearch=', ''))
                     }  else if (url_parameter.startsWith('selected_region=')) {
@@ -195,7 +198,7 @@ export default function Results({searchText, setSearchText, region, setRegion, i
         let URI =  `${dataServiceUrl}/spatial.geojson?`;
         const params = new URLSearchParams({
             'search_text': searchText,
-            'document_type': searchType,
+            // 'document_type': searchType,
             'facetType': 'the_geom',
             'facetName': mapboxBounds_toQuery(mapBounds),
         });
@@ -251,7 +254,7 @@ export default function Results({searchText, setSearchText, region, setRegion, i
             facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} />}
           <div className="container py-3 w-50 text-start">
             <ResultTabs tabList={tabs} setSearchType={setSearchType} searchType={searchType} clearFacetQuery={clearFacetQuery} resetDefaultSearchUrl={resetDefaultSearchUrl}
-            setPageCount={setPageCount} setItemOffset={setItemOffset}/>
+            setPageCount={setPageCount} setItemOffset={setItemOffset} setShowMap={setShowMap}/>
             <h3 className="text-light-blue">Search Query: {searchText}</h3>
             <h4 className="text-light-blue">{mapSearchTypeToProfile(searchType)}</h4>
             <h6 className="text-light-blue"> Total results found {resultCount || 0}</h6>
