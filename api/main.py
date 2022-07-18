@@ -39,6 +39,8 @@ app.add_middleware(
 @app.get("/search")
 def search(search_text: str = None, document_type: str = None,  region: str = None, facetType: list = Query(default=[]),
            facetName: list = Query(default=[]), start=0):
+    if 'the_geom' in facetType:
+        facetType, facetName = rewriteGeom(facetType, facetName)
     query = Query(search_text, document_type, facetType, facetName, region=region, start=start)
     data = query.json()
     response = {'docs': data['response']['docs']}
@@ -68,6 +70,24 @@ def detail(id: str):
     data = res.json()
     return data.get('response',{}).get('docs',[])[:1] or {}
 
+def rewriteGeom(facetType, facetName):
+    # UNDONE -- need to check to see if we're correctly handling wrap-around in the bounding boxes
+    
+    fq = {k:v for k,v in zip(facetType, facetName)}
+    corners = validate_geom(fq['the_geom'])
+    if not corners:
+        raise ParameterError("Invalid Geometry")
+    # corners: s w n e
+    log.error(corners)
+    (s,w,n,e) = corners.group(1,3,5,7)
+    log.error("%s, %s, %s, %s", s,w,n,e)
+    if float(w) > 180: w = 180 - float(w);
+    if float(e) > 180: e = 180 - float(e);
+    fq['the_geom'] = f'[{s},{w} TO {n},{e}]';
+
+    facetType = list(fq.keys())
+    facetName = list(fq.values())
+    return (facetType, facetName)
 
 @app.get("/spatial.geojson")
 def spatial(search_text: str=None, document_type: str=None, region: str=None, facetType: list=Query(default=[]), facetName: list=Query(default=[])):
@@ -76,13 +96,13 @@ def spatial(search_text: str=None, document_type: str=None, region: str=None, fa
         facetType.append('the_geom')
         facetName.append(DEFAULT_GEOMETRY)
     else:
-        fq = {k:v for k,v in zip(facetType, facetName)}
-        if not validate_geom(fq['the_geom']):
-            raise ParameterError("Invalid Geometry")
-    
+        facetType, facetName = rewriteGeom(facetType, facetName)
+
     query = Query(search_text, document_type, facetType, facetName, facetFields=[], region=region, rows=GEOJSON_ROWS, flList=GEOJSON_FIELDS | {'the_geom'})
     data = query.json().get('response',{})
-    
+
+    log.error(json.dumps(query.json(), indent=2))
+
     geometries = {
         'type': 'FeatureCollection',
         "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}},
@@ -105,8 +125,8 @@ def validate_geom(the_geom):
     Should be something like: "[##,## TO ##,##]"
     """
     number = r"-?\d+(\.\d+)?"  # optional sign, digits, optional decimal + more digits
-    return re.match(rf"\[{number},{number} +TO +{number},{number}]$", the_geom)
-    
+    return re.match(rf"\[({number}),({number}) +TO +({number}),({number})]$", the_geom)
+
 class ParameterError(Exception): pass
 
 class Query:
@@ -130,7 +150,7 @@ class Query:
         return res.json()
 
 
-            
+
 
 def _add_facets(data, response):
     for facet in AVAILABLE_FACETS:

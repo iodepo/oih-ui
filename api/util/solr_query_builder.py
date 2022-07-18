@@ -1,5 +1,6 @@
 DEFAULT_FACET_FIELDS = ['txt_knowsAbout', 'name', 'txt_knowsLanguage', 'txt_nationality', 'txt_jobTitle',
                         'txt_contributor', 'txt_keywords', 'txt_memberOf', 'txt_parentOrganization', 'id_provider',
+                        'has_geom',
                         'id_includedInDataCatalog', 'id_identifier', 'id', 'keys', 'type'
                         ]
 
