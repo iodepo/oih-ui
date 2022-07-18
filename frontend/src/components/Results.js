@@ -311,8 +311,11 @@ const Result = ({ result }) => {
                         </div>
                     }
                 </Row>
-                {'description' in result && truncated && shouldTruncate && <div className="w-100 d-flex align-items-end">
-                    <button className="ms-auto btn btn-info text-dark" onClick={() => setShouldTruncate(false)}>Show more</button>
+                {'description' in result && truncated && shouldTruncate && <div className="w-100 d-flex">
+                    <div class="col col-lg-4"></div>
+                    <div class="col d-flex justify-content-center">
+                        <button className="btn btn-info btn-sm text-dark" onClick={() => setShouldTruncate(false)}>Show more</button>
+                    </div>
                 </div>}
             </Container>
         </div>);
