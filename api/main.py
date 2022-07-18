@@ -45,7 +45,7 @@ def search(search_text: str = None, document_type: str = None,  region: str = No
     data = query.json()
     response = {'docs': data['response']['docs']}
     response.update(_convert_counts_array_to_response_dict(data['facet_counts']['facet_fields']['type']))
-    if document_type.upper() == 'EXPERTS':
+    if document_type and document_type.upper() == 'EXPERTS':
         total_counts = response['counts']['Person'] + response['counts']['Organization']
         response['counts']['Experts'] = total_counts
 
