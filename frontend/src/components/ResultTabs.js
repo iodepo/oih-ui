@@ -3,66 +3,26 @@ import { Tab, Tabs, TabList } from "react-tabs";
 
 export default function ResultTabs({
   tabList,
-  setSearchType,
   searchType,
-  clearFacetQuery,
-  resetDefaultSearchUrl,
-  setPageCount,
-  setItemOffset,
-  setShowMap
-}) {
-  function changeSearchType(event) {
-    clearFacetQuery();
-    setPageCount(0)
-    setItemOffset(0)
-    if (event.target.className === "tabSpan") {
-      setSearchType(event.target.id);
-      resetDefaultSearchUrl(event.target.id);
-    } else {
-      setSearchType(event.target.children[0].id);
-      resetDefaultSearchUrl(event.target.children[0].id);
-    }
-    let tabClicked = '';
-    if (event.target.nodeName === 'SPAN') {
-      tabClicked = event.target.id
-    } else {
-      tabClicked = event.target.children[0].id
-    }
-    if (tabClicked === 'SpatialData') {
-      setShowMap(true)
-    } else {
-      setShowMap(false)
-    }
-  }
+  resetDefaultSearchUrl
 
-  function selectedTabIndex() {
-    for (const tab in tabList) {
-      if (tabList[tab].title == searchType) {
-        return Number(tab);
-      }
-    }
-  }
+}) {
+  const changeSearchType = type => event => resetDefaultSearchUrl(type);
 
   return (
-    <Tabs selectedIndex={selectedTabIndex()}>
+    <Tabs selectedIndex={tabList.findIndex(tab => tab.title === searchType)}>
       <TabList className="bg-light rounded-2 pt-2 border-bottom border-primary">
-        {tabList.map((tab, i) => {
-          return (
+        {tabList.map(tab =>
             <Tab
-              onClick={changeSearchType}
+              onClick={changeSearchType(tab.title)}
               key={tab.title}
               selectedClassName="bg-light border border-primary border-bottom-0 rounded-0"
             >
-              <span
-                selected={tab.title === searchType}
-                className="tabSpan"
-                id={tab.title}
-              >
+              <span selected={tab.title === searchType}>
                 {tab.tab_name}
               </span>
             </Tab>
-          );
-        })}
+        )}
       </TabList>
     </Tabs>
   );

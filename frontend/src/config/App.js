@@ -10,28 +10,15 @@ import {Routes} from "react-router";
 
 
 function App() {
-    const [searchText, setSearchText] = useState('');
-    const [region, setRegion] = useState('GLOBAL');
-    const [isDisplaySearch, setIsDisplaySearch] = useState(false);
-    const [isLoadingFromSharableURL, setIsLoadingFromSharableURL] = useState(true);
-    const [searchType, setSearchType] = useState('CreativeWork');
-
     return (
     <div className="App">
         <BrowserRouter>
             <Header />
-            <Search setSearchText={setSearchText} isDisplaySearch={isDisplaySearch}
-                         setIsDisplaySearch={setIsDisplaySearch} region={region} setRegion={setRegion}
-                    setIsLoadingFromSharableURL={setIsLoadingFromSharableURL} />
+            <Search />
             <Routes>
-                  <Route path="results/*" element={
-                      <Results searchText={searchText} setSearchText={setSearchText} region={region} setRegion={setRegion}
-                               isLoadingFromSharableURL={isLoadingFromSharableURL} searchType={searchType}
-                               setSearchType={setSearchType}/>} />
-                  <Route path="*" element={
-                      <TypesCount setIsLoadingFromSharableURL={setIsLoadingFromSharableURL} setSearchType={setSearchType}
-                      setIsDisplaySearch={setIsDisplaySearch}/>
-                  }>
+                  <Route path="results/:searchType" element={<Results />}/>
+                  <Route path="results/" element={<Results />}/>
+                  <Route path="/" element={<TypesCount />}>
               </Route>
             </Routes>
       </BrowserRouter>

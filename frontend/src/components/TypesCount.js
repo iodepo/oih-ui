@@ -33,14 +33,14 @@ const entries = counts => [
             text: 'Projects'
         },
         {
-            id: 'Spatial',
+            id: 'SpatialData',
             count: 0,
             text: 'Spatial Data & Maps'
         }
     ]
 ];
 
-export default function TypesCount({setIsLoadingFromSharableURL, setSearchType, setIsDisplaySearch}) {
+export default function TypesCount() {
     const [counts, setCounts] = useState(defaultCountState);
     const navigate = useNavigate();
 
@@ -50,13 +50,7 @@ export default function TypesCount({setIsLoadingFromSharableURL, setSearchType, 
             .then(json => setCounts(json))
     }, []);
     
-    const searchByType = (event) => {
-        setIsLoadingFromSharableURL(false);
-        const typeToSearch = event.currentTarget.id.replace('bubble_', '')
-        setSearchType(typeToSearch);
-        setIsDisplaySearch(true);
-        navigate(`/results/document_type=${typeToSearch}`)
-    }
+    const searchByType = type => event => navigate(`/results/${type}`);
     
     return (
         <Container>
@@ -64,7 +58,7 @@ export default function TypesCount({setIsLoadingFromSharableURL, setSearchType, 
                 {entries(counts.counts).map(row =>
                     <Row className="pb-3 mb-2">
                         {row.map(col =>
-                            <Col className="bg-light rounded-circle h-100 bubble" role="button" id={`bubble_${col.id}`} onClick={searchByType}>
+                            <Col className="bg-light rounded-circle h-100 bubble" role="button" id={`bubble_${col.id}`} onClick={searchByType(col.id)}>
                                 <p className="text-light-blue">{col.count ?? counts.counts[col.id] }</p>
                                 <p className="text-dark-blue">{col.text ?? col.id}</p>
                             </Col>

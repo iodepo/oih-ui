@@ -1,8 +1,7 @@
 /* global URLSearchParams */
 
-import React, {Component, useEffect, useState} from "react";
-import {useNavigate} from "react-router-dom";
-import {useLocation} from "react-router";
+import React, {Component, useEffect, useState, useCallback} from "react";
+import {useNavigate, useSearchParams, useParams} from "react-router-dom";
 
 import Expert from './Expert';
 import ResultTabs from "./ResultTabs";
@@ -16,7 +15,7 @@ import OrganizationResult from "./results/OrganizationResult";
 
 import FacetsSidebar from "./results/FacetsSidebar";
 import ReMap from './map/ReMap';
-import Pagination from "./results/Pagination";
+import Pagination, { ITEMS_PER_PAGE } from "./results/Pagination";
 
 const typeMap = {
     CreativeWork: {
@@ -69,9 +68,13 @@ function resolveAsUrl(url) {
     return url;
 }
 
-export default function Results({searchText, setSearchText, region, setRegion, isLoadingFromSharableURL,
-                                    searchType, setSearchType}) {
+const useSearchParam = (param, def = undefined) => {
+    const [params, setParams] = useSearchParams()
+    const setParam = useCallback(value => setParams({ ...Object.fromEntries(params), [param]: value }), [param, params, setParams])
+    return [params.has(param) ? params.get(param) : def, setParam]
+}
 
+export default function Results() {
     const tabs = [
         {
             title: 'CreativeWork',
@@ -105,40 +108,21 @@ export default function Results({searchText, setSearchText, region, setRegion, i
     const [results, setResults] = useState([]);
     const [resultCount, setResultCount] = useState(0);
     const [facets, setFacets] = useState([]);
-    const [facetQuery, setFacetQuery] = useState('');
-    const [showMap, setShowMap ] = useState(false);
     const [mapBounds, setMapBounds ] = useState(false);
-    const [pageCount, setPageCount] = useState(0);
-    const [itemOffset, setItemOffset] = useState(0);
-
+    const [showMap, setShowMap ] = useState(false);
+    
     const navigate = useNavigate();
-    const location = useLocation()
+    const { searchType = 'CreativeWork' } = useParams()
+    useEffect(() => setShowMap(searchType === "SpatialData"), [searchType])
+    const [searchText, setSearchText] = useSearchParam("search_text", "");
+    const [region, setRegion] = useSearchParam("region", "global");
+    const [facetQuery, setFacetQuery] = useSearchParam("facet_query");
+    const [page, setPage] = useSearchParam("page", 0);
 
     useEffect(() => {
-        const fetchResultList = (searchText, searchType, facetQuery) => {
-            let URI = `${dataServiceUrl}/search?`;
-            const params = new URLSearchParams({'document_type': searchType, 'start': itemOffset });
-            if (searchText !== '') {
-                params.append('search_text', searchText)
-            }
-            if (region.toUpperCase() !== 'GLOBAL') {
-                params.append('region', region)
-            }
-            URI += [params.toString(), facetQuery].filter(e=>e).join("&");
-
-            fetch(URI)
-                .then(response => response.json())
-                .then(json => {
-                    setResults(json.docs);
-                    setResultCount(json.counts[searchType]);
-                    setFacets(json.facets);
-                });
-        };
-
-        const fetchFacets = (searchText, searchType, facetQuery, mapBounds) => {
+        if (showMap) {
             let URI = `${dataServiceUrl}/search?`;
             const params = new URLSearchParams({
-                // 'document_type': 'Organization',
                 'facetType': 'the_geom',
                 'facetName': mapboxBounds_toQuery(mapBounds),
                 'rows': 0,
@@ -154,51 +138,31 @@ export default function Results({searchText, setSearchText, region, setRegion, i
                     setResultCount(json.counts[searchType]);
                     setFacets(json.facets);
                 });
-        };
-
-        const checkParams = async () => {
-            if (isLoadingFromSharableURL) {
-                const params = decodeURIComponent(location['pathname'].replace('/results/', ''))
-                let facetParams = ''
-                for (const url_parameter of params.split('/')) {
-                    if (url_parameter.startsWith('search_text')) {
-                        setSearchText(url_parameter.replace('search_text=', ''))
-                    } else if (url_parameter.startsWith('document_type')) {
-                        setSearchType(url_parameter.replace('document_type=', ''))
-                        if (url_parameter.replace('document_type=', '') === 'SpatialData') {
-                            setShowMap(true)
-                        }
-                    } else if (url_parameter.startsWith('facetSearch=')) {
-                        setFacetQuery(url_parameter.replace('facetSearch=', ''))
-                    }  else if (url_parameter.startsWith('selected_region=')) {
-                        const region = url_parameter.replace('selected_region=', '')
-                        if (region.toUpperCase() !== 'GLOBAL'){
-                            setRegion(region)
-                        }
-                        facetParams += url_parameter.replace('facetSearch=', '')
-                    }
-                }
-                if (facetParams) {
-                    setFacetQuery(facetParams)
-                }
+        } else {
+            let URI = `${dataServiceUrl}/search?`;
+            const params = new URLSearchParams({'document_type': searchType, 'start': page * ITEMS_PER_PAGE });
+            if (searchText !== '') {
+                params.append('search_text', searchText)
             }
+            if (region.toUpperCase() !== 'GLOBAL') {
+                params.append('region', region)
+            }
+            URI += [params.toString(), facetQuery].filter(e=>e).join("&");
+
+            fetch(URI)
+                .then(response => response.json())
+                .then(json => {
+                    setResults(json.docs);
+                    setResultCount(json.counts[searchType]);
+                    setFacets(json.facets);
+                });
         }
-
-        checkParams().then(async () => {
-            if (showMap) {
-                fetchFacets(searchText, searchType, facetQuery, mapBounds);
-            } else {
-                await fetchResultList(searchText, searchType, facetQuery);
-            }
-        })
-
-    }, [searchText, searchType, facetQuery, showMap, mapBounds, region, itemOffset]);
+    }, [searchText, searchType, facetQuery, showMap, mapBounds, region, page]);
 
     const calcGeoJsonUrl = (searchText, searchType, facetQuery, mapBounds) => {
         let URI =  `${dataServiceUrl}/spatial.geojson?`;
         const params = new URLSearchParams({
             'search_text': searchText,
-            // 'document_type': searchType,
             'facetType': 'the_geom',
             'facetName': mapboxBounds_toQuery(mapBounds),
         });
@@ -220,20 +184,14 @@ export default function Results({searchText, setSearchText, region, setRegion, i
         const selectedIndex = event.target.selectedIndex;
         const clickedFacetQuery = new URLSearchParams({facetType:event.target.children[selectedIndex].className,
                                                        facetName:event.target.value}).toString();
-        setFacetQuery([facetQuery , clickedFacetQuery].filter(e=>e).join("&"));
-        navigate(`${location['pathname'].replace('/results/', '')}/facetSearch=${clickedFacetQuery}`)
+        setFacetQuery([facetQuery, clickedFacetQuery].filter(e=>e).join("&"));
     };
 
-    const resetDefaultSearchUrl = (searchType) => {
-        let region_search = ''
-        if (region !== 'GLOBAL') {
-             region_search = `/selected_region=${region}`
-        }
-        navigate(`/results/search_text=${searchText}/document_type=${searchType}${region_search}`)
+    const resetDefaultSearchUrl = (type) => {
+        navigate(`/results/${type}?${new URLSearchParams({ ...searchText ? { search_text: searchText } : {}, ...region.toUpperCase() !== "GLOBAL" ? { region } : {} })}`)
     }
 
     const clearFacetQuery = () => {
-        setFacetQuery('')
         resetDefaultSearchUrl(searchType)
     }
 
@@ -253,8 +211,7 @@ export default function Results({searchText, setSearchText, region, setRegion, i
           {facets.length > 0 && <FacetsSidebar
             facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} />}
           <div className="container py-3 w-50 text-start">
-            <ResultTabs tabList={tabs} setSearchType={setSearchType} searchType={searchType} clearFacetQuery={clearFacetQuery} resetDefaultSearchUrl={resetDefaultSearchUrl}
-            setPageCount={setPageCount} setItemOffset={setItemOffset} setShowMap={setShowMap}/>
+            <ResultTabs tabList={tabs} searchType={searchType} resetDefaultSearchUrl={resetDefaultSearchUrl} />
             <h3 className="text-light-blue">Search Query: {searchText}</h3>
             <h4 className="text-light-blue">{mapSearchTypeToProfile(searchType)}</h4>
             <h6 className="text-light-blue"> Total results found {resultCount || 0}</h6>
@@ -269,9 +226,10 @@ export default function Results({searchText, setSearchText, region, setRegion, i
                     handleBoundsChange={setMapBounds}
                     layersState={[true]}
                   /> :
-                  <ResultList results={results} resultCount={resultCount} pageCount={pageCount} setPageCount={setPageCount} setItemOffset={setItemOffset}/>
-                }
-                  { !showMap? <Pagination resultCount={resultCount} pageCount={pageCount} setPageCount={setPageCount} setItemOffset={setItemOffset}/> : <div></div>
+                  <>
+                    <ResultList results={results}/>
+                    <Pagination searchType={searchType} resultCount={resultCount} setPage={setPage} page={page}/>
+                  </>
                 }
               </div>
             </div>
