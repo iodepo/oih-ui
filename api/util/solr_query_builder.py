@@ -26,6 +26,7 @@ class SolrQueryBuilder:
 
     formats = {
         'text': '+%(name)s:(%(value)s)',
+        'type': '+%(name)s:(%(value)s)',
         'the_geom': '+%(name)s:%(value)s',
         }
 

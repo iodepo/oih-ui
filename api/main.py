@@ -136,7 +136,10 @@ class Query:
         if search_text:
             solr_search_query.add_fq(name='text', value=search_text)
         if document_type:
-            solr_search_query.add_fq(name='type', value=document_type)
+            if document_type.upper() == 'EXPERTS':
+                solr_search_query.add_fq(name='type', value='Person Organization')
+            else:
+                solr_search_query.add_fq(name='type', value=document_type)
         if region:
             solr_search_query.add_fq(name='txt_region', value=region)
 
