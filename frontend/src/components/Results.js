@@ -126,17 +126,20 @@ export default function Results() {
                 params.append('search_text', searchText)
             }
             URI += [params.toString(), facetQuery].filter(e=>e).join("&");
-
+            let count;
             fetch(URI)
                 .then(response => response.json())
                 .then(json => {
                     setFacets(json.facets);
-                    setResultCount(Object.values(json.counts).reduce((x, y) => x + y, 0))
-                });
-            params.delete('document_type');
-            fetch(`${dataServiceUrl}/count?field=type&${[params.toString(), facetQuery].filter(e=>e).join("&")}`)
+                    count = Object.values(json.counts).reduce((x, y) => x + y, 0);
+                    setResultCount(count)
+                }).then( () => fetch(`${dataServiceUrl}/count?${new URLSearchParams({
+                    field: 'type',
+                    ...region.toUpperCase() !== "GLOBAL" ? { region } : {},
+                    ...searchText ? { search_text: searchText } : {},
+                })}`))
                 .then(response => response.json())
-                .then(json => setCounts(json.counts))
+                .then(json => setCounts({ ...json.counts, [searchType]: count }))
         } else {
             let URI = `${dataServiceUrl}/search?`;
             const params = new URLSearchParams({'document_type': searchType, 'start': page * ITEMS_PER_PAGE });
@@ -148,17 +151,21 @@ export default function Results() {
             }
             URI += [params.toString(), facetQuery].filter(e=>e).join("&");
 
+            let count;
             fetch(URI)
                 .then(response => response.json())
                 .then(json => {
                     setResults(json.docs);
-                    setResultCount(json.counts[searchType]);
+                    count = json.counts[searchType]
+                    setResultCount(count);
                     setFacets(json.facets);
-                });
-            params.delete('document_type');
-            fetch(`${dataServiceUrl}/count?field=type&${[params.toString(), facetQuery].filter(e=>e).join("&")}`)
+                }).then(() => fetch(`${dataServiceUrl}/count?${new URLSearchParams({
+                    field: 'type',
+                    ...region.toUpperCase() !== "GLOBAL" ? { region } : {},
+                    ...searchText ? { search_text: searchText } : {},
+                })}`))
                 .then(response => response.json())
-                .then(json => setCounts(json.counts))
+                .then(json => setCounts({ ...json.counts, [searchType]: count }))
         }
     }, [searchText, searchType, facetQuery, showMap, mapBounds, region, page]);
 
