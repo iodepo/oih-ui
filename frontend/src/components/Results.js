@@ -111,21 +111,23 @@ export default function Results() {
     const [results, setResults] = useState([]);
     const [resultCount, setResultCount] = useState(0);
     const [facets, setFacets] = useState([]);
+    const [canShowMap, setCanShowMap] = useState(false);
     const [mapBounds, setMapBounds] = useState(false);
-    const [showMap, setShowMap] = useState(false);
-    
+
     const navigate = useNavigate();
     const { searchType = 'CreativeWork' } = useParams()
-    // useEffect(() => setShowMap(searchType === "SpatialData"), [searchType])
     const [searchText, setSearchText] = useSearchParam("search_text", "");
     const [region, setRegion] = useSearchParam("region", "global");
     const [facetQuery, setFacetQuery] = useSearchParam("facet_query");
     const [page, setPage] = useSearchParam("page", 0);
+    const [showMap, setShowMap] = useState("show_map", false);
+    useEffect(() => setShowMap(canShowMap), [canShowMap])
 
     useEffect(() => {
         if (showMap) {
             let URI = `${dataServiceUrl}/search?`;
             const params = new URLSearchParams({
+                ...searchType !== 'SpatialData' ? { 'document_type': searchType } : {},
                 'facetType': 'the_geom',
                 'facetName': mapboxBounds_toQuery(mapBounds),
                 'rows': 0,
@@ -138,10 +140,15 @@ export default function Results() {
             fetch(URI)
                 .then(response => response.json())
                 .then(json => {
-                    setResultCount(json.counts[searchType]);
                     setFacets(json.facets);
-                    if (!json.counts[searchType]) {
-                        setShowMap(false);
+                    if (searchType !== 'SpatialData') {
+                        setResultCount(json.counts[searchType]);
+                        if (!json.counts[searchType]) {
+                            setCanShowMap(false);
+                        }
+                    } else {
+                        setResultCount(Object.values(json.counts).reduce((x, y) => x + y, 0))
+                        setCanShowMap(true);
                     }
                 });
         } else {
@@ -161,8 +168,8 @@ export default function Results() {
                     setResults(json.docs);
                     setResultCount(json.counts[searchType]);
                     setFacets(json.facets);
-                    if (showMap != json.docs.some(doc => doc.has_geom)) {
-                        setShowMap(json.docs.some(doc => doc.has_geom));
+                    if (json.docs.some(doc => doc.has_geom)) {
+                        setCanShowMap(true);
                     }
                 });
         }
@@ -171,6 +178,7 @@ export default function Results() {
     const calcGeoJsonUrl = (searchText, searchType, facetQuery, mapBounds) => {
         let URI =  `${dataServiceUrl}/spatial.geojson?`;
         const params = new URLSearchParams({
+            ...searchType !== 'SpatialData' ? { 'document_type': searchType } : {},
             'search_text': searchText,
             'facetType': 'the_geom',
             'facetName': mapboxBounds_toQuery(mapBounds),
@@ -243,10 +251,19 @@ export default function Results() {
             facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} />}
           <div className="container py-3 w-50 text-start">
             <ResultTabs tabList={tabs} searchType={searchType} resetDefaultSearchUrl={resetDefaultSearchUrl} />
-            <h3 className="text-light-blue">Search Query: {searchText}</h3>
-            <h4 className="text-light-blue">{mapSearchTypeToProfile(searchType)}</h4>
-            <h6 className="text-light-blue"> Total results found {resultCount || 0}</h6>
+            <div className="d-flex">
+                <div>
+                    <h3 className="text-light-blue">Search Query: {searchText}</h3>
+                    <h4 className="text-light-blue">{mapSearchTypeToProfile(searchType)}</h4>
+                    <h6 className="text-light-blue"> Total results found {resultCount || 0}</h6>
+                </div>
+                {canShowMap && <div className="ms-auto">
+                        <input type="checkbox" checked={showMap} onChange={e => setShowMap(e.target.checked)} id="showMap"/>
+                        <label for="showMap">Show Map</label>
+                </div>}
+            </div>
             <div>
+
               <div
                 style={{minHeight: "500px"}}
               >

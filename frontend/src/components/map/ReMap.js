@@ -366,7 +366,7 @@ class ReMap extends React.Component {
           onContextMenu={ e=> true }
           onKeyup={ e=> true }
           getCursor={getCursor}
-          interactiveLayerIds={ [selectedLayer, ...externalLayers].filter(l=>l).map(l=>`ext-${l.id}-point`).filter(l=>l) }
+          interactiveLayerIds={ [selectedLayer, ...externalLayers].filter(l=>l).map(l=>`ext-${l.id}`).flatMap(l => ['point', 'line', 'polygon'].map(t => `${l}-${t}`) ).filter(l=>l) }
           clickRadius={2}
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
