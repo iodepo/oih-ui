@@ -84,7 +84,7 @@ export default function Results() {
             tab_name: 'Documents',
         },
         {
-            title: 'Person',
+            title: 'Experts',
             tab_name: 'Experts',
         },
         {
@@ -111,17 +111,15 @@ export default function Results() {
     const [results, setResults] = useState([]);
     const [resultCount, setResultCount] = useState(0);
     const [facets, setFacets] = useState([]);
-    const [canShowMap, setCanShowMap] = useState(false);
     const [mapBounds, setMapBounds] = useState(false);
 
     const navigate = useNavigate();
     const { searchType = 'CreativeWork' } = useParams()
+    const showMap = searchType === 'SpatialData'
     const [searchText, setSearchText] = useSearchParam("search_text", "");
     const [region, setRegion] = useSearchParam("region", "global");
     const [facetQuery, setFacetQuery] = useSearchParam("facet_query");
     const [page, setPage] = useSearchParam("page", 0);
-    const [showMap, setShowMap] = useState("show_map", false);
-    useEffect(() => setShowMap(canShowMap), [canShowMap])
 
     useEffect(() => {
         if (showMap) {
@@ -141,15 +139,7 @@ export default function Results() {
                 .then(response => response.json())
                 .then(json => {
                     setFacets(json.facets);
-                    if (searchType !== 'SpatialData') {
-                        setResultCount(json.counts[searchType]);
-                        if (!json.counts[searchType]) {
-                            setCanShowMap(false);
-                        }
-                    } else {
-                        setResultCount(Object.values(json.counts).reduce((x, y) => x + y, 0))
-                        setCanShowMap(true);
-                    }
+                    setResultCount(Object.values(json.counts).reduce((x, y) => x + y, 0))
                 });
         } else {
             let URI = `${dataServiceUrl}/search?`;
@@ -168,9 +158,6 @@ export default function Results() {
                     setResults(json.docs);
                     setResultCount(json.counts[searchType]);
                     setFacets(json.facets);
-                    if (json.docs.some(doc => doc.has_geom)) {
-                        setCanShowMap(true);
-                    }
                 });
         }
     }, [searchText, searchType, facetQuery, showMap, mapBounds, region, page]);
@@ -251,19 +238,8 @@ export default function Results() {
             facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} />}
           <div className="container py-3 w-50 text-start">
             <ResultTabs tabList={tabs} searchType={searchType} resetDefaultSearchUrl={resetDefaultSearchUrl} />
-            <div className="d-flex">
-                <div>
-                    <h3 className="text-light-blue">Search Query: {searchText}</h3>
-                    <h4 className="text-light-blue">{mapSearchTypeToProfile(searchType)}</h4>
-                    <h6 className="text-light-blue"> Total results found {resultCount || 0}</h6>
-                </div>
-                {canShowMap && <div className="ms-auto">
-                        <input type="checkbox" checked={showMap} onChange={e => setShowMap(e.target.checked)} id="showMap"/>
-                        <label for="showMap">Show Map</label>
-                </div>}
-            </div>
+            <h6 className="text-light-blue"> Total results found {resultCount || 0}</h6>
             <div>
-
               <div
                 style={{minHeight: "500px"}}
               >
@@ -324,7 +300,7 @@ const Result = ({ result }) => {
                     </div>
                     {'description' in result && result['type'] !== 'Person' &&
                         <div className="col" ref={descRef} style={shouldTruncate ? {
-                            height: 0
+                            height: 0,
                         } : {}}>
                             <p>{result['description']}</p>
                         </div>
