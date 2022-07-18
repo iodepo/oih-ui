@@ -1,14 +1,15 @@
 import React, {useState, useEffect, useCallback} from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import useSearchParam from "../useSearchParam";
 
 import Button from 'react-bootstrap/Button';
 import {dataServiceUrl} from "../config/environment";
 
-
 export default function Search() {
     const navigate = useNavigate();
-    const [searchQuery, setSearchQuery] = useState('');
-    const [region, setRegion] = useState("global")
+    const [params,] = useSearchParams();
+    const [searchQuery, setSearchQuery] = useState(params.has('search_text') ? params.get('search_text') : '');
+    const [region, setRegion] = useSearchParam("region", "global")
     const [availableRegions, setAvailableRegions] = useState([]);
     const location = useLocation();
     const isResults = location.pathname.startsWith("/results")

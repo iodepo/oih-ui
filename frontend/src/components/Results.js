@@ -1,7 +1,8 @@
 /* global URLSearchParams */
 
-import React, {useRef, useLayoutEffect, useEffect, useState, useCallback} from "react";
-import {useNavigate, useSearchParams, useParams} from "react-router-dom";
+import React, {useRef, useLayoutEffect, useEffect, useState} from "react";
+import {useNavigate, useParams} from "react-router-dom";
+import useSearchParam from "../useSearchParam";
 
 import Expert from './Expert';
 import ResultTabs from "./ResultTabs";
@@ -68,12 +69,6 @@ function resolveAsUrl(url) {
     }
     return url;
 }
-
-const useSearchParam = (param, def = undefined) => {
-    const [params, setParams] = useSearchParams()
-    const setParam = useCallback(value => setParams({ ...Object.fromEntries(params), [param]: value }), [param, params, setParams])
-    return [params.has(param) ? params.get(param) : def, setParam]
-};
 
 const fetchDetail = id => fetch(`${dataServiceUrl}/detail/?id=${id}`).then(r => r.json());
 
