@@ -29,7 +29,7 @@ const typeMap = {
         type: "Experts",
     },
     Organization: {
-        Component: Expert,
+        Component: OrganizationResult,
         type: "Experts",
     },
     Course: {
@@ -151,12 +151,7 @@ export default function Results() {
                 .then(response => response.json())
                 .then(json => {
                     setResults(json.docs);
-                     if (searchType === 'Experts'){
-                         console.log(json.counts)
-                        setResultCount(json.counts['Person'] + json.counts['Organization']);
-                    } else {
-                        setResultCount(json.counts[searchType]);
-                    }
+                    setResultCount(json.counts[searchType]);
                     setFacets(json.facets);
                 });
         }
