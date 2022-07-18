@@ -16,6 +16,7 @@ import OrganizationResult from "./results/OrganizationResult";
 import FacetsSidebar from "./results/FacetsSidebar";
 import ReMap from './map/ReMap';
 import Pagination, { ITEMS_PER_PAGE } from "./results/Pagination";
+import {Popup} from 'react-map-gl';
 
 const typeMap = {
     CreativeWork: {
@@ -72,7 +73,9 @@ const useSearchParam = (param, def = undefined) => {
     const [params, setParams] = useSearchParams()
     const setParam = useCallback(value => setParams({ ...Object.fromEntries(params), [param]: value }), [param, params, setParams])
     return [params.has(param) ? params.get(param) : def, setParam]
-}
+};
+
+const fetchDetail = id => fetch(`${dataServiceUrl}/detail/?id=${id}`).then(r => r.json());
 
 export default function Results() {
     const tabs = [
@@ -108,12 +111,12 @@ export default function Results() {
     const [results, setResults] = useState([]);
     const [resultCount, setResultCount] = useState(0);
     const [facets, setFacets] = useState([]);
-    const [mapBounds, setMapBounds ] = useState(false);
-    const [showMap, setShowMap ] = useState(false);
+    const [mapBounds, setMapBounds] = useState(false);
+    const [showMap, setShowMap] = useState(false);
     
     const navigate = useNavigate();
     const { searchType = 'CreativeWork' } = useParams()
-    useEffect(() => setShowMap(searchType === "SpatialData"), [searchType])
+    // useEffect(() => setShowMap(searchType === "SpatialData"), [searchType])
     const [searchText, setSearchText] = useSearchParam("search_text", "");
     const [region, setRegion] = useSearchParam("region", "global");
     const [facetQuery, setFacetQuery] = useSearchParam("facet_query");
@@ -137,6 +140,9 @@ export default function Results() {
                 .then(json => {
                     setResultCount(json.counts[searchType]);
                     setFacets(json.facets);
+                    if (!json.counts[searchType]) {
+                        setShowMap(false);
+                    }
                 });
         } else {
             let URI = `${dataServiceUrl}/search?`;
@@ -155,6 +161,9 @@ export default function Results() {
                     setResults(json.docs);
                     setResultCount(json.counts[searchType]);
                     setFacets(json.facets);
+                    if (showMap != json.docs.some(doc => doc.has_geom)) {
+                        setShowMap(json.docs.some(doc => doc.has_geom));
+                    }
                 });
         }
     }, [searchText, searchType, facetQuery, showMap, mapBounds, region, page]);
@@ -206,6 +215,28 @@ export default function Results() {
         }];
     }
 
+    const [selectedElem, setSelectedElem] = useState(undefined);
+    const [detail, setDetail] = useState(undefined);
+    useEffect(() => {
+        fetchDetail(selectedElem).then(d => {
+            if (!d || !d[0]) {
+                setDetail(undefined);
+                return
+            }
+            const matches = /POINT \((-?\d+\.\d+) (-?\d+\.\d+)\)/g.exec(d[0].the_geom)
+            const [_, lng, lat] = matches.map(i => parseFloat(i))
+            setDetail(
+                <Popup
+                    latitude={lat}
+                    longitude={lng}
+                    dynamicPosition={true}
+                    closeButton={false}
+                >
+                        {d[0].name}
+                </Popup>)
+        })
+    }, [selectedElem, setDetail])
+
     return (
         <div className="w-100 bg-light">
           {facets.length > 0 && <FacetsSidebar
@@ -225,6 +256,9 @@ export default function Results() {
                     bounds = {INITIAL_BOUNDS}
                     handleBoundsChange={setMapBounds}
                     layersState={[true]}
+                    onMouseEnter={e => setSelectedElem(e.features[0].properties.id)}
+                    onMouseLeave={e => setSelectedElem(undefined)}
+                    popup={detail}
                   /> :
                   <>
                     <ResultList results={results}/>

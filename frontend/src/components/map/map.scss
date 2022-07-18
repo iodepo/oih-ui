@@ -1,0 +1,191 @@
+@import "bootstrap-scss/bootstrap.scss";
+@import "bootstrap-icons/font/bootstrap-icons.scss";
+
+$base-color: $primary;
+$base-alpha-color: $base-color;
+$base-font-bold: $font-weight-bold;
+$base-border-width: $border-width;
+$global-spacing: $spacer;
+
+.exp-map {
+    flex-grow: 2;
+    position: relative;
+    z-index: 10;
+    background: tint($base-color, 96%);
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    align-self: stretch;
+    overflow: hidden; /* Fixed for ShadowScrollbar */
+    height: 900px;
+    // min-height: 900px;
+  
+    /* Animation */
+    animation: reveal 0.64s ease 0s 1;
+  
+    .mapboxgl-ctrl-group {
+      margin-bottom: 0;
+    }
+  
+    > div {
+      flex-grow: 2;
+      min-height: 100% !important;
+      height: inherit !important; /* ios safari bug fix */
+    }
+  
+    .map-controls__position {
+      position: absolute;
+      bottom: 30px;
+      left: 20px;
+    }
+  }
+  
+  .exp-map__title {
+    position: absolute;
+    top: $global-spacing;
+    left: $global-spacing;
+    text-shadow: 0 0 1px white;
+    padding: 0 ($global-spacing)/3;
+    border-radius: ($global-spacing)/3;
+    background-color: #ffffffdd;
+  
+    h2 {
+      margin-bottom: 0;
+    }
+  }
+  
+  .exp-map__logos {
+    height: 3rem;
+    padding-top: .5rem;
+  
+    img {
+      max-height: 2rem;
+      margin-right: 1rem;
+    }
+  
+    img.logo-gwsp {
+      max-height: 3rem;
+      margin-top: -.5rem;
+    }
+  }
+  
+  
+  .map-number-list {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+  
+    > * {
+      grid-column: auto / span 12;
+      margin: 0;
+    }
+  
+    dt {
+      font-size: 0.75rem;
+      margin-bottom: $global-spacing;
+  
+      &:last-of-type {
+        margin-bottom: 0;
+      }
+    }
+  
+    dd {
+      font-size: 1rem;
+      font-weight: $base-font-bold;
+  
+      @for $child from 1 through 6 {
+        &:nth-of-type(#{$child}) {
+          grid-row: 2 * $child - 1;
+        }
+      }
+    }
+  
+    small {
+      font-size: inherit;
+    }
+  }
+  
+  .mapboxgl-ctrl > button {
+    @extend .btn, .btn-primary, .btn-light; // TODO: .btn--raised .btn--text-hidden;
+  }
+  
+  .layers-menu-trigger::before {
+    @extend .bi, .bi-stack;
+  }
+  
+  .layers-menu {
+    width: 20rem;
+    height: 15.5rem;
+    padding: 0;
+  
+    .drop__title {
+      margin-bottom: $global-spacing * 1.5;
+    }
+  
+    .rcs {
+      > div > div {
+        padding: $global-spacing;
+      }
+    }
+  }
+  
+  .layers-list {
+    list-style: none;
+    margin: 0 (-$global-spacing);
+    padding-right: $global-spacing;
+  
+    &__item {
+      padding: $global-spacing;
+      box-shadow: 0 $base-border-width 0 0 $base-alpha-color;
+  
+      &:first-child {
+        padding-top: 0;
+      }
+  
+      &:last-child {
+        box-shadow: none;
+      }
+  
+      > *:last-child {
+        margin-bottom: 0;
+      }
+    }
+  
+    .form__group {
+      margin-bottom: $global-spacing / 2;
+    }
+  
+    .form__option--switch {
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: flex-start;
+      margin: 0;
+  
+      .form__option__text {
+        order: -1;
+        font-weight: $base-font-bold;
+        line-height: 1.25rem;
+        padding-right: $global-spacing;
+        margin: 0;
+      }
+  
+      .form__option__ui {
+        margin: 0.25rem 0 0.25rem auto;
+      }
+    }
+  
+    .form__help {
+      position: relative;
+      padding-top: $global-spacing / 2;
+      text-align: left;
+  
+      &::before {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 2rem;
+        height: 1px;
+        content: '';
+        background: $base-alpha-color;
+      }
+    }
+  }

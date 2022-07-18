@@ -1,0 +1,272 @@
+p a:hover{
+  cursor: pointer;
+}
+
+.bg-light {
+  background-color: transparent !important;
+}
+
+#headerLogo {
+  width: 60px;
+  height: 60px;
+  className:"d-inline-block align-top";
+}
+
+.infohubH {
+  color: white;
+  text-align: left !important;
+}
+
+.infohubH b {
+color:#0b4ccb;
+}
+
+#bubbleCount {
+  color: #0078A8;
+}
+
+#bubbleText {
+  color: #09074d;
+}
+
+.colLeft {
+    /*width: 20%;*/
+}
+
+#expert {
+  width: 300%;
+}
+
+.topBubbleRow {
+  padding-bottom: 2%;
+}
+
+.bubbleClickZone:hover {
+  cursor: pointer;
+}
+
+
+#bottomBubbleRow {
+  padding-bottom: 5%;
+  margin-bottom: 2%
+}
+
+#topCol {
+  margin-right: 8.5%;
+    background: white;
+    border-radius: 50%;
+    margin-left: 10%;
+    height: 100%;
+    padding-top: 4%;
+    margin-top: 4%;
+}
+
+#bottomCol {
+    background: white;
+    border-radius: 50%;
+    width: 200px;
+    height: 200px;
+}
+
+#bottomCol {
+  background: white;
+  border-radius: 50%;
+}
+
+.searchSuggestionLink {
+  color: #3388ff;
+  text-decoration: underline;
+}
+
+.searchSuggestionLink:hover {
+  cursor:  pointer;
+}
+
+#root {
+    text-align: center;
+    /*background: lightblue;*/
+  background: linear-gradient(rgba(0,212,255,1) 0%, rgb(22, 22, 203) 35%, rgb(24, 16, 187) 100%);;
+}
+
+/*=====*/
+/* results*/
+#resultsBackground {
+  background: white;
+  padding-bottom: 2%;
+  padding-left: 20%;
+  padding-right: 20%;
+  padding-top: 1%;
+  text-align: left;
+}
+
+#factsHeading {
+  overflow: hidden;
+}
+
+#factsHeading h3 {
+  float: left;
+}
+
+#clearFacet {
+  color: #399f12;
+  float: right;
+  padding-right: 2%;
+  margin-top: -2%;
+  font-size: xx-large;
+}
+
+#clearFacet:hover {
+  cursor: pointer;
+  color: #96d28a;
+}
+
+.resultsHeading {
+  color: #0078A8;
+  padding-left: 20%
+}
+
+.expertDetails {
+  padding-left: 2%;
+  padding-top: 2%;
+  border: 2px solid #9fa7e0;
+  border-radius: 25px;
+  margin-bottom: 1%;
+}
+
+#resultsMain {
+  width: 100%;
+  overflow: hidden;
+  background: white;
+}
+
+#resultsFacets {
+  float: left;
+  margin-left: 2%;
+  padding-left: 1%;
+  padding-top: 1%;
+  padding-right: 1%;
+  text-align: left;
+  margin-top: 1%;
+  max-width: 25%;
+  background: #ebf0f7;
+  width: 100%;
+  border-radius: 15px;
+}
+
+#resultsFacets p {
+  font-size: 11px;
+}
+
+#resultsInfo {
+  margin-left: 20%;
+}
+
+/*=====*/
+/* Style the search field */
+
+#SearchSection {
+  margin-left: 20%;
+  margin-right: 20%;
+  margin-bottom: 1%;
+}
+
+#selectRegion {
+  float: left;
+  width: 20%;
+  padding-bottom: 1.2%;
+  font-size: 20px;
+  border-right: 0;
+}
+
+input[type=text] {
+  padding: .6%;
+  font-size: 17px;
+  border: 1px solid grey;
+  float: left;
+  width: 60%;
+  background: #f1f1f1;
+}
+
+#SearchBtn {
+  float: right;
+  width: 20%;
+  padding: .6%;
+  background: #2196F3;
+  color: white;
+  font-size: 17px;
+  border: 1px solid grey;
+  border-left: none; /* Prevent double borders */
+  cursor: pointer;
+  border-radius: 0;
+}
+
+#SearchBtn:hover {
+  background: #0b7dda;
+}
+
+/* Clear floats */
+.searchForm::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.react-tabs__tab-list {
+  border-bottom: 1px solid #000cb1;
+  background-color: #ebeeff;
+  border-radius: 5px;
+  padding-top: 1%;
+}
+
+.react-tabs__tab--selected {
+  background: #f4f4f4;
+  border-color: #000cb1;
+  border-radius: 0;
+}
+
+#controlled-tabs {
+  padding-left: 20%;
+}
+
+/*=====*/
+/*Footer*/
+
+#footer {
+  /*padding-top: 2%;*/
+  margin-top: 2%;
+  margin-left: 20%;
+  background-color: #0b096b;
+}
+
+#footerTop {
+  padding-top: 2%;
+  padding-bottom: 3%;
+  text-align: left;
+  background-color: #0b096b;
+  /*float: left;*/
+}
+
+#footerTop h3{
+  color: #0596e1;
+}
+
+#footerTop p{
+  color: white;
+}
+
+#footerLeft {
+  float: left;
+  margin-left: 20%;
+  margin-right: 10%;
+  text-align: left;
+}
+
+#getInToughBtn {
+  	box-shadow:inset 0px 1px 0px 0px #90c2e0;
+	background:linear-gradient(to bottom, #3590bd 5%, #0596e1 100%);
+    padding: 1%;
+    border: none;
+    width: 14%;
+    color: #0b096b;
+    font-size: larger;
+}
