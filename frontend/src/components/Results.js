@@ -1,6 +1,6 @@
 /* global URLSearchParams */
 
-import React, {Component, useEffect, useState, useCallback} from "react";
+import React, {useRef, useLayoutEffect, useEffect, useState, useCallback} from "react";
 import {useNavigate, useSearchParams, useParams} from "react-router-dom";
 
 import Expert from './Expert';
@@ -291,30 +291,48 @@ export default function Results() {
 
 const ResultList = ({results}) =>
       results.map((result) => {
-          const {Component} = typeMap[result['type']];
-          return (
-              <div
-                key={result['id']}
-                className="border border-info rounded-3 p-3 mb-2">
-                <h6>
-                    <a href={result['txt_url'] || resolveAsUrl(result['id'])}>
-                        {result['name']}
-                    </a>
-                </h6>
-                <Container>
-                  <Row>
-                    <Col className="col-lg-4">
-                      <Component result={result}/>
-                    </Col>
-                    {'description' in result && result['type'] !== 'Person' &&
-                     (
-                         <Col>
-                           <p>{result['description']}</p>
-                         </Col>
-                     )
-                    }
-                  </Row>
-                </Container>
-              </div>
-          );
+        return <Result result={result} key={result['id']} />
       });
+
+const Result = ({ result }) => {
+    const {Component} = typeMap[result['type']];
+    const descRef = useRef();
+    const infoRef = useRef();
+    const [truncated, setTruncated] = useState(false);
+    const [shouldTruncate, setShouldTruncate] = useState(true);
+    useLayoutEffect(() => {
+        if (!descRef.current || !infoRef.current) return
+        const isTruncated = descRef.current.scrollHeight > infoRef.current.clientHeight;
+        if (truncated !== isTruncated) {
+            setTruncated(isTruncated);
+        }
+    });
+    return (
+        <div
+            key={result['id']}
+            className="border border-info rounded-3 p-3 mb-2"
+        >
+            <h6>
+                <a href={result['txt_url'] || resolveAsUrl(result['id'])}>
+                    {result['name']}
+                </a>
+            </h6>
+            <Container>
+                <Row className="overflow-hidden">
+                    <div className="col col-lg-4" ref={infoRef}>
+                        <Component result={result}/>
+                    </div>
+                    {'description' in result && result['type'] !== 'Person' &&
+                        <div className="col" ref={descRef} style={shouldTruncate ? {
+                            height: 0
+                        } : {}}>
+                            <p>{result['description']}</p>
+                        </div>
+                    }
+                </Row>
+                {'description' in result && truncated && shouldTruncate && <div className="w-100 d-flex align-items-end">
+                    <button className="ms-auto btn btn-info text-dark" onClick={() => setShouldTruncate(false)}>Show more</button>
+                </div>}
+            </Container>
+        </div>);
+}
