@@ -10,7 +10,7 @@ const defaultCountState = {'counts': Object.fromEntries(doc_types.map(e => [e, 0
 const entries = counts => [
     [
         {
-            id: 'Person',
+            id: 'Experts',
             count: counts['Person'] + counts['Organization'],
             text: 'Experts'
         },
