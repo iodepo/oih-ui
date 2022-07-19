@@ -54,13 +54,7 @@ export default function TypesCount() {
 
         fetch(`${dataServiceUrl}/spatial.geojson?${region ? 'region=' + region : ''}`)
             .then(response => response.json())
-            .then(json => {
-                console.log('last fetch')
-                const countSpatialData = json['features'].length
-                console.log(countSpatialData)
-                console.log(counts)
-                setSpatialData(countSpatialData)
-            })
+            .then(json => setSpatialData(json['count']))
 
     }, [region]);
 
