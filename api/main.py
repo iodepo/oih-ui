@@ -46,9 +46,7 @@ def search(search_text: str = None, document_type: str = None,  region: str = No
     response = {'docs': data['response']['docs']}
     response.update(_convert_counts_array_to_response_dict(data['facet_counts']['facet_fields']['type']))
     if document_type and document_type.upper() == 'EXPERTS':
-        total_counts = response['counts']['Person'] + response['counts']['Organization']
-        response['counts']['Experts'] = total_counts
-
+        response['counts']['Experts'] = response['counts'].get('Person', 0) + response['counts'].get('Organization', 0)
     response['facets'] = []
     _add_facets(data, response)
     return response
@@ -107,12 +105,11 @@ def spatial(search_text: str=None, document_type: str=None, region: str=None, fa
     query = Query(search_text, document_type, facetType, facetName, facetFields=[], region=region, rows=GEOJSON_ROWS, flList=GEOJSON_FIELDS | {'the_geom'})
     data = query.json().get('response',{})
 
-    log.error(json.dumps(query.json(), indent=2))
-
     geometries = {
         'type': 'FeatureCollection',
         "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}},
-        'features': (_toFeature(result) for result in data.get('docs',[]))
+        'features': (_toFeature(result) for result in data.get('docs',[])),
+        'count': data.get('numFound', 0)
     }
     return geometries
 
@@ -154,6 +151,7 @@ class Query:
             for facet_search in zip(facetType, facetName):
                 solr_search_query.add_fq(facet_search[0], facet_search[1])
         self._query = solr_search_query
+
     def json(self):
         res = requests.get(SOLR_URL, params=self._query.params)
         return res.json()
