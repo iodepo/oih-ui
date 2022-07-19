@@ -4,6 +4,32 @@
   @extend .d-inline-block, .align-top
 }
 
+nav.navbar-oih.navbar.navbar-expand-lg.navbar-light {
+  background-color: #21295c;
+}
+
+.footer-bg {
+    background-color: #21295c;
+}
+
+a.text-light.menu-text.nav-link {
+  padding-left: 5em;
+  font-weight: 600;
+}
+
+.bg-alt {
+  color: #06bce5;
+}
+
+.searchbg {
+  min-height: 55vh;
+  background-image: url("resources/Photo Africa Coast Original.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: 75% 60%;
+}
+
+
 .bubble {
   margin-right: 8.5% !important;
   margin-left: 10% !important;
@@ -13,7 +39,7 @@
 
 #root {
   text-align: center;
-  background: linear-gradient(hsl(233, 70%, 50%) 0vh, hsl(233, 70%, 30%) 35vh, hsl(233, 70%, 33%) 100vh);
+  background: #f3f2f2;
   min-height: 100vh;
 }
 
@@ -40,12 +66,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 /* UNDONE, super hacky css to get the map to show up */
 .exp-map {
   min-height: 500px;
   height: 500px;
   width: 112%;
 }
+
 .exp-map__title {
   display: none;
 }
@@ -54,6 +82,6 @@
   width: 112%;
 }
 
-.buttonHolder{
+.buttonHolder {
   margin-top: 1% !important;
 }
