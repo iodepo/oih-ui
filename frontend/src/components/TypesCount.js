@@ -61,18 +61,18 @@ export default function TypesCount() {
     const searchByType = type => event => navigate(`/results/${type}?${region ? 'region=' + region : ''}`);
 
     return (
-        <Container>
+        <Container className="spacer">
             <Row>
                 {entries(counts.counts).map(row =>
                     <Row className="pb-3 mb-2">
                         {row.map(col =>
-                            <Col className="bg-light rounded-circle h-100 bubble" role="button" id={`bubble_${col.id}`} onClick={searchByType(col.id)}>
-                                <p className="text-light-blue">
+                            <Col className="primary-bg rounded-circle h-100 bubble" role="button" id={`bubble_${col.id}`} onClick={searchByType(col.id)}>
+                                <p className="text-light-blue-alt">
                                     {
                                         col.id !== 'SpatialData' ? counts.counts[col.id] || 0 : spatialData
                                     }
                                 </p>
-                                <p className="text-dark-blue">{col.text ?? col.id}</p>
+                                <p className="text-light fw-bold text-uppercase">{col.text ?? col.id}</p>
                             </Col>
                         )}
                     </Row>

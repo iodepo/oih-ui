@@ -8,8 +8,14 @@ nav.navbar-oih.navbar.navbar-expand-lg.navbar-light {
   background-color: #21295c;
 }
 
-.footer-bg {
+.primary-bg {
     background-color: #21295c;
+}
+
+.text-light-blue-alt {
+  color: #06bce5;
+  font-weight: 700;
+  font-size: 2em;
 }
 
 a.text-light.menu-text.nav-link {
@@ -27,6 +33,11 @@ a.text-light.menu-text.nav-link {
   background-size: cover;
   background-repeat: no-repeat;
   background-position: 75% 60%;
+}
+
+.spacer {
+  margin-top: 4em;
+  margin-bottom: 10em;
 }
 
 
