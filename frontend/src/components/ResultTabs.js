@@ -1,32 +1,33 @@
-import 'react-tabs/style/react-tabs.css';
-import {Tab, Tabs, TabList} from 'react-tabs';
+import "react-tabs/style/react-tabs.css";
+import { Tab, Tabs, TabList } from "react-tabs";
 
-export default function ResultTabs({tabList, setSearchType, clearFacetQuery}) {
+const formatter = Intl.NumberFormat([], { "notation": "compact" })
 
-    function changeSearchType(event){
-        clearFacetQuery()
-        if (event.target.className === 'tabSpan') {
-            setSearchType(event.target.id);
-        } else {
-            setSearchType(event.target.children[0].id);
-        }
-    }
+export default function ResultTabs({
+  tabList, counts,
+  searchType,
+  resetDefaultSearchUrl
 
-    return (
-        // <Tabs id="controlled-tabs" selectedTabClassName="bg-blue">
-        <Tabs id="controlled-tabs" >
-            <TabList>
-                {
-                    tabList.map((tab, i) => {
-                            return (
-                                <Tab onClick={changeSearchType} key={tab.title}>
-                                    <span className='tabSpan' id={tab.title}>{tab.tab_name}</span>
-                                </Tab>
-                            )
-                        }
-                    )
-                }
-            </TabList>
+}) {
+  const changeSearchType = type => event => resetDefaultSearchUrl(type);
+
+  return (
+    <div id='ResTabs' >
+        <Tabs selectedIndex={tabList.findIndex(tab => tab.title === searchType)}>
+          <TabList className="bg-light rounded-2 pt-2 border-bottom border-primary">
+            {tabList.map(tab =>
+                <Tab
+                  onClick={changeSearchType(tab.title)}
+                  key={tab.title}
+                  selectedClassName="bg-light border border-primary border-bottom-0 rounded-0"
+                >
+                  <span selected={tab.title === searchType}>
+                    {tab.tab_name} {counts[tab.title] && <span className="badge bg-secondary">{formatter.format(counts[tab.title])}</span>}
+                  </span>
+                </Tab>
+            )}
+          </TabList>
         </Tabs>
-    )
+    </div>
+  );
 }

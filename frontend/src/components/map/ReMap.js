@@ -11,6 +11,7 @@ import ReactMapGL, {NavigationControl, Source,
 import LayerControlDropdown from './MapLayerControl';
 import LayerControl from './LayerControl';
 import MapboxControl from './MapboxReactControl';
+import './map.scss'
 
 
 /**
@@ -341,7 +342,7 @@ class ReMap extends React.Component {
             details, title, layersSelector,
             titleComponent, selectedLayer,
             onMouseEnter, onMouseLeave, onHover,
-            marker,
+            marker, popup
           } = this.props;
 
     const getCursor = ({isDragging, isHovering}) => {
@@ -365,13 +366,14 @@ class ReMap extends React.Component {
           onContextMenu={ e=> true }
           onKeyup={ e=> true }
           getCursor={getCursor}
-          interactiveLayerIds={ [selectedLayer, ...externalLayers].filter(l=>l).map(l=>l.id).filter(l=>l) }
+          interactiveLayerIds={ [selectedLayer, ...externalLayers].filter(l=>l).map(l=>`ext-${l.id}`).flatMap(l => ['point', 'line', 'polygon'].map(t => `${l}-${t}`) ).filter(l=>l) }
           clickRadius={2}
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
           onHover={onHover}
           // mapOptions={{projection:'naturalEarth'}} doesn't appear to be working
         >
+          {popup}
           { title && (<HTMLOverlay
                         captureClick={false}
                         captureScroll={false}

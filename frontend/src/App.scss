@@ -1,0 +1,59 @@
+#headerLogo {
+  width: 60px;
+  height: 60px;
+  @extend .d-inline-block, .align-top
+}
+
+.bubble {
+  margin-right: 8.5% !important;
+  margin-left: 10% !important;
+  padding-top: 4% !important;
+  margin-top: 4% !important;
+}
+
+#root {
+  text-align: center;
+  background: linear-gradient(hsl(233, 70%, 50%) 0vh, hsl(233, 70%, 30%) 35vh, hsl(233, 70%, 33%) 100vh);
+  min-height: 100vh;
+}
+
+.react-tabs__tab:focus::after {
+  display: none !important;
+}
+
+.react-tabs {
+  width: 112% !important;
+}
+
+/*=====*/
+/* results*/
+#expert {
+  width: 300%;
+}
+
+.narrow {
+  max-width: 20%;
+}
+
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* UNDONE, super hacky css to get the map to show up */
+.exp-map {
+  min-height: 500px;
+  height: 500px;
+  width: 112%;
+}
+.exp-map__title {
+  display: none;
+}
+
+#resultsDiv {
+  width: 112%;
+}
+
+.buttonHolder{
+  margin-top: 1% !important;
+}

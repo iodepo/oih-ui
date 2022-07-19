@@ -41,6 +41,11 @@ color:#0b4ccb;
   padding-bottom: 2%;
 }
 
+.bubbleClickZone:hover {
+  cursor: pointer;
+}
+
+
 #bottomBubbleRow {
   padding-bottom: 5%;
   margin-bottom: 2%
@@ -165,17 +170,25 @@ color:#0b4ccb;
   margin-bottom: 1%;
 }
 
+#selectRegion {
+  float: left;
+  width: 20%;
+  padding-bottom: 1.2%;
+  font-size: 20px;
+  border-right: 0;
+}
+
 input[type=text] {
   padding: .6%;
   font-size: 17px;
   border: 1px solid grey;
   float: left;
-  width: 80%;
+  width: 60%;
   background: #f1f1f1;
 }
 
 #SearchBtn {
-  float: left;
+  float: right;
   width: 20%;
   padding: .6%;
   background: #2196F3;
@@ -203,12 +216,21 @@ input[type=text] {
   background-color: #ebeeff;
   border-radius: 5px;
   padding-top: 1%;
+  width: 105% !important;
 }
 
 .react-tabs__tab--selected {
   background: #f4f4f4;
   border-color: #000cb1;
   border-radius: 0;
+}
+
+.react-tabs {
+  width: 105% !important;
+}
+
+#ResTabs {
+  width: 105% !important;
 }
 
 #controlled-tabs {
@@ -256,15 +278,4 @@ input[type=text] {
     width: 14%;
     color: #0b096b;
     font-size: larger;
-}
-
-
-/* UNDONE, super hacky css to get the map to show up */
-.exp-map {
-  min-height: 500px;
-  height: 500px;
-  width: 100%;
-}
-.exp-map__title {
-  display: none;
 }

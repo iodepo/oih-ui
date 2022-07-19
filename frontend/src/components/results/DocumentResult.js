@@ -4,7 +4,7 @@ import DocumentAttributeList from "./DocumentAttributeList";
 export default function DocumentResult({result}) {
     return(
         <div>
-            <p><b>Id:</b> {result['id']}</p>
+            <p className="truncate"><b>Id:</b> {result['id']}</p>
             <p><b>Author(s):</b></p>
             {'txt_author' in result && <DocumentAttributeList results={result['txt_author']}/>}
             <p><b>Identifier:</b>{result['txt_identifier']}</p>

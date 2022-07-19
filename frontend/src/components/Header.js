@@ -10,9 +10,9 @@ export default function Header() {
                 {/*<Navbar.Toggle aria-controls="basic-navbar-nav" />*/}
                 <Navbar.Collapse id="basic-navbar-nav">
                   <Nav className="justify-content-end flex-grow-1 pe-3">
-                    <Nav.Link href="/">Home</Nav.Link>
-                    <Nav.Link href="/">About</Nav.Link>
-                    <Nav.Link href="/">FAQ</Nav.Link>
+                    <Nav.Link className="text-light" href="/">HOME</Nav.Link>
+                    <Nav.Link className="text-light" href="/">ABOUT</Nav.Link>
+                    <Nav.Link className="text-light" href="/">FAQ</Nav.Link>
                   </Nav>
                 </Navbar.Collapse>
               </Container>
