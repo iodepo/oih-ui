@@ -21,6 +21,10 @@
   display: none !important;
 }
 
+.react-tabs {
+  width: 112% !important;
+}
+
 /*=====*/
 /* results*/
 #expert {
@@ -40,8 +44,16 @@
 .exp-map {
   min-height: 500px;
   height: 500px;
-  width: 100%;
+  width: 112%;
 }
 .exp-map__title {
   display: none;
+}
+
+#resultsDiv {
+  width: 112%;
+}
+
+.buttonHolder{
+  margin-top: 1% !important;
 }

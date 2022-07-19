@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, {useCallback, useState} from "react";
 
 export default function FacetsSidebar({
   facets,
@@ -34,7 +34,7 @@ export default function FacetsSidebar({
               value={values[i]}
               defaultValue=""
             >
-              <option disabled value="">--- Select to search facet ---</option>
+              <option value="">--- Select to search facet ---</option>
               {facet.counts.map((facetCount) => (
                 <option
                   key={facetCount.name}

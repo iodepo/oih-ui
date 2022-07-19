@@ -33,7 +33,7 @@ export default function Search() {
         <div className="w-50 mx-auto pb-3">
             <h1 className="text-light text-start">SEARCH THE <b>{region.toUpperCase()}</b></h1>
             <h1 className="text-light text-start">OCEAN INFOHUB</h1>
-            <form className="d-flex flex-justify-start align-self" onSubmit={e => {
+            <form id='searchBarForm' className="d-flex flex-justify-start align-self" onSubmit={e => {
                 e.preventDefault()
                 handleChange()
             }}>

@@ -125,6 +125,9 @@ export default function Results() {
             if (searchText !== '') {
                 params.append('search_text', searchText)
             }
+            if (region !== '') {
+                params.append('region', region)
+            }
             URI += [params.toString(), facetQuery].filter(e=>e).join("&");
             let count;
             fetch(URI)
@@ -294,6 +297,7 @@ const Result = ({ result }) => {
         <div
             key={result['id']}
             className="border border-info rounded-3 p-3 mb-2"
+            id='resultsDiv'
         >
             <h6>
                 <a href={result['txt_url'] || resolveAsUrl(result['id'])}>
@@ -315,7 +319,7 @@ const Result = ({ result }) => {
                 </Row>
                 {'description' in result && truncated && shouldTruncate && <div className="w-100 d-flex">
                     <div class="col col-lg-4"></div>
-                    <div class="col d-flex justify-content-center">
+                    <div class="col d-flex justify-content-center buttonHolder">
                         <button className="btn btn-info btn-sm text-dark" onClick={() => setShouldTruncate(false)}>Show more</button>
                     </div>
                 </div>}

@@ -43,6 +43,7 @@ const entries = counts => [
 
 export default function TypesCount() {
     const [counts, setCounts] = useState(defaultCountState);
+    const [spatialData, setSpatialData] = useState(0);
     const navigate = useNavigate();
     const [region,] = useSearchParam("region")
 
@@ -50,10 +51,21 @@ export default function TypesCount() {
         fetch(`${dataServiceUrl}/count?field=type${region ? '&region=' + region : ''}`)
             .then(response => response.json())
             .then(json => setCounts(json))
+
+        fetch(`${dataServiceUrl}/spatial.geojson?${region ? 'region=' + region : ''}`)
+            .then(response => response.json())
+            .then(json => {
+                console.log('last fetch')
+                const countSpatialData = json['features'].length
+                console.log(countSpatialData)
+                console.log(counts)
+                setSpatialData(countSpatialData)
+            })
+
     }, [region]);
-    
-    const searchByType = type => event => navigate(`/results/${type}`);
-    
+
+    const searchByType = type => event => navigate(`/results/${type}?${region ? 'region=' + region : ''}`);
+
     return (
         <Container>
             <Row>
@@ -61,7 +73,11 @@ export default function TypesCount() {
                     <Row className="pb-3 mb-2">
                         {row.map(col =>
                             <Col className="bg-light rounded-circle h-100 bubble" role="button" id={`bubble_${col.id}`} onClick={searchByType(col.id)}>
-                                <p className="text-light-blue">{col.count ?? counts.counts[col.id] ?? 0 }</p>
+                                <p className="text-light-blue">
+                                    {
+                                        col.id !== 'SpatialData' ? counts.counts[col.id] || 0 : spatialData
+                                    }
+                                </p>
                                 <p className="text-dark-blue">{col.text ?? col.id}</p>
                             </Col>
                         )}

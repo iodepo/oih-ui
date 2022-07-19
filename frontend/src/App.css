@@ -216,12 +216,21 @@ input[type=text] {
   background-color: #ebeeff;
   border-radius: 5px;
   padding-top: 1%;
+  width: 105% !important;
 }
 
 .react-tabs__tab--selected {
   background: #f4f4f4;
   border-color: #000cb1;
   border-radius: 0;
+}
+
+.react-tabs {
+  width: 105% !important;
+}
+
+#ResTabs {
+  width: 105% !important;
 }
 
 #controlled-tabs {
