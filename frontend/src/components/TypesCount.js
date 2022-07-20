@@ -4,7 +4,7 @@ import {Col, Container, Row} from "react-bootstrap";
 import { dataServiceUrl } from '../config/environment';
 import {useNavigate} from "react-router-dom";
 import useSearchParam from "../useSearchParam";
-
+import regionBoundsMap  from '../constants'
 const doc_types = ['CreativeWork', 'Person', 'Organization', 'Dataset', 'ResearchProject', 'Event', 'Course', 'Vehicle']
 const defaultCountState = {'counts': Object.fromEntries(doc_types.map(e => [e, 0]))}
 
@@ -47,14 +47,21 @@ export default function TypesCount() {
     const navigate = useNavigate();
     const [region,] = useSearchParam("region")
 
+    const get_region_bounds = () => {
+        let bounds;
+        if (region) bounds = regionBoundsMap[region.replaceAll(' ', '_')]
+        if (bounds) return bounds
+        else return '[-90,-180 TO 90,180]'
+    }
+
     useEffect(() => {
         fetch(`${dataServiceUrl}/count?field=type${region ? '&region=' + region : ''}`)
             .then(response => response.json())
             .then(json => setCounts(json))
 
-        fetch(`${dataServiceUrl}/spatial.geojson?${region ? 'region=' + region : ''}`)
+        fetch(`${dataServiceUrl}/search?facetType=the_geom&facetName=${get_region_bounds()}${region ? '&region=' + region : ''}`)
             .then(response => response.json())
-            .then(json => setSpatialData(json['count']))
+            .then(json => setSpatialData(Object.values(json.counts).reduce((x, y) => x + y, 0)))
 
     }, [region]);
 
