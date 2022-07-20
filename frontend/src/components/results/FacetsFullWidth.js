@@ -11,7 +11,10 @@ export default function FacetsFullWidth({
         setValues(new Array(facets.length).fill(""))
         clearFacetQuery()
     }, [clearFacetQuery, setValue])
-    return (
+
+    let url = window.location.href.split('/').slice(3)[1].split('?')[0]
+
+    return url == "SpatialData" ? null : (
         <div className="m-4 p-3">
             <div className="pb-2 ps-3 pe-3 w-75 mx-auto">
                 <h6 className="text-end text-uppercase primary-color fw-bold">
