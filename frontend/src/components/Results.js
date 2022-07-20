@@ -143,8 +143,6 @@ export default function Results() {
     useEffect(() => {
         if (showMap) {
             let URI = `${dataServiceUrl}/search?`;
-            console.log('mapBounds')
-            console.log(mapBounds)
             const params = new URLSearchParams({
                 ...searchType !== 'SpatialData' ? {'document_type': searchType} : {},
                 'facetType': 'the_geom',
