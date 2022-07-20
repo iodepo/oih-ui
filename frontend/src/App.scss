@@ -4,6 +4,92 @@
   @extend .d-inline-block, .align-top
 }
 
+nav.navbar-oih.navbar.navbar-expand-lg.navbar-light {
+  background-color: #21295c;
+}
+
+.primary-bg {
+    background-color: #21295c;
+}
+
+.text-light-blue-alt {
+  color: #06bce5;
+  font-weight: 700;
+  font-size: 2em;
+}
+
+.primary-color-alt {
+  color: #06bce5;
+}
+
+.primary-color {
+  color: #21295c;
+}
+
+a.text-light.menu-text.nav-link {
+  padding-left: 5em;
+  font-weight: 600;
+}
+
+.bg-alt {
+  color: #06bce5;
+}
+
+.searchbg {
+  min-height: 55vh;
+  background-image: url("resources/Photo Africa Coast Original.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: 75% 60%;
+}
+
+.spacer {
+  margin-top: 4em;
+  margin-bottom: 10em;
+}
+
+.clear-btn {
+  all: unset;
+  cursor: pointer;
+  color: #06bce5;
+}
+
+.result-item {
+  border-bottom: 1.2px solid #95a5a6;
+}
+.result-title {
+  text-decoration: none;
+  color: #21295c;
+}
+
+.result-title:hover {
+  text-decoration: underline;
+}
+
+p.result-p {
+    text-align: left;
+  margin-bottom: 0.5em;
+}
+
+p.result-p.truncate {
+    width: 50%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.description-truncate {
+ display: -webkit-box;
+    max-width: 100%;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.pagination {
+    text-transform: capitalize;
+}
+
 .bubble {
   margin-right: 8.5% !important;
   margin-left: 10% !important;

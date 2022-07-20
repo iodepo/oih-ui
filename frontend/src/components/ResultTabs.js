@@ -22,7 +22,7 @@ export default function ResultTabs({
                   selectedClassName="bg-light border border-primary border-bottom-0 rounded-0"
                 >
                   <span selected={tab.title === searchType}>
-                    {tab.tab_name} {counts[tab.title] && <span className="badge bg-secondary">{formatter.format(counts[tab.title])}</span>}
+                    <span className="h6"> {tab.tab_name} </span> {counts[tab.title] && <span className="badge bg-secondary">{formatter.format(counts[tab.title])}</span>}
                   </span>
                 </Tab>
             )}

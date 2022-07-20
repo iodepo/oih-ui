@@ -17,7 +17,7 @@ import regionBoundsMap  from '../constants'
 
 import FacetsSidebar from "./results/FacetsSidebar";
 import ReMap from './map/ReMap';
-import Pagination, { ITEMS_PER_PAGE } from "./results/Pagination";
+import Pagination, {ITEMS_PER_PAGE} from "./results/Pagination";
 import {Popup} from 'react-map-gl';
 
 const typeMap = {
@@ -48,9 +48,9 @@ const typeMap = {
 };
 
 
-const INITIAL_BOUNDS =  [ { lon:-20, lat:-50},  // w s
-                          { lon:320, lat:50}   // e n
-                        ];
+const INITIAL_BOUNDS = [{lon: -20, lat: -50},  // w s
+    {lon: 320, lat: 50}   // e n
+];
 
 const regionMap = {
     Atlantic_Ocean: [{'lon': -110.11658847394503, 'lat': 5.483746321637085}, {'lon': 30.116588473945995, 'lat': 62.204953479609145}],
@@ -71,11 +71,13 @@ const regionMap = {
 const DEFAULT_QUERY_BOUNDS = '[-50,-20 TO 50,320]';
 
 const mapboxBounds_toQuery = (mb) => {
-      /* convert '{"_sw":{"lng":17.841823484137535,"lat":-59.72391567923438},"_ne":{"lng":179.1301535622635,"lat":49.99895151432449}}'
-        to [_sw.lat,_sw.lng TO _ne.lat,_ne.lng] ([-90,-180 TO 90,180])
-      */
+    /* convert '{"_sw":{"lng":17.841823484137535,"lat":-59.72391567923438},"_ne":{"lng":179.1301535622635,"lat":49.99895151432449}}'
+      to [_sw.lat,_sw.lng TO _ne.lat,_ne.lng] ([-90,-180 TO 90,180])
+    */
     const {_sw, _ne} = mb;
-    if (!_sw) { return DEFAULT_QUERY_BOUNDS; }
+    if (!_sw) {
+        return DEFAULT_QUERY_BOUNDS;
+    }
     return `[${_sw.lat},${_sw.lng} TO ${_ne.lat},${_ne.lng}]`;
 };
 
@@ -123,7 +125,7 @@ export default function Results() {
     const [mapBounds, setMapBounds] = useState(false);
 
     const navigate = useNavigate();
-    const { searchType = 'CreativeWork' } = useParams()
+    const {searchType = 'CreativeWork'} = useParams()
     const showMap = searchType === 'SpatialData'
     const [searchText, setSearchText] = useSearchParam("search_text", "");
     const [region, setRegion] = useSearchParam("region", "global");
@@ -136,7 +138,7 @@ export default function Results() {
             console.log('mapBounds')
             console.log(mapBounds)
             const params = new URLSearchParams({
-                ...searchType !== 'SpatialData' ? { 'document_type': searchType } : {},
+                ...searchType !== 'SpatialData' ? {'document_type': searchType} : {},
                 'facetType': 'the_geom',
                 'facetName': mapboxBounds_toQuery(mapBounds),
                 'rows': 0,
@@ -147,7 +149,7 @@ export default function Results() {
             if (region !== '') {
                 params.append('region', region)
             }
-            URI += [params.toString(), facetQuery].filter(e=>e).join("&");
+            URI += [params.toString(), facetQuery].filter(e => e).join("&");
             let count;
             fetch(URI)
                 .then(response => response.json())
@@ -155,11 +157,11 @@ export default function Results() {
                     setFacets(json.facets);
                     count = Object.values(json.counts).reduce((x, y) => x + y, 0);
                     setResultCount(count)
-                }).then( () => fetch(`${dataServiceUrl}/count?${new URLSearchParams({
-                    field: 'type',
-                    ...region.toUpperCase() !== "GLOBAL" ? { region } : {},
-                    ...searchText ? { search_text: searchText } : {},
-                })}`))
+                }).then(() => fetch(`${dataServiceUrl}/count?${new URLSearchParams({
+                field: 'type',
+                ...region.toUpperCase() !== "GLOBAL" ? {region} : {},
+                ...searchText ? {search_text: searchText} : {},
+            })}`))
                 .then(response => response.json())
                 .then(json => {
                         let urlRegion = '';
@@ -179,14 +181,14 @@ export default function Results() {
                 )
         } else {
             let URI = `${dataServiceUrl}/search?`;
-            const params = new URLSearchParams({'document_type': searchType, 'start': page * ITEMS_PER_PAGE });
+            const params = new URLSearchParams({'document_type': searchType, 'start': page * ITEMS_PER_PAGE});
             if (searchText !== '') {
                 params.append('search_text', searchText)
             }
             if (region.toUpperCase() !== 'GLOBAL') {
                 params.append('region', region)
             }
-            URI += [params.toString(), facetQuery].filter(e=>e).join("&");
+            URI += [params.toString(), facetQuery].filter(e => e).join("&");
 
             let count;
             fetch(URI)
@@ -197,10 +199,10 @@ export default function Results() {
                     setResultCount(count);
                     setFacets(json.facets);
                 }).then(() => fetch(`${dataServiceUrl}/count?${new URLSearchParams({
-                    field: 'type',
-                    ...region.toUpperCase() !== "GLOBAL" ? { region } : {},
-                    ...searchText ? { search_text: searchText } : {},
-                })}`))
+                field: 'type',
+                ...region.toUpperCase() !== "GLOBAL" ? {region} : {},
+                ...searchText ? {search_text: searchText} : {},
+            })}`))
                 .then(response => response.json())
                 .then(json => {
                         let urlRegion = '';
@@ -219,9 +221,9 @@ export default function Results() {
     }, [searchText, searchType, facetQuery, showMap, mapBounds, region, page]);
 
     const calcGeoJsonUrl = (searchText, searchType, facetQuery, mapBounds) => {
-        let URI =  `${dataServiceUrl}/spatial.geojson?`;
+        let URI = `${dataServiceUrl}/spatial.geojson?`;
         const params = new URLSearchParams({
-            ...searchType !== 'SpatialData' ? { 'document_type': searchType } : {},
+            ...searchType !== 'SpatialData' ? {'document_type': searchType} : {},
             'search_text': searchText,
             'facetType': 'the_geom',
             'facetName': mapboxBounds_toQuery(mapBounds),
@@ -229,19 +231,21 @@ export default function Results() {
         if (region !== '' && region.toUpperCase() !== 'GLOBAL') {
             params.append('region', region)
         }
-        URI += [params.toString(), facetQuery].filter(e=>e).join("&");
+        URI += [params.toString(), facetQuery].filter(e => e).join("&");
         return URI;
     };
 
     const facetSearch = (event) => {
         const selectedIndex = event.target.selectedIndex;
-        const clickedFacetQuery = new URLSearchParams({facetType:event.target.children[selectedIndex].className,
-                                                       facetName:event.target.value}).toString();
-        setFacetQuery([facetQuery, clickedFacetQuery].filter(e=>e).join("&"));
+        const clickedFacetQuery = new URLSearchParams({
+            facetType: event.target.children[selectedIndex].className,
+            facetName: event.target.value
+        }).toString();
+        setFacetQuery([facetQuery, clickedFacetQuery].filter(e => e).join("&"));
     };
 
     const resetDefaultSearchUrl = (type) => {
-        navigate(`/results/${type}?${new URLSearchParams({ ...searchText ? { search_text: searchText } : {}, ...region.toUpperCase() !== "GLOBAL" ? { region } : {} })}`)
+        navigate(`/results/${type}?${new URLSearchParams({...searchText ? {search_text: searchText} : {}, ...region.toUpperCase() !== "GLOBAL" ? {region} : {}})}`)
     }
 
     const clearFacetQuery = () => {
@@ -252,10 +256,10 @@ export default function Results() {
     if (showMap) {
         geoJsonUrl = calcGeoJsonUrl(searchText, searchType, facetQuery, mapBounds);
         layers = [{
-            id:'search_results_layer',
-            label:'Search Results',
-            type:'geojson',
-            url:geoJsonUrl
+            id: 'search_results_layer',
+            label: 'Search Results',
+            type: 'geojson',
+            url: geoJsonUrl
         }];
     }
 
@@ -276,7 +280,7 @@ export default function Results() {
                     dynamicPosition={true}
                     closeButton={false}
                 >
-                        {d[0].name}
+                    {d[0].name}
                 </Popup>)
         })
     }, [selectedElem, setDetail])
@@ -294,44 +298,56 @@ export default function Results() {
     }
 
     return (
-        <div className="w-100 bg-light">
-          {facets.length > 0 && <FacetsSidebar
-            facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} />}
-          <div className="container py-3 w-50 text-start">
-            <ResultTabs counts={counts} tabList={tabs} searchType={searchType} resetDefaultSearchUrl={resetDefaultSearchUrl} />
-            <h6 className="text-light-blue"> Total results found {resultCount || 0}</h6>
+        <>
             <div>
-              <div
-                style={{minHeight: "500px"}}
-              >
-                { showMap ?
-                  <ReMap
-                    externalLayers={layers}
-                    bounds = {initial_bounds()}
-                    handleBoundsChange={setMapBounds}
-                    layersState={[true]}
-                    onMouseEnter={e => setSelectedElem(e.features[0].properties.id)}
-                    onMouseLeave={e => setSelectedElem(undefined)}
-                    popup={detail}
-                  /> :
-                  <>
-                    <ResultList results={results}/>
-                    <Pagination searchType={searchType} resultCount={resultCount} setPage={setPage} page={page}/>
-                  </>
-                }
-              </div>
+                <div>
+                    <ResultTabs counts={counts} tabList={tabs} searchType={searchType}
+                                resetDefaultSearchUrl={resetDefaultSearchUrl}/>
+                    <div>
+                        {facets.length > 0 && <FacetsFullWidth
+                            facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch}/>}
+                    </div>
+
+                    <div className="row w-75 mx-auto">
+                        <div className="col-12 mb-3">
+                            <h6 className="primary-color text-start"> Total results found {resultCount || 0}</h6>
+                        </div>
+                        <div>
+                            <div
+                                style={{minHeight: "500px"}}
+                            >
+                                {showMap ?
+                                    <ReMap
+                                        externalLayers={layers}
+                                        bounds={initial_bounds()}
+                                        handleBoundsChange={setMapBounds}
+                                        layersState={[true]}
+                                        onMouseEnter={e => setSelectedElem(e.features[0].properties.id)}
+                                        onMouseLeave={e => setSelectedElem(undefined)}
+                                        popup={detail}
+                                    /> :
+                                    <>
+                                        <ResultList results={results}/>
+                                        <Pagination searchType={searchType} resultCount={resultCount} setPage={setPage}
+                                                    page={page}/>
+                                    </>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
-          </div>
-        </div>
+        </>
     );
 }
 
 const ResultList = ({results}) =>
-      results.map((result) => {
-        return <Result result={result} key={result['id']} />
-      });
+    results.map((result) => {
+        return <Result result={result} key={result['id']}/>
+    });
 
-const Result = ({ result }) => {
+const Result = ({result}) => {
     const {Component} = typeMap[result['type']];
     const descRef = useRef();
     const infoRef = useRef();
@@ -347,33 +363,32 @@ const Result = ({ result }) => {
     return (
         <div
             key={result['id']}
-            className="border border-info rounded-3 p-3 mb-2"
+            className="result-item rounded-3 p-3 mb-2"
             id='resultsDiv'
         >
-            <h6>
-                <a href={result['txt_url'] || resolveAsUrl(result['id'])}>
+            <h4 className="text-start mb-3">
+                <a href={result['txt_url'] || resolveAsUrl(result['id'])}
+                   className="result-title" target="_blank">
                     {result['name']}
                 </a>
-            </h6>
-            <Container>
-                <Row className="overflow-hidden">
-                    <div className="col col-lg-4" ref={infoRef}>
+            </h4>
+                <Row className="">
+                    <div className="col" ref={infoRef}>
                         <Component result={result}/>
+                        {'description' in result && result['type'] !== 'Person' &&
+                    <div className="col" ref={descRef} >
+                        <p className="result-p description-truncate"><b>Description:</b> {result['description']}</p>
                     </div>
-                    {'description' in result && result['type'] !== 'Person' &&
-                        <div className="col" ref={descRef} style={shouldTruncate ? {
-                            height: 0,
-                        } : {}}>
-                            <p>{result['description']}</p>
-                        </div>
                     }
+                    </div>
                 </Row>
                 {'description' in result && truncated && shouldTruncate && <div className="w-100 d-flex">
                     <div class="col col-lg-4"></div>
                     <div class="col d-flex justify-content-center buttonHolder">
-                        <button className="btn btn-info btn-sm text-dark" onClick={() => setShouldTruncate(false)}>Show more</button>
+                        <button className="btn btn-info btn-sm text-dark" onClick={() => setShouldTruncate(false)}>Show
+                            more
+                        </button>
                     </div>
                 </div>}
-            </Container>
         </div>);
 }
