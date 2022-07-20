@@ -15,7 +15,6 @@ import ProjectResult from "./results/ProjectResult";
 import OrganizationResult from "./results/OrganizationResult";
 import regionBoundsMap  from '../constants'
 
-import FacetsSidebar from "./results/FacetsSidebar";
 import ReMap from './map/ReMap';
 import Pagination, {ITEMS_PER_PAGE} from "./results/Pagination";
 import {Popup} from 'react-map-gl';
@@ -71,13 +70,21 @@ const regionMap = {
 }
 const DEFAULT_QUERY_BOUNDS = '[-50,-20 TO 50,320]';
 
-const mapboxBounds_toQuery = (mb) => {
+const get_region_bounds = (region=null) => {
+    let bounds;
+    if (region) bounds = regionBoundsMap[region.replaceAll(' ', '_')]
+    if (bounds) return bounds
+    else return DEFAULT_QUERY_BOUNDS
+}
+
+const mapboxBounds_toQuery = (mb, region=null) => {
     /* convert '{"_sw":{"lng":17.841823484137535,"lat":-59.72391567923438},"_ne":{"lng":179.1301535622635,"lat":49.99895151432449}}'
       to [_sw.lat,_sw.lng TO _ne.lat,_ne.lng] ([-90,-180 TO 90,180])
     */
     const {_sw, _ne} = mb;
     if (!_sw) {
-        return DEFAULT_QUERY_BOUNDS;
+        return get_region_bounds(region);
+        // return DEFAULT_QUERY_BOUNDS;
     }
     return `[${_sw.lat},${_sw.lng} TO ${_ne.lat},${_ne.lng}]`;
 };
@@ -141,7 +148,7 @@ export default function Results() {
             const params = new URLSearchParams({
                 ...searchType !== 'SpatialData' ? {'document_type': searchType} : {},
                 'facetType': 'the_geom',
-                'facetName': mapboxBounds_toQuery(mapBounds),
+                'facetName': mapboxBounds_toQuery(mapBounds, region),
                 'rows': 0,
             });
             if (searchText !== '') {
@@ -227,7 +234,7 @@ export default function Results() {
             ...searchType !== 'SpatialData' ? {'document_type': searchType} : {},
             'search_text': searchText,
             'facetType': 'the_geom',
-            'facetName': mapboxBounds_toQuery(mapBounds),
+            'facetName': mapboxBounds_toQuery(mapBounds, region),
         });
         if (region !== '' && region.toUpperCase() !== 'GLOBAL') {
             params.append('region', region)

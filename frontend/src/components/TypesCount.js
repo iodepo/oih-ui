@@ -49,9 +49,7 @@ export default function TypesCount() {
 
     const get_region_bounds = () => {
         let bounds;
-        if (region){
-            bounds = regionBoundsMap[region.replaceAll(' ', '_')]
-        }
+        if (region) bounds = regionBoundsMap[region.replaceAll(' ', '_')]
         if (bounds) return bounds
         else return '[-90,-180 TO 90,180]'
     }
