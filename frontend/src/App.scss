@@ -99,7 +99,7 @@ p.result-p.truncate {
 
 #root {
   text-align: center;
-  background: linear-gradient(hsl(233, 70%, 50%) 0vh, hsl(233, 70%, 30%) 35vh, hsl(233, 70%, 33%) 100vh);
+  background: #f3f2f2;
   min-height: 100vh;
 }
 
@@ -126,12 +126,14 @@ p.result-p.truncate {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 /* UNDONE, super hacky css to get the map to show up */
 .exp-map {
   min-height: 500px;
   height: 500px;
   width: 112%;
 }
+
 .exp-map__title {
   display: none;
 }
@@ -140,6 +142,6 @@ p.result-p.truncate {
   width: 112%;
 }
 
-.buttonHolder{
+.buttonHolder {
   margin-top: 1% !important;
 }

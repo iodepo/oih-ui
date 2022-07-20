@@ -19,6 +19,7 @@ import FacetsSidebar from "./results/FacetsSidebar";
 import ReMap from './map/ReMap';
 import Pagination, {ITEMS_PER_PAGE} from "./results/Pagination";
 import {Popup} from 'react-map-gl';
+import FacetsFullWidth from "./results/FacetsFullWidth";
 
 const typeMap = {
     CreativeWork: {
