@@ -31,10 +31,12 @@ export default function Search() {
 
     const handleChange = useCallback(() => navigate(hrefFor(region, searchQuery)), [navigate, region, searchQuery]);
 
+    let url = window.location.href.split('/')[3]
+
     return (
-        <div className="pb-3 searchbg">
+        <div className={"pb-3 " + (url == "results" ? 'searchbg-alt' : 'searchbg')}>
             <div className="container">
-                <h1 className="text-light text-start pt-5">SEARCH THE <b className="bg-alt">{region.toUpperCase()}</b>
+                <h1 className={"text-light text-start " + (url == "results" ? 'pt-3' : 'pt-5')}>SEARCH THE <b className="bg-alt">{region.toUpperCase()}</b>
                     <br/>OCEAN INFOHUB</h1>
                 <form id='searchBarForm' className="d-flex flex-justify-start align-self mt-3 w-75" onSubmit={e => {
                     e.preventDefault()
