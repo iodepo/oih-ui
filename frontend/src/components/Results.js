@@ -18,6 +18,7 @@ import FacetsSidebar from "./results/FacetsSidebar";
 import ReMap from './map/ReMap';
 import Pagination, { ITEMS_PER_PAGE } from "./results/Pagination";
 import {Popup} from 'react-map-gl';
+import FacetsFullWidth from "./results/FacetsFullWidth";
 
 const typeMap = {
     CreativeWork: {
@@ -258,11 +259,16 @@ export default function Results() {
     }
 
     return (
-        <div className="w-100 bg-light">
-          {facets.length > 0 && <FacetsSidebar
+        <>
+        <div className="row">
+
+
+            <div className="col-12">
+                <ResultTabs counts={counts} tabList={tabs} searchType={searchType} resetDefaultSearchUrl={resetDefaultSearchUrl} />
+                <div className="col-12">
+                {facets.length > 0 && <FacetsFullWidth
             facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} />}
-          <div className="container py-3 w-50 text-start">
-            <ResultTabs counts={counts} tabList={tabs} searchType={searchType} resetDefaultSearchUrl={resetDefaultSearchUrl} />
+            </div>
             <h6 className="text-light-blue"> Total results found {resultCount || 0}</h6>
             <div>
               <div
@@ -285,8 +291,39 @@ export default function Results() {
                 }
               </div>
             </div>
-          </div>
+            </div>
         </div>
+
+        <div className="w-100 bg-light">
+          {/*{facets.length > 0 && <FacetsSidebar*/}
+          {/*  facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} />}*/}
+        {/*  <div className="container py-3 w-50 text-start">*/}
+        {/*    <ResultTabs counts={counts} tabList={tabs} searchType={searchType} resetDefaultSearchUrl={resetDefaultSearchUrl} />*/}
+        {/*    <h6 className="text-light-blue"> Total results found {resultCount || 0}</h6>*/}
+        {/*    <div>*/}
+        {/*      <div*/}
+        {/*        style={{minHeight: "500px"}}*/}
+        {/*      >*/}
+        {/*        { showMap ?*/}
+        {/*          <ReMap*/}
+        {/*            externalLayers={layers}*/}
+        {/*            bounds = {initial_bounds()}*/}
+        {/*            handleBoundsChange={setMapBounds}*/}
+        {/*            layersState={[true]}*/}
+        {/*            onMouseEnter={e => setSelectedElem(e.features[0].properties.id)}*/}
+        {/*            onMouseLeave={e => setSelectedElem(undefined)}*/}
+        {/*            popup={detail}*/}
+        {/*          /> :*/}
+        {/*          <>*/}
+        {/*            <ResultList results={results}/>*/}
+        {/*            <Pagination searchType={searchType} resultCount={resultCount} setPage={setPage} page={page}/>*/}
+        {/*          </>*/}
+        {/*        }*/}
+        {/*      </div>*/}
+        {/*    </div>*/}
+        {/*  </div>*/}
+        </div>
+            </>
     );
 }
 

@@ -18,6 +18,14 @@ nav.navbar-oih.navbar.navbar-expand-lg.navbar-light {
   font-size: 2em;
 }
 
+.primary-color-alt {
+  color: #06bce5;
+}
+
+.primary-color {
+  color: #21295c;
+}
+
 a.text-light.menu-text.nav-link {
   padding-left: 5em;
   font-weight: 600;
@@ -38,6 +46,12 @@ a.text-light.menu-text.nav-link {
 .spacer {
   margin-top: 4em;
   margin-bottom: 10em;
+}
+
+.clear-btn {
+  all: unset;
+  cursor: pointer;
+  color: #06bce5;
 }
 
 
