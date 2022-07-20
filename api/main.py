@@ -37,21 +37,28 @@ app.add_middleware(
 
 
 @app.get("/search")
-def search(search_text: str, document_type: str = None, facetType: list = Query(default=[]), facetName: list = Query(default=[])):
-    query = Query(search_text, document_type, facetType, facetName)
+def search(search_text: str = None, document_type: str = None,  region: str = None, facetType: list = Query(default=[]),
+           facetName: list = Query(default=[]), start=0):
+    if 'the_geom' in facetType:
+        facetType, facetName = rewriteGeom(facetType, facetName)
+    query = Query(search_text, document_type, facetType, facetName, region=region, start=start)
     data = query.json()
     response = {'docs': data['response']['docs']}
     response.update(_convert_counts_array_to_response_dict(data['facet_counts']['facet_fields']['type']))
+    if document_type and document_type.upper() == 'EXPERTS':
+        response['counts']['Experts'] = response['counts'].get('Person', 0) + response['counts'].get('Organization', 0)
     response['facets'] = []
     _add_facets(data, response)
     return response
 
 
 @app.get("/count")
-def count(field: str):
-    query = Query(facetFields=[field])
+def count(field: str, search_text: str = None, region: str = None):
+    query = Query(search_text, facetFields=[field], region=region)
     data = query.json()
     response = _convert_counts_array_to_response_dict(data['facet_counts']['facet_fields'][field])
+    if 'Organization' in response['counts'] or 'Person' in response['counts']:
+        response['counts']['Experts'] = response['counts'].get('Person', 0) + response['counts'].get('Organization', 0)
     return response
 
 
@@ -67,25 +74,42 @@ def detail(id: str):
     data = res.json()
     return data.get('response',{}).get('docs',[])[:1] or {}
 
+def rewriteGeom(facetType, facetName):
+    # UNDONE -- need to check to see if we're correctly handling wrap-around in the bounding boxes
+    
+    fq = {k:v for k,v in zip(facetType, facetName)}
+    corners = validate_geom(fq['the_geom'])
+    if not corners:
+        raise ParameterError("Invalid Geometry")
+    # corners: s w n e
+    log.error(corners)
+    (s,w,n,e) = corners.group(1,3,5,7)
+    log.error("%s, %s, %s, %s", s,w,n,e)
+    if float(w) > 180: w = 180 - float(w);
+    if float(e) > 180: e = 180 - float(e);
+    fq['the_geom'] = f'[{s},{w} TO {n},{e}]';
+
+    facetType = list(fq.keys())
+    facetName = list(fq.values())
+    return (facetType, facetName)
 
 @app.get("/spatial.geojson")
-def spatial(search_text: str=None, document_type: str=None, facetType: list=Query(default=[]), facetName: list=Query(default=[])):
+def spatial(search_text: str=None, document_type: str=None, region: str=None, facetType: list=Query(default=[]), facetName: list=Query(default=[])):
 
     if 'the_geom' not in facetType:
         facetType.append('the_geom')
         facetName.append(DEFAULT_GEOMETRY)
     else:
-        fq = {k:v for k,v in zip(facetType, facetName)}
-        if not validate_geom(fq['the_geom']):
-            raise ParameterError("Invalid Geometry")
-    
-    query = Query(search_text, document_type, facetType, facetName, facetFields=[], rows=GEOJSON_ROWS, flList=GEOJSON_FIELDS | {'the_geom'})
+        facetType, facetName = rewriteGeom(facetType, facetName)
+
+    query = Query(search_text, document_type, facetType, facetName, facetFields=[], region=region, rows=GEOJSON_ROWS, flList=GEOJSON_FIELDS | {'the_geom'})
     data = query.json().get('response',{})
-    
+
     geometries = {
         'type': 'FeatureCollection',
         "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}},
-        'features': (_toFeature(result) for result in data.get('docs',[]))
+        'features': (_toFeature(result) for result in data.get('docs',[])),
+        'count': data.get('numFound', 0)
     }
     return geometries
 
@@ -104,23 +128,28 @@ def validate_geom(the_geom):
     Should be something like: "[##,## TO ##,##]"
     """
     number = r"-?\d+(\.\d+)?"  # optional sign, digits, optional decimal + more digits
-    return re.match(rf"\[{number},{number} +TO +{number},{number}]$", the_geom)
-    
+    return re.match(rf"\[({number}),({number}) +TO +({number}),({number})]$", the_geom)
+
 class ParameterError(Exception): pass
 
 class Query:
-    def __init__(self, search_text=None, document_type=None, facetType=None, facetName=None, facetFields=None, **kwargs):
-        solr_search_query = SolrQueryBuilder(**kwargs)
+    def __init__(self, search_text=None, document_type=None, facetType=None, facetName=None, facetFields=None, region=None,
+                 start=0, **kwargs):
+        solr_search_query = SolrQueryBuilder(start=start, **kwargs)
         if search_text:
             solr_search_query.add_fq(name='text', value=search_text)
         if document_type:
-            solr_search_query.add_fq(name='type', value=document_type)
+            if document_type.upper() == 'EXPERTS':
+                solr_search_query.add_fq(name='type', value='Person Organization')
+            else:
+                solr_search_query.add_fq(name='type', value=document_type)
+        if region:
+            solr_search_query.add_fq(name='txt_region', value=region)
 
         solr_search_query.add_facet_fields(facetFields)
         if (facetType and facetName) and (len(facetType) == len(facetName)):
             for facet_search in zip(facetType, facetName):
                 solr_search_query.add_fq(facet_search[0], facet_search[1])
-
         self._query = solr_search_query
 
     def json(self):
@@ -128,7 +157,7 @@ class Query:
         return res.json()
 
 
-            
+
 
 def _add_facets(data, response):
     for facet in AVAILABLE_FACETS:
