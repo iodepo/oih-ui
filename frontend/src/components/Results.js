@@ -84,7 +84,6 @@ const mapboxBounds_toQuery = (mb, region=null) => {
     const {_sw, _ne} = mb;
     if (!_sw) {
         return get_region_bounds(region);
-        // return DEFAULT_QUERY_BOUNDS;
     }
     return `[${_sw.lat},${_sw.lng} TO ${_ne.lat},${_ne.lng}]`;
 };
@@ -152,7 +151,7 @@ export default function Results() {
             if (searchText !== '') {
                 params.append('search_text', searchText)
             }
-            if (region !== '') {
+            if (region && region.toUpperCase() !== 'GLOBAL') {
                 params.append('region', region)
             }
             URI += [params.toString(), facetQuery].filter(e => e).join("&");
@@ -170,16 +169,20 @@ export default function Results() {
             })}`))
                 .then(response => response.json())
                 .then(json => {
-                        let urlRegion = '';
+                        const params = new URLSearchParams({
+                            'facetType': 'the_geom',
+                            'facetName': get_region_bounds(),
+                            'rows': 0,
+                        });
                         if (region && region.toUpperCase() !== 'GLOBAL') {
-                            urlRegion = '&region=' + region
+                            params.append('region', region)
                         }
-                        fetch(`${dataServiceUrl}/search?facetType=the_geom&facetName=${get_region_bounds()}${urlRegion}`)
+                        if (searchText) {
+                            params.append('search_text', searchText)
+                        }
+                        fetch(`${dataServiceUrl}/search?${params.toString()}`)
                             .then(response => response.json())
                             .then(spatialDataJson => {
-                                console.log('spatialDataJson')
-                                console.log(spatialDataJson)
-                                console.log(Object.values(spatialDataJson.counts).reduce((x, y) => x + y, 0))
                                 json.counts.SpatialData = Object.values(spatialDataJson.counts).reduce((x, y) => x + y, 0)
                                 setCounts({...json.counts, [searchType]: count})
                             })
@@ -211,11 +214,18 @@ export default function Results() {
             })}`))
                 .then(response => response.json())
                 .then(json => {
-                        let urlRegion = '';
+                        const params = new URLSearchParams({
+                            'facetType': 'the_geom',
+                            'facetName': get_region_bounds(),
+                            'rows': 0,
+                        });
                         if (region && region.toUpperCase() !== 'GLOBAL') {
-                            urlRegion = '&region=' + region
+                            params.append('region', region)
                         }
-                        fetch(`${dataServiceUrl}/search?facetType=the_geom&facetName=${get_region_bounds()}${urlRegion}`)
+                        if (searchText) {
+                            params.append('search_text', searchText)
+                        }
+                        fetch(`${dataServiceUrl}/search?${params.toString()}`)
                             .then(response => response.json())
                             .then(spatialDataJson => {
                                 json.counts.SpatialData = Object.values(spatialDataJson.counts).reduce((x, y) => x + y, 0)
@@ -294,7 +304,7 @@ export default function Results() {
     const get_region_bounds = () => {
         const bounds = regionBoundsMap[region.replaceAll(' ', '_')]
         if (bounds) return bounds
-        else return INITIAL_BOUNDS
+        else return DEFAULT_QUERY_BOUNDS
     }
     
     const initial_bounds = () => {
