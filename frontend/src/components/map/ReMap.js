@@ -324,6 +324,9 @@ class ReMap extends React.Component {
       const mapGL = this.mapRef && this.mapRef.getMap();
       if (!mapGL) {return;}
       const bounds = mapGL.getBounds();
+
+      console.log('RE bounds')
+      console.log(bounds)
       handleBoundsChange(bounds);
     }
   }

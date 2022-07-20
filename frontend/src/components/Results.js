@@ -13,6 +13,7 @@ import CourseResult from "./results/CourseResult";
 import VesselResult from "./results/VesselResult";
 import ProjectResult from "./results/ProjectResult";
 import OrganizationResult from "./results/OrganizationResult";
+import regionBoundsMap  from '../constants'
 
 import FacetsSidebar from "./results/FacetsSidebar";
 import ReMap from './map/ReMap';
@@ -52,20 +53,20 @@ const INITIAL_BOUNDS =  [ { lon:-20, lat:-50},  // w s
                         ];
 
 const regionMap = {
-    Atlantic_Ocean: [{'lon': -106.13563030191317, 'lat': 7.722279481459125}, {'lon': 26.42965382576412,'lat': 61.34350533443319}],
-    Europe: [{'lon': -59.82953110786673, 'lat': 9.73537176688049}, {'lon': 125.28096513056107, 'lat': 72.78086284410605}],
-    Pacific_Ocean: [{'lon': 76.73857614555914, 'lat': -21.178040850606266}, {'lon': 278.30266660319285, 'lat': 64.63116525975602}],
-    Africa: [{'lon': -58.47073748462185, 'lat': -41.23861790211953}, {'lon': 126.6397587538043, 'lat': 46.766036620731}],
-    Latin_America_and_the_Caribbean: [{'lon': -173.69220508441592, 'lat': -51.577191756993656}, {'lon': 11.418291154011712, 'lat': 35.467064391724065}],
-    Mediterranean_Sea: [{'lon': -7.586873434119838, 'lat': 28.720668808388652}, {'lon': 38.69136077120598, 'lat': 47.826686423360684}],
-    Indian_Ocean: [{'lon': -18.762762768442997, 'lat': -45.51508186280669}, {'lon': 175.32966191266144, 'lat': 45.99771970470985}],
-    Caribbean_Sea: [{'lon': -98.13481484232238, 'lat': 12.606950554859594}, {'lon': -51.856580636996, 'lat': 34.91835271849355}],
-    Asia: [{'lon': 13.660317850001945, 'lat': -11.50779448134162}, {'lon': 198.75164274038963, 'lat': 65.19790019953217}],
-    Americas: [{'lon': -169.9700107694391, 'lat': -22.583449366664766}, {'lon': 15.112192704587642, 'lat': 59.85793058993079}],
-    Southern_Ocean: [{'lon': -76.38674878551501, 'lat': -75.09807094038365}, {'lon': 108.69107270098624, 'lat': -17.89209341508294}],
-    Pacific_Small_Islands: [{'lon': -219.43150999515905, 'lat': -23.787064763225786}, {'lon': -127.71205617681251, 'lat': 23.551535345665997}],
-    Arctic_Ocean: [{'lon': -42.082352373611485, 'lat': 63.55684622830515}, {'lon': 140.45600115936452, 'lat': 85.05112877980659}],
-    Oceania: [{'lon': 112.87802443109621, 'lat': -45.30637113220563}, {'lon': 204.1497317515661, 'lat': -2.4250425433680647}]
+    Atlantic_Ocean: [{'lon': -110.11658847394503, 'lat': 5.483746321637085}, {'lon': 30.116588473945995, 'lat': 62.204953479609145}],
+    Europe: [{'lon': -60, 'lat': 10}, {'lon': 125, 'lat': 73}],
+    Pacific_Ocean: [{'lon': 77, 'lat': -21}, {'lon': 278, 'lat': 65}],
+    Africa: [{'lon': -58, 'lat': -41}, {'lon': 127, 'lat': 47}],
+    Latin_America_and_the_Caribbean: [{'lon': -131.86094382957086, 'lat': -35.97799165355438}, {'lon': -31.1390561704267, 'lat': 14.758199586212825}],
+    Mediterranean_Sea: [{'lon': -8, 'lat': 29}, {'lon': 39, 'lat': 48}],
+    Indian_Ocean: [{'lon': -19, 'lat': -46}, {'lon': 175, 'lat': 46}],
+    Caribbean_Sea: [{'lon': -98, 'lat': 13}, {'lon': -52, 'lat': 35}],
+    Asia: [{'lon': 14, 'lat': -12}, {'lon': 199, 'lat': 65}],
+    Americas: [{'lon': -170, 'lat': -23}, {'lon': 15, 'lat': 60}],
+    Southern_Ocean: [{'lon': -76, 'lat': -75}, {'lon': 109, 'lat': -18}],
+    Pacific_Small_Islands: [{'lon': -219, 'lat': -24}, {'lon': -128, 'lat': 24}],
+    Arctic_Ocean: [{'lon': -42, 'lat': 64}, {'lon': 140, 'lat': 85}],
+    Oceania: [{'lon': 113, 'lat': -45}, {'lon': 204, 'lat': -2}]
 }
 const DEFAULT_QUERY_BOUNDS = '[-50,-20 TO 50,320]';
 
@@ -132,6 +133,8 @@ export default function Results() {
     useEffect(() => {
         if (showMap) {
             let URI = `${dataServiceUrl}/search?`;
+            console.log('mapBounds')
+            console.log(mapBounds)
             const params = new URLSearchParams({
                 ...searchType !== 'SpatialData' ? { 'document_type': searchType } : {},
                 'facetType': 'the_geom',
@@ -158,7 +161,22 @@ export default function Results() {
                     ...searchText ? { search_text: searchText } : {},
                 })}`))
                 .then(response => response.json())
-                .then(json => setCounts({ ...json.counts, [searchType]: count }))
+                .then(json => {
+                        let urlRegion = '';
+                        if (region && region.toUpperCase() !== 'GLOBAL') {
+                            urlRegion = '&region=' + region
+                        }
+                        fetch(`${dataServiceUrl}/search?facetType=the_geom&facetName=${get_region_bounds()}${urlRegion}`)
+                            .then(response => response.json())
+                            .then(spatialDataJson => {
+                                console.log('spatialDataJson')
+                                console.log(spatialDataJson)
+                                console.log(Object.values(spatialDataJson.counts).reduce((x, y) => x + y, 0))
+                                json.counts.SpatialData = Object.values(spatialDataJson.counts).reduce((x, y) => x + y, 0)
+                                setCounts({...json.counts, [searchType]: count})
+                            })
+                    }
+                )
         } else {
             let URI = `${dataServiceUrl}/search?`;
             const params = new URLSearchParams({'document_type': searchType, 'start': page * ITEMS_PER_PAGE });
@@ -184,7 +202,19 @@ export default function Results() {
                     ...searchText ? { search_text: searchText } : {},
                 })}`))
                 .then(response => response.json())
-                .then(json => setCounts({ ...json.counts, [searchType]: count }))
+                .then(json => {
+                        let urlRegion = '';
+                        if (region && region.toUpperCase() !== 'GLOBAL') {
+                            urlRegion = '&region=' + region
+                        }
+                        fetch(`${dataServiceUrl}/search?facetType=the_geom&facetName=${get_region_bounds()}${urlRegion}`)
+                            .then(response => response.json())
+                            .then(spatialDataJson => {
+                                json.counts.SpatialData = Object.values(spatialDataJson.counts).reduce((x, y) => x + y, 0)
+                                setCounts({...json.counts, [searchType]: count})
+                            })
+                    }
+                )
         }
     }, [searchText, searchType, facetQuery, showMap, mapBounds, region, page]);
 
@@ -250,7 +280,13 @@ export default function Results() {
                 </Popup>)
         })
     }, [selectedElem, setDetail])
-
+    
+    const get_region_bounds = () => {
+        const bounds = regionBoundsMap[region.replaceAll(' ', '_')]
+        if (bounds) return bounds
+        else return INITIAL_BOUNDS
+    }
+    
     const initial_bounds = () => {
         const bounds = regionMap[region.replaceAll(' ', '_')]
         if (bounds) return bounds
