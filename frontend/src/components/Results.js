@@ -310,13 +310,14 @@ export default function Results() {
                     <ResultTabs counts={counts} tabList={tabs} searchType={searchType}
                                 resetDefaultSearchUrl={resetDefaultSearchUrl}/>
                     <div>
+
                         {facets.length > 0 && <FacetsFullWidth
                             facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch}/>}
                     </div>
 
                     <div className="row w-75 mx-auto">
                         <div className="col-12 mb-3">
-                            <h6 className="primary-color text-start"> Total results found {resultCount || 0}</h6>
+                            <h6 className="primary-color text-start pt-3"> Total results found {resultCount || 0}</h6>
                         </div>
                         <div>
                             <div
