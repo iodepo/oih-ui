@@ -168,26 +168,7 @@ export default function Results() {
                 ...searchText ? {search_text: searchText} : {},
             })}`))
                 .then(response => response.json())
-                .then(json => {
-                        const params = new URLSearchParams({
-                            'facetType': 'the_geom',
-                            'facetName': get_region_bounds(),
-                            'rows': 0,
-                        });
-                        if (region && region.toUpperCase() !== 'GLOBAL') {
-                            params.append('region', region)
-                        }
-                        if (searchText) {
-                            params.append('search_text', searchText)
-                        }
-                        fetch(`${dataServiceUrl}/search?${params.toString()}`)
-                            .then(response => response.json())
-                            .then(spatialDataJson => {
-                                json.counts.SpatialData = Object.values(spatialDataJson.counts).reduce((x, y) => x + y, 0)
-                                setCounts({...json.counts, [searchType]: count})
-                            })
-                    }
-                )
+                .then(json => setCounts({...json.counts, [searchType]: count}))
         } else {
             let URI = `${dataServiceUrl}/search?`;
             const params = new URLSearchParams({'document_type': searchType, 'start': page * ITEMS_PER_PAGE});
