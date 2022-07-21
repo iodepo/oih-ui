@@ -365,7 +365,7 @@ const Result = ({result}) => {
             id='resultsDiv'
         >
             <h4 className="text-start mb-3">
-                <a href={result['txt_url'] || resolveAsUrl(result['id'])}
+                <a href={result['type'] === 'Person' ? resolveAsUrl(result['id']) : result['txt_url'] || resolveAsUrl(result['id'])}
                    className="result-title" target="_blank">
                     {result['name']}
                 </a>
