@@ -7,6 +7,8 @@ import {dataServiceUrl} from "../config/environment";
 
 import BackgroundImage1 from '../resources/Photo Africa Coast Original.jpg'
 
+const REGIONS = ['Global', 'Atlantic Ocean', 'Latin America and the Caribbean', 'Africa', 'Pacific Small Islands']
+
 export default function Search() {
     const navigate = useNavigate();
     const [params,] = useSearchParams();
@@ -17,11 +19,12 @@ export default function Search() {
     const isResults = location.pathname.startsWith("/results")
 
     useEffect(() => {
-        fetch(`${dataServiceUrl}/count?field=txt_region`)
-            .then(response => response.json())
-            .then(json => {
-                setAvailableRegions(Object.keys(json['counts']))
-            })
+        setAvailableRegions(REGIONS)
+        // fetch(`${dataServiceUrl}/count?field=txt_region`)
+        //     .then(response => response.json())
+        //     .then(json => {
+        //         setAvailableRegions(Object.keys(json['counts']))
+        //     })
     }, []);
 
     const hrefFor = (region, query) => `/results/?${new URLSearchParams({
@@ -36,7 +39,6 @@ export default function Search() {
     return (
         <div className={"pb-3 " + (url == "results" ? 'searchbg-alt' : 'searchbg')}>
             <div className="container">
-                {/*Ocean InfoHub: Search across our global partners*/}
                 <h1 className={"text-light text-start " + (url == "results" ? 'pt-3 d-none' : 'pt-5')}>Ocean InfoHub:<br /> Search across our <b className="bg-alt">{region.toUpperCase()}</b> partners</h1>
                 <form id='searchBarForm' className={"d-flex flex-justify-start align-self pt-4 w-75 " + (url == "results" ? 'result-search' : '')} onSubmit={e => {
                     e.preventDefault()
@@ -44,7 +46,6 @@ export default function Search() {
                 }}>
                     <select className="form-select w-25 rounded-0" value={region}
                             onChange={e => setRegion(e.target.value)}>
-                        <option value="">Global</option>
                         {
                             availableRegions.map((region) => {
                                 return <option>{region}</option>
