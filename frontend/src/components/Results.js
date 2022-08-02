@@ -7,7 +7,7 @@ import useSearchParam from "../useSearchParam";
 import Expert from './Expert';
 import ResultTabs from "./ResultTabs";
 import {dataServiceUrl} from '../config/environment';
-import {Col, Container, Row} from "react-bootstrap";
+import {Row} from "react-bootstrap";
 import DocumentResult from "./results/DocumentResult";
 import CourseResult from "./results/CourseResult";
 import VesselResult from "./results/VesselResult";
