@@ -13,6 +13,7 @@ import CourseResult from "./results/CourseResult";
 import VesselResult from "./results/VesselResult";
 import ProjectResult from "./results/ProjectResult";
 import OrganizationResult from "./results/OrganizationResult";
+import Dataset from "./results/Dataset";
 import regionBoundsMap  from '../constants'
 
 import ReMap from './map/ReMap';
@@ -31,7 +32,7 @@ const typeMap = {
     },
     Organization: {
         Component: OrganizationResult,
-        type: "Experts",
+        type: "Institutions",
     },
     Course: {
         Component: CourseResult,
@@ -40,6 +41,10 @@ const typeMap = {
     Vehicle: {
         Component: VesselResult,
         type: "Vessels",
+    },
+    Dataset: {
+        Component: Dataset,
+        type: "Dataset",
     },
     ResearchProject: {
         Component: ProjectResult,
@@ -105,8 +110,16 @@ export default function Results() {
             tab_name: 'Documents',
         },
         {
-            title: 'Experts',
+            title: 'Person',
             tab_name: 'Experts',
+        },
+        {
+            title: 'Organization',
+            tab_name: 'Institutions',
+        },
+        {
+            title: 'Dataset',
+            tab_name: 'Datasets',
         },
         {
             title: 'Course',
@@ -122,7 +135,7 @@ export default function Results() {
         },
         {
             title: 'SpatialData',
-            tab_name: 'Spatial Data & Maps',
+            tab_name: 'Spatial Data',
         },
     ];
     const [results, setResults] = useState([]);

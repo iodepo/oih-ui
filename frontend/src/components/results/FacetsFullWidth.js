@@ -17,9 +17,6 @@ export default function FacetsFullWidth({
     return url == "SpatialData" ? null : (
         <div className="m-4 p-3">
             <div className="pb-2 ps-3 pe-3 w-75 mx-auto">
-                <h6 className="text-end text-uppercase primary-color fw-bold">
-                    Filters
-                </h6>
             </div>
             <div className="row bg-white pt-5 pb-5 ps-3 pe-3 w-75 mx-auto">
                 {facets.map((facet, i) => {
