@@ -151,6 +151,7 @@ export default function Results() {
     const [region, setRegion] = useSearchParam("region", "global");
     const [facetQuery, setFacetQuery] = useSearchParam("facet_query");
     const [page, setPage] = useSearchParam("page", 0);
+    const [facetValues, setFacetFacetValues] = useState(new Array(facets.length).fill(""))
 
     useEffect(() => {
         if (showMap) {
@@ -259,6 +260,7 @@ export default function Results() {
     }
 
     const clearFacetQuery = () => {
+        setFacetFacetValues(new Array(facets.length).fill(""))
         resetDefaultSearchUrl(searchType)
     }
 
@@ -312,11 +314,11 @@ export default function Results() {
             <div>
                 <div>
                     <ResultTabs counts={counts} tabList={tabs} searchType={searchType}
-                                resetDefaultSearchUrl={resetDefaultSearchUrl}/>
+                                resetDefaultSearchUrl={resetDefaultSearchUrl} clearFacetQuery={clearFacetQuery}/>
                     <div>
 
                         {facets.length > 0 && <FacetsFullWidth
-                            facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch}/>}
+                            facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} facetValues={facetValues} setFacetFacetValues={setFacetFacetValues}/>}
                     </div>
 
                     <div className="row w-75 mx-auto">
@@ -378,7 +380,8 @@ const Result = ({result}) => {
             id='resultsDiv'
         >
             <h4 className="text-start mb-3">
-                <a href={result['type'] === 'Person' ? resolveAsUrl(result['id']) : result['txt_url'] || resolveAsUrl(result['id'])}
+                <a href={result['type'] === 'Person' || result['type'] === 'Organization' ? resolveAsUrl(result['id']) :
+                    result['txt_url'] || resolveAsUrl(result['id'])}
                    className="result-title" target="_blank">
                     {result['name']}
                 </a>

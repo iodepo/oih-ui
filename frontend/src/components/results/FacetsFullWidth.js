@@ -4,11 +4,12 @@ export default function FacetsFullWidth({
                                             facets,
                                             clearFacetQuery,
                                             facetSearch,
+                                            facetValues, setFacetFacetValues
                                         }) {
-    const [values, setValues] = useState(new Array(facets.length).fill(""))
-    const setValue = (i, value) => setValues(values => [...values.slice(0, i), value, ...values.slice(i + 1, values.length)])
+
+    const setValue = (i, value) => setFacetFacetValues(values => [...values.slice(0, i), value, ...values.slice(i + 1, values.length)])
     const clear = useCallback(e => {
-        setValues(new Array(facets.length).fill(""))
+        setFacetFacetValues(new Array(facets.length).fill(""))
         clearFacetQuery()
     }, [clearFacetQuery, setValue])
 
@@ -29,7 +30,7 @@ export default function FacetsFullWidth({
                                         setValue(i, e.target.value);
                                         facetSearch(e)
                                     }}
-                                    value={values[i]}
+                                    value={facetValues[i]}
                                     defaultValue=""
                                 >
                                     <option value="">--- Select to search {facet.name.substring(4)} facet ---</option>
