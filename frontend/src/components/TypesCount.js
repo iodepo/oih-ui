@@ -23,7 +23,11 @@ const entries = counts => [
         {
             id: 'Course',
             text: 'Training'
-        }
+        },
+        {
+            id: 'Dataset',
+            text: 'Datasets'
+        },
     ],
     [
         {
@@ -37,10 +41,6 @@ const entries = counts => [
         {
             id: 'Organization',
             text: 'Institution'
-        },
-        {
-            id: 'Dataset',
-            text: 'Datasets'
         },
         {
             id: 'SpatialData',
@@ -82,15 +82,18 @@ export default function TypesCount() {
                 {entries(counts.counts).map(row =>
                     <Row className="bubble-height">
                         {row.map(col =>
-                            <Col className="primary-bg rounded-circle h-100 bubble" role="button" id={`bubble_${col.id}`} onClick={searchByType(col.id)}>
-                                <span className="text-light-alt">
+                            <Col className="p-4" role="button" id={`bubble_${col.id}`} onClick={searchByType(col.id)}>
+                                <div className="primary-bg rounded-circle bubble">
+                                    <span className="text-light-alt">
                                     {
                                         col.id !== 'SpatialData' ? (counts.counts[col.id] !== undefined ? formatter.format(counts.counts[col.id]) : 0) : spatialData
 
                                     }
                                 </span><br/>
                                 <span className="text-light fw-bold text-uppercase">{col.text ?? col.id}</span>
-                            </Col>
+
+                                </div>
+                                </Col>
                         )}
                     </Row>
                 )}
