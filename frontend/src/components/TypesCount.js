@@ -85,7 +85,7 @@ export default function TypesCount() {
                             <Col className="primary-bg rounded-circle h-100 bubble" role="button" id={`bubble_${col.id}`} onClick={searchByType(col.id)}>
                                 <span className="text-light-alt">
                                     {
-                                        col.id !== 'SpatialData' ? formatter.format(counts.counts[col.id]) || 0 : spatialData
+                                        col.id !== 'SpatialData' ? (counts.counts[col.id] !== undefined ? formatter.format(counts.counts[col.id]) : 0) : spatialData
 
                                     }
                                 </span><br/>
