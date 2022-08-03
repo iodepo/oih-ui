@@ -325,7 +325,7 @@ export default function Results() {
                     <div className="row w-75 mx-auto">
                         <div className="col-12 mb-3">
                             {showMap ?
-                                <h6 className="primary-color text-start pt-3"> Total results
+                                <h6 className="primary-color text-start"> Total results
                                     found {resultMapCount || 0}</h6> :
                                 <h6 className="primary-color text-start pt-3"> Total results
                                     found {resultCount || 0}</h6>

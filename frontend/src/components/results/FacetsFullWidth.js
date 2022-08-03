@@ -16,10 +16,10 @@ export default function FacetsFullWidth({
     let url = window.location.href.split('/').slice(3)[1].split('?')[0]
 
     return url == "SpatialData" ? null : (
-        <div className="m-4 p-3">
-            <div className="pb-2 ps-3 pe-3 w-75 mx-auto">
+        <div className="mt-4 w-75 mx-auto">
+            <div className="ps-3 pe-3 w-75 mx-auto">
             </div>
-            <div className="row bg-white pt-5 pb-5 ps-3 pe-3 w-75 mx-auto">
+            <div className="row">
                 {facets.map((facet, i) => {
                     return (
                         <div className="col-5">
