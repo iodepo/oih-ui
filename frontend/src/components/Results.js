@@ -174,7 +174,7 @@ export default function Results() {
             fetch(URI)
                 .then(response => response.json())
                 .then(json => {
-                    setFacets(json.facets);
+                    // setFacets(json.facets);
                     count = Object.values(json.counts).reduce((x, y) => x + y, 0);
                     setResultMapCount(count)
                 }).then(() => fetch(`${dataServiceUrl}/count?${new URLSearchParams({

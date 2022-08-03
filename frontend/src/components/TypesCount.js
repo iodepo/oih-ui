@@ -22,7 +22,11 @@ const entries = counts => [
         {
             id: 'Course',
             text: 'Training'
-        }
+        },
+        {
+            id: 'Dataset',
+            text: 'Datasets'
+        },
     ],
     [
         {
@@ -36,10 +40,6 @@ const entries = counts => [
         {
             id: 'Organization',
             text: 'Institution'
-        },
-        {
-            id: 'Dataset',
-            text: 'Datasets'
         },
         {
             id: 'SpatialData',
