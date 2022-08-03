@@ -5,15 +5,17 @@
 }
 
 nav.navbar-oih.navbar.navbar-expand-lg.navbar-light {
-  background-color: #21295c;
+   background: rgb(29,87,122);
+background: linear-gradient(180deg, rgba(29,87,122,1) 0%, rgba(29,107,144,1) 35%, rgba(23,171,192,1) 100%);
+
 }
 
 .primary-bg {
-  background-color: #21295c;
+  background-color: #009aad;
 }
 
-.text-light-blue-alt {
-  color: #06bce5;
+.text-light-alt {
+  color: white;
   font-weight: 700;
   font-size: 2em;
 }
@@ -23,7 +25,7 @@ nav.navbar-oih.navbar.navbar-expand-lg.navbar-light {
 }
 
 .primary-color {
-  color: #21295c;
+  color: #17abc0;
 }
 
 a.text-light.menu-text.nav-link {
@@ -32,12 +34,12 @@ a.text-light.menu-text.nav-link {
 }
 
 .bg-alt {
-  color: #06bce5;
+  color: #17abc0;
 }
 
 .searchbg {
   max-height: 40vh;
-  background-image: url("resources/Photo Africa Coast Original.jpg");
+  background:linear-gradient(0deg, rgba(6,188,229, 0.3), rgba(6,188,229, 0.3)), url("resources/Photo Africa Coast Original.jpg");
   background-size: cover;
   background-repeat: no-repeat;
   background-position: 75% 60%;
@@ -48,7 +50,7 @@ a.text-light.menu-text.nav-link {
   background-size: cover;
   background-repeat: no-repeat;
   background-position: 75% 60%;
-  background-color: #21295c;
+  background-color: #17abc0;
 }
 
 .result-search {
@@ -116,6 +118,10 @@ p.result-p.truncate {
   padding: 3.3%;
 }
 
+.footer-bg{
+  background: rgb(29,87,122);
+background: linear-gradient(180deg, rgba(29,87,122,1) 0%, rgba(29,107,144,1) 35%, rgba(23,171,192,1) 100%);
+}
 
 @media only screen and (min-width: 1200px) {
   .bubble-height {

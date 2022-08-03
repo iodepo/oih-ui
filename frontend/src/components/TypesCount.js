@@ -83,7 +83,7 @@ export default function TypesCount() {
                     <Row className="bubble-height">
                         {row.map(col =>
                             <Col className="primary-bg rounded-circle h-100 bubble" role="button" id={`bubble_${col.id}`} onClick={searchByType(col.id)}>
-                                <span className="text-light-blue-alt">
+                                <span className="text-light-alt">
                                     {
                                         col.id !== 'SpatialData' ? formatter.format(counts.counts[col.id]) || 0 : spatialData
 
