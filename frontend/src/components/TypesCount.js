@@ -8,6 +8,7 @@ import regionBoundsMap  from '../constants'
 const doc_types = ['CreativeWork', 'Person', 'Organization', 'Dataset', 'ResearchProject', 'Event', 'Course', 'Vehicle']
 const defaultCountState = {'counts': Object.fromEntries(doc_types.map(e => [e, 0]))}
 
+const formatter = Intl.NumberFormat([], { "notation": "compact" })
 const entries = counts => [
     [
         {
@@ -76,23 +77,24 @@ export default function TypesCount() {
     const searchByType = type => event => navigate(`/results/${type}?${region ? 'region=' + region : ''}`);
 
     return (
-        <Container className="spacer">
-            <Row>
+        <Container className="bubble-height">
+            <div>
                 {entries(counts.counts).map(row =>
-                    <Row className="pb-3 mb-2">
+                    <Row className="bubble-height">
                         {row.map(col =>
                             <Col className="primary-bg rounded-circle h-100 bubble" role="button" id={`bubble_${col.id}`} onClick={searchByType(col.id)}>
-                                <p className="text-light-blue-alt">
+                                <span className="text-light-blue-alt">
                                     {
-                                        col.id !== 'SpatialData' ? counts.counts[col.id] || 0 : spatialData
+                                        col.id !== 'SpatialData' ? formatter.format(counts.counts[col.id]) || 0 : spatialData
+
                                     }
-                                </p>
-                                <p className="text-light fw-bold text-uppercase">{col.text ?? col.id}</p>
+                                </span><br/>
+                                <span className="text-light fw-bold text-uppercase">{col.text ?? col.id}</span>
                             </Col>
                         )}
                     </Row>
                 )}
-            </Row>
+            </div>
         </Container>
     )
 }

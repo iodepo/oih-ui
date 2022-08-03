@@ -36,7 +36,7 @@ a.text-light.menu-text.nav-link {
 }
 
 .searchbg {
-  min-height: 55vh;
+  max-height: 40vh;
   background-image: url("resources/Photo Africa Coast Original.jpg");
   background-size: cover;
   background-repeat: no-repeat;
@@ -112,8 +112,15 @@ p.result-p.truncate {
 .bubble {
   margin-right: 8.5% !important;
   margin-left: 10% !important;
-  padding-top: 4% !important;
   margin-top: 4% !important;
+  padding: 3.3%;
+}
+
+
+@media only screen and (min-width: 1200px) {
+  .bubble-height {
+    margin-top: -2em;
+  }
 }
 
 #root {
