@@ -39,8 +39,8 @@ export default function Search() {
     return (
         <div className={"pb-3 " + (url == "results" ? 'searchbg-alt' : 'searchbg')}>
             <div className="container">
-                <h1 className={"text-light text-start " + (url == "results" ? 'pt-3 d-none' : 'pt-5')}>Ocean InfoHub:<br /> Search across our <b className="bg-alt">{region.toUpperCase()}</b> partners</h1>
-                <form id='searchBarForm' className={"d-flex flex-justify-start align-self pt-4 w-75 " + (url == "results" ? 'result-search' : '')} onSubmit={e => {
+                <h1 className={"text-light text-start " + (url == "results" ? 'pt-3 d-none' : 'pt-3')}>Ocean InfoHub:<br /> Search across our <b className="bg-alt">{region.toUpperCase()}</b> partners</h1>
+                <form id='searchBarForm' className={"d-flex flex-justify-start align-self pt-2 w-75 " + (url == "results" ? 'result-search' : '')} onSubmit={e => {
                     e.preventDefault()
                     handleChange()
                 }}>

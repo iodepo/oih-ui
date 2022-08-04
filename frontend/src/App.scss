@@ -5,15 +5,15 @@
 }
 
 nav.navbar-oih.navbar.navbar-expand-lg.navbar-light {
-  background-color: #21295c;
+   background: #21295c;
 }
 
 .primary-bg {
   background-color: #21295c;
 }
 
-.text-light-blue-alt {
-  color: #06bce5;
+.text-light-alt {
+  color: white;
   font-weight: 700;
   font-size: 2em;
 }
@@ -36,8 +36,8 @@ a.text-light.menu-text.nav-link {
 }
 
 .searchbg {
-  min-height: 55vh;
-  background-image: url("resources/Photo Africa Coast Original.jpg");
+  max-height: 40vh;
+  background: url("resources/Photo Africa Coast Original.jpg");
   background-size: cover;
   background-repeat: no-repeat;
   background-position: 75% 60%;
@@ -112,8 +112,22 @@ p.result-p.truncate {
 .bubble {
   margin-right: 8.5% !important;
   margin-left: 10% !important;
-  padding-top: 4% !important;
   margin-top: 4% !important;
+  padding: 23%;
+}
+
+.footer-bg{
+  background: #21295c;
+}
+
+//@media only screen and (min-width: 1200px) {
+//  .bubble-height {
+//    margin-top: -2em;
+//  }
+//}
+
+.footer-logos {
+  height: 4rem;
 }
 
 #root {
