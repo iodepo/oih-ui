@@ -24,7 +24,7 @@ export default function FacetsSidebar({
       {facets.map((facet, i) => {
         return (
           <div key={i}>
-            <h6>{facet.name.substring(4)}</h6>
+            <h6>{facet.name.substring(4)} HELLO</h6>
             <select
               className="form-select form-select-md mb-3"
               onChange={e => {
