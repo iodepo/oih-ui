@@ -7,12 +7,13 @@ import useSearchParam from "../useSearchParam";
 import Expert from './Expert';
 import ResultTabs from "./ResultTabs";
 import {dataServiceUrl} from '../config/environment';
-import {Col, Container, Row} from "react-bootstrap";
+import {Row} from "react-bootstrap";
 import DocumentResult from "./results/DocumentResult";
 import CourseResult from "./results/CourseResult";
 import VesselResult from "./results/VesselResult";
 import ProjectResult from "./results/ProjectResult";
 import OrganizationResult from "./results/OrganizationResult";
+import Dataset from "./results/Dataset";
 import regionBoundsMap  from '../constants'
 
 import ReMap from './map/ReMap';
@@ -31,7 +32,7 @@ const typeMap = {
     },
     Organization: {
         Component: OrganizationResult,
-        type: "Experts",
+        type: "Institutions",
     },
     Course: {
         Component: CourseResult,
@@ -40,6 +41,10 @@ const typeMap = {
     Vehicle: {
         Component: VesselResult,
         type: "Vessels",
+    },
+    Dataset: {
+        Component: Dataset,
+        type: "Dataset",
     },
     ResearchProject: {
         Component: ProjectResult,
@@ -105,8 +110,16 @@ export default function Results() {
             tab_name: 'Documents',
         },
         {
-            title: 'Experts',
+            title: 'Person',
             tab_name: 'Experts',
+        },
+        {
+            title: 'Organization',
+            tab_name: 'Institutions',
+        },
+        {
+            title: 'Dataset',
+            tab_name: 'Datasets',
         },
         {
             title: 'Course',
@@ -122,11 +135,12 @@ export default function Results() {
         },
         {
             title: 'SpatialData',
-            tab_name: 'Spatial Data & Maps',
+            tab_name: 'Spatial Data',
         },
     ];
     const [results, setResults] = useState([]);
     const [resultCount, setResultCount] = useState(0);
+    const [resultMapCount, setResultMapCount] = useState(0);
     const [counts, setCounts] = useState({})
     const [facets, setFacets] = useState([]);
     const [mapBounds, setMapBounds] = useState(false);
@@ -138,6 +152,7 @@ export default function Results() {
     const [region, setRegion] = useSearchParam("region", "global");
     const [facetQuery, setFacetQuery] = useSearchParam("facet_query");
     const [page, setPage] = useSearchParam("page", 0);
+    const [facetValues, setFacetFacetValues] = useState(new Array(facets.length).fill(""))
 
     useEffect(() => {
         if (showMap) {
@@ -159,9 +174,9 @@ export default function Results() {
             fetch(URI)
                 .then(response => response.json())
                 .then(json => {
-                    setFacets(json.facets);
+                    // setFacets(json.facets);
                     count = Object.values(json.counts).reduce((x, y) => x + y, 0);
-                    setResultCount(count)
+                    setResultMapCount(count)
                 }).then(() => fetch(`${dataServiceUrl}/count?${new URLSearchParams({
                 field: 'type',
                 ...region.toUpperCase() !== "GLOBAL" ? {region} : {},
@@ -246,6 +261,7 @@ export default function Results() {
     }
 
     const clearFacetQuery = () => {
+        setFacetFacetValues(new Array(facets.length).fill(""))
         resetDefaultSearchUrl(searchType)
     }
 
@@ -299,16 +315,21 @@ export default function Results() {
             <div>
                 <div>
                     <ResultTabs counts={counts} tabList={tabs} searchType={searchType}
-                                resetDefaultSearchUrl={resetDefaultSearchUrl}/>
+                                resetDefaultSearchUrl={resetDefaultSearchUrl} clearFacetQuery={clearFacetQuery}/>
                     <div>
 
                         {facets.length > 0 && <FacetsFullWidth
-                            facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch}/>}
+                            facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} facetValues={facetValues} setFacetFacetValues={setFacetFacetValues}/>}
                     </div>
 
                     <div className="row w-75 mx-auto">
                         <div className="col-12 mb-3">
-                            <h6 className="primary-color text-start pt-3"> Total results found {resultCount || 0}</h6>
+                            {showMap ?
+                                <h6 className="primary-color text-start pt-3"> Total results
+                                    found {resultMapCount || 0}</h6> :
+                                <h6 className="primary-color text-start pt-3"> Total results
+                                    found {resultCount || 0}</h6>
+                            }
                         </div>
                         <div>
                             <div
@@ -365,7 +386,8 @@ const Result = ({result}) => {
             id='resultsDiv'
         >
             <h4 className="text-start mb-3">
-                <a href={result['type'] === 'Person' ? resolveAsUrl(result['id']) : result['txt_url'] || resolveAsUrl(result['id'])}
+                <a href={result['type'] === 'Person' || result['type'] === 'Organization' ? resolveAsUrl(result['id']) :
+                    result['txt_url'] || resolveAsUrl(result['id'])}
                    className="result-title" target="_blank">
                     {result['name']}
                 </a>

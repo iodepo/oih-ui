@@ -6,10 +6,14 @@ const formatter = Intl.NumberFormat([], { "notation": "compact" })
 export default function ResultTabs({
   tabList, counts,
   searchType,
-  resetDefaultSearchUrl
+  resetDefaultSearchUrl,
+  clearFacetQuery
 
 }) {
-  const changeSearchType = type => event => resetDefaultSearchUrl(type);
+  const changeSearchType = type => event => {
+    clearFacetQuery()
+    resetDefaultSearchUrl(type)
+  };
 
   return (
     <div id='ResTabs' >

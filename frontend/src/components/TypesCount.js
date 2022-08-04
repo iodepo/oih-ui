@@ -11,8 +11,8 @@ const defaultCountState = {'counts': Object.fromEntries(doc_types.map(e => [e, 0
 const entries = counts => [
     [
         {
-            id: 'Experts',
-            count: (counts['Person'] || 0) + (counts['Organization'] || 0),
+            id: 'Person',
+            // count: (counts['Person'] || 0) + (counts['Organization'] || 0),
             text: 'Experts'
         },
         {
@@ -22,7 +22,11 @@ const entries = counts => [
         {
             id: 'Course',
             text: 'Training'
-        }
+        },
+        {
+            id: 'Dataset',
+            text: 'Datasets'
+        },
     ],
     [
         {
@@ -34,9 +38,13 @@ const entries = counts => [
             text: 'Projects'
         },
         {
+            id: 'Organization',
+            text: 'Institution'
+        },
+        {
             id: 'SpatialData',
             count: 0,
-            text: 'Spatial Data & Maps'
+            text: 'Spatial Data'
         }
     ]
 ];

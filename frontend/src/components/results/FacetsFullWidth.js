@@ -4,11 +4,12 @@ export default function FacetsFullWidth({
                                             facets,
                                             clearFacetQuery,
                                             facetSearch,
+                                            facetValues, setFacetFacetValues
                                         }) {
-    const [values, setValues] = useState(new Array(facets.length).fill(""))
-    const setValue = (i, value) => setValues(values => [...values.slice(0, i), value, ...values.slice(i + 1, values.length)])
+
+    const setValue = (i, value) => setFacetFacetValues(values => [...values.slice(0, i), value, ...values.slice(i + 1, values.length)])
     const clear = useCallback(e => {
-        setValues(new Array(facets.length).fill(""))
+        setFacetFacetValues(new Array(facets.length).fill(""))
         clearFacetQuery()
     }, [clearFacetQuery, setValue])
 
@@ -17,9 +18,6 @@ export default function FacetsFullWidth({
     return url == "SpatialData" ? null : (
         <div className="m-4 p-3">
             <div className="pb-2 ps-3 pe-3 w-75 mx-auto">
-                <h6 className="text-end text-uppercase primary-color fw-bold">
-                    Filters
-                </h6>
             </div>
             <div className="row bg-white pt-5 pb-5 ps-3 pe-3 w-75 mx-auto">
                 {facets.map((facet, i) => {
@@ -32,7 +30,7 @@ export default function FacetsFullWidth({
                                         setValue(i, e.target.value);
                                         facetSearch(e)
                                     }}
-                                    value={values[i]}
+                                    value={facetValues[i]}
                                     defaultValue=""
                                 >
                                     <option value="">--- Select to search {facet.name.substring(4)} facet ---</option>
