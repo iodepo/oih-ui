@@ -15,6 +15,11 @@ export default function FacetsFullWidth({
 
     let url = window.location.href.split('/').slice(3)[1].split('?')[0]
 
+    const format_facet_name = (facet_name) => {
+        if (facet_name.startsWith('id_')) return facet_name.substring(3)
+        return facet_name.substring(4)
+    }
+
     return url == "SpatialData" ? null : (
         <div className="mt-4 w-75 mx-auto">
             <div className="ps-3 pe-3 w-75 mx-auto">
@@ -33,7 +38,7 @@ export default function FacetsFullWidth({
                                     value={facetValues[i]}
                                     defaultValue=""
                                 >
-                                    <option value="">--- Select to search {facet.name.substring(4)} facet ---</option>
+                                    <option value="">--- Select to search {format_facet_name(facet.name)} facet ---</option>
                                     {facet.counts.map((facetCount) => (
                                         <option
                                             key={facetCount.name}
