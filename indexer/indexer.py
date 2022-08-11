@@ -31,9 +31,7 @@ solr_params = {
 
 
 # UNDONE
-# - Refactor
 # - Tests
-# - Save exceptions in exceptions file
 # - Geocoding of address in convert_place
 # - Add the source file name hash id as graph_id
 
@@ -116,11 +114,11 @@ def flatten(l):
 
 
 ## wrapper of the function to do test generation against the "generic" class
-@test_generation(post=lambda x:x)
-def genericTest(_type, orig):
-    return genericType_toAtts(orig)
+@test_generation(post=lambda x,y:x)
+def genericTest(_type, orig, rid=None):
+    return genericType_toAtts(orig, rid)
 
-def genericType_toAtts(orig):
+def genericType_toAtts(orig, rid=None):
     """
      This is a generic entity -> solr atts table for json-ld structures.
     dictionary => dictionary
@@ -143,7 +141,7 @@ def genericType_toAtts(orig):
 
     """
     try:
-        _id = orig.get('@id', orig.get('url',''))
+        _id = rid or orig.get('@id', orig.get('url',''))
         if not _id:
             #UNDONE Hash name instead?
             _id = str(uuid.uuid4())
@@ -209,9 +207,9 @@ def genericType_toAtts(orig):
     return {d.key:d.value for d in data if d.value}
 
 
-def index_one(orig):
-    data = genericTest('generic', orig)
-#    data = genericType_toAtts(orig)
+def index_one(orig, rid=None):
+    data = genericTest('generic', orig, rid)
+#    data = genericType_toAtts(orig, rid)
     data['keys'] = list(data.keys())
 #    print (json.dumps(data, indent=2))
     data['json_source'] = json.dumps(orig)
@@ -326,6 +324,30 @@ def reindex(url):
     orig_source = json.loads(orig['json_source'])
     index_one(orig_source)
 
+def reindex_query(fq, chunk=100):
+    start = 0
+    ct = None
+    solr_params = {
+        'q': '*:*',
+        "fl":"id,json_source",
+        "sort":"id asc",  # this can't be the indexed timestamp
+        "rows":chunk,
+        'fq': fq,
+    }
+
+    while start==0 or start < ct:
+        solr_params['start'] = start
+        print ("indexing from %s of %s" %(start, ct))
+        resp = session.get(query_url, params=solr_params).json()
+
+        start += chunk
+        if ct is None:
+            ct = resp['response']['numFound']
+
+        for orig in resp['response']['docs']:
+            orig_source = json.loads(orig['json_source'])
+            index_one(orig_source)
+
 
 def fetch_dups():
     solr_params = {
@@ -359,7 +381,8 @@ if __name__ == '__main__':
     #paths = ('./research_project.txt',)
 
     #session.post(delete_url, params={"commit":"true"}, json={"delete":{"query":'type:"PropertyValue"'}})
-    index_all(['../all_files.txt'])
+    if False:
+        index_all(['../all_files.txt'])
     #index_all(['./event.txt'])
     #index_all(paths + ('./organizations.txt', './spatial.txt'))
     #index_all(['./organizations.txt', './spatial.txt'])
@@ -376,3 +399,5 @@ if __name__ == '__main__':
         import_file('oceanexperts/d5cf2f2580f59f45c6ab86ed2e1740893b5a4b59.jsonld')
         # provider
         import_file('obis/c0f54b1a7d64ba983f1937d4d8708239804655d8.jsonld')
+
+    reindex_query(["+has_geom:true"])
