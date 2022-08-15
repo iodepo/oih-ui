@@ -1,6 +1,6 @@
 /* global URLSearchParams */
 
-import React, {useRef, useLayoutEffect, useEffect, useState} from "react";
+import React, {useRef, useLayoutEffect, useEffect, useState, useMemo, useCallback} from "react";
 import {useNavigate, useParams} from "react-router-dom";
 import useSearchParam from "../useSearchParam";
 
@@ -57,6 +57,27 @@ const typeMap = {
 const INITIAL_BOUNDS = [{lon: -20, lat: -50},  // w s
     {lon: 320, lat: 50}   // e n
 ];
+
+const expandMapBounds = ({_sw, _ne}) => {
+    _sw = {..._sw}
+    _ne = {..._ne}
+    const size = { lat: Math.abs(_ne.lat - _sw.lat), lng: Math.abs(_ne.lng - _sw.lng) }
+    _sw.lat -= Math.abs(size.lat * 0.25)
+    if (Math.abs(_sw.lat) > 90) { _sw.lat = 90 * Math.sign(_sw.lat) }
+    _sw.lng -= Math.abs(size.lng * 0.25)
+
+    _ne.lat += Math.abs(size.lat * 0.25)
+    if (Math.abs(_ne.lat) > 90) { _ne.lat = 90 * Math.sign(_ne.lat) }
+    _ne.lng += Math.abs(size.lng * 0.25)
+    return { _sw, _ne }
+}
+
+const containsMapBounds = (outer, inner) => (
+    outer._sw.lat < inner._sw.lat &&
+    outer._sw.lng < inner._sw.lng &&
+    outer._ne.lat > inner._ne.lat &&
+    outer._ne.lng > inner._ne.lng
+)
 
 const regionMap = {
     Atlantic_Ocean: [{'lon': -145.33369569979607, 'lat': 5.7780686247193955}, {'lon': 65.33369569979615, 'lat': 62.066727156861674}],
@@ -237,21 +258,6 @@ export default function Results() {
         }
     }, [searchText, searchType, facetQuery, showMap, mapBounds, region, page]);
 
-    const calcGeoJsonUrl = (searchText, searchType, facetQuery, mapBounds) => {
-        let URI = `${dataServiceUrl}/spatial.geojson?`;
-        const params = new URLSearchParams({
-            ...searchType !== 'SpatialData' ? {'document_type': searchType} : {},
-            'search_text': searchText,
-            'facetType': 'the_geom',
-            'facetName': mapboxBounds_toQuery(mapBounds, region),
-        });
-        if (region !== '' && region.toUpperCase() !== 'GLOBAL') {
-            params.append('region', region)
-        }
-        URI += [params.toString(), facetQuery].filter(e => e).join("&");
-        return URI;
-    };
-
     const facetSearch = (event) => {
         const selectedIndex = event.target.selectedIndex;
         const clickedFacetQuery = new URLSearchParams({
@@ -270,16 +276,47 @@ export default function Results() {
         resetDefaultSearchUrl(searchType)
     }
 
-    let layers, geoJsonUrl;
-    if (showMap) {
-        geoJsonUrl = calcGeoJsonUrl(searchText, searchType, facetQuery, mapBounds);
-        layers = [{
-            id: 'search_results_layer',
-            label: 'Search Results',
-            type: 'geojson',
-            url: geoJsonUrl
-        }];
-    }
+    const [expandedMapBounds, setExpandedMapBounds] = useState(false)
+    const [allowSetMapBounds, ] = useState(true)
+
+    const updateMapBounds = useCallback(bounds => {
+        if (allowSetMapBounds) {
+            setMapBounds(bounds)
+            if (!expandedMapBounds || !containsMapBounds(expandedMapBounds, bounds)) {
+                setExpandedMapBounds(expandMapBounds(bounds))
+            }
+        }
+    }, [expandedMapBounds, setMapBounds, setExpandedMapBounds, allowSetMapBounds])
+
+    const geoJsonUrl = useMemo(() => {
+        if (showMap) {
+            let geoJsonUrl = `${dataServiceUrl}/spatial.geojson?`;
+            const params = new URLSearchParams({
+                ...searchType !== 'SpatialData' ? {'document_type': searchType} : {},
+                'search_text': searchText,
+                'facetType': 'the_geom',
+                'facetName': mapboxBounds_toQuery(expandedMapBounds, region),
+            });
+            if (region !== '' && region.toUpperCase() !== 'GLOBAL') {
+                params.append('region', region)
+            }
+            geoJsonUrl += [params.toString(), facetQuery].filter(e => e).join("&");
+            return geoJsonUrl
+        }
+        return null
+    }, [showMap, dataServiceUrl, searchType, searchText, region, expandedMapBounds]);
+
+    const layers = useMemo(() => {
+        return [
+            {
+                id: 'search_results_layer',
+                label: 'Search Results',
+                type: 'geojson',
+                url: geoJsonUrl,
+                cluster: true
+            },
+        ];
+    }, [geoJsonUrl]);
 
     const [selectedElem, setSelectedElem] = useState(undefined);
     const [detail, setDetail] = useState(undefined);
