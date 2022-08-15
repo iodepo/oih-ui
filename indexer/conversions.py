@@ -17,7 +17,7 @@ class UnhandledDispatchException(Exception): pass
 def _dispatch(_type, d):
     try:
         mod = __import__('conversions')
-        return getattr(mod, _type)(d)
+        return getattr(mod, _type.replace(':','__'))(d)
     except (KeyError, AttributeError):
         raise UnhandledDispatchException()
 
@@ -83,8 +83,6 @@ def CourseInstance(data):
     # UNDONE flatten
     return [a for a in atts if a and a.value]
 
-
-
 ## Geometry processing
 def _geo_polygon(feature):
     the_geom= shapely.wkt.loads(feature)
@@ -148,3 +146,22 @@ def _extractDate(field):
 
 endDate = _extractDate('endDate')
 startDate = _extractDate('startDate')
+
+## Prov Fields
+def prov__wasAttributedTo(data):
+    if isinstance(data, str):
+        return Att('id', data, 'provider')
+
+    _id = data.get('@id', None)
+    if not _id:
+        return UnhandledFormatException("Didn't find @id in prov:wasAttributedto %s" % data)
+
+    return [Att('id', _id, 'provider'),
+            Att('txt', data.get('rdf:name', None), 'provider'),
+    ]
+
+def rdf__name(data):
+    return Att(None, data, 'name')
+
+def rdfs__seeAlso(data):
+    return Att('txt', data, 'sameAs')

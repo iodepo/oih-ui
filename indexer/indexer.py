@@ -21,7 +21,7 @@ session = requests.Session()
 
 
 BASE_DIR='./../../jsonld/120822/summoned'
-
+PROV_DIR='./../../jsonld/120822/re-prov'
 
 solr_params = {
     'commit': 'true',
@@ -43,7 +43,7 @@ from test_utils import test_generation, dump_exception
 @test_generation
 def dispatch(_type, d):
     try:
-        return getattr(conversions, _type)(d)
+        return getattr(conversions, _type.replace(':','__'))(d)
     except (KeyError, AttributeError):
         raise UnhandledDispatchException()
 
@@ -106,7 +106,7 @@ def upsert(url, data, flReindex=False):
 
 def flatten(l):
     for item in l:
-        if isinstance(item, Iterable):
+        if isinstance(item, Iterable) and not isinstance(item, str):
             for subitem in item:
                 yield subitem
             continue
@@ -163,8 +163,8 @@ def genericType_toAtts(orig, rid=None):
         try:
             # check by name
             att = dispatch(k, v)
-            att.name = att.name or k
             if isinstance(att, Att):
+                att.name = att.name or k
                 data.append(att)
             else:
                 data.extend(att)
@@ -204,11 +204,34 @@ def genericType_toAtts(orig, rid=None):
                     att.name = k
             data.extend(atts)
 
-    return {d.key:d.value for d in data if d.value}
+    #old singlevalued version.
+    # return {d.key:d.value for d in data if d.value}
+
+    # Note that some things like provider can come from either provider or prov:wasAttributedTo,
+    # so we can get lists of these things from multiple keys that need to be merged.
+    ret = {}
+    for d in data:
+        ### Complicated. Want either single string valued, or list of
+        ### items, but some single string items can't be sent as a
+        ### list. So we can't use a default dict, we have to iterate.
+        if not d.value: continue
+        if not d.key in ret:
+            ret[d.key] = d.value
+            continue
+        ret[d.key] = list(flatten([ret[d.key], d.value]))
+    return ret
 
 
-def index_one(orig, rid=None):
-    data = genericTest('generic', orig, rid)
+
+
+def _merge_prov(orig, prov):
+    if prov and not 'prov:wasAttributedTo' in orig:
+        orig = orig.copy()
+        orig['prov:wasAttributedTo'] = prov
+    return orig
+
+def index_one(orig, rid=None, prov=None):
+    data = genericTest('generic', _merge_prov(orig, prov), rid)
 #    data = genericType_toAtts(orig, rid)
     data['keys'] = list(data.keys())
 #    print (json.dumps(data, indent=2))
@@ -227,16 +250,39 @@ def index_one(orig, rid=None):
 #    print(solr_post.text)
     #break
 
-def upsert_one(orig):
+_upserted = {}
+def upsert_once(_id, data, flReindex=False):
+    if _id in _upserted: return
+    _upserted.add(_id)
+    upsert(_id, data, flRindex)
+
+def upsert_one(orig, prov=None, flReindex=False):
+    orig = _merge_prov(orig, prov)
     _id = orig.get('@id', orig.get('url',''))
     if _id:
-        return upsert(_id, orig, True)
+        return upsert(_id, orig, flReindex)
+    if prov:
+        prov_id = prov.get('@id', None)
+        if prov_id:
+            upsert_once(prov_id, prov, flReindex)
     index_one(orig)
 
+def resolve_prov_file(filename):
+    try:
+        with open(os.path.join(PROV_DIR,filename), 'rb') as f:
+            prov = json.load(f)
+        for elt in prov.get('@graph',[]):
+            if elt.get('@type',None) == 'prov:Organization':
+                return elt
 
+    except Exception as msg:
+        print ("Exception load prov for %s: %s", (filename, msg))
+        return None
 
 def import_file(filename):
     filename = filename.strip()
+
+    prov = resolve_prov_file(filename)
 
     print (os.path.join(BASE_DIR,filename))
 
@@ -261,9 +307,9 @@ def import_file(filename):
             itemListElements = orig.get('itemListElement',[])
             for elt in itemListElements:
                 try:
-                    upsert_one(elt['item'])
+                    upsert_one(elt['item'], prov=prov)
                 except Exception as msg:
-                    print(msg)
+                    print("Exception in itemList: %s" % msg)
                     try:
                         dump_exception(elt['item'], str(msg))
                     except KeyError: pass
@@ -274,36 +320,26 @@ def import_file(filename):
         if graph:
             for elt in graph:
                 try:
-                    upsert_one(elt)
+                    upsert_one(elt, prov=prov)
                 except Exception as msg:
-                    print(msg)
+                    print("Exception parsing graph: %s" % msg)
                     try:
                         dump_exception(elt['item'], str(msg))
                     except KeyError: pass
             return
 
-
-    # if doc_type != 'Person':
-    #     print("Type %s, skipping %s" % (doc_type, filename))
-    #     continue
-
     try:
-        upsert_one(orig)
+        upsert_one(orig, prov=prov)
     except Exception as msg:
-        print (msg)
+        print ("Exception on bare upsert: %s" % msg)
         try:
             dump_exception(orig, str(msg))
         except KeyError: pass
-    # try:
-    #     index_one(orig)
-    # except Exception as msg:
-    #     print(json.dumps(orig, indent=2))
-    #     print(msg)
 
 def index_all(paths):
     for path in paths:
         with open(path) as files:
-            with Pool(5) as p:
+            with Pool(8) as p:
                 p.map(import_file, list(files))
 
 def reindex(url):
@@ -390,6 +426,11 @@ if __name__ == '__main__':
     #import_file('obis/df819829c4cc82c0442d5ebb00ea9aadaa7d0842.jsonld')
     #import_file('oceanexperts/5ec3b5b61e65100386448c5e8eb078ad9790c37f.jsonld')
 
+    if False:
+        #prov
+        #import_file('edmo/00032788b3d1eecf4257bd8ffd42c5d56761a6bf.jsonld')
+        #import_file('edmo/00226d82454eea1058f1677f3b57599d83517acb.jsonld')
+        import_file('obis/f4c5646df687db8f6fb4e373764ffaf4d6cab621.jsonld')
     if False:
         # polygon
         import_file('obis/42ce161b29ce021957e8db4b6a30cb9cf75646f7.jsonld')
