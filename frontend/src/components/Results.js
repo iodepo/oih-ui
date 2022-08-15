@@ -321,6 +321,7 @@ export default function Results() {
     const [mousePos, setMousePos] = useState(undefined);
     const [selectedElem, setSelectedElem] = useState(undefined);
     const [selectedDetails, setSelectedDetails] = useState(undefined);
+    const [selectHold, setSelectHold] = useState(false)
     useEffect(() => {
         if (selectedElem == undefined) {
             setSelectedDetails(undefined);
@@ -400,17 +401,28 @@ export default function Results() {
                                 style={{minHeight: "500px"}}
                             >
                                 {showMap ?
-                                    <ReMap
-                                        externalLayers={layers}
-                                        bounds={initial_bounds()}
-                                        handleBoundsChange={updateMapBounds}
-                                        layersState={[true]}
-                                        onHover={e => {
-                                            setSelectedElem(e.features?.[0])
-                                            setMousePos(e.lngLat)
-                                        }}
-                                        popup={detail}
-                                    /> :
+                                                <ReMap
+                                                    externalLayers={layers}
+                                                    bounds={initial_bounds()}
+                                                    handleBoundsChange={updateMapBounds}
+                                                    layersState={[true]}
+                                                    onHover={e => {
+                                                        if (!selectHold) {
+                                                            setSelectedElem(e.features?.[0])
+                                                            setMousePos(e.lngLat)
+                                                        }
+                                                    }}
+                                                    onClick={e => {
+                                                        if (selectHold) {
+                                                            setSelectedElem(e.features?.[0])
+                                                            setMousePos(e.lngLat)
+                                                            setSelectHold(Boolean(e.features?.[0]))
+                                                        } else if (selectedElem) {
+                                                            setSelectHold(true)
+                                                        }
+                                                    }}
+                                                    popup={tooltip}
+                                                />
                                     <>
                                         <ResultList results={results}/>
                                         <Pagination searchType={searchType} resultCount={resultCount} setPage={setPage}
