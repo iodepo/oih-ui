@@ -144,8 +144,12 @@ def genericType_toAtts(orig, rid=None):
     try:
         _id = rid or orig.get('@id', orig.get('url',''))
         if not _id:
-            #UNDONE Hash name instead?
-            _id = str(uuid.uuid4())
+            name = orig.get('name', None)
+            if name:
+                _id = hashlib.md5(name.encode('utf-8')).hexdigest()
+            else:
+                _id = str(uuid.uuid4())
+
         data = [
             Att(None, _id, 'id'),
             Att(None, orig['@type'], 'type'),
