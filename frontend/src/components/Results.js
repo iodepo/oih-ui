@@ -499,5 +499,10 @@ const Result = ({result}) => {
                         </button>
                     </div>
                 </div>}
+                <a href={`${dataServiceUrl}/source?id=${result['id']}`} target="_blank" rel="noreferrer noopener" 
+                    className="text-align-start float-start text-decoration-none" style={{ fontSize: 'x-small' }}
+                >
+                    View JSONLD source
+                </a>
         </div>);
 }

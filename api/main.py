@@ -76,6 +76,18 @@ def detail(id: str):
     data = res.json()
     return data.get('response',{}).get('docs',[])[:1] or {}
 
+@app.get("/source")
+def source(id: str):
+    params = {
+        'q': '*:*',
+        'fq': ['+id:"%s"' % id],
+        'rows': "1",
+    }
+
+    res = requests.get(SOLR_URL, params=params)
+    data = res.json()
+    return json.loads((data.get('response',{}).get('docs',[])[:1] or [{}])[0].get("json_source", "{}"))
+
 def rewriteGeom(facetType, facetName):
     # UNDONE -- need to check to see if we're correctly handling wrap-around in the bounding boxes
     
