@@ -3,7 +3,8 @@ import React, { useState } from "react";
 
 export default function Dataset({result}) {
     const [keywordsTruncated, setKeywordsTruncated] = useState(result['txt_keywords'].length > 20)
-    console.log(result['txt_keywords'])
+    const [keywordTruncate, setKeywordTruncate] = useState(Array(result['txt_keywords'].length).fill(true))
+    const toggleKeywordTruncate = id => () => setKeywordTruncate(keywords => [...keywords.slice(0, id), !keywords[id], ...keywords.slice(id + 1)])
     return(
         <div>
             {'name' in result && <p className="result-p"><b>Name:</b> {result['name']}</p>}
@@ -12,10 +13,10 @@ export default function Dataset({result}) {
             {'txt_citation' in result && <p className="result-p"><b>Citation:</b> {result['txt_citation']}</p>}
             {'txt_version' in result && <p className="result-p"><b>Version:</b> {result['txt_version']}</p>}
             {'txt_keywords' in result && <p className="result-p"><b>Keywords:</b> <br />
-                {result['txt_keywords'].map(keyword => {
-                    return <span key={keyword} className="bg-secondary mx-1 truncate badge" style={{
-                        maxWidth: '12em'
-                    }}>{keyword}</span>
+                {result['txt_keywords'].map((keyword, i) => {
+                    return <span key={keyword} className={`bg-secondary mx-1 truncate badge`} style={{
+                        maxWidth: keywordTruncate[i] ? '12em' : undefined
+                    }} onClick={toggleKeywordTruncate(i)}>{keyword}</span>
                 }).slice(0, keywordsTruncated ? 20 : undefined)}
                 {keywordsTruncated  && (
                     <button className="bg-secondary mx-1 truncate btn badge" style={{

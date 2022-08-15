@@ -457,17 +457,7 @@ const ResultList = ({results}) =>
 
 const Result = ({result}) => {
     const {Component} = typeMap[result['type']];
-    const descRef = useRef();
-    const infoRef = useRef();
-    const [truncated, setTruncated] = useState(false);
-    const [shouldTruncate, setShouldTruncate] = useState(true);
-    useLayoutEffect(() => {
-        if (!descRef.current || !infoRef.current) return
-        const isTruncated = descRef.current.scrollHeight > infoRef.current.clientHeight;
-        if (truncated !== isTruncated) {
-            setTruncated(isTruncated);
-        }
-    });
+    const [truncate, setTruncate] = useState(true)
     return (
         <div
             key={result['id']}
@@ -482,23 +472,15 @@ const Result = ({result}) => {
                 </a>
             </h4>
                 <Row className="">
-                    <div className="col" ref={infoRef}>
+                    <div className="col">
                         <Component result={result}/>
                         {'description' in result && result['type'] !== 'Person' &&
-                    <div className="col" ref={descRef} >
-                        <p className="result-p description-truncate"><b>Description:</b> {result['description']}</p>
+                    <div className="col" >
+                        <p className={`result-p ${truncate ? 'description-truncate' : ''}`} onClick={() => setTruncate(!truncate)} ><b>Description:</b> {result['description']}</p>
                     </div>
                     }
                     </div>
                 </Row>
-                {'description' in result && truncated && shouldTruncate && <div className="w-100 d-flex">
-                    <div class="col col-lg-4"></div>
-                    <div class="col d-flex justify-content-center buttonHolder">
-                        <button className="btn btn-info btn-sm text-dark" onClick={() => setShouldTruncate(false)}>Show
-                            more
-                        </button>
-                    </div>
-                </div>}
                 <a href={`${dataServiceUrl}/source?id=${result['id']}`} target="_blank" rel="noreferrer noopener" 
                     className="text-align-start float-start text-decoration-none" style={{ fontSize: 'x-small' }}
                 >
