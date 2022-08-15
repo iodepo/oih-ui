@@ -14,7 +14,8 @@ import VesselResult from "./results/VesselResult";
 import ProjectResult from "./results/ProjectResult";
 import OrganizationResult from "./results/OrganizationResult";
 import Dataset from "./results/Dataset";
-import regionBoundsMap  from '../constants'
+import regionBoundsMap  from '../constants';
+import throttle from "lodash/throttle";
 
 import ReMap from './map/ReMap';
 import Pagination, {ITEMS_PER_PAGE} from "./results/Pagination";
@@ -154,36 +155,40 @@ export default function Results() {
     const [page, setPage] = useSearchParam("page", 0);
     const [facetValues, setFacetFacetValues] = useState(new Array(facets.length).fill(""))
 
+    const mapCounts = useCallback(throttle(mapBounds => {
+        let URI = `${dataServiceUrl}/search?`;
+        const params = new URLSearchParams({
+            ...searchType !== 'SpatialData' ? { 'document_type': searchType } : {},
+            'facetType': 'the_geom',
+            'facetName': mapboxBounds_toQuery(mapBounds, region),
+            'rows': 0,
+        });
+        if (searchText !== '') {
+            params.append('search_text', searchText);
+        }
+        if (region && region.toUpperCase() !== 'GLOBAL') {
+            params.append('region', region);
+        }
+        URI += [params.toString(), facetQuery].filter(e => e).join("&");
+        let count;
+        fetch(URI)
+            .then(response => response.json())
+            .then(json => {
+                // setFacets(json.facets);
+                count = Object.values(json.counts).reduce((x, y) => x + y, 0);
+                setResultMapCount(count);
+            }).then(() => fetch(`${dataServiceUrl}/count?${new URLSearchParams({
+                field: 'type',
+                ...region.toUpperCase() !== "GLOBAL" ? { region } : {},
+                ...searchText ? { search_text: searchText } : {},
+            })}`))
+            .then(response => response.json())
+            .then(json => setCounts({ ...json.counts, [searchType]: count }));
+    }, 1000), [dataServiceUrl, searchText, searchType, region, facetQuery, setResultMapCount, setCounts])
+
     useEffect(() => {
         if (showMap) {
-            let URI = `${dataServiceUrl}/search?`;
-            const params = new URLSearchParams({
-                ...searchType !== 'SpatialData' ? {'document_type': searchType} : {},
-                'facetType': 'the_geom',
-                'facetName': mapboxBounds_toQuery(mapBounds, region),
-                'rows': 0,
-            });
-            if (searchText !== '') {
-                params.append('search_text', searchText)
-            }
-            if (region && region.toUpperCase() !== 'GLOBAL') {
-                params.append('region', region)
-            }
-            URI += [params.toString(), facetQuery].filter(e => e).join("&");
-            let count;
-            fetch(URI)
-                .then(response => response.json())
-                .then(json => {
-                    // setFacets(json.facets);
-                    count = Object.values(json.counts).reduce((x, y) => x + y, 0);
-                    setResultMapCount(count)
-                }).then(() => fetch(`${dataServiceUrl}/count?${new URLSearchParams({
-                field: 'type',
-                ...region.toUpperCase() !== "GLOBAL" ? {region} : {},
-                ...searchText ? {search_text: searchText} : {},
-            })}`))
-                .then(response => response.json())
-                .then(json => setCounts({...json.counts, [searchType]: count}))
+            mapCounts(mapBounds);
         } else {
             let URI = `${dataServiceUrl}/search?`;
             const params = new URLSearchParams({'document_type': searchType, 'start': page * ITEMS_PER_PAGE});
