@@ -318,27 +318,49 @@ export default function Results() {
         ];
     }, [geoJsonUrl]);
 
+    const [mousePos, setMousePos] = useState(undefined);
     const [selectedElem, setSelectedElem] = useState(undefined);
-    const [detail, setDetail] = useState(undefined);
+    const [selectedDetails, setSelectedDetails] = useState(undefined);
     useEffect(() => {
-        fetchDetail(selectedElem).then(d => {
+        if (selectedElem == undefined) {
+            setSelectedDetails(undefined);
+            return
+        }
+        fetchDetail(selectedElem.properties.id).then(d => {
             if (!d || !d[0]) {
-                setDetail(undefined);
+                setSelectedDetails(undefined);
                 return
             }
-            const matches = /POINT \((-?\d+\.\d+) (-?\d+\.\d+)\)/g.exec(d[0].the_geom)
-            const [_, lng, lat] = matches.map(i => parseFloat(i))
-            setDetail(
-                <Popup
-                    latitude={lat}
-                    longitude={lng}
-                    dynamicPosition={true}
-                    closeButton={false}
-                >
-                    {d[0].name}
-                </Popup>)
+            let position;
+            switch (selectedElem.layer.type) {
+                case 'circle':
+                    position = /POINT +\((-?\d+\.\d+) +(-?\d+\.\d+)\)/g.exec(d[0].the_geom)?.map(i => parseFloat(i))?.slice(1)
+                    if (position == undefined) {
+                        console.log(d[0].the_geom)
+                    }
+                    break;
+                case 'line':
+                    position = undefined;
+                    break;
+            }
+            setSelectedDetails({ detail: d[0], position })
         })
-    }, [selectedElem, setDetail])
+    }, [selectedElem?.properties?.id])
+
+    const detail = (() => {
+        if (!selectedDetails || !selectedElem) return null;
+        let [lng, lat] = selectedDetails.position ?? mousePos
+        while (lng - mousePos[0] > +180) { lng -= 360.0 }
+        while (lng - mousePos[0] < -180) { lng += 360.0 }
+        return <Popup
+            latitude={lat}
+            longitude={lng}
+            dynamicPosition={true}
+            closeButton={false}
+        >
+            {selectedDetails.detail.name}
+        </Popup>
+    })()
     
     const get_region_bounds = () => {
         const bounds = regionBoundsMap[region.replaceAll(' ', '_')]
@@ -381,10 +403,12 @@ export default function Results() {
                                     <ReMap
                                         externalLayers={layers}
                                         bounds={initial_bounds()}
-                                        handleBoundsChange={setMapBounds}
+                                        handleBoundsChange={updateMapBounds}
                                         layersState={[true]}
-                                        onMouseEnter={e => setSelectedElem(e.features[0].properties.id)}
-                                        onMouseLeave={e => setSelectedElem(undefined)}
+                                        onHover={e => {
+                                            setSelectedElem(e.features?.[0])
+                                            setMousePos(e.lngLat)
+                                        }}
                                         popup={detail}
                                     /> :
                                     <>
