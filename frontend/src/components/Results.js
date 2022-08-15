@@ -162,7 +162,6 @@ export default function Results() {
     ];
     const [results, setResults] = useState([]);
     const [resultCount, setResultCount] = useState(0);
-    const [resultMapCount, setResultMapCount] = useState(0);
     const [counts, setCounts] = useState({})
     const [facets, setFacets] = useState([]);
     const [mapBounds, setMapBounds] = useState(false);
@@ -176,13 +175,14 @@ export default function Results() {
     const [page, setPage] = useSearchParam("page", 0);
     const [facetValues, setFacetFacetValues] = useState(new Array(facets.length).fill(""))
 
-    const mapCounts = useCallback(throttle(mapBounds => {
+    const mapSearch = useCallback(throttle((mapBounds, page) => {
         let URI = `${dataServiceUrl}/search?`;
         const params = new URLSearchParams({
             ...searchType !== 'SpatialData' ? { 'document_type': searchType } : {},
             'facetType': 'the_geom',
             'facetName': mapboxBounds_toQuery(mapBounds, region),
-            'rows': 0,
+            'rows': ITEMS_PER_PAGE,
+            'start': page * ITEMS_PER_PAGE
         });
         if (searchText !== '') {
             params.append('search_text', searchText);
@@ -195,9 +195,10 @@ export default function Results() {
         fetch(URI)
             .then(response => response.json())
             .then(json => {
-                // setFacets(json.facets);
+                setResults(json.docs);
+                setFacets(json.facets);
                 count = Object.values(json.counts).reduce((x, y) => x + y, 0);
-                setResultMapCount(count);
+                setResultCount(count);
             }).then(() => fetch(`${dataServiceUrl}/count?${new URLSearchParams({
                 field: 'type',
                 ...region.toUpperCase() !== "GLOBAL" ? { region } : {},
@@ -205,11 +206,11 @@ export default function Results() {
             })}`))
             .then(response => response.json())
             .then(json => setCounts({ ...json.counts, [searchType]: count }));
-    }, 1000), [dataServiceUrl, searchText, searchType, region, facetQuery, setResultMapCount, setCounts])
+    }, 1000), [dataServiceUrl, searchText, searchType, region, facetQuery])
 
     useEffect(() => {
         if (showMap) {
-            mapCounts(mapBounds);
+            mapSearch(mapBounds, page);
         } else {
             let URI = `${dataServiceUrl}/search?`;
             const params = new URLSearchParams({'document_type': searchType, 'start': page * ITEMS_PER_PAGE});
@@ -358,6 +359,7 @@ export default function Results() {
             longitude={lng}
             dynamicPosition={true}
             closeButton={false}
+            className="w-25"
         >
             {selectedDetails.detail.name}
         </Popup>
@@ -392,20 +394,15 @@ export default function Results() {
                             facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} facetValues={facetValues} setFacetFacetValues={setFacetFacetValues}/>}
                     </div>
 
-                    <div className={`row mx-auto ${!showMap ? 'w-75' : ''}`}>
-                        <div className="col-12 mb-3">
-                            {showMap ?
-                                <h6 className="primary-color text-start"> Total results
-                                    found {resultMapCount || 0}</h6> :
-                                <h6 className="primary-color text-start pt-3"> Total results
-                                    found {resultCount || 0}</h6>
-                            }
+                    <div className="row mx-auto">
+                        <div className="col-12 container mb-3">
+                            <h6 className="primary-color text-start"> Total results found {resultCount || 0}</h6>
                         </div>
                         <div>
                             <div
                                 style={{minHeight: "500px"}}
                             >
-                                {showMap ?
+                                {showMap &&
                                     <div className="">
                                         <div className="row">
                                             <div className="container col-6">
@@ -436,13 +433,13 @@ export default function Results() {
                                                 {detail}
                                             </div>
                                         </div>
-                                    </div> :
-                                    <>
-                                        <ResultList results={results}/>
-                                        <Pagination searchType={searchType} resultCount={resultCount} setPage={setPage}
-                                                    page={page}/>
-                                    </>
+                                        <hr />
+                                    </div>
                                 }
+                                <div className="container">
+                                    <ResultList results={results}/>
+                                    <Pagination searchType={searchType} resultCount={resultCount} setPage={setPage} page={page}/>
+                                </div>
                             </div>
                         </div>
                     </div>
