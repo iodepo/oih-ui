@@ -1,12 +1,11 @@
-
-
-GENERATE_TESTS = False
-
 import hashlib
 import json
 import os
 from pathlib import Path
 from functools import wraps, partial
+
+GENERATE_TESTS = False
+
 
 def test_generation(func=None, post=None):
 
@@ -29,7 +28,7 @@ def test_generation(func=None, post=None):
         if not GENERATE_TESTS:
             return result
 
-        _type, data = tuple(args)
+        _type, data = tuple(args)[:2]
 
         print ("Generating test %s" %( _type))
         src = json.dumps(data)

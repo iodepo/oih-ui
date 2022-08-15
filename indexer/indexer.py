@@ -114,7 +114,7 @@ def flatten(l):
 
 
 ## wrapper of the function to do test generation against the "generic" class
-@test_generation(post=lambda x,y:x)
+@test_generation(post=lambda x:x)
 def genericTest(_type, orig, rid=None):
     return genericType_toAtts(orig, rid)
 
