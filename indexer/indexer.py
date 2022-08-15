@@ -20,7 +20,7 @@ query_url = "http://localhost:8983/solr/ckan/select"
 session = requests.Session()
 
 
-BASE_DIR='./../../jsonld/summoned'
+BASE_DIR='./../../jsonld/120822/summoned'
 
 
 solr_params = {
@@ -381,8 +381,8 @@ if __name__ == '__main__':
     #paths = ('./research_project.txt',)
 
     #session.post(delete_url, params={"commit":"true"}, json={"delete":{"query":'type:"PropertyValue"'}})
-    if False:
-        index_all(['../all_files.txt'])
+    if True:
+        index_all(['../all_files.v2.txt'])
     #index_all(['./event.txt'])
     #index_all(paths + ('./organizations.txt', './spatial.txt'))
     #index_all(['./organizations.txt', './spatial.txt'])
@@ -400,4 +400,5 @@ if __name__ == '__main__':
         # provider
         import_file('obis/c0f54b1a7d64ba983f1937d4d8708239804655d8.jsonld')
 
-    reindex_query(["+has_geom:true"])
+    if False:
+        reindex_query(["+has_geom:true"])
