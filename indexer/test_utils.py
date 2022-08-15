@@ -52,7 +52,7 @@ def test_generation(func=None, post=None):
 
     return inner
 
-def dump_exception(elt):
+def dump_exception(elt, err=None):
     try:
         if isinstance(elt, str):
             src = elt
@@ -61,5 +61,9 @@ def dump_exception(elt):
         filehash = hashlib.md5(src.encode('utf-8')).hexdigest()[:10]
         with open(os.path.join(os.path.dirname(__file__), 'exceptions', '%s.json' % filehash), 'w') as f:
             f.write(src)
+        if err:
+            with open(os.path.join(os.path.dirname(__file__), 'exceptions', '%s.err.txt' % filehash), 'w') as f:
+                f.write(err)
+
     except Exception as msg:
         print ("Exception dumping exception: %s")

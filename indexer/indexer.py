@@ -180,8 +180,8 @@ def genericType_toAtts(orig, rid=None):
             elif isinstance(v[0], dict):
                 try:
                     vals = sorted(flatten(_extract_dict(elt) for elt in v))
-                except TypeError:
-                    dump_exception(orig)
+                except TypeError as msg:
+                    dump_exception(orig, str(msg))
                     continue
                 # this should be sorted (prefix1, val), (prefix1, val2), (prefix2, val2)
                 for prefix, val in itertools.groupby(vals, lambda x:x.prefix):
@@ -222,7 +222,7 @@ def index_one(orig, rid=None):
         solr_post.raise_for_status()
         print("added resource %s: %s to index" % (data['id'], data['type']))
     except:
-        dump_exception(solr_post.text)
+        dump_exception(orig, solr_post.text)
         return
 #    print(solr_post.text)
     #break
@@ -265,7 +265,7 @@ def import_file(filename):
                 except Exception as msg:
                     print(msg)
                     try:
-                        dump_exception(elt['item'])
+                        dump_exception(elt['item'], str(msg))
                     except KeyError: pass
         return
 
@@ -278,7 +278,7 @@ def import_file(filename):
                 except Exception as msg:
                     print(msg)
                     try:
-                        dump_exception(elt['item'])
+                        dump_exception(elt['item'], str(msg))
                     except KeyError: pass
             return
 
@@ -292,7 +292,7 @@ def import_file(filename):
     except Exception as msg:
         print (msg)
         try:
-            dump_exception(orig)
+            dump_exception(orig, str(msg))
         except KeyError: pass
     # try:
     #     index_one(orig)
