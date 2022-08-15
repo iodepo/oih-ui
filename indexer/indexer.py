@@ -60,14 +60,15 @@ def _extract_dict(d):
         upsert(_id, d)
         return [
             Att('id', _id),
-            Att('txt', d.get('name', d.get('description','')))
+            Att('txt', str(d.get('name', d.get('description',''))))
         ]
 
     member = d.get('member', None)
     if member:
         return _extract_dict(member)
 
-    return Att('txt', d.get('name', d.get('description','')))
+    # Erroring if description is a number
+    return Att('txt', str(d.get('name', d.get('description',''))))
 
 
 def upsert(url, data, flReindex=False):
