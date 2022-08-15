@@ -348,7 +348,7 @@ export default function Results() {
         })
     }, [selectedElem?.properties?.id])
 
-    const detail = (() => {
+    const tooltip = (() => {
         if (!selectedDetails || !selectedElem) return null;
         let [lng, lat] = selectedDetails.position ?? mousePos
         while (lng - mousePos[0] > +180) { lng -= 360.0 }
@@ -361,6 +361,11 @@ export default function Results() {
         >
             {selectedDetails.detail.name}
         </Popup>
+    })()
+
+    const detail = (() => {
+        if (!selectedDetails || !selectedElem) return undefined
+        return <Result result={selectedDetails.detail} />
     })()
     
     const get_region_bounds = () => {
@@ -387,7 +392,7 @@ export default function Results() {
                             facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} facetValues={facetValues} setFacetFacetValues={setFacetFacetValues}/>}
                     </div>
 
-                    <div className="row w-75 mx-auto">
+                    <div className={`row mx-auto ${!showMap ? 'w-75' : ''}`}>
                         <div className="col-12 mb-3">
                             {showMap ?
                                 <h6 className="primary-color text-start"> Total results
@@ -401,6 +406,9 @@ export default function Results() {
                                 style={{minHeight: "500px"}}
                             >
                                 {showMap ?
+                                    <div className="">
+                                        <div className="row">
+                                            <div className="container col-6">
                                                 <ReMap
                                                     externalLayers={layers}
                                                     bounds={initial_bounds()}
@@ -423,6 +431,12 @@ export default function Results() {
                                                     }}
                                                     popup={tooltip}
                                                 />
+                                            </div>
+                                            <div className="container col-3">
+                                                {detail}
+                                            </div>
+                                        </div>
+                                    </div> :
                                     <>
                                         <ResultList results={results}/>
                                         <Pagination searchType={searchType} resultCount={resultCount} setPage={setPage}
@@ -460,7 +474,7 @@ const Result = ({result}) => {
     return (
         <div
             key={result['id']}
-            className="result-item rounded-3 p-3 mb-2"
+            className="result-item container rounded-3 p-3 mb-2"
             id='resultsDiv'
         >
             <h4 className="text-start mb-3">
