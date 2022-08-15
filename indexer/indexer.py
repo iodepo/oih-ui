@@ -255,11 +255,11 @@ def index_one(orig, rid=None, prov=None):
 #    print(solr_post.text)
     #break
 
-_upserted = {}
+_upserted = set()
 def upsert_once(_id, data, flReindex=False):
     if _id in _upserted: return
     _upserted.add(_id)
-    upsert(_id, data, flRindex)
+    upsert(_id, data, flReindex)
 
 def upsert_one(orig, prov=None, flReindex=False):
     orig = _merge_prov(orig, prov)
