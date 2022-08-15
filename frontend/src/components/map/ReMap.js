@@ -29,9 +29,6 @@ const buildLayersForSource = (sourceId, sourceLayer) => [
     type: 'line',
     source: sourceId,
     filter: ['==', '$type', 'LineString'],
-    layout: {
-      visibility: 'none'
-    },
     paint: {
       'line-color': 'red'
     }
@@ -39,14 +36,11 @@ const buildLayersForSource = (sourceId, sourceLayer) => [
   {
     id: `${sourceId}-polygon`,
     key: `${sourceId}-polygon`,
-    type: 'fill',
+    type: 'line',
     source: sourceId,
     filter: ['==', '$type', 'Polygon'],
-    layout: {
-      visibility: 'none'
-    },
     paint: {
-      'fill-color': 'blue'
+      'line-color': 'blue'
     }
   },
   {
