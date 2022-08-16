@@ -1,3 +1,28 @@
+"""
+Field and Type conversions.
+
+The intention here is that we can dispatch on either type or the
+fieldname to be able to convert the given jsonld source data into a
+set of attributes that will be indexed in solr.  There are several use
+cases:
+
+* extract a field from a typed dictionary: e.g. DataDownload, we want
+to return the contentUrl field.
+* Conditionally extract the data from a potentially complicated type:
+e.g. Place. We're preferentially parsing geo, [lat/lon], and address
+fields, and returning a rich set of data from the place.
+* Returning a specific type for a field, and potentially parsing: e.g
+startDate/endDate
+* Renaming a field: e.g. rdf:name -> name
+
+Dispatch conventions:
+
+* Function names should match the graph field name or type value.
+* Colons (:) in the name are replaced by double underscore (__)
+
+Any method beginning with _ is internal.
+"""
+
 from models import Att
 from test_utils import test_generation
 import regions
@@ -5,6 +30,7 @@ import regions
 import shapely
 import shapely.wkt
 import shapely.geometry
+import json
 
 import math
 
@@ -84,6 +110,10 @@ def CourseInstance(data):
     return [a for a in atts if a and a.value]
 
 ## Geometry processing
+def _to_geojson(geo):
+    return json.dumps(shapely.geometry.mapping(geo))
+
+
 def _geo_polygon(feature):
     the_geom= shapely.wkt.loads(feature)
     (minx, miny, maxx, maxy) = the_geom.bounds
@@ -98,8 +128,9 @@ def _geo_polygon(feature):
         print ("Complicated feature: %s, %s, %s" % (the_geom.area, length, feature))
 
     return [
-        Att('geom', the_geom.representative_point().wkt, 'point'),
-        Att('geom', the_geom.simplify(0.1).wkt,'simple'),
+        Att('geojson', _to_geojson(the_geom.representative_point()), 'point'),
+        Att('geojson', _to_geojson(the_geom.simplify(0.1)),'simple'),
+        Att('geojson', _to_geojson(the_geom),'geom'),
         Att('geom', the_geom.area, 'area'),
         Att('geom', length, 'length'),
         Att('the', the_geom.wkt, 'geom'),
@@ -109,7 +140,8 @@ def _geo_default(feature):
     the_geom= shapely.wkt.loads(feature)
     return [
         Att('the', feature, 'geom'),
-        Att('geom', the_geom.representative_point().wkt, 'point'),
+        Att('geojson', _to_geojson(the_geom.representative_point()), 'point'),
+        Att('geojson', _to_geojson(the_geom),'geom'),
     ]
 
 def _geo(featuretype, feature):
