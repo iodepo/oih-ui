@@ -1,12 +1,11 @@
-
-
-GENERATE_TESTS = False
-
 import hashlib
 import json
 import os
 from pathlib import Path
 from functools import wraps, partial
+
+GENERATE_TESTS = False
+
 
 def test_generation(func=None, post=None):
 
@@ -29,7 +28,7 @@ def test_generation(func=None, post=None):
         if not GENERATE_TESTS:
             return result
 
-        _type, data = tuple(args)
+        _type, data = tuple(args)[:2]
 
         print ("Generating test %s" %( _type))
         src = json.dumps(data)
@@ -52,7 +51,7 @@ def test_generation(func=None, post=None):
 
     return inner
 
-def dump_exception(elt):
+def dump_exception(elt, err=None):
     try:
         if isinstance(elt, str):
             src = elt
@@ -61,5 +60,9 @@ def dump_exception(elt):
         filehash = hashlib.md5(src.encode('utf-8')).hexdigest()[:10]
         with open(os.path.join(os.path.dirname(__file__), 'exceptions', '%s.json' % filehash), 'w') as f:
             f.write(src)
+        if err:
+            with open(os.path.join(os.path.dirname(__file__), 'exceptions', '%s.err.txt' % filehash), 'w') as f:
+                f.write(err)
+
     except Exception as msg:
         print ("Exception dumping exception: %s")
