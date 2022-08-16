@@ -1,0 +1,5 @@
+[
+  { "key": "txt_url", "type": ["link", "truncated"], "label": "URL" },
+  "txt_telephone",
+  { "key": "txt_memberOf", "type": "list" }
+]

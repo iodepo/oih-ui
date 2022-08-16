@@ -1,0 +1,10 @@
+[
+  {
+    "id": "alternate_name",
+    "key": "txt_identifier",
+    "label": "Alternate Name"
+  },
+  { "key": "txt_identifier", "label": "Identifier" },
+  { "key": "txt_memberOf", "type": "list", "label": "Member Of" },
+  { "key": "txt_parentOrganization", "type": "link", "label": "Parent Org" }
+]

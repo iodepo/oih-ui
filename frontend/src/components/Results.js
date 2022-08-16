@@ -15,7 +15,7 @@ import Pagination, {ITEMS_PER_PAGE} from "./results/Pagination";
 import {Popup} from 'react-map-gl';
 import FacetsFullWidth from "./results/FacetsFullWidth";
 
-import typeMap from './results/types'
+import typeMap from './results/types/'
 
 const tabs = [
     {
