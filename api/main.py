@@ -76,20 +76,42 @@ def detail(id: str):
     data = res.json()
     return data.get('response',{}).get('docs',[])[:1] or {}
 
+@app.get("/source")
+def source(id: str):
+    params = {
+        'q': '*:*',
+        'fq': ['+id:"%s"' % id],
+        'rows': "1",
+    }
+
+    res = requests.get(SOLR_URL, params=params)
+    data = res.json()
+    return json.loads((data.get('response',{}).get('docs',[])[:1] or [{}])[0].get("json_source", "{}"))
+
 def rewriteGeom(facetType, facetName):
     # UNDONE -- need to check to see if we're correctly handling wrap-around in the bounding boxes
     
-    fq = {k:v for k,v in zip(facetType, facetName)}
+    fq = dict(zip(facetType, facetName))
     corners = validate_geom(fq['the_geom'])
     if not corners:
         raise ParameterError("Invalid Geometry")
     # corners: s w n e
     log.error(corners)
-    (s,w,n,e) = corners.group(1,3,5,7)
+    (s,w,n,e) = [float(x) for x in corners.group(1,3,5,7)]
     log.error("%s, %s, %s, %s", s,w,n,e)
-    if float(w) > 180: w = 180 - float(w);
-    if float(e) > 180: e = 180 - float(e);
-    fq['the_geom'] = f'[{s},{w} TO {n},{e}]';
+    bb_width = e - w
+    if bb_width > 360.0:
+        e = 180.0
+        w = -180.0
+    else:
+        while w > +180.0: w -= 360.0
+        while w < -180.0: w += 360.0
+        e = w + bb_width
+        while e > +180.0: e -= 360.0
+        while e < -180.0: e += 360.0
+    log.error("%s, %s, %s, %s", s,w,n,e)
+    # assert -180.0 <= e <= +180.0 and -180.0 <= w <= +180.0
+    fq['the_geom'] = f'[{s},{w} TO {n},{e}]'
 
     facetType = list(fq.keys())
     facetName = list(fq.values())

@@ -29,9 +29,6 @@ const buildLayersForSource = (sourceId, sourceLayer) => [
     type: 'line',
     source: sourceId,
     filter: ['==', '$type', 'LineString'],
-    layout: {
-      visibility: 'none'
-    },
     paint: {
       'line-color': 'red'
     }
@@ -39,14 +36,11 @@ const buildLayersForSource = (sourceId, sourceLayer) => [
   {
     id: `${sourceId}-polygon`,
     key: `${sourceId}-polygon`,
-    type: 'fill',
+    type: 'line',
     source: sourceId,
     filter: ['==', '$type', 'Polygon'],
-    layout: {
-      visibility: 'none'
-    },
     paint: {
-      'fill-color': 'blue'
+      'line-color': 'blue'
     }
   },
   {
@@ -342,7 +336,7 @@ class ReMap extends React.Component {
             details, title, layersSelector,
             titleComponent, selectedLayer,
             onMouseEnter, onMouseLeave, onHover,
-            marker, popup
+            marker, popup, onClick
           } = this.props;
 
     const getCursor = ({isDragging, isHovering}) => {
@@ -362,7 +356,7 @@ class ReMap extends React.Component {
           mapStyle={ basemapStyleLink }
           mapboxApiAccessToken={ mapboxAccessToken }
           onViewportChange={ this.onViewportChange }
-          onClick={this.onClick}
+          onClick={onClick}
           onContextMenu={ e=> true }
           onKeyup={ e=> true }
           getCursor={getCursor}

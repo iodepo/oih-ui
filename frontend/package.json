@@ -11,7 +11,7 @@
     "bootstrap-scss": "^5.1.3",
     "element-resize-event": "^3.0.3",
     "history": "^4.10.1",
-    "lodash.get": "^4.4.2",
+    "lodash": "^4.4.2",
     "mapbox-gl": "^2.9",
     "react": "^18.1.0",
     "react-bootstrap": "^2.4.0",

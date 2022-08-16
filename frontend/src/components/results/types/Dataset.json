@@ -1,0 +1,18 @@
+[
+  "name",
+  { "key": "txt_sameAs", "type": ["list", "truncated", "link"] },
+  "txt_license",
+  "txt_citation",
+  "txt_version",
+  { "key": "txt_keywords", "type": "keywords" },
+  {
+    "key": "id_includedInDataCatalog",
+    "type": "link",
+    "label": "Data Catalog"
+  },
+  "txt_temporalCoverage",
+  { "key": "txt_distribution", "type": "link" },
+  { "key": "txt_region", "type": "list" },
+  { "key": "id_provider", "type": ["list", "link"], "label": "Provider ID" },
+  { "key": "txt_provider", "type": "list" }
+]
