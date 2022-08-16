@@ -1,3 +1,10 @@
+.App {
+  background: url("resources/landing-bg.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: 15% 95%;
+}
+
 #headerLogo {
   width: 60px;
   height: 60px;
@@ -110,10 +117,27 @@ p.result-p.truncate {
 }
 
 .bubble {
-  margin-right: 8.5% !important;
-  margin-left: 10% !important;
-  margin-top: 4% !important;
-  padding: 23%;
+  padding: 10%;
+  height: 80px;
+  width: 80px;
+  font-size: 0.5em;
+  z-index: 2;
+}
+
+.bubble-textarea {
+  position: relative;
+  top: 1.5em;
+  left: -1em;
+  background-color: #2f5592;
+  color: white;
+  padding: 1em;
+  padding-left: 1.5em;
+  border-radius: 0.8em;
+}
+
+.category-icon {
+  position: relative;
+  bottom: -1em;
 }
 
 .footer-bg{
