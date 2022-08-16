@@ -392,6 +392,7 @@ export default function Results() {
                                                         }
                                                     }}
                                                     popup={tooltip}
+                                                    selectedId={selectedElem?.properties?.id}
                                                 />
                                             </div>
                                             <div className="container col-3">
