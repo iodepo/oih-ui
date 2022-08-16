@@ -1,19 +1,12 @@
 /* global URLSearchParams */
 
-import React, {useRef, useLayoutEffect, useEffect, useState, useMemo, useCallback} from "react";
+import React, {useEffect, useState, useMemo, useCallback} from "react";
 import {useNavigate, useParams} from "react-router-dom";
 import useSearchParam from "../useSearchParam";
 
-import Expert from './Expert';
 import ResultTabs from "./ResultTabs";
 import {dataServiceUrl} from '../config/environment';
 import {Row} from "react-bootstrap";
-import DocumentResult from "./results/DocumentResult";
-import CourseResult from "./results/CourseResult";
-import VesselResult from "./results/VesselResult";
-import ProjectResult from "./results/ProjectResult";
-import OrganizationResult from "./results/OrganizationResult";
-import Dataset from "./results/Dataset";
 import regionBoundsMap  from '../constants';
 import throttle from "lodash/throttle";
 
@@ -22,37 +15,42 @@ import Pagination, {ITEMS_PER_PAGE} from "./results/Pagination";
 import {Popup} from 'react-map-gl';
 import FacetsFullWidth from "./results/FacetsFullWidth";
 
-const typeMap = {
-    CreativeWork: {
-        Component: DocumentResult,
-        type: "Document",
-    },
-    Person: {
-        Component: Expert,
-        type: "Experts",
-    },
-    Organization: {
-        Component: OrganizationResult,
-        type: "Institutions",
-    },
-    Course: {
-        Component: CourseResult,
-        type: "Training",
-    },
-    Vehicle: {
-        Component: VesselResult,
-        type: "Vessels",
-    },
-    Dataset: {
-        Component: Dataset,
-        type: "Dataset",
-    },
-    ResearchProject: {
-        Component: ProjectResult,
-        type: "Projects",
-    }
-};
+import typeMap from './results/types'
 
+const tabs = [
+    {
+        title: 'CreativeWork',
+        tab_name: 'Documents',
+    },
+    {
+        title: 'Person',
+        tab_name: 'Experts',
+    },
+    {
+        title: 'Organization',
+        tab_name: 'Institutions',
+    },
+    {
+        title: 'Dataset',
+        tab_name: 'Datasets',
+    },
+    {
+        title: 'Course',
+        tab_name: 'Training',
+    },
+    {
+        title: 'Vehicle',
+        tab_name: 'Vessels',
+    },
+    {
+        title: 'ResearchProject',
+        tab_name: 'Projects',
+    },
+    {
+        title: 'SpatialData',
+        tab_name: 'Spatial Data',
+    },
+];
 
 const INITIAL_BOUNDS = [{lon: -20, lat: -50},  // w s
     {lon: 320, lat: 50}   // e n
@@ -126,40 +124,7 @@ function resolveAsUrl(url) {
 const fetchDetail = id => fetch(`${dataServiceUrl}/detail/?id=${id}`).then(r => r.json());
 
 export default function Results() {
-    const tabs = [
-        {
-            title: 'CreativeWork',
-            tab_name: 'Documents',
-        },
-        {
-            title: 'Person',
-            tab_name: 'Experts',
-        },
-        {
-            title: 'Organization',
-            tab_name: 'Institutions',
-        },
-        {
-            title: 'Dataset',
-            tab_name: 'Datasets',
-        },
-        {
-            title: 'Course',
-            tab_name: 'Training',
-        },
-        {
-            title: 'Vehicle',
-            tab_name: 'Vessels',
-        },
-        {
-            title: 'ResearchProject',
-            tab_name: 'Projects',
-        },
-        {
-            title: 'SpatialData',
-            tab_name: 'Spatial Data',
-        },
-    ];
+
     const [results, setResults] = useState([]);
     const [resultCount, setResultCount] = useState(0);
     const [counts, setCounts] = useState({})
