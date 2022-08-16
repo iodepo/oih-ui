@@ -1,10 +1,8 @@
-import React, {useState, useEffect, useCallback} from "react";
+import React, {useState, useCallback} from "react";
 import {useNavigate, useLocation, useSearchParams} from "react-router-dom";
 import useSearchParam from "../useSearchParam";
 
 import Button from 'react-bootstrap/Button';
-import {dataServiceUrl} from "../config/environment";
-
 import BackgroundImage1 from '../resources/Photo Africa Coast Original.jpg'
 
 const REGIONS = ['Global', 'Atlantic Ocean', 'Latin America and the Caribbean', 'Africa', 'Pacific Small Islands']
@@ -14,18 +12,9 @@ export default function Search() {
     const [params,] = useSearchParams();
     const [searchQuery, setSearchQuery] = useState(params.has('search_text') ? params.get('search_text') : '');
     const [region, setRegion] = useSearchParam("region", "global")
-    const [availableRegions, setAvailableRegions] = useState([]);
     const location = useLocation();
     const isResults = location.pathname.startsWith("/results")
 
-    useEffect(() => {
-        setAvailableRegions(REGIONS)
-        // fetch(`${dataServiceUrl}/count?field=txt_region`)
-        //     .then(response => response.json())
-        //     .then(json => {
-        //         setAvailableRegions(Object.keys(json['counts']))
-        //     })
-    }, []);
 
     const hrefFor = (region, query) => `/results/?${new URLSearchParams({
         ...query ? {search_text: query} : {},
@@ -47,7 +36,7 @@ export default function Search() {
                     <select className="form-select w-25 rounded-0" value={region}
                             onChange={e => setRegion(e.target.value)}>
                         {
-                            availableRegions.map((region) => {
+                            REGIONS.map((region) => {
                                 return <option>{region}</option>
                             })
                         }

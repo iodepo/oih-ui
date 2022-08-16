@@ -140,6 +140,17 @@ export default function Results() {
     const [page, setPage] = useSearchParam("page", 0);
     const [facetValues, setFacetFacetValues] = useState(new Array(facets.length).fill(""))
 
+    useEffect(() => {
+        fetch(`${dataServiceUrl}/search?${new URLSearchParams({
+            rows: 0,
+            include_facets: false,
+            ...region.toUpperCase() !== "GLOBAL" ? { region } : {},
+            ...searchText ? { search_text: searchText } : {},
+        })}`)
+            .then(response => response.json())
+            .then(json => setCounts(prev => ({ ...json.counts, [searchType]: prev[searchType], SpatialData: prev.SpatialData })))
+    }, [region, searchText, searchType])
+
     const mapSearch = useCallback(throttle((mapBounds, page) => {
         let URI = `${dataServiceUrl}/search?`;
         const params = new URLSearchParams({
@@ -156,21 +167,17 @@ export default function Results() {
             params.append('region', region);
         }
         URI += [params.toString(), facetQuery].filter(e => e).join("&");
-        let count;
         fetch(URI)
             .then(response => response.json())
             .then(json => {
                 setResults(json.docs);
                 setFacets(json.facets);
-                count = Object.values(json.counts).reduce((x, y) => x + y, 0);
-                setResultCount(count);
-            }).then(() => fetch(`${dataServiceUrl}/count?${new URLSearchParams({
-                field: 'type',
-                ...region.toUpperCase() !== "GLOBAL" ? { region } : {},
-                ...searchText ? { search_text: searchText } : {},
-            })}`))
-            .then(response => response.json())
-            .then(json => setCounts({ ...json.counts, [searchType]: count }));
+                // TODO: Pagination will have *issues* with double-counted orgs+experts
+                // (count of orgs, people, and experts are summed, double-counting both orgs and people)
+                const count = Object.values(json.counts).reduce((x, y) => x + y, 0);
+                setResultCount(count); 
+                setCounts(prev => ({ ...prev, [searchType]: count }))
+            })
     }, 1000), [dataServiceUrl, searchText, searchType, region, facetQuery])
 
     useEffect(() => {
@@ -178,7 +185,7 @@ export default function Results() {
             mapSearch(mapBounds, page);
         } else {
             let URI = `${dataServiceUrl}/search?`;
-            const params = new URLSearchParams({'document_type': searchType, 'start': page * ITEMS_PER_PAGE});
+            const params = new URLSearchParams({'document_type': searchType, 'start': page * ITEMS_PER_PAGE, rows: ITEMS_PER_PAGE});
             if (searchText !== '') {
                 params.append('search_text', searchText)
             }
@@ -187,40 +194,31 @@ export default function Results() {
             }
             URI += [params.toString(), facetQuery].filter(e => e).join("&");
 
-            let count;
             fetch(URI)
                 .then(response => response.json())
                 .then(json => {
                     setResults(json.docs);
-                    count = json.counts[searchType]
+                    const count = json.counts[searchType]
                     setResultCount(count);
-                    setFacets(json.facets);
-                }).then(() => fetch(`${dataServiceUrl}/count?${new URLSearchParams({
-                field: 'type',
-                ...region.toUpperCase() !== "GLOBAL" ? {region} : {},
-                ...searchText ? {search_text: searchText} : {},
-            })}`))
+                    setCounts(prev => ({ ...prev, [searchType]: count }))
+                    setFacets(json.facets.filter(facet => facet.counts.length > 0));
+                })
+
+            const geoParams = new URLSearchParams({
+                'facetType': 'the_geom',
+                'facetName': get_region_bounds(),
+                include_facets: false,
+                'rows': 0,
+            });
+            if (region && region.toUpperCase() !== 'GLOBAL') {
+                geoParams.append('region', region)
+            }
+            if (searchText) {
+                geoParams.append('search_text', searchText)
+            }
+            fetch(`${dataServiceUrl}/search?${geoParams.toString()}`)
                 .then(response => response.json())
-                .then(json => {
-                        const params = new URLSearchParams({
-                            'facetType': 'the_geom',
-                            'facetName': get_region_bounds(),
-                            'rows': 0,
-                        });
-                        if (region && region.toUpperCase() !== 'GLOBAL') {
-                            params.append('region', region)
-                        }
-                        if (searchText) {
-                            params.append('search_text', searchText)
-                        }
-                        fetch(`${dataServiceUrl}/search?${params.toString()}`)
-                            .then(response => response.json())
-                            .then(spatialDataJson => {
-                                json.counts.SpatialData = Object.values(spatialDataJson.counts).reduce((x, y) => x + y, 0)
-                                setCounts({...json.counts, [searchType]: count})
-                            })
-                    }
-                )
+                .then(json => setCounts(prev => ({ ...prev, SpatialData: Object.values(json.counts).reduce((x, y) => x + y, 0)})))
         }
     }, [searchText, searchType, facetQuery, showMap, mapBounds, region, page]);
 
@@ -294,23 +292,23 @@ export default function Results() {
             return
         }
         fetchDetail(selectedElem.properties.id).then(d => {
-            if (!d || !d[0]) {
+            if (!d) {
                 setSelectedDetails(undefined);
                 return
             }
             let position;
             switch (selectedElem.layer.type) {
                 case 'circle':
-                    position = /POINT +\((-?\d+\.\d+) +(-?\d+\.\d+)\)/g.exec(d[0].the_geom)?.map(i => parseFloat(i))?.slice(1)
+                    position = /POINT +\((-?\d+\.\d+) +(-?\d+\.\d+)\)/g.exec(d.the_geom)?.map(i => parseFloat(i))?.slice(1)
                     if (position == undefined) {
-                        console.log(d[0].the_geom)
+                        console.log(d.the_geom)
                     }
                     break;
                 case 'line':
                     position = undefined;
                     break;
             }
-            setSelectedDetails({ detail: d[0], position })
+            setSelectedDetails({ detail: d, position })
         })
     }, [selectedElem?.properties?.id])
 
