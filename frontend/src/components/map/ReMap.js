@@ -22,7 +22,7 @@ import './map.scss'
 const labelsAndBordersLayer = 'wb-boundaries';
 
 // Adds layers for points
-const buildLayersForSource = (sourceId, sourceLayer) => [
+const buildLayersForSource = (selectedId, sourceId, sourceLayer) => [
   {
     id: `${sourceId}-line`,
     key: `${sourceId}-line`,
@@ -30,7 +30,7 @@ const buildLayersForSource = (sourceId, sourceLayer) => [
     source: sourceId,
     filter: ['==', '$type', 'LineString'],
     paint: {
-      'line-color': 'red'
+      'line-color':  ['case', ['==', ['get', 'id'], selectedId ?? null], 'green', 'red']
     }
   },
   {
@@ -40,7 +40,7 @@ const buildLayersForSource = (sourceId, sourceLayer) => [
     source: sourceId,
     filter: ['==', '$type', 'Polygon'],
     paint: {
-      'line-color': 'blue'
+      'line-color': ['case', ['==', ['get', 'id'], selectedId ?? null], 'green', 'blue']
     }
   },
   {
@@ -50,7 +50,7 @@ const buildLayersForSource = (sourceId, sourceLayer) => [
     source: sourceId,
     filter: ['==', '$type', 'Point'],
     paint: {
-      'circle-color': 'purple'
+      'circle-color': ['case', ['==', ['get', 'id'], selectedId ?? null], 'green', 'purple']
     }
   }
 ];
@@ -151,7 +151,7 @@ class ReMap extends React.Component {
                   {...layer.style}
                 />);
     } else {
-      layers = buildLayersForSource(sourceId, '').map(l =>
+      layers = buildLayersForSource(this.props.selectedId, sourceId, '').map(l =>
         (<Layer
            {...l}
            visible={true}
@@ -213,7 +213,7 @@ class ReMap extends React.Component {
         {...options}
       >
         { layer.vectorLayers.map(vt =>
-          buildLayersForSource(sourceId, vt).map(l => (
+          buildLayersForSource(this.props.selectedId, sourceId, vt).map(l => (
             <Layer
               {...l}
               sourceLayer={vt}
