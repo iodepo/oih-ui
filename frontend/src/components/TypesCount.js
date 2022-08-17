@@ -6,14 +6,13 @@ import {useNavigate} from "react-router-dom";
 import useSearchParam from "../useSearchParam";
 import regionBoundsMap  from '../constants'
 const doc_types = ['CreativeWork', 'Person', 'Organization', 'Dataset', 'ResearchProject', 'Event', 'Course', 'Vehicle']
-const defaultCountState = {'counts': Object.fromEntries(doc_types.map(e => [e, 0]))}
+const defaultCountState = Object.fromEntries(doc_types.map(e => [e, 0]))
 
 const formatter = Intl.NumberFormat([], { "notation": "compact" })
 const entries = counts => [
     [
         {
             id: 'Person',
-            // count: (counts['Person'] || 0) + (counts['Organization'] || 0),
             text: 'Experts'
         },
         {
@@ -44,7 +43,6 @@ const entries = counts => [
         },
         {
             id: 'SpatialData',
-            count: 0,
             text: 'Spatial Data'
         }
     ]
@@ -52,7 +50,6 @@ const entries = counts => [
 
 export default function TypesCount() {
     const [counts, setCounts] = useState(defaultCountState);
-    const [spatialData, setSpatialData] = useState(0);
     const navigate = useNavigate();
     const [region,] = useSearchParam("region")
 
@@ -64,14 +61,13 @@ export default function TypesCount() {
     }
 
     useEffect(() => {
-        fetch(`${dataServiceUrl}/count?field=type${region ? '&region=' + region : ''}`)
+        fetch(`${dataServiceUrl}/search?rows=0&include_facets=false&${region ? '&region=' + region : ''}`)
             .then(response => response.json())
-            .then(json => setCounts(json))
+            .then(json => setCounts(prev => ({ ...prev, ...json.counts })))
 
-        fetch(`${dataServiceUrl}/search?facetType=the_geom&facetName=${get_region_bounds()}${region ? '&region=' + region : ''}`)
+        fetch(`${dataServiceUrl}/search?rows=0&include_facets=false&facetType=the_geom&facetName=${get_region_bounds()}${region ? '&region=' + region : ''}`)
             .then(response => response.json())
-            .then(json => setSpatialData(Object.values(json.counts).reduce((x, y) => x + y, 0)))
-
+            .then(json => setCounts(prev => ({...prev, SpatialData: Object.values(json.counts).reduce((x, y) => x + y, 0)})))
     }, [region]);
 
     const searchByType = type => event => navigate(`/results/${type}?${region ? 'region=' + region : ''}`);
@@ -79,16 +75,13 @@ export default function TypesCount() {
     return (
         <Container className="bubble-height">
             <div>
-                {entries(counts.counts).map(row =>
+                {entries(counts).map(row =>
                     <Row className="bubble-height">
                         {row.map(col =>
                             <Col className="p-4" role="button" id={`bubble_${col.id}`} onClick={searchByType(col.id)}>
                                 <div className="primary-bg rounded-circle bubble">
                                     <span className="text-light-alt">
-                                    {
-                                        col.id !== 'SpatialData' ? (counts.counts[col.id] !== undefined ? formatter.format(counts.counts[col.id]) : 0) : spatialData
-
-                                    }
+                                    {counts[col.id] !== undefined ? formatter.format(counts[col.id]) : 0}
                                 </span><br/>
                                 <span className="text-light fw-bold text-uppercase">{col.text ?? col.id}</span>
 
