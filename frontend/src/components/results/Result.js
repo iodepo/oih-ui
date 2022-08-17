@@ -13,10 +13,10 @@ const Keyword = ({ keyword }) => {
 }
 
 const Keywords = ({ result }) => {
-    const [keywordsTruncated, setKeywordsTruncated] = useState(result.length > 20)
     result = [...result]
     result.sort()
     result = sortedUniq(result)
+    const [keywordsTruncated, setKeywordsTruncated] = useState(result.length > 20)
     return <>
         <br />
         {result.map(keyword => <Keyword key={keyword} keyword={keyword} />).slice(0, keywordsTruncated ? 20 : undefined)}
