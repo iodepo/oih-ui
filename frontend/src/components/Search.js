@@ -27,7 +27,7 @@ export default function Search() {
     let url = window.location.href.split('/')[3]
 
     return (
-        <div className={"pb-3 mt-4" + (url == "results" ? 'searchbg-alt' : '')}>
+        <div className={"pb-3 mt-4" + (url == " results" ? ' searchbg-alt' : '')}>
             <div className="container">
                 <div className="row">
                     <div className="col-2 me-3">

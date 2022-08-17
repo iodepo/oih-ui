@@ -1,8 +1,10 @@
-.App {
+#root {
   background: url("resources/landing-bg.jpg");
   background-size: cover;
   background-repeat: no-repeat;
-  background-position: 15% 95%;
+  background-position: 15% 65%;
+  min-height: 100vh;
+  background-attachment: fixed;
 }
 
 #headerLogo {
@@ -40,6 +42,7 @@ a.text-light.menu-text.nav-link {
   position: absolute;
   top: 1em;
   right: 2em;
+  cursor: pointer;
 }
 
 .primary-bg {
@@ -82,7 +85,8 @@ a.text-light.menu-text.nav-link {
   background-size: cover;
   background-repeat: no-repeat;
   background-position: 75% 60%;
-  background-color: #21295c;
+  padding-top: 2em;
+  //background-color: #21295c;
 }
 
 .result-search {
@@ -106,7 +110,7 @@ a.text-light.menu-text.nav-link {
 
 .result-title {
   text-decoration: none;
-  color: #21295c;
+  color: #ffffff;
 }
 
 .result-title:hover {
@@ -184,24 +188,30 @@ p.result-p.truncate {
   margin-bottom: 7em;
 }
 
+#result-section {
+  background-color: rgba(0,24,49, 0.8);
+  padding: 2em;
+  color: white;
+}
+
+#ResTabs {
+  margin-bottom: -1em;
+}
+
 .footer-bg{
   background: #21295c;
 }
-
-//@media only screen and (min-width: 1200px) {
-//  .bubble-height {
-//    margin-top: -2em;
-//  }
-//}
 
 .footer-logos {
   height: 4rem;
 }
 
-#root {
-  text-align: center;
-  background: #f3f2f2;
-  min-height: 100vh;
+#resultsPaginate {
+  margin-top: 2em;
+}
+
+#result-container {
+  padding: 2% 6%;
 }
 
 .react-tabs__tab:focus::after {

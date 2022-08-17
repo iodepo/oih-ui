@@ -347,11 +347,12 @@ export default function Results() {
 
     return (
         <>
-            <div>
+            <div id="result-container">
                 <div>
                     <ResultTabs counts={counts} tabList={tabs} searchType={searchType}
                                 resetDefaultSearchUrl={resetDefaultSearchUrl} clearFacetQuery={clearFacetQuery}/>
-                    <div>
+                    <div id="result-section">
+                        <div>
 
                         {facets.length > 0 && <FacetsFullWidth
                             facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} facetValues={facetValues} setFacetFacetValues={setFacetFacetValues}/>}
@@ -359,7 +360,7 @@ export default function Results() {
 
                     <div className="row mx-auto">
                         <div className="col-12 container mb-3">
-                            <h6 className="primary-color text-start"> Total results found {resultCount || 0}</h6>
+                            <h6 className="primary-color text-start text-light ps-5 pt-3"> Total results found {resultCount || 0}</h6>
                         </div>
                         <div>
                             <div
@@ -406,6 +407,8 @@ export default function Results() {
                                 </div>
                             </div>
                         </div>
+                    </div>
+
                     </div>
 
                 </div>

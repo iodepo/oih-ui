@@ -46,7 +46,7 @@ export default function FacetsFullWidth({
             <div className="row">
                 {facets.map((facet, i) => {
                     return (
-                        <div className="col-5">
+                        <div className="col">
                             <div key={i}>
                                 <select
                                     className="form-select form-select-md mb-3"
