@@ -92,7 +92,7 @@ export default function TypesCount() {
         <Container className="bubble-height">
             <div className="category-section">
                 <div id="category-heading" className="mx-auto">
-                    <h2 className="text-white">Browse by category</h2>
+                    <h5 className="text-white">Browse by category</h5>
                 </div>
 
                 {entries(counts.counts).map(row =>
