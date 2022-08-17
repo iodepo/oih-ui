@@ -190,9 +190,10 @@ p.result-p.truncate {
 }
 
 #result-section {
-  background-color: rgba(0,24,49, 0.8);
+  background-color: rgba(0,24,49, 1);
   padding: 2em;
   color: white;
+  opacity: 100%;
 }
 
 #ResTabs {
@@ -240,6 +241,7 @@ p.result-p.truncate {
   min-height: 500px;
   height: 500px;
   width: 112%;
+  color: black;
 }
 
 .exp-map__title {
