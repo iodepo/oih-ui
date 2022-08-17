@@ -10,8 +10,11 @@ import {Routes} from "react-router";
 
 
 function App() {
+    let url = window.location.href.split('/')[3]
+
     return (
-    <div className="App">
+    // <div className="App">
+    <div className={url == "results" ? '' : 'App'}>
         <BrowserRouter>
             <Header />
             <Search />

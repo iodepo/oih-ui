@@ -42,7 +42,7 @@ export default function Search() {
             <div className="container">
                 <div className="row">
                     <div className="col-2 me-3">
-                        <img className="p-1" height="100px" src={OIHLogo}/>
+                        <a href="/"><img className="p-1" height="100px" src={OIHLogo}/></a>
                     </div>
 
 

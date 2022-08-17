@@ -15,6 +15,33 @@ nav.navbar-oih.navbar.navbar-expand-lg.navbar-light {
    background: #21295c;
 }
 
+nav .navbar-collapse {
+  position: absolute;
+  top: 0;
+  background: rgba(0,24,49, 1);
+  right: -100%; /* pull the menu out of the viewport from right */
+  width: 25vw;
+  height: 100vh;
+  display: block;
+  padding-top: 2em;
+  transition: right 0.3s ease; /* transition for smooth sliding */
+  z-index: 3;
+}
+
+nav .navbar-collapse.show {
+  right: 0; /* push the menu back to viewport */
+}
+
+a.text-light.menu-text.nav-link {
+    text-align: left;
+}
+
+.close-btn {
+  position: absolute;
+  top: 1em;
+  right: 2em;
+}
+
 .primary-bg {
   background-color: #21295c;
 }
