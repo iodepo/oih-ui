@@ -58,7 +58,7 @@ def spatial(search_text: str=None, document_type: str=None, region: str=None, fa
         index = facetType.index('the_geom')
         facetName[index] = rewriteGeom(facetName[index])
 
-    query = SolrQuery(search_text, document_type, facetName, facetType, facetFields=[], region=region, rows=GEOJSON_ROWS, flList=GEOJSON_FIELDS | {'the_geom'})
+    query = SolrQuery(search_text, document_type, facetType, facetName, facetFields=[], region=region, rows=GEOJSON_ROWS, flList=GEOJSON_FIELDS | {'the_geom'})
     data = query.json().get('response',{})
 
     geometries = {
@@ -125,9 +125,9 @@ def rewriteGeom(the_geom):
     if not corners:
         raise ParameterError("Invalid Geometry")
     # corners: s w n e
-    log.error(corners)
+    #log.error(corners)
     (s,w,n,e) = [float(x) for x in corners.group(1,3,5,7)]
-    log.error("%s, %s, %s, %s", s,w,n,e)
+    #log.error("%s, %s, %s, %s", s,w,n,e)
     bb_width = e - w
     if bb_width > 360.0:
         e = 180.0
@@ -138,7 +138,7 @@ def rewriteGeom(the_geom):
         e = w + bb_width
         while e > +180.0: e -= 360.0
         while e < -180.0: e += 360.0
-    log.error("%s, %s, %s, %s", s,w,n,e)
+    #log.error("%s, %s, %s, %s", s,w,n,e)
     return f'[{s},{w} TO {n},{e}]'
 
 
