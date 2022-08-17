@@ -6,7 +6,7 @@ import Vlaanderen from '../resources/Vlaanderen Logo White Footer.png'
 
 export default function Footer() {
     return (
-        <div className="mt-5 ml-5 pt-5 mb-0 pb-5 text-light footer-bg">
+        <div className="mt-5 ml-5 pt-5 mb-0 pb-5 text-light">
             <div className="container d-flex ">
                 <div className="flex-fill text-start">
                     <h3 className="text-white fw-bold h4 text-uppercase">About OIH Project</h3>

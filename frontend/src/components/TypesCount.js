@@ -4,7 +4,15 @@ import {Col, Container, Row} from "react-bootstrap";
 import { dataServiceUrl } from '../config/environment';
 import {useNavigate} from "react-router-dom";
 import useSearchParam from "../useSearchParam";
-import regionBoundsMap  from '../constants'
+import regionBoundsMap  from '../constants';
+import diver from "../resources/diving.png";
+import lighthouse from "../resources/lighthouse.png";
+import thinking from "../resources/thinking.png";
+import documents from "../resources/document.png";
+import map from "../resources/map.png";
+import boat from "../resources/boat.png";
+import project_mgmt from "../resources/project-management.png";
+import database from "../resources/database.png";
 const doc_types = ['CreativeWork', 'Person', 'Organization', 'Dataset', 'ResearchProject', 'Event', 'Course', 'Vehicle']
 const defaultCountState = Object.fromEntries(doc_types.map(e => [e, 0]))
 
@@ -13,37 +21,45 @@ const entries = counts => [
     [
         {
             id: 'Person',
-            text: 'Experts'
+            text: 'Experts',
+            icon: diver
         },
         {
             id: 'CreativeWork',
-            text: 'Documents'
+            text: 'Documents',
+            icon: documents
         },
         {
             id: 'Course',
-            text: 'Training'
+            text: 'Training',
+            icon: thinking
         },
         {
             id: 'Dataset',
-            text: 'Datasets'
+            text: 'Datasets',
+            icon: database
         },
     ],
     [
         {
             id: 'Vehicle',
-            text: 'Vessels'
+            text: 'Vessels',
+            icon: boat
         },
         {
             id: 'ResearchProject',
-            text: 'Projects'
+            text: 'Projects',
+            icon: project_mgmt
         },
         {
             id: 'Organization',
-            text: 'Institution'
+            text: 'Institution',
+            icon: lighthouse
         },
         {
             id: 'SpatialData',
-            text: 'Spatial Data'
+            text: 'Spatial Data',
+            icon: map
         }
     ]
 ];
@@ -74,19 +90,29 @@ export default function TypesCount() {
 
     return (
         <Container className="bubble-height">
-            <div>
-                {entries(counts).map(row =>
+            <div className="category-section">
+                <div id="category-heading" className="mx-auto">
+                    <h2 className="text-white">Browse by category</h2>
+                </div>
+
+                {entries(counts.counts).map(row =>
                     <Row className="bubble-height">
                         {row.map(col =>
                             <Col className="p-4" role="button" id={`bubble_${col.id}`} onClick={searchByType(col.id)}>
-                                <div className="primary-bg rounded-circle bubble">
-                                    <span className="text-light-alt">
-                                    {counts[col.id] !== undefined ? formatter.format(counts[col.id]) : 0}
-                                </span><br/>
-                                <span className="text-light fw-bold text-uppercase">{col.text ?? col.id}</span>
-
+                                <div>
+                                  <img className="p-1 category-icon" height="100px" src={col.icon}/>
+                                  <div className="d-flex">
+                                    <div className="primary-bg rounded-circle bubble">
+                                      <span className="text-light-alt">
+                                        {counts[col.id] !== undefined ? formatter.format(counts[col.id]) : 0}
+                                      </span>
+                                    </div>
+                                    <div className="">
+                                      <span className="text-light fw-bold bubble-textarea">{col.text ?? col.id}</span>
+                                    </div>
+                                  </div>
                                 </div>
-                                </Col>
+                            </Col>
                         )}
                     </Row>
                 )}

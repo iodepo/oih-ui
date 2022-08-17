@@ -1,3 +1,10 @@
+.App {
+  background: url("resources/landing-bg.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: 15% 95%;
+}
+
 #headerLogo {
   width: 60px;
   height: 60px;
@@ -6,6 +13,33 @@
 
 nav.navbar-oih.navbar.navbar-expand-lg.navbar-light {
    background: #21295c;
+}
+
+nav .navbar-collapse {
+  position: absolute;
+  top: 0;
+  background: rgba(0,24,49, 1);
+  right: -100%; /* pull the menu out of the viewport from right */
+  width: 25vw;
+  height: 100vh;
+  display: block;
+  padding-top: 2em;
+  transition: right 0.3s ease; /* transition for smooth sliding */
+  z-index: 3;
+}
+
+nav .navbar-collapse.show {
+  right: 0; /* push the menu back to viewport */
+}
+
+a.text-light.menu-text.nav-link {
+    text-align: left;
+}
+
+.close-btn {
+  position: absolute;
+  top: 1em;
+  right: 2em;
 }
 
 .primary-bg {
@@ -110,10 +144,44 @@ p.result-p.truncate {
 }
 
 .bubble {
-  margin-right: 8.5% !important;
-  margin-left: 10% !important;
-  margin-top: 4% !important;
-  padding: 23%;
+  padding: 10%;
+  height: 80px;
+  width: 80px;
+  font-size: 0.5em;
+  z-index: 2;
+  border: 1px solid #fff;
+}
+
+.bubble-textarea {
+  position: relative;
+  top: 1.5em;
+  left: -1em;
+  background-color: #2f5592;
+  color: white;
+  padding: 1em;
+  padding-left: 1.5em;
+  border-radius: 0.8em;
+}
+
+.category-icon {
+  position: relative;
+  bottom: -1em;
+}
+
+#category-heading {
+  position: relative;
+  background-color: black;
+  margin-top: -4em;
+  padding: 1em 4em;
+  width: fit-content;
+}
+
+.category-section {
+  background-color: rgba(0,24,49, 0.8);
+  padding: 2em;
+  border-radius: 3em;
+  margin-top: 5em;
+  margin-bottom: 7em;
 }
 
 .footer-bg{
