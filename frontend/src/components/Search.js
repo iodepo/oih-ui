@@ -57,6 +57,11 @@ export default function Search() {
                         name="search"/>
                     <Button className="btn-lg btn-info rounded-0 text-dark" type="submit"><span className="h6">Search</span></Button>
                 </form>
+                        {!isResults && <div className="text-light text-start mt-3">
+                    <span className="p-2 h5">TRY:</span>
+                    <a href={hrefFor(region, 'Coral Reefs')} className="text-info text-light h6 p-2">Coral Reefs</a>
+                    <a href={hrefFor(region, 'Rare Species')} className="text-info text-light h6 p-2">Rare Species</a>
+                </div>}
                     </div>
 
                 </div>
