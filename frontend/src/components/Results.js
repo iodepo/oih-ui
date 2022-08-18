@@ -175,7 +175,7 @@ export default function Results() {
                 // TODO: Pagination will have *issues* with double-counted orgs+experts
                 // (count of orgs, people, and experts are summed, double-counting both orgs and people)
                 const count = Object.values(json.counts).reduce((x, y) => x + y, 0);
-                setResultCount(count); 
+                setResultCount(count);
                 setCounts(prev => ({ ...prev, [searchType]: count }))
             })
     }, 1000), [dataServiceUrl, searchText, searchType, region, facetQuery])
@@ -242,8 +242,10 @@ export default function Results() {
 
     const [expandedMapBounds, setExpandedMapBounds] = useState(false)
     const [allowSetMapBounds, ] = useState(true)
+    const [viewport, setViewport] = useState({});
 
-    const updateMapBounds = useCallback(bounds => {
+    const updateMapBounds = useCallback((bounds, viewport) => {
+        setViewport(viewport);
         if (allowSetMapBounds) {
             setMapBounds(bounds)
             if (!expandedMapBounds || !containsMapBounds(expandedMapBounds, bounds)) {
@@ -332,18 +334,49 @@ export default function Results() {
         if (!selectedDetails || !selectedElem) return undefined
         return <Result result={selectedDetails.detail} />
     })()
-    
+
     const get_region_bounds = () => {
         const bounds = regionBoundsMap[region.replaceAll(' ', '_')]
         if (bounds) return bounds
         else return DEFAULT_QUERY_BOUNDS
     }
-    
+
     const initial_bounds = () => {
         const bounds = regionMap[region.replaceAll(' ', '_')]
         if (bounds) return bounds
         else return INITIAL_BOUNDS
     }
+
+
+    const maybe_set_selected_element = (eltList) => {
+        const { zoom=0 } = viewport;
+        if (!eltList) { return undefined; }
+        if (zoom < 3 ) { return undefined; }
+        // // one hit
+        // if (eltList.length == 1) {
+        //     setSelectedElem(eltList[0]);
+        //     return eltList[0];
+        // }
+        // Priority to points, maybe there's a better option, but choose one of 3
+        const points = eltList.filter(e=>e.layer.type == 'circle');
+        if (points.length) {
+            if (points.length < 3) {
+                const elem = points.pop();
+                setSelectedElem(elem);
+                return elem;
+            }
+            return undefined;
+        }
+        if (zoom > 3 && eltList && eltList.length < 100) {
+            const elements = eltList.sort((a,b) => a.properties.geom_length - b.properties.geom_length);
+            const elem = elements[0];
+            setSelectedElem(elem);
+            return elem;
+        }
+        return undefined;
+    };
+
+    const {zoom=0} = viewport;
 
     return (
         <>
@@ -377,27 +410,35 @@ export default function Results() {
                                                     layersState={[true]}
                                                     onHover={e => {
                                                         if (!selectHold) {
-                                                            setSelectedElem(e.features?.[0])
-                                                            setMousePos(e.lngLat)
+                                                            maybe_set_selected_element(e.features);
+                                                            setMousePos(e.lngLat);
                                                         }
                                                     }}
                                                     onClick={e => {
                                                         if (selectHold) {
-                                                            setSelectedElem(e.features?.[0])
-                                                            setMousePos(e.lngLat)
-                                                            setSelectHold(Boolean(e.features?.[0]))
+                                                            setMousePos(e.lngLat);
+                                                            const selected = maybe_set_selected_element(e.features);
+                                                            setSelectHold(Boolean(selected));
                                                         } else if (selectedElem) {
-                                                            setSelectHold(true)
+                                                            setSelectHold(true);
                                                         }
                                                     }}
                                                     popup={tooltip}
                                                     selectedId={selectedElem?.properties?.id}
                                                 />
+                                              <div>
+                                                Note: Geometries that are larger than the map display area will not be displayed. <br/>
+                                                Search results corresponding to the map area show below. <br/>
+                                                <span>{(zoom <= 3) && "Zoom in to hover over areas to see the objects associted with them."}</span><br/>
+                                              </div>
+
                                             </div>
                                             <div className="container col-3">
                                                 {detail}
                                             </div>
                                         </div>
+
+
                                         <hr />
                                     </div>
                                 }
@@ -448,7 +489,7 @@ const Result = ({result}) => {
                     }
                     </div>
                 </Row>
-                <a href={`${dataServiceUrl}/source?id=${result['id']}`} target="_blank" rel="noreferrer noopener" 
+                <a href={`${dataServiceUrl}/source?id=${result['id']}`} target="_blank" rel="noreferrer noopener"
                     className="text-align-start float-start text-decoration-none" style={{ fontSize: 'x-small' }}
                 >
                     View JSONLD source
