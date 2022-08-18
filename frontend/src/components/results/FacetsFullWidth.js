@@ -1,4 +1,5 @@
 import React, {useCallback, useState} from "react";
+import {fieldTitleFromName}  from '../../constants';
 
 export default function FacetsFullWidth({
                                             facets,
@@ -14,24 +15,6 @@ export default function FacetsFullWidth({
     }, [clearFacetQuery, setValue])
 
 
-    const fieldNameMap = {
-        "includedindatacatalog": "Catalog",
-        "jobtitle": "Job Title",
-        "knowsabout": "Knows About",
-        "knowslanguage": "Language",
-        "memberof": "Within Directory",
-    };
-
-    const format_facet_name = (facet_name) => {
-        // strip off id_/txt_ from the leading bit.
-        const field_name = facet_name.substring(facet_name.indexOf('_')+1);
-
-        const lower_field_name = field_name.toLowerCase();
-        if (fieldNameMap[lower_field_name]) {
-            return fieldNameMap[lower_field_name];
-        }
-        return field_name.charAt(0).toUpperCase() + field_name.slice(1);
-    };
 
     return (
         <div className="mt-4 w-75 mx-auto">
@@ -46,12 +29,12 @@ export default function FacetsFullWidth({
                           className="form-select form-select-md mb-3"
                           onChange={e => {
                               setValue(i, e.target.value);
-                              facetSearch(e)
+                              facetSearch(e);
                           }}
                           value={facetValues[i]}
                           defaultValue=""
                         >
-                          <option value="">{format_facet_name(facet.name)}</option>
+                          <option value="">{fieldTitleFromName(facet.name)}</option>
                           {facet.counts.map((facetCount) => (
                               <option
                                 key={facetCount.name}

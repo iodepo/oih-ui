@@ -28,5 +28,26 @@ const regionBoundsMap = Object.fromEntries(Object.entries(regionMap).map(([k,v])
 const DEFAULT_QUERY_BOUNDS = '[-50,-20 TO 50,320]';
 
 
+const fieldNameMap = {
+    "includedindatacatalog": "Catalog",
+    "jobtitle": "Job Title",
+    "knowsabout": "Knows About",
+    "knowslanguage": "Language",
+    "memberof": "Within Directory",
+};
 
-export { regionMap, regionBoundsMap, DEFAULT_QUERY_BOUNDS }
+const fieldTitleFromName = (facet_name) => {
+    // strip off id_/txt_ from the leading bit.
+    const field_name = facet_name.substring(facet_name.indexOf('_')+1);
+
+    const lower_field_name = field_name.toLowerCase();
+    if (fieldNameMap[lower_field_name]) {
+        return fieldNameMap[lower_field_name];
+    }
+    return field_name.charAt(0).toUpperCase() + field_name.slice(1);
+};
+
+
+
+
+export { regionMap, regionBoundsMap, DEFAULT_QUERY_BOUNDS, fieldTitleFromName }
