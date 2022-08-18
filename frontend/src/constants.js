@@ -25,8 +25,11 @@ const boundsToQuery = (mb) => {
 
 const regionBoundsMap = Object.fromEntries(Object.entries(regionMap).map(([k,v])=>[k,boundsToQuery(v)]));
 
-const DEFAULT_QUERY_BOUNDS = '[-50,-20 TO 50,320]';
-
+const INITIAL_BOUNDS = [
+    {lon: -20, lat: -50},  // w s
+    {lon: 320, lat: 50}   // e n
+];
+const DEFAULT_QUERY_BOUNDS = boundsToQuery(INITIAL_BOUNDS);
 
 const fieldNameMap = {
     "includedindatacatalog": "Catalog",
@@ -50,4 +53,4 @@ const fieldTitleFromName = (facet_name) => {
 
 
 
-export { regionMap, regionBoundsMap, DEFAULT_QUERY_BOUNDS, fieldTitleFromName }
+export { regionMap, regionBoundsMap, INITIAL_BOUNDS, DEFAULT_QUERY_BOUNDS, fieldTitleFromName }

@@ -7,7 +7,7 @@ import useSearchParam from "../useSearchParam";
 import ResultTabs from "./ResultTabs";
 import {dataServiceUrl} from '../config/environment';
 import {Row} from "react-bootstrap";
-import { regionMap, regionBoundsMap, DEFAULT_QUERY_BOUNDS }  from '../constants';
+import { regionMap, regionBoundsMap, INITIAL_BOUNDS, DEFAULT_QUERY_BOUNDS }  from '../constants';
 import throttle from "lodash/throttle";
 
 import ReMap from './map/ReMap';
