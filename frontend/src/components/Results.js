@@ -171,7 +171,7 @@ export default function Results() {
             .then(response => response.json())
             .then(json => {
                 setResults(json.docs);
-                setFacets(json.facets);
+                setFacets(json.facets.filter(facet => facet.counts.length > 0));
                 // TODO: Pagination will have *issues* with double-counted orgs+experts
                 // (count of orgs, people, and experts are summed, double-counting both orgs and people)
                 const count = Object.values(json.counts).reduce((x, y) => x + y, 0);
@@ -270,7 +270,7 @@ export default function Results() {
             return geoJsonUrl
         }
         return null
-    }, [showMap, dataServiceUrl, searchType, searchText, region, expandedMapBounds]);
+    }, [showMap, dataServiceUrl, searchType, searchText, region, expandedMapBounds, facetQuery]);
 
     const layers = useMemo(() => {
         return [
