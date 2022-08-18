@@ -30,12 +30,12 @@ export default function Search() {
         <div className={"pb-3 mt-4" + (url == " results" ? ' searchbg-alt' : '')}>
             <div className="container">
                 <div className="row">
-                    <div className="col-2 me-3">
+                    <div className="col-12 col-md-2 col-sm-12">
                         <a href="/"><img className="p-1" height="100px" src={OIHLogo}/></a>
                     </div>
 
 
-                    <div className="col">
+                    <div className="col-12 col-md-10 col-sm-12">
                         <form id='searchBarForm' className={"d-flex flex-justify-start align-self pt-2" + (url == "results" ? 'result-search' : '')} onSubmit={e => {
                     e.preventDefault()
                     handleChange()
