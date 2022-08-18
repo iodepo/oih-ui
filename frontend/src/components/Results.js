@@ -380,119 +380,127 @@ export default function Results() {
 
     return (
         <>
-            <div id="result-container">
+          <div id="result-container">
+            <div>
+              <ResultTabs
+                counts={counts}
+                tabList={tabs}
+                searchType={searchType}
+                resetDefaultSearchUrl={resetDefaultSearchUrl}
+                clearFacetQuery={clearFacetQuery}
+              />
+              <div id="result-section">
                 <div>
-                    <ResultTabs counts={counts} tabList={tabs} searchType={searchType}
-                                resetDefaultSearchUrl={resetDefaultSearchUrl} clearFacetQuery={clearFacetQuery}/>
-                    <div id="result-section">
-                        <div>
-
-                        {facets.length > 0 && <FacetsFullWidth
-                            facets={facets} clearFacetQuery={clearFacetQuery} facetSearch={facetSearch} facetValues={facetValues} setFacetFacetValues={setFacetFacetValues}/>}
-                    </div>
-
-                    <div className="row mx-auto">
-                        <div className="col-12 container mb-3">
-                            <h6 className="primary-color text-start text-light ps-5 pt-3"> Total results found {resultCount || 0}</h6>
-                        </div>
-                        <div>
-                            <div
-                                style={{minHeight: "500px"}}
-                            >
-                                {showMap &&
-                                    <div className="">
-                                        <div className="row">
-                                            <div className="container col-6">
-                                                <ReMap
-                                                    externalLayers={layers}
-                                                    bounds={initial_bounds()}
-                                                    handleBoundsChange={updateMapBounds}
-                                                    layersState={[true]}
-                                                    onHover={e => {
-                                                        if (!selectHold) {
-                                                            maybe_set_selected_element(e.features);
-                                                            setMousePos(e.lngLat);
-                                                        }
-                                                    }}
-                                                    onClick={e => {
-                                                        if (selectHold) {
-                                                            setMousePos(e.lngLat);
-                                                            const selected = maybe_set_selected_element(e.features);
-                                                            setSelectHold(Boolean(selected));
-                                                        } else if (selectedElem) {
-                                                            setSelectHold(true);
-                                                        }
-                                                    }}
-                                                    popup={tooltip}
-                                                    selectedId={selectedElem?.properties?.id}
-                                                />
-                                              <div>
-                                                Note: Geometries that are larger than the map display area will not be displayed. <br/>
-                                                Search results corresponding to the map area show below. <br/>
-                                                <span>{(zoom <= 3) && "Zoom in to hover over areas to see the objects associted with them."}</span><br/>
-                                              </div>
-
-                                            </div>
-                                            <div className="container col-3">
-                                                {detail}
-                                            </div>
-                                        </div>
-
-
-                                        <hr />
-                                    </div>
-                                }
-                                <div className="container">
-                                    <ResultList results={results}/>
-                                    <Pagination searchType={searchType} resultCount={resultCount} setPage={setPage} page={page}/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    </div>
-
+                  {facets.length > 0 &&
+                   <FacetsFullWidth
+                     facets={facets}
+                     clearFacetQuery={clearFacetQuery}
+                     facetSearch={facetSearch}
+                     facetValues={facetValues}
+                     setFacetFacetValues={setFacetFacetValues}
+                   />}
                 </div>
+
+                <div className="row mx-auto">
+                  <div className="col-12 container mb-3">
+                    <h6 className="primary-color text-start text-light ps-5 pt-3"> Total results found {resultCount || 0}</h6>
+                  </div>
+                  <div>
+                    <div
+                      style={{minHeight: "500px"}}
+                    >
+                      {showMap &&
+                       <div className="">
+                         <div className="row">
+                           <div className="container col-6">
+                             <ReMap
+                               externalLayers={layers}
+                               bounds={initial_bounds()}
+                               handleBoundsChange={updateMapBounds}
+                               layersState={[true]}
+                               onHover={e => {
+                                   if (!selectHold) {
+                                       maybe_set_selected_element(e.features);
+                                       setMousePos(e.lngLat);
+                                   }
+                               }}
+                               onClick={e => {
+                                   if (selectHold) {
+                                       setMousePos(e.lngLat);
+                                       const selected = maybe_set_selected_element(e.features);
+                                       setSelectHold(Boolean(selected));
+                                   } else if (selectedElem) {
+                                       setSelectHold(true);
+                                   }
+                               }}
+                               popup={tooltip}
+                               selectedId={selectedElem?.properties?.id}
+                             />
+                             <div>
+                               Note: Geometries that are larger than the map display area will not be displayed. <br/>
+                               Search results corresponding to the map area show below. <br/>
+                               <span>{(zoom <= 3) && "Zoom in to hover over areas to see the objects associted with them."}</span><br/>
+                             </div>
+
+                           </div>
+                           <div className="container col-3">
+                             {detail}
+                           </div>
+                         </div>
+
+
+                         <hr />
+                       </div>
+                      }
+                      <div className="container">
+                        <ResultList results={results}/>
+                        <Pagination searchType={searchType} resultCount={resultCount} setPage={setPage} page={page}/>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
         </>
     );
 }
 
 const ResultList = ({results}) =>
-    results.map((result) => {
-        return <Result result={result} key={result['id']}/>
-    });
+      results.map((result) => {
+          return <Result result={result} key={result['id']}/>
+      });
 
 const Result = ({result}) => {
     const {Component} = typeMap[result['type']];
     const [truncate, setTruncate] = useState(true)
     return (
         <div
-            key={result['id']}
-            className="result-item container rounded-3 p-3 mb-2"
-            id='resultsDiv'
+          key={result['id']}
+          className="result-item container rounded-3 p-3 mb-2"
+          id='resultsDiv'
         >
-            <h4 className="text-start mb-3">
-                <a href={result['type'] === 'Person' || result['type'] === 'Organization' ? resolveAsUrl(result['id']) :
-                    result['txt_url'] || resolveAsUrl(result['id'])}
-                   className="result-title" target="_blank">
-                    {result['name']}
-                </a>
-            </h4>
-                <Row className="">
-                    <div className="col">
-                        <Component result={result}/>
-                        {'description' in result && result['type'] !== 'Person' &&
-                    <div className="col" >
-                        <p className={`result-p ${truncate ? 'description-truncate' : ''}`} onClick={() => setTruncate(!truncate)} ><b>Description:</b> {result['description']}</p>
-                    </div>
-                    }
-                    </div>
-                </Row>
-                <a href={`${dataServiceUrl}/source?id=${result['id']}`} target="_blank" rel="noreferrer noopener"
-                    className="text-align-start float-start text-decoration-none" style={{ fontSize: 'x-small' }}
-                >
-                    View JSONLD source
-                </a>
+          <h4 className="text-start mb-3">
+            <a href={result['type'] === 'Person' || result['type'] === 'Organization' ? resolveAsUrl(result['id']) :
+                     result['txt_url'] || resolveAsUrl(result['id'])}
+               className="result-title" target="_blank">
+              {result['name']}
+            </a>
+          </h4>
+          <Row className="">
+            <div className="col">
+              <Component result={result}/>
+              {'description' in result && result['type'] !== 'Person' &&
+               <div className="col" >
+                 <p className={`result-p ${truncate ? 'description-truncate' : ''}`} onClick={() => setTruncate(!truncate)} ><b>Description:</b> {result['description']}</p>
+               </div>
+              }
+            </div>
+          </Row>
+          <a href={`${dataServiceUrl}/source?id=${result['id']}`} target="_blank" rel="noreferrer noopener"
+             className="text-align-start float-start text-decoration-none" style={{ fontSize: 'x-small' }}
+          >
+            View JSONLD source
+          </a>
         </div>);
 }
