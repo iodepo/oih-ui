@@ -4,7 +4,7 @@ import {Col, Container, Row} from "react-bootstrap";
 import { dataServiceUrl } from '../config/environment';
 import {useNavigate} from "react-router-dom";
 import useSearchParam from "../useSearchParam";
-import regionBoundsMap  from '../constants';
+import { regionBoundsMap }  from '../constants';
 import diver from "../resources/diving.png";
 import lighthouse from "../resources/lighthouse.png";
 import thinking from "../resources/thinking.png";
