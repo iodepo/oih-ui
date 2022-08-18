@@ -23,7 +23,7 @@ AVAILABLE_FACETS = ['txt_knowsAbout', 'txt_knowsLanguage', 'txt_nationality', 't
                     'txt_memberOf', 'txt_parentOrganization', 'id_provider', 'id_includedInDataCatalog']
 
 
-GEOJSON_FIELDS = { 'id', 'type' }
+GEOJSON_FIELDS = { 'id', 'geom_length' }
 GEOJSON_ROWS = 10000
 DEFAULT_GEOMETRY = "[-90,-180 TO 90,180]"
 COMBINED_TYPES = {
@@ -42,7 +42,9 @@ def search(search_text: str = None, document_type: str = None, region: str = Non
     if 'the_geom' in facetType:
         facetName[facetType.index('the_geom')] = rewriteGeom(facetName[facetType.index('the_geom')])
 
-    data = SolrQuery(search_text, document_type, facetType, facetName, region=region, start=start, rows=rows).json()
+    data = SolrQuery(search_text, document_type, facetType, facetName,
+                     region=region, start=start, rows=rows,
+                     ).json()
     return {
         'docs': data['response']['docs'],
         'counts': counts_dict(data['facet_counts']['facet_fields']['type']),
