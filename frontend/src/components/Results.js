@@ -350,7 +350,7 @@ export default function Results() {
 
     const maybe_set_selected_element = (eltList) => {
         const { zoom=0 } = viewport;
-        if (!eltList) { return undefined; }
+        if (!eltList || ! eltList.length) { return undefined; }
         if (zoom < 3 ) { return undefined; }
         // // one hit
         // if (eltList.length == 1) {
