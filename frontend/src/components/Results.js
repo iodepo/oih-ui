@@ -121,7 +121,7 @@ function resolveAsUrl(url) {
     return url;
 }
 
-const fetchDetail = id => fetch(`${dataServiceUrl}/detail/?id=${id}`).then(r => r.json());
+const fetchDetail = id => fetch(`${dataServiceUrl}/detail?id=${id}`).then(r => r.json());
 
 export default function Results() {
 
