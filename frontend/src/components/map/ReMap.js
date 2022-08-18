@@ -36,11 +36,30 @@ const buildLayersForSource = (selectedId, sourceId, sourceLayer) => [
   {
     id: `${sourceId}-polygon`,
     key: `${sourceId}-polygon`,
-    type: 'line',
+    type: 'fill',
     source: sourceId,
-    filter: ['==', '$type', 'Polygon'],
+    filter: [
+      'all',
+      ['==', ['geometry-type'], 'Polygon'],
+      ['has', 'geom_length'],
+      ['<', ['number',['get', 'geom_length']], ['/', 350, ['^', 2, ['zoom']]]],
+      ['>', ['number',['get', 'geom_length']], ['/', 15, ['^', 2, ['zoom']]]],
+    ],
     paint: {
-      'line-color': ['case', ['==', ['get', 'id'], selectedId ?? null], 'green', 'blue']
+      'fill-outline-color': [
+        'step',
+        ['zoom'],
+        'rgba(0,0,0,0)',
+        2.5, ['case', ['==', ['get', 'id'], selectedId ?? null], 'green', 'rgba(0,0,225,.5)'],
+      ],
+      'fill-opacity': ['interpolate', ['linear'], ['get', 'geom_length'],
+                       0, 1,
+                       10, .2,
+                       100, 0.1
+                      ],
+      'fill-color': ['case', ['==', ['get', 'id'], selectedId ?? null], 'rgba(0,225,0,.5)',
+                     'rgba(0,0,225,.1)'],
+
     }
   },
   {
@@ -318,7 +337,7 @@ class ReMap extends React.Component {
       const mapGL = this.mapRef && this.mapRef.getMap();
       if (!mapGL) {return;}
       const bounds = mapGL.getBounds();
-      handleBoundsChange(bounds);
+        handleBoundsChange(bounds, viewport);
     }
   }
 
