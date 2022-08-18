@@ -23,6 +23,18 @@ AVAILABLE_FACETS = ['txt_knowsAbout', 'txt_knowsLanguage', 'txt_nationality', 't
                     'txt_memberOf', 'txt_parentOrganization', 'id_provider', 'id_includedInDataCatalog']
 
 
+FACET_FIELDS = {
+    'Spatial': [ 'txt_keywords', 'txt_provider', 'txt_variableMeasured', 'type'],
+    'Person':  [ 'txt_memberOf', 'txt_knowsLanguage', 'txt_jobTitle', 'txt_knowsAbout', 'txt_affiliation', 'txt_provider'  ],
+    'Organization':  [ 'txt_memberOf', 'txt_provider' ],
+    'Dataset': [ 'txt_keywords', 'txt_provider', 'txt_variableMeasured'],
+    'CreativeWork': ['txt_keywords', 'txt_provider', 'txt_contributor'],
+    'Course': ['txt_keywords', 'txt_provider', 'txt_author', 'txt_educationalCredentialAwarded'],
+    'Vehicle': ['txt_keywords', 'txt_provider', 'txt_vehicleSpecialUsage'],
+    'ResearchProject':  [ 'txt_keywords',  'txt_provider', 'txt_areaServed' ],
+   }
+
+
 GEOJSON_FIELDS = { 'id', 'geom_length' }
 GEOJSON_ROWS = 10000
 DEFAULT_GEOMETRY = "[-90,-180 TO 90,180]"
@@ -39,16 +51,27 @@ app.add_middleware(
 @app.get("/search")
 def search(search_text: str = None, document_type: str = None, region: str = None, facetType: list = Query(default=[]),
            facetName: list = Query(default=[]), start=0, rows=10, include_facets: bool = True):
+
+    facetFields = FACET_FIELDS.get(document_type, AVAILABLE_FACETS)
+
     if 'the_geom' in facetType:
         facetName[facetType.index('the_geom')] = rewriteGeom(facetName[facetType.index('the_geom')])
+        facetFields = FACET_FIELDS['Spatial']
 
-    data = SolrQuery(search_text, document_type, facetType, facetName,
-                     region=region, start=start, rows=rows,
+    # need to add the type facet because of the counts, even if we're not requesting it elsewhere.
+    queryFacetFields = set(facetFields)
+    queryFacetFields.add('type')
+    data = SolrQuery(search_text, document_type,
+                     facetType, facetName,
+                     facetFields=list(queryFacetFields) if include_facets else ['type'],
+                     region=region,
+                     start=start,
+                     rows=rows
                      ).json()
     return {
         'docs': data['response']['docs'],
         'counts': counts_dict(data['facet_counts']['facet_fields']['type']),
-        'facets': facet_counts(data['facet_counts']['facet_fields']) if include_facets else None
+        'facets': facet_counts(data['facet_counts']['facet_fields'], facetFields) if include_facets else None
     }
 
 @app.get("/spatial.geojson")
@@ -106,17 +129,18 @@ def with_combined_counts(counts):
 def counts_dict(counts):
     return with_combined_counts(dict(zip(counts[::2], counts[1::2])))
 
-def facet_counts(facets):
+def facet_counts(facets, facetFields=None):
+    if facetFields is None:
+        facetFields=AVAILABLE_FACETS
     return [
         {
             "name": facet,
             "counts": [{
                 'name': name,
                 'count': count
-            } for name, count in zip(facets[facet][::2], facets[facet][1::2])]
+            } for name, count in zip(values[::2], values[1::2])]
         }
-        for facet in AVAILABLE_FACETS
-        if facet in facets
+        for facet, values in facets.items() if facet in facetFields
     ]
 
 
