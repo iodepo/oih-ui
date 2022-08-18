@@ -15,7 +15,7 @@ import './map.scss'
 
 
 /**
- * Id of the last "topmost" layer, before which all GEP layers
+ * Id of the last "topmost" layer, before which all custom layers
  * should be added. This is needed to show place names and borders above
  * all other layers.
  **/
