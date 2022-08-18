@@ -43,7 +43,7 @@ const buildLayersForSource = (selectedId, sourceId, sourceLayer) => [
       ['==', ['geometry-type'], 'Polygon'],
       ['has', 'geom_length'],
       ['<', ['number',['get', 'geom_length']], ['/', 350, ['^', 2, ['zoom']]]],
-      ['>', ['number',['get', 'geom_length']], ['/', 15, ['^', 2, ['zoom']]]],
+      ['>', ['number',['get', 'geom_length']], ['/', 15, ['^', 2, ['zoom']]]],  // ~.7 px/deg @zoom=0
     ],
     paint: {
       'fill-outline-color': [
@@ -67,7 +67,15 @@ const buildLayersForSource = (selectedId, sourceId, sourceLayer) => [
     key: `${sourceId}-point`,
     type: 'circle',
     source: sourceId,
-    filter: ['==', '$type', 'Point'],
+    filter: [
+      'all',
+      ['==', ['geometry-type'], 'Point'],
+      ['any',
+       ['!', ['has', 'geom_length']],
+       // This is the bit that adds the extra points for small polygons that have been hidden from the poly layer.
+        ['<', ['number',['get', 'geom_length']], ['/', 15, ['^', 2, ['zoom']]]],   // opposite of the polygon layer
+      ]
+    ],
     paint: {
       'circle-color': ['case', ['==', ['get', 'id'], selectedId ?? null], 'green', 'purple']
     }
