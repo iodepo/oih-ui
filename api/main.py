@@ -60,7 +60,7 @@ def spatial(search_text: str=None, document_type: str=None, region: str=None, fa
         index = facetType.index('the_geom')
         facetName[index] = rewriteGeom(facetName[index])
 
-    query = SolrQuery(search_text, document_type, facetType, facetName, facetFields=[], region=region, rows=GEOJSON_ROWS, flList=GEOJSON_FIELDS | {'the_geom'})
+    query = SolrQuery(search_text, document_type, facetType, facetName, facetFields=[], region=region, rows=GEOJSON_ROWS, flList=GEOJSON_FIELDS | {'geojson_geom'})
     data = query.json().get('response',{})
 
     geometries = {
@@ -145,7 +145,8 @@ def rewriteGeom(the_geom):
 
 
 def _toFeature(result):
-    geometry = shapely.geometry.mapping(shapely.wkt.loads(result['the_geom']))
+    #geometry = shapely.geometry.mapping(shapely.wkt.loads(result['the_geom']))
+    geometry = json.loads(result['geojson_geom'])
     properties = {field:result[field] for field in GEOJSON_FIELDS if field in result}
     return {
         'type': 'Feature',
