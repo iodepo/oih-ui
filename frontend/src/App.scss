@@ -231,9 +231,13 @@ p.result-p.truncate {
 }
 
 .truncate {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: white;
+}
+
+.truncate a {
+    color: white;
 }
 
 /* UNDONE, super hacky css to get the map to show up */
