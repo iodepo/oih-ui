@@ -60,13 +60,13 @@ def spatial(search_text: str=None, document_type: str=None, region: str=None, fa
         index = facetType.index('the_geom')
         facetName[index] = rewriteGeom(facetName[index])
 
-    query = SolrQuery(search_text, document_type, facetType, facetName, facetFields=[], region=region, rows=GEOJSON_ROWS, flList=GEOJSON_FIELDS | {'geojson_geom'})
+    query = SolrQuery(search_text, document_type, facetType, facetName, facetFields=[], region=region, rows=GEOJSON_ROWS, flList=GEOJSON_FIELDS | {'geojson_geom', 'geojson_point'})
     data = query.json().get('response',{})
 
     geometries = {
         'type': 'FeatureCollection',
         "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}},
-        'features': (_toFeature(result) for result in data.get('docs',[])),
+        'features':  _expandFeatures(data.get('docs',[])),
         'count': data.get('numFound', 0)
     }
     return geometries
@@ -144,9 +144,19 @@ def rewriteGeom(the_geom):
     return f'[{s},{w} TO {n},{e}]'
 
 
-def _toFeature(result):
+def _expandFeatures(results):
+    for feature in results:
+        yield _toFeature(feature)
+        # include small features as points, in the same geojson.
+        length = feature.get('geom_length', 1000)
+        if length < 15: # This should match fronend
+            # zoom 0 == .7degrees/pixel, this will generally overfill the smaller ones for us
+            yield _toFeature(feature, 'geojson_point')
+
+
+def _toFeature(result, geometry_source='geojson_geom'):
     #geometry = shapely.geometry.mapping(shapely.wkt.loads(result['the_geom']))
-    geometry = json.loads(result['geojson_geom'])
+    geometry = json.loads(result[geometry_source])
     properties = {field:result[field] for field in GEOJSON_FIELDS if field in result}
     return {
         'type': 'Feature',
