@@ -9,6 +9,9 @@ import OIHLogo from "../resources/Logo Nav x 2.png";
 
 import { PROMOTED_REGIONS, randomSampleQueries } from '../constants';
 
+// Set once, will change for every load, not every key click
+const currentSampleQueries = randomSampleQueries(4);
+
 export default function Search() {
     const navigate = useNavigate();
     const [params,] = useSearchParams();
@@ -58,7 +61,7 @@ export default function Search() {
               {!isResults && (
                 <div className="text-light text-start mt-3">
                   <span className="p-2 h5">TRY:</span>
-                  {randomSampleQueries(4).map(query=>(
+                  {currentSampleQueries.map(query=>(
                     <a
                       onClick={e => {
                         setSearchQuery(query);
