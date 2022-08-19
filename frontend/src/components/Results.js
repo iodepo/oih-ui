@@ -451,7 +451,8 @@ const ResultList = ({results}) =>
 
 const Result = ({result}) => {
     const {Component} = typeMap[result['type']];
-    const [truncate, setTruncate] = useState(true)
+    const [truncate, setTruncate] = useState(true);
+    const jsonLdParams = new URLSearchParams({id:result['id']}).toString();
     return (
         <div
           key={result['id']}
@@ -475,7 +476,7 @@ const Result = ({result}) => {
               }
             </div>
           </Row>
-          <a href={`${dataServiceUrl}/source?id=${result['id']}`} target="_blank" rel="noreferrer noopener"
+          <a href={`${dataServiceUrl}/source?${jsonLdParams}`} target="_blank" rel="noreferrer noopener"
              className="text-align-start float-start text-decoration-none" style={{ fontSize: 'x-small' }}
           >
             View JSONLD source
