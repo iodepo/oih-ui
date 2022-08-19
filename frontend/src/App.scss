@@ -189,6 +189,22 @@ p.result-p.truncate {
   border-radius: 0.8em;
 }
 
+.bubble-textarea-selected {
+  position: relative;
+  height: fit-content;
+  padding: 0.2em 1.2em 0.5em;
+  top: 0.5em;
+  left: -0.9em;
+  background-color: white;
+  color: #21295c;
+  border-radius: 0.8em;
+}
+
+.bg-selected {
+  background-color: white;
+  color: #21295c;
+}
+
 .category-icon {
   position: relative;
   bottom: -1em;
