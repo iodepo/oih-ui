@@ -17,15 +17,14 @@ export default function Search() {
     const location = useLocation();
     const isResults = location.pathname.startsWith("/results")
 
+    const [_, url, tabName=''] = window.location.pathname.split('/');
 
-    const hrefFor = (region, query) => `/results/?${new URLSearchParams({
+    const hrefFor = (region, query) => `/results/${tabName}?${new URLSearchParams({
         ...query ? {search_text: query} : {},
         ...region && region.toUpperCase() !== "GLOBAL" ? {region} : {}
-    })}`
+    })}`;
 
-    const handleChange = useCallback(() => navigate(hrefFor(region, searchQuery)), [navigate, region, searchQuery]);
-
-    let url = window.location.href.split('/')[3]
+    const handleChange = useCallback(() => navigate(hrefFor(region, searchQuery)), [navigate, region, searchQuery, tabName]);
 
     return (
       <div className={"pb-3 mt-4" + (url == " results" ? ' searchbg-alt' : '')}>
@@ -43,7 +42,7 @@ export default function Search() {
                         onChange={e => setRegion(e.target.value)}>
                   {
                     PROMOTED_REGIONS.map((region) => {
-                      return <option>{region}</option>
+                      return <option>{region}</option>;
                     })
                   }
                 </select>
