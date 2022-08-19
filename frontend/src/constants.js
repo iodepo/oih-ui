@@ -52,11 +52,15 @@ const INITIAL_BOUNDS = [
 const DEFAULT_QUERY_BOUNDS = boundsToQuery(INITIAL_BOUNDS);
 
 const fieldNameMap = {
-    "includedindatacatalog": "Catalog",
-    "jobtitle": "Job Title",
-    "knowsabout": "Knows About",
-    "knowslanguage": "Language",
-    "memberof": "Within Directory",
+  "includedindatacatalog": "Catalog",
+  "jobtitle": "Job Title",
+  "knowsabout": "Knows About",
+  "knowslanguage": "Language",
+  "memberof": "Within Directory",
+  "variablemeasured": "Variable Measured",
+  "educationalcredentialawarded": "Credential Awarded",
+  "vehiclespecialusage": "Vehicle Usage",
+  "areaserved": "Area",
 };
 
 const fieldTitleFromName = (facet_name) => {
