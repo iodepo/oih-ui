@@ -8,11 +8,14 @@ export default function Footer() {
     return (
         <div className="mt-5 ml-5 pt-5 mb-0 pb-5 text-light">
             <div className="container d-flex ">
-                <div className="flex-fill text-start">
+                <div className="col-md-6 flex-fill text-start">
                     <h3 className="text-white fw-bold h4 text-uppercase">About OIH Project</h3>
-                    <p>The OIH is a three year project funded by the Government of Flanders, <br/>Kingdom of Belgium and implemented by IODE, project office of the UNESCO</p>
+                  <p>
+                    The OIH was created through a three-year project funded by the Government of Flanders,
+Kingdom of Belgium and implemented by IODE, project office of the UNESCO. It is a contribution to the OceanData 2030 Programme of the UN Decade of Ocean Science for Sustainable Development.
+                  </p>
                 </div>
-                <div className="flex-fill">
+                <div className="col-md-6 flex-fill">
                     <h3 className="text-white fw-bold h4 text-uppercase">Want to learn more?</h3>
                     <button className="w-50 btn rounded-0 btn-info text-white">GET IN TOUCH</button>
                 </div>
