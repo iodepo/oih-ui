@@ -4,7 +4,7 @@ import {Col, Container, Row} from "react-bootstrap";
 import { dataServiceUrl } from '../config/environment';
 import {useNavigate} from "react-router-dom";
 import useSearchParam from "../useSearchParam";
-import regionBoundsMap  from '../constants';
+import { regionBoundsMap }  from '../constants';
 import diver from "../resources/diving.png";
 import lighthouse from "../resources/lighthouse.png";
 import thinking from "../resources/thinking.png";
@@ -92,7 +92,7 @@ export default function TypesCount() {
         <Container className="bubble-height">
             <div className="category-section">
                 <div id="category-heading" className="mx-auto">
-                    <h2 className="text-white">Browse by category</h2>
+                    <h5 className="text-white">Browse by category</h5>
                 </div>
 
                 {entries(counts.counts).map(row =>

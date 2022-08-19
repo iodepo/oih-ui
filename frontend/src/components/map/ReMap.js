@@ -15,7 +15,7 @@ import './map.scss'
 
 
 /**
- * Id of the last "topmost" layer, before which all GEP layers
+ * Id of the last "topmost" layer, before which all custom layers
  * should be added. This is needed to show place names and borders above
  * all other layers.
  **/
@@ -36,11 +36,30 @@ const buildLayersForSource = (selectedId, sourceId, sourceLayer) => [
   {
     id: `${sourceId}-polygon`,
     key: `${sourceId}-polygon`,
-    type: 'line',
+    type: 'fill',
     source: sourceId,
-    filter: ['==', '$type', 'Polygon'],
+    filter: [
+      'all',
+      ['==', ['geometry-type'], 'Polygon'],
+      ['has', 'geom_length'],
+      ['<', ['number',['get', 'geom_length']], ['/', 350, ['^', 2, ['zoom']]]],
+      ['>', ['number',['get', 'geom_length']], ['/', 15, ['^', 2, ['zoom']]]],  // ~.7 px/deg @zoom=0
+    ],
     paint: {
-      'line-color': ['case', ['==', ['get', 'id'], selectedId ?? null], 'green', 'blue']
+      'fill-outline-color': [
+        'step',
+        ['zoom'],
+        'rgba(0,0,0,0)',
+        2.5, ['case', ['==', ['get', 'id'], selectedId ?? null], 'green', 'rgba(0,0,225,.5)'],
+      ],
+      'fill-opacity': ['interpolate', ['linear'], ['get', 'geom_length'],
+                       0, 1,
+                       10, .2,
+                       100, 0.1
+                      ],
+      'fill-color': ['case', ['==', ['get', 'id'], selectedId ?? null], 'rgba(0,225,0,.5)',
+                     'rgba(0,0,225,.1)'],
+
     }
   },
   {
@@ -48,7 +67,15 @@ const buildLayersForSource = (selectedId, sourceId, sourceLayer) => [
     key: `${sourceId}-point`,
     type: 'circle',
     source: sourceId,
-    filter: ['==', '$type', 'Point'],
+    filter: [
+      'all',
+      ['==', ['geometry-type'], 'Point'],
+      ['any',
+       ['!', ['has', 'geom_length']],
+       // This is the bit that adds the extra points for small polygons that have been hidden from the poly layer.
+        ['<', ['number',['get', 'geom_length']], ['/', 15, ['^', 2, ['zoom']]]],   // opposite of the polygon layer
+      ]
+    ],
     paint: {
       'circle-color': ['case', ['==', ['get', 'id'], selectedId ?? null], 'green', 'purple']
     }
@@ -318,7 +345,7 @@ class ReMap extends React.Component {
       const mapGL = this.mapRef && this.mapRef.getMap();
       if (!mapGL) {return;}
       const bounds = mapGL.getBounds();
-      handleBoundsChange(bounds);
+        handleBoundsChange(bounds, viewport);
     }
   }
 
