@@ -98,7 +98,7 @@ export default function TypesCount() {
                 {entries(counts.counts).map(row =>
                     <Row className="bubble-height">
                         {row.map(col =>
-                            <Col className="p-4" role="button" id={`bubble_${col.id}`} onClick={searchByType(col.id)}>
+                            <Col className="p-4 col-xs-6 col-sm-6 col-md-3 col-6" role="button" id={`bubble_${col.id}`} onClick={searchByType(col.id)}>
                                 <div>
                                   <img className="p-1 category-icon" height="100px" src={col.icon}/>
                                   <div className="d-flex">
