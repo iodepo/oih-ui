@@ -194,9 +194,15 @@ class ParameterError(Exception): pass
 class SolrQuery:
     def __init__(self, search_text=None, document_type=None, facetType=None, facetName=None, facetFields=None, region=None,
                  start=0, **kwargs):
-        solr_search_query = SolrQueryBuilder(start=start, **kwargs)
-        if search_text:
-            solr_search_query.add_fq(name='text', value=search_text)
+
+        # Dismax query parser needs to have the search term in the query, not * or :.
+        # So adding this to the query, and not putting it in the fq.
+        # The querybuilder will filter out the *:* default here, and just run an ordinary query.
+        query = search_text or '*:*'
+        solr_search_query = SolrQueryBuilder(query=query, start=start, **kwargs)
+
+        # if search_text:
+        #     solr_search_query.add_fq(name='text', value=search_text)
         if document_type:
             if document_type in COMBINED_TYPES:
                 solr_search_query.add_fq(name='type', value=' '.join(COMBINED_TYPES[document_type]))

@@ -10,7 +10,12 @@ class SolrQueryBuilder:
     def __init__(self, rows=10, facet_min_count=1, start=0,
                  query='*:*', sort='score desc, indexed_ts desc',
                  facet='true', flList=None):
-        self.params = dict()
+        self.params = dict();
+        if not '*' in query and not ':' in query:
+            self.params.update({
+                'defType':'dismax',
+                'qf':'name^4 txt_keywords^2 text'
+            })
         self.params['q'] = query
         self.params['sort'] = sort
         self.params['rows'] = rows
@@ -19,10 +24,9 @@ class SolrQueryBuilder:
         self.params["facet"] = facet
         if flList:
             self.params['fl'] = ','.join(flList)
-        
+
     def add_facet_fields(self, facet_fields=None):
         self.params["facet.field"] = facet_fields if (facet_fields is not None) else DEFAULT_FACET_FIELDS
-
 
     formats = {
         'text': '+%(name)s:(%(value)s)',
@@ -32,10 +36,9 @@ class SolrQueryBuilder:
 
     def _fmt(self, name):
         return self.formats.get(name, '+%(name)s:"%(value)s"')
-    
+
     def add_fq(self, name, value):
         if "fq" not in self.params:
             self.params['fq'] = []
-            
+
         self.params['fq'].append(self._fmt(name) % {'name': name, 'value':value})
-        
