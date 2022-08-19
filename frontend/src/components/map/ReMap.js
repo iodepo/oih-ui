@@ -19,7 +19,7 @@ import './map.scss'
  * should be added. This is needed to show place names and borders above
  * all other layers.
  **/
-const labelsAndBordersLayer = 'wb-boundaries';
+const labelsAndBordersLayer = 'admin-0-boundary';
 
 // Adds layers for points
 const buildLayersForSource = (selectedId, sourceId, sourceLayer) => [
@@ -392,7 +392,7 @@ class ReMap extends React.Component {
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
           onHover={onHover}
-          // mapOptions={{projection:'naturalEarth'}} doesn't appear to be working
+          mapOptions={{projection:'mercator'}} // current style is setting globe, and that's not working well.
         >
           {popup}
           { title && (<HTMLOverlay
