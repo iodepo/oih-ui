@@ -21,21 +21,21 @@ Kingdom of Belgium and implemented by IODE, project office of the UNESCO. It is 
                 </div>
             </div>
             <div className="container">
-                <div className="d-flex mt-5">
-                    <div className="col">
-                        <img src={UNESCO} className="img-fluid footer-logos" alt="Unesco/IODE Logo" />
+                <div className="d-flex mt-5 footer-logos__container">
+                    <div className="col footer-logos">
+                        <img src={UNESCO} className="img-fluid" alt="Unesco/IODE Logo" />
                     </div>
-                    <div className="col">
-                        <img src={UNESCOScience} className="img-fluid footer-logos" alt="Unesco Decade of Ocean Science Logo" />
+                    <div className="col footer-logos">
+                        <img src={UNESCOScience} className="img-fluid" alt="Unesco Decade of Ocean Science Logo" />
                     </div>
-                    <div className="col">
-                        <img src={IODE} className="img-fluid footer-logos" alt="IODE Logo" />
+                    <div className="col footer-logos">
+                        <img src={IODE} className="img-fluid" alt="IODE Logo" />
                     </div>
-                     <div className="col">
-                        <img src={Vlaanderen} className="img-fluid footer-logos" alt="Flanders Logo" />
+                     <div className="col footer-logos">
+                        <img src={Vlaanderen} className="img-fluid" alt="Flanders Logo" />
                     </div>
-                    <div className="col">
-                        <img src={OIHLogo} className="img-fluid footer-logos" alt="OIH Logo" />
+                    <div className="col footer-logos">
+                        <img src={OIHLogo} className="img-fluid" alt="OIH Logo" />
                     </div>
                 </div>
             </div>
