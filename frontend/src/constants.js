@@ -25,6 +25,26 @@ const boundsToQuery = (mb) => {
 
 const regionBoundsMap = Object.fromEntries(Object.entries(regionMap).map(([k,v])=>[k,boundsToQuery(v)]));
 
+const PROMOTED_REGIONS = ['Global', 'Atlantic Ocean', 'Latin America and the Caribbean', 'Africa', 'Pacific Small Islands'];
+
+const SAMPLE_QUERIES = [
+  'Coral Reef',
+  'Rare Species',
+  'Pelagic',
+  'Bathymetric',
+  'Whale',
+  'Shark',
+  'Hydrothermal Vent',
+  'Tidal',
+  'Heavy Metals',
+];
+
+const randomSampleQueries = (n) =>
+  SAMPLE_QUERIES.map(e=>[Math.random(),e])
+    .sort((a,b)=>a[0]-b[0])
+    .map(([_,e])=>e)
+    .slice(0,n);
+
 const INITIAL_BOUNDS = [
     {lon: -20, lat: -50},  // w s
     {lon: 320, lat: 50}   // e n
@@ -32,11 +52,15 @@ const INITIAL_BOUNDS = [
 const DEFAULT_QUERY_BOUNDS = boundsToQuery(INITIAL_BOUNDS);
 
 const fieldNameMap = {
-    "includedindatacatalog": "Catalog",
-    "jobtitle": "Job Title",
-    "knowsabout": "Knows About",
-    "knowslanguage": "Language",
-    "memberof": "Within Directory",
+  "includedindatacatalog": "Catalog",
+  "jobtitle": "Job Title",
+  "knowsabout": "Knows About",
+  "knowslanguage": "Language",
+  "memberof": "Within Directory",
+  "variablemeasured": "Variable Measured",
+  "educationalcredentialawarded": "Credential Awarded",
+  "vehiclespecialusage": "Vehicle Usage",
+  "areaserved": "Area",
 };
 
 const fieldTitleFromName = (facet_name) => {
@@ -51,6 +75,7 @@ const fieldTitleFromName = (facet_name) => {
 };
 
 
-
-
-export { regionMap, regionBoundsMap, INITIAL_BOUNDS, DEFAULT_QUERY_BOUNDS, fieldTitleFromName }
+export { regionMap, regionBoundsMap, PROMOTED_REGIONS,
+         SAMPLE_QUERIES, randomSampleQueries,
+         INITIAL_BOUNDS, DEFAULT_QUERY_BOUNDS,
+         fieldTitleFromName }

@@ -242,9 +242,18 @@ p.result-p.truncate {
   background: #21295c;
 }
 
-.footer-logos {
-  height: 4rem;
+.footer-logos__container {
+  column-gap: 1rem;
 }
+/* use px height for integer scaling on logos */
+.footer-logos {
+  max-height: 110px;
+  align-self: center;
+  img {
+    max-height: 110px;
+  }
+}
+
 
 #resultsPaginate {
   margin-top: 2em;

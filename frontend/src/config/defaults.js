@@ -8,7 +8,7 @@ export default {
   baseUrl: 'http://oih.staging.derilinx.com:8000',
   tileUrl: 'http://oih.staging.derilinx.com:8000',
   dataServiceUrl: '/',
-  // UNDONE -- not OIH styles, ReMap will need to be updated to match.
-  basemapStyleLink: 'mapbox://styles/derilinx/ckvc8g9yj0nm714nzuopbqz7s/draft',
-  mapboxAccessToken: 'pk.eyJ1IjoiZGVyaWxpbngiLCJhIjoiY2szeTlzbWo2MDV6eDNlcDMxM3dzZXBieiJ9.zPf1iiFilYYwyx6ETNj_8w'
+  // OIH styles
+  basemapStyleLink: 'mapbox://styles/iodepo/cl5c7ll1b004f14una8frqid5',
+  mapboxAccessToken: 'pk.eyJ1IjoiaW9kZXBvIiwiYSI6ImNsNWM3OW5wMjBlbXkzY21zMTVvdXljejUifQ.mHqzrnpLdsKcUDTIsKNrkw'
 };

@@ -95,27 +95,35 @@ export default function TypesCount() {
                     <h5 className="text-white">Browse by category</h5>
                 </div>
 
-                {entries(counts.counts).map(row =>
-                    <Row className="bubble-height">
-                        {row.map(col =>
-                            <Col className="p-4 col-xs-6 col-sm-6 col-md-3 col-6" role="button" id={`bubble_${col.id}`} onClick={searchByType(col.id)}>
-                                <div>
-                                  <img className="p-1 category-icon" height="100px" src={col.icon}/>
-                                  <div className="d-flex">
-                                    <div className="primary-bg rounded-circle bubble">
-                                      <span className="text-light-alt">
-                                        {counts[col.id] !== undefined ? formatter.format(counts[col.id]) : 0}
-                                      </span>
-                                    </div>
-                                    <div className="">
-                                      <span className="text-light fw-bold bubble-textarea">{col.text ?? col.id}</span>
-                                    </div>
-                                  </div>
-                                </div>
-                            </Col>
-                        )}
-                    </Row>
-                )}
+              {entries(counts.counts).map((row,ix) => (
+                <Row
+                  key={ix}
+                  className="bubble-height">
+                  {row.map(col =>
+                           <Col
+                             className="p-4 col-xs-6 col-sm-6 col-md-3 col-6"
+                             key={col.id}
+                             role="button"
+                             id={`bubble_${col.id}`}
+                             onClick={searchByType(col.id)}
+                           >
+                             <div>
+                               <img className="p-1 category-icon" height="100px" src={col.icon}/>
+                               <div className="d-flex">
+                                 <div className="primary-bg rounded-circle bubble">
+                                   <span className="text-light-alt">
+                                     {counts[col.id] !== undefined ? formatter.format(counts[col.id]) : 0}
+                                   </span>
+                                 </div>
+                                 <div className="">
+                                   <span className="text-light fw-bold bubble-textarea">{col.text ?? col.id}</span>
+                                 </div>
+                               </div>
+                             </div>
+                           </Col>
+                          )}
+                </Row>
+              ))}
             </div>
         </Container>
     )
