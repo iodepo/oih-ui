@@ -30,7 +30,20 @@ const PROMOTED_REGIONS = ['Global', 'Atlantic Ocean', 'Latin America and the Car
 const SAMPLE_QUERIES = [
   'Coral Reef',
   'Rare Species',
+  'Pelagic',
+  'Bathymetric',
+  'Whale',
+  'Shark',
+  'Hydrothermal Vent',
+  'Tidal',
+  'Heavy Metals',
 ];
+
+const randomSampleQueries = (n) =>
+  SAMPLE_QUERIES.map(e=>[Math.random(),e])
+    .sort((a,b)=>a[0]-b[0])
+    .map(([_,e])=>e)
+    .slice(0,n);
 
 const INITIAL_BOUNDS = [
     {lon: -20, lat: -50},  // w s
@@ -59,6 +72,6 @@ const fieldTitleFromName = (facet_name) => {
 
 
 export { regionMap, regionBoundsMap, PROMOTED_REGIONS,
-         SAMPLE_QUERIES,
+         SAMPLE_QUERIES, randomSampleQueries,
          INITIAL_BOUNDS, DEFAULT_QUERY_BOUNDS,
          fieldTitleFromName }

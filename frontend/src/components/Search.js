@@ -7,7 +7,7 @@ import Button from 'react-bootstrap/Button';
 import BackgroundImage1 from '../resources/Photo Africa Coast Original.jpg'
 import OIHLogo from "../resources/Logo Nav x 2.png";
 
-import { PROMOTED_REGIONS, SAMPLE_QUERIES } from '../constants';
+import { PROMOTED_REGIONS, randomSampleQueries } from '../constants';
 
 export default function Search() {
     const navigate = useNavigate();
@@ -59,7 +59,7 @@ export default function Search() {
               {!isResults && (
                 <div className="text-light text-start mt-3">
                   <span className="p-2 h5">TRY:</span>
-                  {SAMPLE_QUERIES.map(query=>(
+                  {randomSampleQueries(4).map(query=>(
                     <a
                       onClick={e => {
                         setSearchQuery(query);
