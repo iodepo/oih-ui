@@ -25,6 +25,13 @@ const boundsToQuery = (mb) => {
 
 const regionBoundsMap = Object.fromEntries(Object.entries(regionMap).map(([k,v])=>[k,boundsToQuery(v)]));
 
+const PROMOTED_REGIONS = ['Global', 'Atlantic Ocean', 'Latin America and the Caribbean', 'Africa', 'Pacific Small Islands'];
+
+const SAMPLE_QUERIES = [
+  'Coral Reef',
+  'Rare Species',
+];
+
 const INITIAL_BOUNDS = [
     {lon: -20, lat: -50},  // w s
     {lon: 320, lat: 50}   // e n
@@ -51,6 +58,7 @@ const fieldTitleFromName = (facet_name) => {
 };
 
 
-
-
-export { regionMap, regionBoundsMap, INITIAL_BOUNDS, DEFAULT_QUERY_BOUNDS, fieldTitleFromName }
+export { regionMap, regionBoundsMap, PROMOTED_REGIONS,
+         SAMPLE_QUERIES,
+         INITIAL_BOUNDS, DEFAULT_QUERY_BOUNDS,
+         fieldTitleFromName }
