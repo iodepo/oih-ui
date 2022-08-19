@@ -102,13 +102,16 @@ export default function TypesCount() {
                                 <div>
                                   <img className="p-1 category-icon" height="100px" src={col.icon}/>
                                   <div className="d-flex">
-                                    <div className="primary-bg rounded-circle bubble">
+                                      <div className="bubble-container">
+                                          <div className="primary-bg rounded-circle bubble">
                                       <span className="text-light-alt">
                                         {counts[col.id] !== undefined ? formatter.format(counts[col.id]) : 0}
                                       </span>
                                     </div>
+                                      </div>
+
                                     <div className="">
-                                      <span className="text-light fw-bold bubble-textarea">{col.text ?? col.id}</span>
+                                      <div className="text-light fw-bold bubble-textarea">{col.text ?? col.id}</div>
                                     </div>
                                   </div>
                                 </div>
@@ -116,6 +119,8 @@ export default function TypesCount() {
                         )}
                     </Row>
                 )}
+
+
             </div>
         </Container>
     )

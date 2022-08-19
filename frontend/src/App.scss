@@ -53,6 +53,7 @@ a.text-light.menu-text.nav-link {
   color: white;
   font-weight: 700;
   font-size: 2em;
+  margin: auto;
 }
 
 .primary-color-alt {
@@ -147,10 +148,15 @@ p.result-p.truncate {
   text-transform: capitalize;
 }
 
+.bubble-container {
+  z-index: 5;
+}
+
 .bubble {
+  display: flex;
   padding: 10%;
-  height: 80px;
-  width: 80px;
+  height: 10em;
+  width: 10em;
   font-size: 0.5em;
   z-index: 2;
   border: 1px solid #fff;
@@ -169,7 +175,7 @@ p.result-p.truncate {
 
 .bubble-textarea {
   position: relative;
-  top: 1.5em;
+  top: 0.8em;
   left: -1em;
   background-color: #2f5592;
   color: white;
@@ -208,6 +214,7 @@ p.result-p.truncate {
 .category-icon {
   position: relative;
   bottom: -1em;
+  right: -4em;
 }
 
 #category-heading {

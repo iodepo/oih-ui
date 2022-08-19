@@ -26,7 +26,6 @@ export default function ResultTabs({
                   selectedClassName=" rounded-0 primary-color-alt"
                 >
                   <div selected={tab.title === searchType} className="d-flex">
-                    {/*<div className="primary-bg rounded-circle bubble-alt">{formatter.format(counts[tab.title])}</div>*/}
                     <div className={"" + (tab.title === searchType ? 'bg-selected rounded-circle bubble-alt' : ' primary-bg rounded-circle bubble-alt')}>
                       {formatter.format(counts[tab.title])}
                     </div>
