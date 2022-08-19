@@ -45,7 +45,7 @@ export default function Search() {
                         onChange={e => setRegion(e.target.value)}>
                   {
                     PROMOTED_REGIONS.map((region) => {
-                      return <option>{region}</option>;
+                      return <option key={region}>{region}</option>;
                     })
                   }
                 </select>
@@ -61,8 +61,9 @@ export default function Search() {
               {!isResults && (
                 <div className="text-light text-start mt-3">
                   <span className="p-2 h5">TRY:</span>
-                  {currentSampleQueries.map(query=>(
+                  {currentSampleQueries.map((query,ix)=>(
                     <a
+                      key={ix}
                       onClick={e => {
                         setSearchQuery(query);
                         handleChange();
