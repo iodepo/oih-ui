@@ -1,8 +1,8 @@
-import OIHLogo from '../resources/Logo Nav x 2.png'
-import IODE from '../resources/IODE Logo Footer.png'
-import UNESCO from '../resources/Unesco Logo White Footer.png'
-import UNESCOScience from '../resources/UNESCO Science White Logo Footer.png'
-import Vlaanderen from '../resources/Vlaanderen Logo White Footer.png'
+import OIHLogo from '../resources/Logo Nav x 2.png';
+import IODE from '../resources/logos/iode_white_220.png';
+import UNESCO from '../resources/logos/combined_unesco_ioc_white_220.png';
+import UNESCOScience from '../resources/logos/decade_white_220.png';
+import Vlaanderen from '../resources/logos/Flanders_white_220.png';
 
 export default function Footer() {
     return (
@@ -23,16 +23,16 @@ Kingdom of Belgium and implemented by IODE, project office of the UNESCO. It is 
             <div className="container">
                 <div className="d-flex mt-5">
                     <div className="col">
-                        <img src={UNESCO} className="img-fluid footer-logos" alt="OIH Logo" />
+                        <img src={UNESCO} className="img-fluid footer-logos" alt="Unesco/IODE Logo" />
                     </div>
                     <div className="col">
-                        <img src={UNESCOScience} className="img-fluid footer-logos" alt="OIH Logo" />
+                        <img src={UNESCOScience} className="img-fluid footer-logos" alt="Unesco Decade of Ocean Science Logo" />
                     </div>
                     <div className="col">
-                        <img src={IODE} className="img-fluid footer-logos" alt="OIH Logo" />
+                        <img src={IODE} className="img-fluid footer-logos" alt="IODE Logo" />
                     </div>
                      <div className="col">
-                        <img src={Vlaanderen} className="img-fluid footer-logos" alt="OIH Logo" />
+                        <img src={Vlaanderen} className="img-fluid footer-logos" alt="Flanders Logo" />
                     </div>
                     <div className="col">
                         <img src={OIHLogo} className="img-fluid footer-logos" alt="OIH Logo" />
@@ -40,5 +40,5 @@ Kingdom of Belgium and implemented by IODE, project office of the UNESCO. It is 
                 </div>
             </div>
         </div>
-    )
+    );
 }

@@ -204,8 +204,9 @@ p.result-p.truncate {
   background: #21295c;
 }
 
+/* use px height for integer scaling on logos */
 .footer-logos {
-  height: 4rem;
+  height: 110px;
 }
 
 #resultsPaginate {
