@@ -11,9 +11,9 @@ class SolrQueryBuilder:
                  query='*:*', sort='score desc, indexed_ts desc',
                  facet='true', flList=None):
         self.params = dict();
-        if not '*' in query and not ':' in query:
+        if not '*' in query:
             self.params.update({
-                'defType':'dismax',
+                'defType':'edismax',
                 'qf':'name^4 txt_keywords^2 text'
             })
         self.params['q'] = query
