@@ -1,6 +1,6 @@
 /* global URLSearchParams */
 import React, {useState, useCallback} from "react";
-import {useNavigate, useLocation, useSearchParams} from "react-router-dom";
+import {Link, useNavigate, useLocation, useSearchParams} from "react-router-dom";
 import useSearchParam from "../useSearchParam";
 
 import Button from 'react-bootstrap/Button';
@@ -34,7 +34,11 @@ export default function Search() {
         <div className="container">
           <div className="row">
             <div className="col-12 col-md-2 col-sm-12 me-4 mb-4">
-              <a href="/"><img className="p-1" height="100px" src={OIHLogo}/></a>
+              <Link
+                to='/'
+              >
+                <img className="p-1" height="100px" src={OIHLogo}/>
+              </Link>
             </div>
             <div className="col-12 col-md-9 col-sm-11">
               <form id='searchBarForm' className={"d-flex flex-justify-start align-self pt-2" + (url == "results" ? 'result-search' : '')} onSubmit={e => {
