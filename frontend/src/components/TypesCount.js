@@ -17,7 +17,7 @@ const doc_types = ['CreativeWork', 'Person', 'Organization', 'Dataset', 'Researc
 const defaultCountState = Object.fromEntries(doc_types.map(e => [e, 0]))
 
 const formatter = Intl.NumberFormat([], { "notation": "compact" })
-const entries = counts => [
+const HOME_PAGE_CATEGORIES =
     [
         {
             id: 'Person',
@@ -39,8 +39,6 @@ const entries = counts => [
             text: 'Datasets',
             icon: database
         },
-    ],
-    [
         {
             id: 'Vehicle',
             text: 'Vessels',
@@ -61,7 +59,6 @@ const entries = counts => [
             text: 'Spatial Data',
             icon: map
         }
-    ]
 ];
 
 export default function TypesCount() {
@@ -94,13 +91,10 @@ export default function TypesCount() {
           <div id="category-heading" className="mx-auto">
             <h5 className="text-white">Browse by category</h5>
           </div>
-          {entries(counts.counts).map((row,ix) =>(
-            <Row
-              className="bubble-height">
-              key={ix}
-              {row.map(col =>
-                       <Col
-                         className="p-4 col-xs-6 col-sm-6 col-md-3 col-6"
+          <div className='container__categories'>
+              {HOME_PAGE_CATEGORIES.map(col =>
+                       <div
+                         className="p-4 category__button"
                          role="button"
                          id={`bubble_${col.id}`}
                          key={col.id}
@@ -122,10 +116,9 @@ export default function TypesCount() {
                              </div>
                            </div>
                          </div>
-                       </Col>
+                       </div>
                       )}
-            </Row>
-          ))}
+          </div>
         </div>
       </Container>
     );
