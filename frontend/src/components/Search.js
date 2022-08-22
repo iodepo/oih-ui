@@ -71,16 +71,16 @@ export default function Search() {
                 <div className="text-light text-start mt-3">
                   <span className="p-2 h5">TRY:</span>
                   {currentSampleQueries.map((query,ix)=>(
-                    <a
+                    <Link
                       key={ix}
-                      onClick={e => {
-                        setSearchQuery(query);
-                        handleChange();
-                      }}
+                      // Touch up the internal state to match the navigation
+                      onClick= {e=>setSearchQuery(query)}
+                      // do the navigation
+                      to={ hrefFor(region, query) }
                       className="text-info text-light h6 p-2"
                     >
                       {query}
-                    </a>
+                    </Link>
                   ))
                   }
                 </div>)}
