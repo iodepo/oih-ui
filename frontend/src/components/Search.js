@@ -38,6 +38,7 @@ export default function Search() {
             <div className="col-12 col-md-2 col-sm-12 me-4 mb-4">
               <Link
                 to='/'
+                onClick= {e=>setSearchQuery('')}
               >
                 <img className="p-1" height="100px" src={OIHLogo}/>
               </Link>
