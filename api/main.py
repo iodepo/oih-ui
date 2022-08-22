@@ -146,14 +146,16 @@ def facet_counts(facets, facetFields=None):
 
 def rewriteGeom(the_geom):
     # UNDONE -- need to check to see if we're correctly handling wrap-around in the bounding boxes
-    number = r"-?\d+(\.\d+)?"  # optional sign, digits, optional decimal + more digits
+    # optional sign, digits, optional decimal + more digits, optional e-## for scientific notation.
+    # extra groups in non-capturing (?:) because we don't want them in the groups we save later.
+    number = r"-?\d+(?:\.\d+)?(?:e-?\d+)?"
     corners = re.match(rf"\[({number}),({number}) +TO +({number}),({number})]$", the_geom)
     if not corners:
         raise ParameterError("Invalid Geometry")
     # corners: s w n e
     #log.error(corners)
-    (s,w,n,e) = [float(x) for x in corners.group(1,3,5,7)]
-    #log.error("%s, %s, %s, %s", s,w,n,e)
+    (s,w,n,e) = [float(x) for x in corners.group(1,2,3,4)]
+    log.error("%s, %s, %s, %s", s,w,n,e)
     bb_width = e - w
     if bb_width > 360.0:
         e = 180.0
