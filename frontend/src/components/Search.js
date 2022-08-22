@@ -1,6 +1,6 @@
 /* global URLSearchParams */
 import React, {useState, useCallback} from "react";
-import {useNavigate, useLocation, useSearchParams} from "react-router-dom";
+import {Link, useNavigate, useLocation, useSearchParams} from "react-router-dom";
 import useSearchParam from "../useSearchParam";
 
 import Button from 'react-bootstrap/Button';
@@ -27,20 +27,30 @@ export default function Search() {
         ...region && region.toUpperCase() !== "GLOBAL" ? {region} : {}
     })}`;
 
-    const handleChange = useCallback(() => navigate(hrefFor(region, searchQuery)), [navigate, region, searchQuery, tabName]);
+    const handleSubmit = useCallback(() =>
+                                   navigate(hrefFor(region, searchQuery)),
+                                   [navigate, region, searchQuery, tabName]);
 
     return (
-      <div className={"pb-3 mt-4" + (url == " results" ? ' searchbg-alt' : '')}>
+      <div className={"pb-3 search__container" + (url == " results" ? ' searchbg-alt' : '')}>
         <div className="container">
           <div className="row">
             <div className="col-12 col-md-2 col-sm-12 me-4 mb-4">
-              <a href="/"><img className="p-1" height="100px" src={OIHLogo}/></a>
+              <Link
+                to='/'
+                onClick= {e=>setSearchQuery('')}
+              >
+                <img className="p-1" height="100px" src={OIHLogo}/>
+              </Link>
             </div>
             <div className="col-12 col-md-9 col-sm-11">
-              <form id='searchBarForm' className={"d-flex flex-justify-start align-self pt-2" + (url == "results" ? 'result-search' : '')} onSubmit={e => {
-                e.preventDefault();
-                handleChange();
-              }}>
+              <form
+                id='searchBarForm'
+                className={"d-flex flex-justify-start align-self pt-2" + (url == "results" ? 'result-search' : '')}
+                onSubmit={e => {
+                  e.preventDefault();
+                  handleSubmit();
+                }}>
                 <select className="form-select w-50 rounded-0" value={region}
                         onChange={e => setRegion(e.target.value)}>
                   {
@@ -62,19 +72,23 @@ export default function Search() {
                 <div className="text-light text-start mt-3">
                   <span className="p-2 h5">TRY:</span>
                   {currentSampleQueries.map((query,ix)=>(
-                    <a
+                    <Link
                       key={ix}
-                      onClick={e => {
-                        setSearchQuery(query);
-                        handleChange();
-                      }}
+                      // Touch up the internal state to match the navigation
+                      onClick= {e=>setSearchQuery(query)}
+                      // do the navigation
+                      to={ hrefFor(region, query) }
                       className="text-info text-light h6 p-2"
                     >
                       {query}
-                    </a>
+                    </Link>
                   ))
                   }
                 </div>)}
+              {!isResults && (
+                  <div className="text-light text-end ">
+                    <a href='#bbc' className='text-light'>Browse by Category</a>
+                  </div>)}
             </div>
           </div>
         </div>

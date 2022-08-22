@@ -1,11 +1,29 @@
 #root {
-  background: url("resources/landing-bg.jpg");
-  background-size: cover;
+  background: url("resources/landing-bg_1400.jpeg"), #001029;
+  background-size: 100%;
   background-repeat: no-repeat;
-  background-position: 15% 65%;
+  background-position-y: -200px;
   min-height: 100vh;
-  background-attachment: fixed;
+//  background-attachment: fixed;
 }
+
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction:column;
+  // Undo this to make the front page less scrolly
+  .search__container {
+    margin-top: 250px !important;
+  }
+  .category-section {
+    margin-top: 70vh;
+  }
+}
+
+.search__container {
+  @extend .mt-4;
+}
+
 
 #headerLogo {
   width: 60px;
@@ -153,6 +171,18 @@ p.result-p.truncate {
 
 }
 
+.container__categories {
+  display: flex;
+  justify-content: space-between;
+  align-content: middle;
+  flex-wrap: wrap;
+  div.category__button {
+    height: 228px;
+    /* show 4 across for most larger ones, don't kick up to 5, nor down to 3 on the HD sized display */
+    width: (min(max(228px, 18vw), 300px));
+  }
+}
+
 .bubble-container {
   z-index: 5;
 }
@@ -193,9 +223,9 @@ p.result-p.truncate {
 .bubble-textarea-alt {
   position: relative;
   height: fit-content;
-  padding: 0.2em 1em 0.5em;
+  padding: 0.2em 1.5em 0.5em;
   top: 0.5em;
-  left: -0.5em;
+  left: -1em;
   background-color: #2f5592;
   color: white;
   border-radius: 0.8em;
@@ -206,7 +236,7 @@ p.result-p.truncate {
   height: fit-content;
   padding: 0.2em 1.5em 0.5em;
   top: 0.5em;
-  left: -1.2em;
+  left: -1.0em;
   background-color: white;
   color: #21295c;
   border-radius: 0.8em;

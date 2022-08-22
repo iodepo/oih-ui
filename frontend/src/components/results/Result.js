@@ -22,7 +22,7 @@ const Keywords = ({ result }) => {
         {result.map(keyword => <Keyword key={keyword} keyword={keyword} />).slice(0, keywordsTruncated ? 20 : undefined)}
         {keywordsTruncated && (
             <button
-                className="btn-outline-secondary text-dark mx-1 truncate btn badge"
+                className="btn-outline-secondary text-light mx-1 truncate btn badge"
                 style={{ verticalAlign: 'super' }}
                 onClick={() => setKeywordsTruncated(false)}
             >
