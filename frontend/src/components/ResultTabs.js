@@ -25,19 +25,16 @@ export default function ResultTabs({
                   key={tab.title}
                   selectedClassName=" rounded-0 primary-color-alt"
                 >
-                  {counts[tab.title] &&
-                   (<div selected={tab.title === searchType} className="d-flex">
+                   <div selected={tab.title === searchType} className="d-flex">
                       <div className="bubble-container">
                         <div className={"" + (tab.title === searchType ? 'bg-selected rounded-circle bubble-alt' : ' primary-bg rounded-circle bubble-alt')}>
-                          <span className="text-light-tab">{formatter.format(counts[tab.title])}</span>
+                          <span className="text-light-tab">{formatter.format(counts[tab.title] || 0)}</span>
                         </div>
                       </div>
                       <div className={"fw-bold text-capitalize" + (tab.title === searchType ? ' bubble-textarea-selected' : ' bubble-textarea-alt')}>
                         {tab.tab_name}
                       </div>
                   </div>
-                   )}
-
                 </Tab>
             )}
           </TabList>
