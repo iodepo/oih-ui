@@ -70,6 +70,8 @@ def search(search_text: str = None, document_type: str = None, region: str = Non
                      ).json()
     return {
         'docs': data['response']['docs'],
+        # make sure pagination gets the right number of items back so it doesn't need to calculate it.
+        'count': data['response'].get('numFound', 0),
         'counts': counts_dict(data['facet_counts']['facet_fields']['type']),
         'facets': facet_counts(data['facet_counts']['facet_fields'], facetFields) if include_facets else None
     }
