@@ -415,7 +415,7 @@ export default function Results() {
                              <div>
                                Note: Geometries that are larger than the map display area will not be displayed. <br/>
                                Search results corresponding to the map area show below. <br/>
-                               <span>{(zoom <= 3) && "Zoom in to hover over areas to see the objects associted with them."}</span><br/>
+                               <span>{(zoom <= 3) && "Zoom in to hover over areas to see the objects associated with them."}</span><br/>
                              </div>
 
                            </div>
