@@ -150,11 +150,9 @@ export default function Results() {
             .then(json => {
                 setResults(json.docs);
                 setFacets(json.facets.filter(facet => facet.counts.length > 0));
-                // TODO: Pagination will have *issues* with double-counted orgs+experts
-                // (count of orgs, people, and experts are summed, double-counting both orgs and people)
-                const count = Object.values(json.counts).reduce((x, y) => x + y, 0);
+                const count = json.count;
                 setResultCount(count);
-                setCounts(prev => ({ ...prev, [searchType]: count }))
+                setCounts(prev => ({ ...prev, [searchType]: count }));
             })
     }, 1000), [dataServiceUrl, searchText, searchType, region, facetQuery])
 
@@ -176,9 +174,9 @@ export default function Results() {
                 .then(response => response.json())
                 .then(json => {
                     setResults(json.docs);
-                    const count = json.counts[searchType]
+                    const count = json.count;
                     setResultCount(count);
-                    setCounts(prev => ({ ...prev, [searchType]: count }))
+                    setCounts(prev => ({ ...prev, [searchType]: count }));
                     setFacets(json.facets.filter(facet => facet.counts.length > 0));
                 })
 
