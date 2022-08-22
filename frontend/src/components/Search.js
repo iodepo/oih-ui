@@ -27,7 +27,9 @@ export default function Search() {
         ...region && region.toUpperCase() !== "GLOBAL" ? {region} : {}
     })}`;
 
-    const handleChange = useCallback(() => navigate(hrefFor(region, searchQuery)), [navigate, region, searchQuery, tabName]);
+    const handleSubmit = useCallback(() =>
+                                   navigate(hrefFor(region, searchQuery)),
+                                   [navigate, region, searchQuery, tabName]);
 
     return (
       <div className={"pb-3 mt-4" + (url == " results" ? ' searchbg-alt' : '')}>
@@ -41,10 +43,13 @@ export default function Search() {
               </Link>
             </div>
             <div className="col-12 col-md-9 col-sm-11">
-              <form id='searchBarForm' className={"d-flex flex-justify-start align-self pt-2" + (url == "results" ? 'result-search' : '')} onSubmit={e => {
-                e.preventDefault();
-                handleChange();
-              }}>
+              <form
+                id='searchBarForm'
+                className={"d-flex flex-justify-start align-self pt-2" + (url == "results" ? 'result-search' : '')}
+                onSubmit={e => {
+                  e.preventDefault();
+                  handleSubmit();
+                }}>
                 <select className="form-select w-50 rounded-0" value={region}
                         onChange={e => setRegion(e.target.value)}>
                   {
