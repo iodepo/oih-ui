@@ -6,7 +6,7 @@ import Vlaanderen from '../resources/logos/Flanders_white_220.png';
 
 export default function Footer() {
     return (
-        <div className="mt-5 ml-5 pt-5 mb-0 pb-5 text-light">
+        <div className="mt-auto ml-5 pt-5 mb-0 pb-5 text-light footer__container">
             <div className="container d-flex ">
                 <div className="col-md-6 flex-fill text-start">
                     <h3 className="text-white fw-bold h4 text-uppercase">About OIH Project</h3>

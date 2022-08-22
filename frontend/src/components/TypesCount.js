@@ -87,7 +87,7 @@ export default function TypesCount() {
 
     return (
       <Container className="bubble-height">
-        <div className="category-section">
+        <div id="bbc"className="category-section">
           <div id="category-heading" className="mx-auto">
             <h5 className="text-white">Browse by category</h5>
           </div>

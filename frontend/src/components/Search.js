@@ -32,7 +32,7 @@ export default function Search() {
                                    [navigate, region, searchQuery, tabName]);
 
     return (
-      <div className={"pb-3 mt-4" + (url == " results" ? ' searchbg-alt' : '')}>
+      <div className={"pb-3 search__container" + (url == " results" ? ' searchbg-alt' : '')}>
         <div className="container">
           <div className="row">
             <div className="col-12 col-md-2 col-sm-12 me-4 mb-4">
@@ -85,6 +85,10 @@ export default function Search() {
                   ))
                   }
                 </div>)}
+              {!isResults && (
+                  <div className="text-light text-end ">
+                    <a href='#bbc' className='text-light'>Browse by Category</a>
+                  </div>)}
             </div>
           </div>
         </div>

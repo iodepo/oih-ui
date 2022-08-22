@@ -2,10 +2,28 @@
   background: url("resources/landing-bg_1400.jpeg"), #001029;
   background-size: 100%;
   background-repeat: no-repeat;
-//  background-position: 15% 65%;
+  background-position-y: -200px;
   min-height: 100vh;
 //  background-attachment: fixed;
 }
+
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction:column;
+  // Undo this to make the front page less scrolly
+  .search__container {
+    margin-top: 250px !important;
+  }
+  .category-section {
+    margin-top: 70vh;
+  }
+}
+
+.search__container {
+  @extend .mt-4;
+}
+
 
 #headerLogo {
   width: 60px;
