@@ -21,10 +21,11 @@ export default function FacetsFullWidth({
           <div className="ps-3 pe-3 w-75 mx-auto">
           </div>
           <div className="row">
-            {facets.map((facet, i) => {
-                return (
-                    <div className="col">
-                      <div key={i}>
+            {facets.map((facet, i) => (
+              <div
+                className="col"
+                key={i}>
+                      <div>
                         <select
                           className="form-select form-select-md mb-3"
                           onChange={e => {
@@ -47,8 +48,8 @@ export default function FacetsFullWidth({
                         </select>
                       </div>
                     </div>
-                );
-            })}
+                )
+                       )}
             <div className="col-1 pt-2">
               <button className="clear-btn text-uppercase fw-bold" onClick={clear}>
                 Clear
