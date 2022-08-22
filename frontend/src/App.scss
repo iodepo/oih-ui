@@ -145,6 +145,7 @@ p.result-p.truncate {
 
 .pagination {
   text-transform: capitalize;
+
 }
 
 .bubble {
@@ -232,6 +233,13 @@ p.result-p.truncate {
   padding: 2em;
   color: white;
   opacity: 100%;
+  a {
+    color: #eee;
+    &:hover, &:visited, &:active {
+      color:#ddd;
+      text-decoration: underline;
+    }
+  }
 }
 
 #ResTabs {
@@ -257,6 +265,11 @@ p.result-p.truncate {
 
 #resultsPaginate {
   margin-top: 2em;
+  display:flex;
+  justify-content: center;
+  .page-link {
+    background-color: rgba(0,24,49, 1);
+  }
 }
 
 #result-container {
