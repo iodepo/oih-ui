@@ -24,11 +24,11 @@ services:
 
   backend-api:
     image: unesco-oih_fast-api
-#    build: .
+#    build: ./api
     ports:
       - "8000:8000"
     volumes:
-      - ./api:/usr/src/app/api
+      - ./api/api:/usr/src/app/api
 
   frontend:
     build: ./frontend
