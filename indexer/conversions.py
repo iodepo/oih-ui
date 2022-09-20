@@ -27,11 +27,11 @@ from models import Att
 from test_utils import test_generation
 import regions
 
+from dateutil.parser import isoparse
 import shapely
 import shapely.wkt
 import shapely.geometry
 import json
-
 import math
 
 class UnhandledFormatException(Exception): pass
@@ -178,6 +178,20 @@ def _extractDate(field):
 
 endDate = _extractDate('endDate')
 startDate = _extractDate('startDate')
+
+
+def temporalCoverage(field):
+    if field == 'null/null' or not '/' in field:
+        return Att('txt', field, 'temporalCoverage')
+    try:
+        (start, end) = field.split('/')
+        return [
+            Att('dt', isoparse(start).isoformat(), 'startDate'),
+            Att('dt', isoparse(end).isoformat(), 'endDate'),
+            Att('txt', field, 'temporalCoverage')
+        ]
+    except ValueError:
+        raise UnhandledFormatException("Didn't handle %s in temporalCoverage" % field)
 
 ## Prov Fields
 def prov__wasAttributedTo(data):
