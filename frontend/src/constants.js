@@ -25,7 +25,17 @@ const boundsToQuery = (mb) => {
 
 const regionBoundsMap = Object.fromEntries(Object.entries(regionMap).map(([k,v])=>[k,boundsToQuery(v)]));
 
-const PROMOTED_REGIONS = ['Global', 'Atlantic Ocean', 'Latin America and the Caribbean', 'Africa', 'Pacific Small Islands'];
+
+/* Name: title mapping of the regions that show up in the search bar.
+  Add more items here to search different regions.
+*/
+const PROMOTED_REGIONS =
+      { 'Global': 'Global Ocean',
+        'Atlantic Ocean': 'Atlantic Ocean',
+        'Latin America and the Caribbean':'Coastal waters of Latin America and the Caribbean',
+        'Africa': 'Coastal waters of Africa',
+        'Pacific Small Islands': 'Waters of the Pacific Island States',
+      };
 
 const SAMPLE_QUERIES = [
   'Coral Reef',
