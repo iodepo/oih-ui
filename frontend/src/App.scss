@@ -51,7 +51,7 @@ nav .navbar-collapse {
   display: block;
   padding-top: 2em;
   transition: right 0.3s ease; /* transition for smooth sliding */
-  z-index: 3;
+  z-index: 10;
 }
 
 nav .navbar-collapse.show {
