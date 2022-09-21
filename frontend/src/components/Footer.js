@@ -8,14 +8,13 @@ export default function Footer() {
     return (
         <div className="mt-auto ml-5 pt-5 mb-0 pb-5 text-light footer__container">
             <div className="container d-flex ">
-                <div className="col-md-6 flex-fill text-start">
-                    <h3 className="text-white fw-bold h4 text-uppercase">About OIH Project</h3>
+                <div className="col-md-6 mx-2 flex-fill text-start">
+                    <h3 className="text-white fw-bold h4 text-uppercase">About the Ocean InfoHub Project</h3>
                   <p>
-                    The OIH was created through a three-year project funded by the Government of Flanders,
-Kingdom of Belgium and implemented by IODE, project office of the UNESCO. It is a contribution to the OceanData 2030 Programme of the UN Decade of Ocean Science for Sustainable Development.
+                    The Ocean InfoHub aims to build a sustainable, interoperable, and inclusive digital ecosystem for all ocean stakeholders. Existing and emerging data systems are linked, with the ultimate goal of coordinating action and capacity to improve access to ocean data and knowledge. The Project is funded by the Government of Flanders, Kingdom of Belgium and implemented by IODE, project office of the IOC of UNESCO. It is a contribution to the OceanData 2030 Programme of the UN Decade of Ocean Science for Sustainable Development.
                   </p>
                 </div>
-                <div className="col-md-6 flex-fill">
+                <div className="col-md-6 mx-2 flex-fill">
                     <h3 className="text-white fw-bold h4 text-uppercase">Want to learn more?</h3>
                     <button className="w-50 btn rounded-0 btn-info text-white">GET IN TOUCH</button>
                 </div>
