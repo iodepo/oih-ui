@@ -32,7 +32,7 @@ export default function Search() {
                                    [navigate, region, searchQuery, tabName]);
 
     const placeholder = useCallback(() =>
-                                    "Search across our " + (PROMOTED_REGIONS[region]||'').toUpperCase() + " partners"
+                                    "Search across our " + (PROMOTED_REGIONS[region]||'Global') + " partners"
                                     , [region]);
 
     return (
