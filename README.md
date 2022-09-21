@@ -1,17 +1,11 @@
-# fastapi-docker-base
+# Global Hub Search Portal
 
-## This repo will create a base image for FastAPI
-## This image can be extended to develop other projects
+This repo contains the code for the Ocean Info Hub Global Search Portal.
 
-## Deploy on local environment
-### Build an image and run using
-`make up`
-### Browse to http://localhost:8000/ 
+* `/api` contains the code for the api server. This produces a container which will need to have access to the SOLR instance.
+* `/indexer` contains all of the code to ingest the OIH graph into the SOLR Instance
+* `/solr` contains the configuration required for the solr instance, including the schema. 
+* `/frontend` contains the code for the static javascript app. This will produce a container in dev mode running a live server, and a static html/javascript site in production mode. 
+* `/regions` contains the QGIS file defining the gographical regions. 
 
-## clean up
-### Total clean up (remove container and image) 
-`make clean`
-### stop and remove containers 
-`make clean-container`
-### remove image 
-`make remove-image`
+See the individual README files for more information. 
