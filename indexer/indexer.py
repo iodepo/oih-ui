@@ -10,8 +10,8 @@ import hashlib
 import shutil
 
 from multiprocessing import Pool
-from collections.abc import Iterable
 from models import Att
+from common import flatten
 
 solr_url = "http://localhost:8983/solr/ckan/update/json/docs"
 delete_url = "http://localhost:8983/solr/ckan/update"
@@ -103,15 +103,6 @@ def upsert(url, data, flReindex=False):
         orig_source = data
 
     index_one(orig_source)
-
-
-def flatten(l):
-    for item in l:
-        if isinstance(item, Iterable) and not isinstance(item, str):
-            for subitem in item:
-                yield subitem
-            continue
-        yield item
 
 
 ## wrapper of the function to do test generation against the "generic" class
