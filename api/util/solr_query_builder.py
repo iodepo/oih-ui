@@ -10,11 +10,13 @@ class SolrQueryBuilder:
     def __init__(self, rows=10, facet_min_count=1, start=0,
                  query='*:*', sort='score desc, indexed_ts desc',
                  facet='true', flList=None):
-        self.params = dict();
+        self.params = {
+            'q.op':'AND',  # default op to AND  # applies to dismax and standard query parser
+        };
         if not '*' in query:
             self.params.update({
                 'defType':'edismax',
-                'qf':'name^4 txt_keywords^2 text'
+                'qf':'name^4 txt_keywords^2 text',
             })
         self.params['q'] = query
         self.params['sort'] = sort
