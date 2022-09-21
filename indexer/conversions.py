@@ -24,20 +24,20 @@ Any method beginning with _ is internal.
 """
 
 from models import Att
+from common import flatten
 from test_utils import test_generation
 import regions
 
+from dateutil.parser import isoparse
 import shapely
 import shapely.wkt
 import shapely.geometry
 import json
-
 import math
 
 class UnhandledFormatException(Exception): pass
 class UnhandledDispatchException(Exception): pass
-
-
+class IDCollisionError(Exception): pass
 
 @test_generation
 def _dispatch(_type, d):
@@ -50,6 +50,9 @@ def _dispatch(_type, d):
 
 ###
 #  Types
+#
+#  These types will be inlined as attributes on the enclosing
+#  object. They are not saved as separate items in the index.
 ###
 
 def _extractField(fieldName):
@@ -106,8 +109,7 @@ def CourseInstance(data):
                 atts.append(_dispatch(loc['@type'], loc))
             except (UnhandledDispatchException): pass
     atts.append(Att('txt', data.get('name', data.get('description', ''))))
-    # UNDONE flatten
-    return [a for a in atts if a and a.value]
+    return list(flatten(atts))
 
 ## Geometry processing
 def _to_geojson(geo):
@@ -166,18 +168,44 @@ def _geo(featuretype, feature):
 #   Individual Fields
 ###
 
+def _parseDate(field, d):
+    try:
+        dt = isoparse(d)
+        return [
+            Att('dt', dt.isoformat(), field),
+            Att('n', dt.year, field.replace('Date', 'Year')),
+        ]
+    except ValueError:
+        return Att('txt', d, field)
+
 def _extractDate(field):
+
     def _extractor(d):
         if isinstance(d, str):
-            return Att('dt', d, field)
+            return _parseDate(field, d)
         dt = d.get('date', None)
         if dt:
-            return Att('dt', dt, field)
+            return _parseDate(field, dt)
         return None
     return _extractor
 
 endDate = _extractDate('endDate')
 startDate = _extractDate('startDate')
+
+
+def temporalCoverage(field):
+    if field == 'null/null' or not '/' in field:
+        return Att('txt', field, 'temporalCoverage')
+    try:
+        (start, end) = field.split('/')
+        return list(flatten([
+            _parseDate('startDate', start),
+            _parseDate('endDate', end),
+            Att('txt', field, 'temporalCoverage')
+        ]))
+
+    except ValueError:
+        raise UnhandledFormatException("Didn't handle %s in temporalCoverage" % field)
 
 ## Prov Fields
 def prov__wasAttributedTo(data):

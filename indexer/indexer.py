@@ -10,8 +10,8 @@ import hashlib
 import shutil
 
 from multiprocessing import Pool
-from collections.abc import Iterable
 from models import Att
+from common import flatten
 
 solr_url = "http://localhost:8983/solr/ckan/update/json/docs"
 delete_url = "http://localhost:8983/solr/ckan/update"
@@ -36,7 +36,7 @@ solr_params = {
 # - Add the source file name hash id as graph_id
 
 import conversions
-from conversions import UnhandledDispatchException
+from conversions import UnhandledDispatchException, IDCollisionError
 
 from test_utils import test_generation, dump_exception
 
@@ -87,15 +87,22 @@ def upsert(url, data, flReindex=False):
         orig = resp['response']['docs'][0]
         orig_source = json.loads(orig['json_source'])
 
+        if orig_source.get('@type', None) != data.get('@type', None):
+            # If the types are different, there are potentially two
+            # objects in the graph with the same id This is the case
+            # for https://www.marinetraining.eu/node/3857, which is
+            # both a CourseInstance and a Course
+            dump_exception([data, orig_source], "Duplicate ID with different types found")
+            raise(IDCollisionError(url))
+
         loc_trace = orig_source.get('location',None)
 
-        orig_vals = sorted(json.dumps(list(orig_source.values())))
-        if orig_vals != sorted(json.dumps(list(data.values()))):
+        if orig_source != data:
             orig_source.update(data)
-            new_vals = sorted(json.dumps(list(orig_source.values())))
-            if new_vals == orig_vals and not flReindex:
+            if orig_source == json.loads(orig['json_source']) and not flReindex:
+                # did we make a change with the update
                 return
-            if json.dumps(loc_trace) and loc_trace != json.dumps(orig_source['location']):
+            if loc_trace and loc_trace != orig_source['location']:
                 dump_exception([loc_trace, orig_source['location']])
         else:
             if not flReindex: return
@@ -103,15 +110,6 @@ def upsert(url, data, flReindex=False):
         orig_source = data
 
     index_one(orig_source)
-
-
-def flatten(l):
-    for item in l:
-        if isinstance(item, Iterable) and not isinstance(item, str):
-            for subitem in item:
-                yield subitem
-            continue
-        yield item
 
 
 ## wrapper of the function to do test generation against the "generic" class
@@ -284,7 +282,7 @@ def resolve_prov_file(filename):
         print ("Exception load prov for %s: %s", (filename, msg))
         return None
 
-def import_file(filename):
+def import_file(filename, flReindex=False):
     filename = filename.strip()
 
     prov = resolve_prov_file(filename)
@@ -312,7 +310,7 @@ def import_file(filename):
             itemListElements = orig.get('itemListElement',[])
             for elt in itemListElements:
                 try:
-                    upsert_one(elt['item'], prov=prov)
+                    upsert_one(elt['item'], prov=prov, flReindex=flReindex)
                 except Exception as msg:
                     print("Exception in itemList: %s" % msg)
                     try:
@@ -325,7 +323,7 @@ def import_file(filename):
         if graph:
             for elt in graph:
                 try:
-                    upsert_one(elt, prov=prov)
+                    upsert_one(elt, prov=prov, flReindex=flReindex)
                 except Exception as msg:
                     print("Exception parsing graph: %s" % msg)
                     try:
@@ -334,7 +332,7 @@ def import_file(filename):
             return
 
     try:
-        upsert_one(orig, prov=prov)
+        upsert_one(orig, prov=prov, flReindex=flReindex)
     except Exception as msg:
         print ("Exception on bare upsert: %s" % msg)
         try:
