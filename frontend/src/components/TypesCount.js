@@ -87,10 +87,7 @@ export default function TypesCount() {
 
     return (
       <Container className="bubble-height">
-        <div id="bbc"className="category-section">
-          <div id="category-heading" className="mx-auto">
-            <h5 className="text-white">Browse by category</h5>
-          </div>
+        <div id="bbc" className="category-section">
           <div className='container__categories'>
               {HOME_PAGE_CATEGORIES.map(col =>
                        <div

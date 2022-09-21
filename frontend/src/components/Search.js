@@ -16,9 +16,9 @@ export default function Search() {
     const navigate = useNavigate();
     const [params,] = useSearchParams();
     const [searchQuery, setSearchQuery] = useState(params.has('search_text') ? params.get('search_text') : '');
-    const [region, setRegion] = useSearchParam("region", "global")
+    const [region, setRegion] = useSearchParam("region", "global");
     const location = useLocation();
-    const isResults = location.pathname.startsWith("/results")
+    const isResults = location.pathname.startsWith("/results");
 
     const [_, url, tabName=''] = window.location.pathname.split('/');
 
@@ -31,8 +31,12 @@ export default function Search() {
                                    navigate(hrefFor(region, searchQuery)),
                                    [navigate, region, searchQuery, tabName]);
 
+    const placeholder = useCallback(() =>
+                                    "Search across our " + (PROMOTED_REGIONS[region]||'Global') + " partners"
+                                    , [region]);
+
     return (
-      <div className={"pb-3 search__container" + (url == " results" ? ' searchbg-alt' : '')}>
+      <div className={"search__container " + (url == " results" ? ' searchbg-alt' : '')}>
         <div className="container">
           <div className="row">
             <div className="col-12 col-md-2 col-sm-12 me-4 mb-4">
@@ -51,18 +55,24 @@ export default function Search() {
                   e.preventDefault();
                   handleSubmit();
                 }}>
-                <select className="form-select w-50 rounded-0" value={region}
+                <select className="form-select w-50 rounded-0"
+                        value={region}
                         onChange={e => setRegion(e.target.value)}>
                   {
-                    PROMOTED_REGIONS.map((region) => {
-                      return <option key={region}>{region}</option>;
+                      Object.entries(PROMOTED_REGIONS).map(([region, title]) => {
+                        return <option
+                                 key={region}
+                                 value={region}
+                               >
+                                 {title}
+                               </option>;
                     })
                   }
                 </select>
                 <input
                   className="flex-fill form-control rounded-0"
                   type="text"
-                  placeholder={"Search across our " + region.toUpperCase() + " partners"}
+                  placeholder={placeholder()}
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   name="search"/>

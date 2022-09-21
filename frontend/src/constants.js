@@ -1,3 +1,11 @@
+
+/* Bounds for regions on the map.
+
+  This is just the initial bounds of the map that's shown, it doesn't
+  ultimately restrict the data found for a region, that's determined by the
+  data in the regions.geojson on the indexing side
+*/
+
 const regionMap = {
     Atlantic_Ocean: [{'lon': -145.33369569979607, 'lat': 5.7780686247193955}, {'lon': 65.33369569979615, 'lat': 62.066727156861674}],
     Europe: [{'lon': -107.21562733091812, 'lat': 10.386093118754701}, {'lon': 172.21562733091304, 'lat': 72.88493065790703}],
@@ -25,8 +33,22 @@ const boundsToQuery = (mb) => {
 
 const regionBoundsMap = Object.fromEntries(Object.entries(regionMap).map(([k,v])=>[k,boundsToQuery(v)]));
 
-const PROMOTED_REGIONS = ['Global', 'Atlantic Ocean', 'Latin America and the Caribbean', 'Africa', 'Pacific Small Islands'];
 
+/* Name: title mapping of the regions that show up in the search bar.
+  Add more items here to search different regions.
+*/
+const PROMOTED_REGIONS =
+      { 'Global': 'Global Ocean',
+        'Atlantic Ocean': 'Atlantic Ocean',
+        'Latin America and the Caribbean':'Coastal waters of Latin America and the Caribbean',
+        'Africa': 'Coastal waters of Africa',
+        'Pacific Small Islands': 'Waters of the Pacific Island States',
+      };
+
+
+/* Sample queries for the home page. 4 random items from this list will be added
+   on each view/session
+*/
 const SAMPLE_QUERIES = [
   'Coral Reef',
   'Rare Species',
@@ -51,6 +73,13 @@ const INITIAL_BOUNDS = [
 ];
 const DEFAULT_QUERY_BOUNDS = boundsToQuery(INITIAL_BOUNDS);
 
+
+/*
+Field name -> Title mapping for facets.
+
+Note that this does not include the type_ prefix, so that it will be
+used for any of the dt_ or txt_ or n_ fields, if available.
+*/
 const fieldNameMap = {
   "includedindatacatalog": "Catalog",
   "jobtitle": "Job Title",

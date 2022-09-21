@@ -2,7 +2,8 @@
   background: url("resources/landing-bg_1400.jpeg"), #001029;
   background-size: 100%;
   background-repeat: no-repeat;
-  background-position-y: -200px;
+  // note, this is positioning y based on the width to keep the manta on the page
+  background-position-y: -40vw;
   min-height: 100vh;
 //  background-attachment: fixed;
 }
@@ -13,15 +14,20 @@
   flex-direction:column;
   // Undo this to make the front page less scrolly
   .search__container {
-    margin-top: 250px !important;
+    margin-top: 20vh;
+    margin-bottom: 1rem;
   }
+  // Also possibly 35vh;
+  // again, we're doign positioning in Y based on the widgh, to keep it under the manta.
   .category-section {
-    margin-top: 70vh;
+    margin-top: 20vw;
   }
 }
 
-.search__container {
-  @extend .mt-4;
+.results {
+  .search__container {
+    @extend .mt-4;
+  }
 }
 
 
@@ -45,7 +51,7 @@ nav .navbar-collapse {
   display: block;
   padding-top: 2em;
   transition: right 0.3s ease; /* transition for smooth sliding */
-  z-index: 3;
+  z-index: 10;
 }
 
 nav .navbar-collapse.show {
@@ -199,7 +205,7 @@ p.result-p.truncate {
 
 .bubble-alt {
   display: flex;
-  padding: 6%;
+  padding: 0.18rem;
   height: 3em;
   width: 3em;
   font-size: 1em;
@@ -223,9 +229,10 @@ p.result-p.truncate {
 .bubble-textarea-alt {
   position: relative;
   height: fit-content;
-  padding: 0.2em 1.5em 0.5em;
+  padding: 0.2em 0.5em 0.3em 1.2em;
   top: 0.5em;
   left: -1em;
+  margin-right: -1rem;
   background-color: #2f5592;
   color: white;
   border-radius: 0.8em;
@@ -234,9 +241,10 @@ p.result-p.truncate {
 .bubble-textarea-selected {
   position: relative;
   height: fit-content;
-  padding: 0.2em 1.5em 0.5em;
+  padding: 0.2em 0.5em 0.3em 1.2em;
   top: 0.5em;
   left: -1.0em;
+  margin-right: -1rem;
   background-color: white;
   color: #21295c;
   border-radius: 0.8em;
@@ -263,7 +271,7 @@ p.result-p.truncate {
 }
 
 .category-section {
-  background-color: rgba(0,24,49, 0.8);
+//  background-color: rgba(0,24,49, 0.8);
   padding: 2em;
   border-radius: 3em;
   margin-top: 5em;
@@ -285,7 +293,25 @@ p.result-p.truncate {
 }
 
 #ResTabs {
-  margin-bottom: -1em;
+
+  .react-tabs__tab {
+    // tighten horizontal spacing on tabs.
+    padding: 6px 0;
+    margin-right: .3rem;
+    margin-left: .3rem;
+  }
+  ul {
+    padding-left: 0;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+  }
+  margin-bottom: calc(-1.0rem + 3px);
+  // give us a bit of overhang to go single line @ 1280 px.
+  margin-right: -1.3rem;
+  margin-left: -1.3rem
 }
 
 .footer-bg{
@@ -315,7 +341,7 @@ p.result-p.truncate {
 }
 
 #result-container {
-  padding: 2% 6%;
+  padding: 0 6% 2em 6%;
 }
 
 .react-tabs__tab:focus::after {
