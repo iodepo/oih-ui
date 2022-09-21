@@ -18,7 +18,7 @@ export default function ResultTabs({
   return (
     <div id='ResTabs' >
         <Tabs selectedIndex={tabList.findIndex(tab => tab.title === searchType)}>
-          <TabList className="rounded-2 pt-5 text-secondary">
+          <TabList className="rounded-2 text-secondary">
             {tabList.map(tab =>
                 <Tab
                   onClick={changeSearchType(tab.title)}

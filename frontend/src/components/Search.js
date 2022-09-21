@@ -36,7 +36,7 @@ export default function Search() {
                                     , [region]);
 
     return (
-      <div className={"pb-3 search__container" + (url == " results" ? ' searchbg-alt' : '')}>
+      <div className={"search__container " + (url == " results" ? ' searchbg-alt' : '')}>
         <div className="container">
           <div className="row">
             <div className="col-12 col-md-2 col-sm-12 me-4 mb-4">
