@@ -169,13 +169,24 @@ def _geo(featuretype, feature):
 #   Individual Fields
 ###
 
+def _parseDate(field, d):
+    try:
+        dt = isoparse(d)
+        return [
+            Att('dt', dt.isoformat(), field),
+            Att('n', dt.year, field.replace('Date', 'Year')),
+        ]
+    except ValueError:
+        return Att('txt', d, field)
+
 def _extractDate(field):
+
     def _extractor(d):
         if isinstance(d, str):
-            return Att('dt', d, field)
+            return _parseDate(field, d)
         dt = d.get('date', None)
         if dt:
-            return Att('dt', dt, field)
+            return _parseDate(field, dt)
         return None
     return _extractor
 
@@ -188,11 +199,12 @@ def temporalCoverage(field):
         return Att('txt', field, 'temporalCoverage')
     try:
         (start, end) = field.split('/')
-        return [
-            Att('dt', isoparse(start).isoformat(), 'startDate'),
-            Att('dt', isoparse(end).isoformat(), 'endDate'),
+        return list(flatten([
+            _parseDate('startDate', start),
+            _parseDate('endDate', end),
             Att('txt', field, 'temporalCoverage')
-        ]
+        ]))
+
     except ValueError:
         raise UnhandledFormatException("Didn't handle %s in temporalCoverage" % field)
 

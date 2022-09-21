@@ -275,7 +275,7 @@ def resolve_prov_file(filename):
         print ("Exception load prov for %s: %s", (filename, msg))
         return None
 
-def import_file(filename):
+def import_file(filename, flReindex=False):
     filename = filename.strip()
 
     prov = resolve_prov_file(filename)
@@ -303,7 +303,7 @@ def import_file(filename):
             itemListElements = orig.get('itemListElement',[])
             for elt in itemListElements:
                 try:
-                    upsert_one(elt['item'], prov=prov)
+                    upsert_one(elt['item'], prov=prov, flReindex=flReindex)
                 except Exception as msg:
                     print("Exception in itemList: %s" % msg)
                     try:
@@ -316,7 +316,7 @@ def import_file(filename):
         if graph:
             for elt in graph:
                 try:
-                    upsert_one(elt, prov=prov)
+                    upsert_one(elt, prov=prov, flReindex=flReindex)
                 except Exception as msg:
                     print("Exception parsing graph: %s" % msg)
                     try:
@@ -325,7 +325,7 @@ def import_file(filename):
             return
 
     try:
-        upsert_one(orig, prov=prov)
+        upsert_one(orig, prov=prov, flReindex=flReindex)
     except Exception as msg:
         print ("Exception on bare upsert: %s" % msg)
         try:
