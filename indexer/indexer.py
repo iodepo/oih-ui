@@ -36,7 +36,7 @@ solr_params = {
 # - Add the source file name hash id as graph_id
 
 import conversions
-from conversions import UnhandledDispatchException
+from conversions import UnhandledDispatchException, IDCollisionError
 
 from test_utils import test_generation, dump_exception
 
@@ -87,15 +87,22 @@ def upsert(url, data, flReindex=False):
         orig = resp['response']['docs'][0]
         orig_source = json.loads(orig['json_source'])
 
+        if orig_source.get('@type', None) != data.get('@type', None):
+            # If the types are different, there are potentially two
+            # objects in the graph with the same id This is the case
+            # for https://www.marinetraining.eu/node/3857, which is
+            # both a CourseInstance and a Course
+            dump_exception([data, orig_source], "Duplicate ID with different types found")
+            raise(IDCollisionError(url))
+
         loc_trace = orig_source.get('location',None)
 
-        orig_vals = sorted(json.dumps(list(orig_source.values())))
-        if orig_vals != sorted(json.dumps(list(data.values()))):
+        if orig_source != data:
             orig_source.update(data)
-            new_vals = sorted(json.dumps(list(orig_source.values())))
-            if new_vals == orig_vals and not flReindex:
+            if orig_source == json.loads(orig['json_source']) and not flReindex:
+                # did we make a change with the update
                 return
-            if json.dumps(loc_trace) and loc_trace != json.dumps(orig_source['location']):
+            if loc_trace and loc_trace != orig_source['location']:
                 dump_exception([loc_trace, orig_source['location']])
         else:
             if not flReindex: return

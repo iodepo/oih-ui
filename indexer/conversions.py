@@ -37,8 +37,7 @@ import math
 
 class UnhandledFormatException(Exception): pass
 class UnhandledDispatchException(Exception): pass
-
-
+class IDCollisionError(Exception): pass
 
 @test_generation
 def _dispatch(_type, d):
