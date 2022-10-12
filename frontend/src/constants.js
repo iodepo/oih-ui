@@ -90,6 +90,8 @@ const fieldNameMap = {
   "educationalcredentialawarded": "Credential Awarded",
   "vehiclespecialusage": "Vehicle Usage",
   "areaserved": "Area",
+  "startyear": "Starting Between",
+  "endyear": "Ending Between",
 };
 
 const fieldTitleFromName = (facet_name) => {
