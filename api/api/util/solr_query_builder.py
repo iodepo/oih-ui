@@ -34,6 +34,8 @@ class SolrQueryBuilder:
         'text': '+%(name)s:(%(value)s)',
         'type': '+%(name)s:(%(value)s)',
         'the_geom': '+%(name)s:%(value)s',
+        'n_startYear':'+%(name)s:%(value)s',
+        'n_endYear':'+%(name)s:%(value)s',
         }
 
     def _fmt(self, name):
@@ -44,3 +46,9 @@ class SolrQueryBuilder:
             self.params['fq'] = []
 
         self.params['fq'].append(self._fmt(name) % {'name': name, 'value':value})
+
+    def add_facet_interval(self, interval_fields, facet_intervals):
+        self.params["facet.interval"] = interval_fields
+        self.params["facet.interval.set"] = facet_intervals
+        self.params["f.n_startYear.facet.limit"] = 30
+        self.params["f.n_endYear.facet.limit"] = 30
