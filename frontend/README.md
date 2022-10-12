@@ -42,4 +42,4 @@ Run `REACT_APP_DATA_SERVICE=https://api.url.com ./build.sh` from this directory 
 
 * All of the image assets are in `src/resources`
 
-* The front page categories with the icons are defined in `src/components/TypesCount.js`
+* The specific fields to be shown for the various types are defined in `src/components/results/types/*.json`. Each json file corresponds to the name of the type. The format is a list of `{key: value:}` objects.
