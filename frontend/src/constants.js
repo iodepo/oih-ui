@@ -39,7 +39,7 @@ const regionBoundsMap = Object.fromEntries(Object.entries(regionMap).map(([k,v])
 */
 const PROMOTED_REGIONS =
       { 'Global': 'Global Ocean',
-        'Atlantic Ocean': 'Atlantic Ocean',
+//        'Atlantic Ocean': 'Atlantic Ocean',
         'Latin America and the Caribbean':'Coastal waters of Latin America and the Caribbean',
         'Africa': 'Coastal waters of Africa',
         'Pacific Small Islands': 'Waters of the Pacific Island States',
