@@ -11,7 +11,7 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import HTTPException
 
-from api.util.solr_query_builder import SolrQueryBuilder
+from .util.solr_query_builder import SolrQueryBuilder
 
 import logging
 log = logging.getLogger(__name__)
