@@ -14,6 +14,7 @@ class SolrQueryBuilder:
             'q.op':'AND',  # default op to AND  # applies to dismax and standard query parser
         };
         if not '*' in query:
+            # default query parser
             self.params.update({
                 'defType':'edismax',
                 'qf':'name^4 txt_keywords^2 text',
@@ -30,6 +31,8 @@ class SolrQueryBuilder:
     def add_facet_fields(self, facet_fields=None):
         self.params["facet.field"] = facet_fields if (facet_fields is not None) else DEFAULT_FACET_FIELDS
 
+    # These are formats to convert the individual field queries into the representation sent to the solr instance.
+    # There are basically two formats here -- text/type include parens () around the value, and the others don't.
     formats = {
         'text': '+%(name)s:(%(value)s)',
         'type': '+%(name)s:(%(value)s)',
