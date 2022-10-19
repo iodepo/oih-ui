@@ -1,65 +1,16 @@
+/* global Intl */
+
 import React, {useEffect, useState} from "react";
 import {Col, Container, Row} from "react-bootstrap";
 
 import { dataServiceUrl } from '../config/environment';
 import {useNavigate} from "react-router-dom";
 import useSearchParam from "../useSearchParam";
-import { regionBoundsMap }  from '../constants';
-import diver from "../resources/diving.png";
-import lighthouse from "../resources/lighthouse.png";
-import thinking from "../resources/thinking.png";
-import documents from "../resources/document.png";
-import map from "../resources/map.png";
-import boat from "../resources/boat.png";
-import project_mgmt from "../resources/project-management.png";
-import database from "../resources/database.png";
+import { regionBoundsMap, HOME_PAGE_CATEGORIES }  from '../constants';
 const doc_types = ['CreativeWork', 'Person', 'Organization', 'Dataset', 'ResearchProject', 'Event', 'Course', 'Vehicle']
 const defaultCountState = Object.fromEntries(doc_types.map(e => [e, 0]))
 
 const formatter = Intl.NumberFormat([], { "notation": "compact" })
-const HOME_PAGE_CATEGORIES =
-    [
-        {
-            id: 'Person',
-            text: 'Experts',
-            icon: diver
-        },
-        {
-            id: 'CreativeWork',
-            text: 'Documents',
-            icon: documents
-        },
-        {
-            id: 'Course',
-            text: 'Training',
-            icon: thinking
-        },
-        {
-            id: 'Dataset',
-            text: 'Datasets',
-            icon: database
-        },
-        {
-            id: 'Vehicle',
-            text: 'Vessels',
-            icon: boat
-        },
-        {
-            id: 'ResearchProject',
-            text: 'Projects',
-            icon: project_mgmt
-        },
-        {
-            id: 'Organization',
-            text: 'Institution',
-            icon: lighthouse
-        },
-        {
-            id: 'SpatialData',
-            text: 'Spatial Data',
-            icon: map
-        }
-];
 
 export default function TypesCount() {
     const [counts, setCounts] = useState(defaultCountState);

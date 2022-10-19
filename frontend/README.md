@@ -1,46 +1,45 @@
-# Getting Started with Create React App and Redux
+# Web Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app), using the [Redux](https://redux.js.org/) and [Redux Toolkit](https://redux-toolkit.js.org/) template.
+## Running in Development
 
-## Available Scripts
+A docker-compose service like this is sufficient for running the app in development mode:
+```
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - REACT_APP_DATA_SERVICE_URL=https://api.${HOST}
+      - VIRTUAL_HOST=${HOST}
+      - VIRTUAL_PROTO=http
+      - VIRTUAL_PORT=3000
+    volumes:
+      - "./public:/app/public"
+      - "./src:/app/src"
+```
+(Note, adjust path prefixes to the relative path between the dockerfile and this directory
 
-In the project directory, you can run:
+## Production Build
 
-### `npm start`
+Run `REACT_APP_DATA_SERVICE=https://api.url.com ./build.sh` from this directory -- the production version will be added produced in `./build`. The contents can be hosted anywhere there is a static web server.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Customization
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+* There are several places where there are placeholders for links to be added later:
+  - `src/components/Footer.js`: The "Get In Touch" button
+  - `src/components/Header.js`: "Become a partner", About, and FAQ links.
 
-### `npm test`
+* The API url is set via an environment variable `REACT_APP_DATA_SERVICE` -- as it is the most likely thing to need to change.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+* See `src/constants.js` for customization of some of the defaults:
+  - The initial bounds of the map per region
+  - The promoted regions (popup next to the search bar)
+  - The list of possible sample queries
+  - Field name -> title for the facets. (the facets themselves are added in the API)
+  - The icons and names for the home page count/categories
 
-### `npm run build`
+* Configuration for app-wide defaults are in `src/config/defaults.js`, including the app title and other meta information, and the mapbox basemap and key for altering the spatial search basemap.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+* All of the image assets are in `src/resources`
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+* The specific fields to be shown for the various types are defined in `src/components/results/types/*.json`. Each json file corresponds to the name of the type. The format is a list of `{key: value:}` objects.

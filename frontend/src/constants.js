@@ -1,3 +1,12 @@
+/* images for icons on home page, see HOME+_PAGE_CATEGORIES */
+import diver from "./resources/diving.png";
+import lighthouse from "./resources/lighthouse.png";
+import thinking from "./resources/thinking.png";
+import documents from "./resources/document.png";
+import map from "./resources/map.png";
+import boat from "./resources/boat.png";
+import project_mgmt from "./resources/project-management.png";
+import database from "./resources/database.png";
 
 /* Bounds for regions on the map.
 
@@ -39,7 +48,7 @@ const regionBoundsMap = Object.fromEntries(Object.entries(regionMap).map(([k,v])
 */
 const PROMOTED_REGIONS =
       { 'Global': 'Global Ocean',
-        'Atlantic Ocean': 'Atlantic Ocean',
+//        'Atlantic Ocean': 'Atlantic Ocean',
         'Latin America and the Caribbean':'Coastal waters of Latin America and the Caribbean',
         'Africa': 'Coastal waters of Africa',
         'Pacific Small Islands': 'Waters of the Pacific Island States',
@@ -90,6 +99,8 @@ const fieldNameMap = {
   "educationalcredentialawarded": "Credential Awarded",
   "vehiclespecialusage": "Vehicle Usage",
   "areaserved": "Area",
+  "startyear": "Starting Between",
+  "endyear": "Ending Between",
 };
 
 const fieldTitleFromName = (facet_name) => {
@@ -103,8 +114,58 @@ const fieldTitleFromName = (facet_name) => {
     return field_name.charAt(0).toUpperCase() + field_name.slice(1);
 };
 
+/* The front page count/categories.
+/ id: is the url fragement of the results type for the link, e.g. /results/<id>?page=0
+/ text: the title of the category
+/ icon: the image, as defined above
+*/
+const HOME_PAGE_CATEGORIES =
+    [
+        {
+            id: 'Person',
+            text: 'Experts',
+            icon: diver,
+
+        },
+        {
+            id: 'CreativeWork',
+            text: 'Documents',
+            icon: documents
+        },
+        {
+            id: 'Course',
+            text: 'Training',
+            icon: thinking
+        },
+        {
+            id: 'Dataset',
+            text: 'Datasets',
+            icon: database
+        },
+        {
+            id: 'Vehicle',
+            text: 'Vessels',
+            icon: boat
+        },
+        {
+            id: 'ResearchProject',
+            text: 'Projects',
+            icon: project_mgmt
+        },
+        {
+            id: 'Organization',
+            text: 'Institution',
+            icon: lighthouse
+        },
+        {
+            id: 'SpatialData',
+            text: 'Spatial Data',
+            icon: map
+        }
+];
+
 
 export { regionMap, regionBoundsMap, PROMOTED_REGIONS,
          SAMPLE_QUERIES, randomSampleQueries,
          INITIAL_BOUNDS, DEFAULT_QUERY_BOUNDS,
-         fieldTitleFromName }
+         fieldTitleFromName, HOME_PAGE_CATEGORIES }

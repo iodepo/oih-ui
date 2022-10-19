@@ -5,7 +5,7 @@ const configurations =
 const config = configurations.defaults || {};
 
 config.default.dataServiceUrl = process.env.REACT_APP_DATA_SERVICE_URL || 'http://localhost:8000';
-config.default.environment = process.env.REACT_APP_DATA_SERVICE_URL == 'PRODUCTION' ? 'production' : 'development';
+config.default.environment = process.env.NODE_ENV;
 
 export const { appTitle,
                appShortTitle,

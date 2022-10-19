@@ -40,7 +40,7 @@ export default function FacetsFullWidth({
                               <option
                                 key={facetCount.name}
                                 className={facet.name}
-                                value={facetCount.name}
+                                value={facetCount.value || facetCount.name}
                               >
                                 {facetCount.name} ({facetCount.count})
                               </option>
