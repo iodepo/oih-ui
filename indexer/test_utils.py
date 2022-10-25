@@ -5,7 +5,7 @@ from pathlib import Path
 from functools import wraps, partial
 
 GENERATE_TESTS = False
-
+BASE_DIR = Path(os.path.dirname(__file__))
 
 def test_generation(func=None, post=None):
 
@@ -32,7 +32,7 @@ def test_generation(func=None, post=None):
 
         print ("Generating test %s" %( _type))
         src = json.dumps(data)
-        base_path = Path(os.path.dirname(__file__)) / 'test' / _type
+        base_path = BASE_DIR / 'test' / _type
         if not base_path.exists():
             os.mkdir(base_path)
             os.mkdir(base_path / 'src')
@@ -58,11 +58,14 @@ def dump_exception(elt, err=None):
         else:
             src = json.dumps(elt)
         filehash = hashlib.md5(src.encode('utf-8')).hexdigest()[:10]
-        with open(os.path.join(os.path.dirname(__file__), 'exceptions', '%s.json' % filehash), 'w') as f:
+        base_path = BASE_DIR / 'exceptions'
+        if not base_path.exists():
+            os.mkdir(base_path)
+        with open(base_path / ('%s.json' % filehash), 'w') as f:
             f.write(src)
         if err:
-            with open(os.path.join(os.path.dirname(__file__), 'exceptions', '%s.err.txt' % filehash), 'w') as f:
+            with open(base_path / ('%s.err.txt' % filehash), 'w') as f:
                 f.write(err)
 
     except Exception as msg:
-        print ("Exception dumping exception: %s")
+        print ("Exception dumping exception: %s" % msg)
