@@ -30,6 +30,8 @@ def test_generation(func=None, post=None):
 
         _type, data = tuple(args)[:2]
 
+        _type = _type.replace(':','__') # windows machines don't like colons in filenames
+
         print ("Generating test %s" %( _type))
         src = json.dumps(data)
         base_path = BASE_DIR / 'test' / _type
