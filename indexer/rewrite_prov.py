@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import collections
 import os
 import sys
@@ -67,12 +69,22 @@ def run_subdir(src, dest):
 def main():
     args = sys.argv
     if len(args) != 3:
-        print ("Usage: ")
-        print ("  rewrite_prov.py src dest")
-        return 1
-
-    src = Path(args[1])
-    dest = Path(args[2])
+        DATA_DIR = os.environ.get('DATA_DIR', None)
+        if not DATA_DIR:
+            print ("Usage: ")
+            print ("  rewrite_prov.py src dest")
+            print ("  or")
+            print ("  DATA_DIR=path-to-data rewrite_prov.py")
+            return 1
+        data_dir = Path(DATA_DIR)
+        if not data_dir.is_dir():
+            print ("DATA_DIR is not a directory or does not exist")
+            return 2
+        src = data_dir / 'prov'
+        dest = data_dir / 're-prov'
+    else:
+        src = Path(args[1])
+        dest = Path(args[2])
 
     if not src.is_dir():
         print ("Source is not a directory or does not exist")
