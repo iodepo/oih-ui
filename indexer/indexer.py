@@ -8,20 +8,24 @@ import itertools
 import uuid
 import hashlib
 import shutil
+from pathlib import Path
 
 from multiprocessing import Pool
 from models import Att
 from common import flatten
 
-solr_url = "http://localhost:8983/solr/ckan/update/json/docs"
-delete_url = "http://localhost:8983/solr/ckan/update"
-query_url = "http://localhost:8983/solr/ckan/select"
+
+BASE_SOLR_URL=os.environ.get('SOLR_URL', '')
+solr_url = BASE_SOLR_URL + "/update/json/docs"
+delete_url = BASE_SOLR_URL + "/update"
+query_url = BASE_SOLR_URL + "/select"
+
+DATA_DIR=os.environ.get('DATA_DIR')
+BASE_DIR=Path(DATA_DIR) / 'summoned'
+PROV_DIR=Path(DATA_DIR) / 're-prov'
 
 session = requests.Session()
 
-
-BASE_DIR='./../../jsonld/120822/summoned'
-PROV_DIR='./../../jsonld/120822/re-prov'
 
 solr_params = {
     'commit': 'true',
@@ -29,11 +33,6 @@ solr_params = {
 #    'echo': 'true',
 }
 
-
-# UNDONE
-# - Tests
-# - Geocoding of address in convert_place
-# - Add the source file name hash id as graph_id
 
 import conversions
 from conversions import UnhandledDispatchException, IDCollisionError
@@ -272,7 +271,7 @@ def upsert_one(orig, prov=None, flReindex=False):
 
 def resolve_prov_file(filename):
     try:
-        with open(os.path.join(PROV_DIR,filename), 'rb') as f:
+        with open(PROV_DIR / filename, 'rb') as f:
             prov = json.load(f)
         for elt in prov.get('@graph',[]):
             if elt.get('@type',None) == 'prov:Organization':
@@ -282,14 +281,17 @@ def resolve_prov_file(filename):
         print ("Exception load prov for %s: %s", (filename, msg))
         return None
 
-def import_file(filename, flReindex=False):
-    filename = filename.strip()
+def import_file(path, flReindex=False):
+    if isinstance(path, str):
+        filename = path.strip()
+        prov = resolve_prov_file(path)
+        src = os.path.join(BASE_DIR,path)
+        print(src)
+    else:
+        prov = resolve_prov_file(path)
+        src = BASE_DIR / path
 
-    prov = resolve_prov_file(filename)
-
-    print (os.path.join(BASE_DIR,filename))
-
-    with open(os.path.join(BASE_DIR,filename), 'rb') as f:
+    with open(src, 'rb') as f:
         try:
             orig = json.load(f)
         except UnicodeDecodeError:
@@ -300,7 +302,7 @@ def import_file(filename, flReindex=False):
                 orig = json.loads(file_string)
             except Exception as msg:
                 print ("Issue decoding %s, continuing" % filename)
-                shutil.copy(os.path.join(BASE_DIR,filename), os.path.join('exceptions', filename.split('/')[-1]))
+                shutil.copy(src, os.path.join('exceptions', filename.split('/')[-1]))
                 return
 
     doc_type = orig.get('@type', None)
@@ -344,6 +346,18 @@ def index_all(paths):
         with open(path) as files:
             with Pool(8) as p:
                 p.map(import_file, list(files))
+
+def index_dir(src_dir):
+    def recursive_walk(d):
+        for item in os.scandir(d):
+            if item.is_file() and item.name.endswith('jsonld'):
+                yield Path(item.path).relative_to(BASE_DIR)
+            if item.is_dir():
+                for sub_item in recursive_walk(item):
+                    yield sub_item
+    with Pool(8) as p:
+        p.map(import_file, recursive_walk(src_dir))
+
 
 def reindex(url):
     solr_params = {
@@ -411,38 +425,39 @@ def remove_dups():
 
 
 if __name__ == '__main__':
-    paths = ('./person.txt',
-             './research_project.txt',
-             './course.txt',
-             './creative_work.txt',
-             )
+    import argparse
+    parser = argparse.ArgumentParser(description="Index summoned data")
+    parser.add_argument('--reindex-query',
+                        dest='fq',
+                        nargs='+',
+                        help='fq (filterquery) expression to reindex from items already in the index')
+    parser.add_argument('-f', '--file',
+                        nargs='+',
+                        dest='file',
+                        help='index one file, relative to the DATA_DIR base')
+    parser.add_argument('--generate-test',
+                        dest='test',
+                        action='store_true',
+                        help='generate test cases from indexed data into ./test (caution, may create many artifacts)')
 
-    #paths = ('./research_project.txt',)
+    args = vars(parser.parse_args())
 
-    #session.post(delete_url, params={"commit":"true"}, json={"delete":{"query":'type:"PropertyValue"'}})
-    if True:
-        index_all(['../all_files.v2.txt'])
-    #index_all(['./event.txt'])
-    #index_all(paths + ('./organizations.txt', './spatial.txt'))
-    #index_all(['./organizations.txt', './spatial.txt'])
-    #remove_dups()
-    #import_file('obis/df819829c4cc82c0442d5ebb00ea9aadaa7d0842.jsonld')
-    #import_file('oceanexperts/5ec3b5b61e65100386448c5e8eb078ad9790c37f.jsonld')
+    # rewrite test / exception generation directories.
+    from test_utils import BASE_DIR as test_base_dir
+    test_base_dir = BASE_DIR
 
-    if False:
-        #prov
-        #import_file('edmo/00032788b3d1eecf4257bd8ffd42c5d56761a6bf.jsonld')
-        #import_file('edmo/00226d82454eea1058f1677f3b57599d83517acb.jsonld')
-        import_file('obis/f4c5646df687db8f6fb4e373764ffaf4d6cab621.jsonld')
-    if False:
-        # polygon
-        import_file('obis/42ce161b29ce021957e8db4b6a30cb9cf75646f7.jsonld')
-        # knows about events
-        import_file('oceanexperts/fff4c32ad70f1767a3a6ff7dfa0181fd56f77753.jsonld')
-        # non-point locations, start/end dates for course instance
-        import_file('oceanexperts/d5cf2f2580f59f45c6ab86ed2e1740893b5a4b59.jsonld')
-        # provider
-        import_file('obis/c0f54b1a7d64ba983f1937d4d8708239804655d8.jsonld')
+    if args.get('test', False):
+        from test_utils import GENERATE_TESTS
+        GENERATE_TESTS = True
 
-    if False:
-        reindex_query(["+has_geom:true"])
+    if args.get('fq', None):
+        reindex_query(args['fq'])
+    elif args.get('file', None):
+        filearg = args['file']
+        if isinstance(filearg, str):
+            import_file(filearg)
+        else:
+            for f in filearg:
+                import_file(f)
+    else:
+        index_dir(BASE_DIR)

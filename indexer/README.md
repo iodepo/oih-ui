@@ -284,3 +284,119 @@ work as a mapping.
 
 
 ## To Run
+
+There is an entry in the docker-compose.yml file that creates the
+environment for this container, but does not leave a running daemon.
+
+```
+  indexer:
+    build:
+      # ensure the path is correct relative to docker-compose.yml
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      solr:
+    volumes:
+      - "./indexer/indexer:/usr/src/app"
+      - "./source-data:/opt/data"
+    environment:
+      - SOLR_URL=http://solr:8983/solr/ckan
+      # needs to match the volume mount
+      - DATA_DIR=/opt/data
+```
+
+Individual commands can be run from this directory with:
+```
+docker run -ti --rm -v "[path_to_data]:/opt/data" -e "SOLR_URL=http://solr/url" indexer indexer.py [options]
+```
+or from the docker-compose directory:
+```
+docker-compose run indexer indexer.py [options]
+```
+
+The input data should be volume mounted read/write into the container,
+with the following hierarchy:
+
+```
+[path-to-data]/
+  - prov
+  - summoned
+  - re-prov # will be written by rewrite_prov.py
+  - exceptions # potentially written by indexer.py
+  - tests # potentially written by indexer.py
+```
+
+Note that as-written, the path to data would be the `source-data` in
+the same directory as the `docker-compose.yml` file.
+
+### Environment variables:
+
+- `SOLR_URL`, required. The url to the solr core.
+- `DATA_DIR`, defaults to `/opt/data`.  The data volume location within the container.
+
+### Preprocess Prov data
+
+Incoming provenance data is stored in a hierarchy of files named for a
+hash of their content. There are potentially multiple provenance
+records for each jsonld file in the summoned directory. The
+`rewrite_prov.py` script ingests this corpus of provenance records and
+emits one provenance record per jsonld file mentioned, corresponding
+to the latest timestamp. These are then stored in a hierarchy that
+mirrors the summoned data such that an item at
+`summoned/path/to/item.json` would have a provenance record at
+`re-prov/path/to/item.json`.
+
+```
+docker-compose run indexer rewrite_prov.py
+```
+
+### Indexing Data
+
+```
+usage: indexer.py [-h] [--reindex-query FQ [FQ ...]] [-f FILE [FILE ...]] [--generate-test]
+
+Index summoned data
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --reindex-query FQ [FQ ...]
+                        fq (filterquery) expression to reindex from items already in the index
+  -f FILE [FILE ...], --file FILE [FILE ...]
+                        index one file, relative to the DATA_DIR base
+  --generate-test       generate test cases from indexed data into ./test (caution, may create many artifacts)
+```
+
+There are three modes of indexing:
+
+* The default -- index all of the jsonld docs in the
+  `DATA_DIR/summoned` directory. This would be run as:
+
+```
+docker-compose run indexer indexer.py
+```
+
+* Index one or more individual files:
+
+```
+docker-compose run indexer indexer.py -f obis/001652ef8a4e4e3f906c11a65ddc47c7b37b0b09.jsonld
+```
+
+* Re-index by query -- note that quoting may be an issue here, as urls
+  need to be double quoted within the query
+
+```
+# reindex a single node
+docker-compose run indexer indexer.py --reindex-query '+id:"https://www.marinetraining.eu/node/3857"'
+# reindex all items with a specific field:
+docker-compose run indexer indexer.py --reindex-query '+txt_temporalCoverage:*'
+# reindex all items with a specific field/value combination:
+docker-compose run indexer indexer.py --reindex-query '+has_geom:true'
+```
+
+If there is an error, triggering items and exceptions will be dumped to the
+`DATA_DIR/exceptions` folder.
+
+If the `--generate-test` flag is enabled, the raw and parsed versions
+of the jsonld objects will be dumped to the `DATA_DIR/tests`
+folder. This can be used to test the generation of attributes from the
+jsonld documents.
