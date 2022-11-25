@@ -8,7 +8,13 @@ import Footer from "../components/Footer";
 import Header from "../components/Header";
 import { AppContainer } from "../components/AppContainer";
 import {Routes} from "react-router";
+import ReactGA from "react-ga4";
 
+ReactGA.initialize([
+    {
+        trackingId: "G-QJ5XJMZFXW",
+    },
+]);
 
 function App() {
     return (
