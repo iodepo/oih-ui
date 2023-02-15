@@ -15,15 +15,17 @@ export default function Header() {
             <Navbar expand={false} variant="dark" className="navbar-oih pt-4" collapseOnSelect>
                 <Container id="NavContainer">
                     <Col md="auto">
-                        <Navbar.Brand className="text-white h6" href="/">Become a partner</Navbar.Brand>
+                        <Navbar.Brand className="text-white h6" href="https://oceaninfohub.org/contact-2/" target="_blank">Become a partner</Navbar.Brand>
                     </Col>
                     <Col md="auto">
                         <Navbar.Toggle aria-controls="responsive-navbar-nav"/>
                         <Navbar.Collapse id="responsive-navbar-nav">
                             <Nav className="mr-auto">
                                 <Nav.Link className="text-light menu-text" href="/">HOME</Nav.Link>
-                                <Nav.Link className="text-light menu-text" href="/">ABOUT</Nav.Link>
-                                <Nav.Link className="text-light menu-text" href="/">FAQ</Nav.Link>
+                                <Nav.Link className="text-light menu-text" href="https://oceaninfohub.org/about/project-overview/" target="_blank">ABOUT</Nav.Link>
+                                {/* <Nav.Link className="text-light menu-text" href="/">FAQ</Nav.Link> */}
+                                <Nav.Link className="text-light menu-text" href="http://graph.oceaninfohub.org/blazegraph/#query" target="_blank">ODIS GRAPH INTERFACE</Nav.Link>
+                                <Nav.Link className="text-light menu-text" href="http://catalogue.gatewaygeo.ca:8501/odis/dashboard/" target="_blank">ODIS DASHBOARD</Nav.Link>
                             </Nav>
                             <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" style={{fill: "#fff"}}
                                  width="30" height="30"
