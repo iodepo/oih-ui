@@ -16,7 +16,9 @@ export default function Footer() {
                 </div>
                 <div className="col-md-6 mx-2 flex-fill">
                     <h3 className="text-white fw-bold h4 text-uppercase">Want to learn more?</h3>
-                    <button className="w-50 btn rounded-0 btn-info text-white">GET IN TOUCH</button>
+                    <a href="https://oceaninfohub.org/contact-2/" target="_blank">
+                      <button className="w-50 btn rounded-0 btn-info text-white">GET IN TOUCH</button>
+                    </a>
                 </div>
             </div>
             <div className="container">
