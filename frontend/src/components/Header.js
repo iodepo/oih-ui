@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import {Navbar, Nav, Form, FormControl, Button, NavDropdown, Container, Col} from 'react-bootstrap';
-import logo1 from '../resources/Logo Nav x 2.png'
+import logo1 from '../resources/Logo Nav x 2.png';
 
 export default function Header() {
-    const [showNav, setShowNav] = useState(true)
+    const [showNav, setShowNav] = useState(true);
 
     function closeSidebar() {
         const menubar = document.getElementById("responsive-navbar-nav");
-        menubar.classList.remove("show")
+        menubar.classList.remove("show");
     }
 
     return (
@@ -21,8 +21,8 @@ export default function Header() {
                         <Navbar.Toggle aria-controls="responsive-navbar-nav"/>
                         <Navbar.Collapse id="responsive-navbar-nav">
                             <Nav className="mr-auto">
-                                <Nav.Link className="text-light menu-text" href="/">HOME</Nav.Link>
-                                <Nav.Link className="text-light menu-text" href="https://oceaninfohub.org/about/project-overview/" target="_blank">ABOUT</Nav.Link>
+                                <Nav.Link className="text-light menu-text" href="https://oceaninfohub.org/" target="_blank">OIH HOME</Nav.Link>
+                                <Nav.Link className="text-light menu-text" href="https://oceaninfohub.org/about/project-overview/" target="_blank">ABOUT OIH</Nav.Link>
                                 {/* <Nav.Link className="text-light menu-text" href="/">FAQ</Nav.Link> */}
                                 <Nav.Link className="text-light menu-text" href="http://graph.oceaninfohub.org/blazegraph/#query" target="_blank">ODIS GRAPH INTERFACE</Nav.Link>
                                 <Nav.Link className="text-light menu-text" href="http://catalogue.gatewaygeo.ca:8501/odis/dashboard/" target="_blank">ODIS DASHBOARD</Nav.Link>
