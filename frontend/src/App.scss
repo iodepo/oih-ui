@@ -14,13 +14,15 @@
   flex-direction:column;
   // Undo this to make the front page less scrolly
   .search__container {
-    margin-top: 20vh;
+    //margin-top: 20vh;
+    margin-top: 1.5rem;
     margin-bottom: 1rem;
   }
   // Also possibly 35vh;
-  // again, we're doign positioning in Y based on the widgh, to keep it under the manta.
+  // again, we're doing positioning in Y based on the width, to keep it under the manta.
+  //Arno 23/02/23 this creates too much 'white'space
   .category-section {
-    margin-top: 20vw;
+    //margin-top: 20vw;
   }
 }
 
@@ -29,7 +31,6 @@
     @extend .mt-4;
   }
 }
-
 
 #headerLogo {
   width: 60px;
