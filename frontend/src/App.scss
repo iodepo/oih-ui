@@ -1,5 +1,5 @@
 #root {
-  background: url("resources/landing-bg_1400.jpeg"), #001029;
+  background: url("resources/landing-bg_1400.jpeg");
   background-size: 100%;
   background-repeat: no-repeat;
   // note, this is positioning y based on the width to keep the manta on the page
@@ -184,9 +184,11 @@ p.result-p.truncate {
   align-content: middle;
   flex-wrap: wrap;
   div.category__button {
-    height: 228px;
+    /* height: 228px;*/
     /* show 4 across for most larger ones, don't kick up to 5, nor down to 3 on the HD sized display */
-    width: (min(max(228px, 18vw), 300px));
+    /*width: (min(max(228px, 18vw), 300px));*/
+    height: 180px;
+    width: min(max(19px, 16vw), 280px);
   }
 }
 
@@ -260,6 +262,7 @@ p.result-p.truncate {
   position: relative;
   bottom: -1em;
   right: -4em;
+  max-width: 40%;
 }
 
 #category-heading {
@@ -275,8 +278,9 @@ p.result-p.truncate {
 //  background-color: rgba(0,24,49, 0.8);
   padding: 2em;
   border-radius: 3em;
-  margin-top: 5em;
-  margin-bottom: 7em;
+  /*margin-top: 5em;*/
+  /*margin-bottom: 7em;*/
+  margin-bottom: 5em;
 }
 
 #result-section {
