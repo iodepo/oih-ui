@@ -162,7 +162,7 @@ def genericType_toAtts(orig, rid=None):
             data.append(Att('txt', regions.regionForCountryOfLastProcessing(v), 'region'))
         if k in {'@id','@type','@context'}:
             if k == '@id':
-                print('***Processing @id: ' + v)
+                print('***@id: ' + v)
             continue
         if k in {'name', 'description'}:
             if k == 'name':
@@ -302,6 +302,7 @@ def import_file(path, flReindex=False):
         src = BASE_DIR / path
 
     with open(src, 'rb') as f:
+        print ("***Processing filename: " + f.name)
         try:
             orig = json.load(f)
         except UnicodeDecodeError:
