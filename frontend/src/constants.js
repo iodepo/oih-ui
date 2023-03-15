@@ -47,11 +47,11 @@ const regionBoundsMap = Object.fromEntries(Object.entries(regionMap).map(([k,v])
   Add more items here to search different regions.
 */
 const PROMOTED_REGIONS =
-      { 'Global': 'Global Ocean',
+      { 'Global': 'Global',
 //        'Atlantic Ocean': 'Atlantic Ocean',
-        'Latin America and the Caribbean':'Coastal waters of Latin America and the Caribbean',
-        'Africa': 'Coastal waters of Africa',
-        'Pacific Small Islands': 'Waters of the Pacific Island States',
+        'Latin America and the Caribbean':'Latin America & the Caribbean and its coastal waters',
+        'Africa': 'Africa and its coastal waters',
+        'Oceania': 'Pacific Island States and its coastal waters',
       };
 
 
