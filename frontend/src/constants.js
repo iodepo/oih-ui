@@ -51,7 +51,10 @@ const PROMOTED_REGIONS =
 //        'Atlantic Ocean': 'Atlantic Ocean',
         'Latin America and the Caribbean':'Latin America & the Caribbean and its coastal waters',
         'Africa': 'Africa and its coastal waters',
-        'Oceania': 'Pacific Island States and its coastal waters',
+        'Oceania': 'Oceania / Pacific Island States and its coastal waters',
+        'Europe': 'Europe and its coastal waters',
+        'Americas': 'North & South America and their coastal waters',
+        'Asia': 'Asia and its coastal waters'        
       };
 
 
