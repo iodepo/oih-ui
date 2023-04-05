@@ -453,31 +453,37 @@ const Result = ({result}) => {
     const jsonLdParams = new URLSearchParams({id:result['id']}).toString();
     return (
         <div
-          key={result['id']}
-          className="result-item container rounded-3 p-3 mb-2"
-          id='resultsDiv'
-        >
-          <h4 className="text-start mb-3">
-            <a href={result['type'] === 'Person' || result['type'] === 'Organization' ? resolveAsUrl(result['id']) :
-                     result['txt_url'] || resolveAsUrl(result['id'])}
-               className="result-title" target="_blank">
-              {result['name']}
+                key={result['id']}
+                className="result-item container rounded-3 p-3 mb-2"
+                id="resultsDiv">
+            <h4 className="text-start mb-3">
+                <a
+                        href={result['type'] === 'Person' || result['type'] === 'Organization' ? resolveAsUrl(result['id']) : result['txt_url'] || resolveAsUrl(result['id'])}
+                        className="result-title"
+                        target="_blank">
+                    {result['name']}
+                </a>
+            </h4>
+            <Row className="">
+                <div className="col">
+                    <Component result={result} />
+                    {'description' in result && result['type'] !== 'Person' &&
+                    <div className="col" >
+                        <p className={`result-p ${truncate ? 'description-truncate' : ''}`} onClick={() => setTruncate(!truncate)} >
+                            <b>Description:</b> {result['description']}
+                        </p>
+                    </div>
+                    }
+                </div>
+            </Row>
+            <a
+                    href={`${dataServiceUrl}/source?${jsonLdParams}`}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="text-align-start float-start text-decoration-none"
+                    style={{ fontSize: 'x-small' }}>
+                View JSONLD source
             </a>
-          </h4>
-          <Row className="">
-            <div className="col">
-              <Component result={result}/>
-              {'description' in result && result['type'] !== 'Person' &&
-               <div className="col" >
-                 <p className={`result-p ${truncate ? 'description-truncate' : ''}`} onClick={() => setTruncate(!truncate)} ><b>Description:</b> {result['description']}</p>
-               </div>
-              }
-            </div>
-          </Row>
-          <a href={`${dataServiceUrl}/source?${jsonLdParams}`} target="_blank" rel="noreferrer noopener"
-             className="text-align-start float-start text-decoration-none" style={{ fontSize: 'x-small' }}
-          >
-            View JSONLD source
-          </a>
-        </div>);
+        </div>
+    );
 }
