@@ -224,4 +224,4 @@ def rdf__name(data):
     return Att(None, data, 'name')
 
 def rdfs__seeAlso(data):
-    return Att('txt', data, 'sameAs')
+    return Att('txt', data, 'sameAs')    

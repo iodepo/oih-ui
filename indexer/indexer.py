@@ -14,6 +14,7 @@ from multiprocessing import Pool
 from models import Att
 from common import flatten
 
+import regions
 
 BASE_SOLR_URL=os.environ.get('SOLR_URL', '')
 solr_url = BASE_SOLR_URL + "/update/json/docs"
@@ -157,10 +158,19 @@ def genericType_toAtts(orig, rid=None):
 
     for k,v in orig.items():
         if not v: continue
+        if k == 'countryOfLastProcessing':
+            data.append(Att('txt', regions.regionForCountryOfLastProcessing(v), 'region'))
         if k in {'@id','@type','@context'}:
+            if k == '@id':
+                print('***@id: ' + v)
             continue
         if k in {'name', 'description'}:
-            data.append(Att(None, v, k))
+            if k == 'name':
+                print('***Name: ' + v)
+                data.append(Att(None, v, k))
+                data.append(Att('txt', regions.regionForName(v), 'region'))
+            else:
+                data.append(Att(None, v, k))
             continue
         try:
             # check by name
@@ -292,6 +302,7 @@ def import_file(path, flReindex=False):
         src = BASE_DIR / path
 
     with open(src, 'rb') as f:
+        print ("***Processing filename: " + f.name)
         try:
             orig = json.load(f)
         except UnicodeDecodeError:
