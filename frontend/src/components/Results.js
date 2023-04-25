@@ -448,19 +448,61 @@ const ResultList = ({results}) =>
       });
 
 const Result = ({result}) => {
+    var url = result['type'] === 'Person' || result['type'] === 'Organization' ? resolveAsUrl(result['id']) : result['txt_url'] || resolveAsUrl(result['id']);
     const {Component} = typeMap[result['type']];
     const [truncate, setTruncate] = useState(true);
     const jsonLdParams = new URLSearchParams({id:result['id']}).toString();
+    const sendGoogleEvent = () => {
+        gtag('config', 'G-MQDK6BB0YQ');
+        gtag(
+            'event',
+            'click_on_result',
+            {
+                'oih_result_target': url
+            }
+        );
+
+        /*
+        //GA4 debug code
+	    const measurement_id = `G-MQDK6BB0YQ`;
+        const api_secret = `dtIVKr8XQHSKJ0FrI4EkDQ`;
+
+        fetch(`https://www.google-analytics.com/mp/collect?measurement_id=${measurement_id}&api_secret=${api_secret}`, {
+            method: "POST",
+            body: JSON.stringify({
+                client_id: 'arno.clientId',
+                events: [
+                    {
+                        name: 'click_on_result_fetch',
+                        params: {
+                            'target': url
+                        },
+                    }
+                ]
+            })
+        });
+
+         */
+    }
+
     return (
         <div
                 key={result['id']}
                 className="result-item container rounded-3 p-3 mb-2"
                 id="resultsDiv">
             <h4 className="text-start mb-3">
+                {/*
+           <a href={result['type'] === 'Person' || result['type'] === 'Organization' ? resolveAsUrl(result['id']) :
+                    result['txt_url'] || resolveAsUrl(result['id'])}
+              className="result-title" target="_blank">
+             {result['name']}
+           </a>
+           */}
                 <a
-                        href={result['type'] === 'Person' || result['type'] === 'Organization' ? resolveAsUrl(result['id']) : result['txt_url'] || resolveAsUrl(result['id'])}
+                        href={url}
                         className="result-title"
-                        target="_blank">
+                        target="_blank"
+                        onClick={sendGoogleEvent}>
                     {result['name']}
                 </a>
             </h4>
@@ -487,3 +529,4 @@ const Result = ({result}) => {
         </div>
     );
 }
+

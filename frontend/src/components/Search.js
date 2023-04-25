@@ -34,6 +34,22 @@ export default function Search() {
     const placeholder = useCallback(() =>
                                     "Search across our " + (PROMOTED_REGIONS[region]||'Global') + " partners"
                                     , [region]);
+    const sendGoogleEvent = () => {
+        let searchElements = document.getElementsByName("search");
+        let search = searchElements[0];
+        let regionElements = document.getElementsByName("searchRegion");
+        let region = regionElements[0];
+        //console.log(element.value);
+        gtag('config', 'G-MQDK6BB0YQ');
+        gtag(
+            'event',
+            'click_on_search',
+            {
+                'oih_search_text': search.value,
+                'oih_search_region': region.value
+            }
+        );
+    }
 
     return (
       <div className={"search__container " + (url == " results" ? ' searchbg-alt' : '')}>
@@ -49,10 +65,12 @@ export default function Search() {
                   e.preventDefault();
                   handleSubmit();
                 }}>
-                <select className="form-select w-50 rounded-0"
-                        value={region}
-                        onChange={e => setRegion(e.target.value)}>
-                  {
+                <select
+                    className="form-select w-50 rounded-0"
+                    value={region}
+                    name="searchRegion"
+                    onChange={e => setRegion(e.target.value)}>
+                    {
                       Object.entries(PROMOTED_REGIONS).map(([region, title]) => {
                         return <option
                                  key={region}
@@ -70,7 +88,12 @@ export default function Search() {
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   name="search"/>
-                <Button className="btn-lg btn-info rounded-0 text-dark" type="submit"><span className="h6">Search</span></Button>
+                <Button
+                    className="btn-lg btn-info rounded-0 text-dark"
+                    type="submit"
+                    onClick={sendGoogleEvent}>
+                    <span className="h6">Search</span>
+                </Button>
               </form>
               {!isResults && (
                 <div className="text-light text-start mt-3">
