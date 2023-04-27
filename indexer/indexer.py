@@ -27,13 +27,11 @@ PROV_DIR=Path(DATA_DIR) / 're-prov'
 
 session = requests.Session()
 
-
 solr_params = {
     'commit': 'true',
     # echo implies a dry run
 #    'echo': 'true',
 }
-
 
 import conversions
 from conversions import UnhandledDispatchException, IDCollisionError
@@ -233,9 +231,6 @@ def genericType_toAtts(orig, rid=None):
         ret[d.key] = list(flatten([ret[d.key], d.value]))
     return ret
 
-
-
-
 def _merge_prov(orig, prov):
     if prov and not 'prov:wasAttributedTo' in orig:
         orig = orig.copy()
@@ -368,7 +363,6 @@ def index_dir(src_dir):
                     yield sub_item
     with Pool(8) as p:
         p.map(import_file, recursive_walk(src_dir))
-
 
 def reindex(url):
     solr_params = {
