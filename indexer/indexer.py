@@ -47,7 +47,7 @@ def dispatch(_type, d):
 
 def _extract_dict(d):
     _id = d.get('@id', d.get('url', None))
-    _type = d.get('@type', None)
+    _type = d.get('@type', None)   
 
     try:
         if _type:
@@ -70,6 +70,7 @@ def _extract_dict(d):
 
 
 def upsert(url, data, flReindex=False):
+    #print('upsert')
     solr_params = {
         'q': '*:*',
         "fl":"id,json_source",
@@ -164,12 +165,36 @@ def genericType_toAtts(orig, rid=None):
             continue
         if k in {'name', 'description'}:
             if k == 'name':
-                print('***Name: ' + v)
-                data.append(Att(None, v, k))
-                data.append(Att('txt', regions.regionForName(v), 'region'))
-            else:
-                data.append(Att(None, v, k))
-            continue
+                if isinstance(v, list) == False:
+                    #print('type is: ',type(v))
+                    print('***Name: ' + v)
+                    data.append(Att(None, v, k))
+                    data.append(Att('txt', regions.regionForName(v), 'region'))
+                else:
+                    #handle case of name as list
+                    for i in v:
+                        pos = 0
+                        print(i.values()) 
+                        for val in i.values():
+                            if val == "en":
+                                listForm = list(i.values())
+                                print('***Name: ' + listForm[pos+1])
+                                data.append(Att(None, listForm[pos+1], k))
+                                data.append(Att('txt', regions.regionForName(listForm[pos+1]), 'region'))
+            elif k == 'description':
+                if isinstance(v, list) == False:
+                    #print('type is: ',type(v))
+                    data.append(Att(None, v, k))
+                else:
+                    #handle case of description as list
+                    for i in v:
+                        pos = 0
+                        print(i.values()) 
+                        for val in i.values():
+                            if val == "en":
+                                listForm = list(i.values())
+                                print('***Description: ' + listForm[pos+1])
+                                data.append(Att(None, listForm[pos+1], k))
         try:
             # check by name
             att = dispatch(k, v)
@@ -180,38 +205,92 @@ def genericType_toAtts(orig, rid=None):
                 data.extend(att)
             continue
         except (UnhandledDispatchException): pass
+        
+        #if k == 'spatialCoverage':
+            #print('spatialCoverage dict')        
+        
         if isinstance(v, str):
+            if k == 'spatialCoverage':
+                print('spatialCoverage str')
             data.append(Att('txt', [v], k))
             continue
-        if isinstance(v, list):
+        if isinstance(v, list) and k not in {'name', 'description'}:
+            if k == 'spatialCoverage':
+                print('spatialCoverage list')         
             if isinstance(v[0], str):
+                #print('here v[0] str')
                 data.append(Att('txt', v, k))
                 continue
-            elif isinstance(v[0], dict):
+            elif isinstance(v[0], dict) and k == 'spatialCoverage':
+                #print('here v[0] dict & spatialCoverage')
+                #print(v[0])
+                #atts = _extract_dict(v)
+                atts = _extract_dict(v[0])
+                if not isinstance(atts, list):
+                    print('not list')
+                    atts = [atts]
+                for att in atts:
+                    if not att.value:
+                        print('not value')
+                        continue
+                    if not att.name:
+                        print('not name')
+                        att.name = k
+                print(atts)
+                data.extend(atts)
+            elif isinstance(v[0], dict) and k == 'keywords':
+                #print('here v[0] dict & keywords')
+                for i in v:
+                    pos = 0
+                    print(i.values()) 
+                    for val in i.values():
+                        if val == "en":
+                            listForm = list(i.values())
+                            print('***Keyword: ' + listForm[pos+1])
+                            data.append(Att('txt', listForm[pos+1], k))
+            elif isinstance(v[0], dict) and (k != 'spatialCoverage' or k != 'keywords'):
+                #print('here v[0] dict')
+                #print(v[0])
+                #vals = sorted(flatten(_extract_dict(elt) for elt in v))
                 try:
                     vals = sorted(flatten(_extract_dict(elt) for elt in v))
                 except TypeError as msg:
                     dump_exception(orig, str(msg))
                     continue
+                #print('here [after vals]')
                 # this should be sorted (prefix1, val), (prefix1, val2), (prefix2, val2)
                 for prefix, val in itertools.groupby(vals, lambda x:x.prefix):
                     _val = [elt.value for elt in val if elt.value]
                     names = [elt.name for elt in val if elt.name]
                     if names:
                         name = name.pop()
+                        #print('names')
                     else:
                         name = k
+                        #print('nameK')
+                        #print(name)
                     if _val:
-                        data.append(Att(prefix, _val, name))
+                        #print('_val')
+                        data.append(Att(prefix, _val, name))                       
 
         if isinstance(v, dict):
+            #print('here [dict]')
+            if k == 'spatialCoverage':
+                print('spatialCoverage dict')            
             atts = _extract_dict(v)
             if not isinstance(atts, list):
+                #print('not list')
                 atts = [atts]
             for att in atts:
-                if not att.value: continue
+                if not att.value:
+                    #print('not value')
+                    #print(att)
+                    continue
                 if not att.name:
+                    #print('not name')
+                    #print(k)
                     att.name = k
+            print(atts)
             data.extend(atts)
 
     #old singlevalued version.
@@ -221,6 +300,7 @@ def genericType_toAtts(orig, rid=None):
     # so we can get lists of these things from multiple keys that need to be merged.
     ret = {}
     for d in data:
+        #print('data')
         ### Complicated. Want either single string valued, or list of
         ### items, but some single string items can't be sent as a
         ### list. So we can't use a default dict, we have to iterate.
@@ -254,7 +334,7 @@ def index_one(orig, rid=None, prov=None):
     except:
         dump_exception(orig, solr_post.text)
         return
-#    print(solr_post.text)
+    #print(solr_post.text)
     #break
 
 _upserted = set()

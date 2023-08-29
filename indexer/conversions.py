@@ -32,6 +32,8 @@ from dateutil.parser import isoparse
 import shapely
 import shapely.wkt
 import shapely.geometry
+from shapely.ops import transform
+from shapely.geometry import LineString, Point, Polygon
 import json
 import math
 
@@ -67,6 +69,8 @@ PropertyValue = _extractField('value')
 DataDownload = _extractField('contentUrl')
 
 def Place(d):
+    #print('here [Place]')
+    
     _formats = {'polygon': 'POLYGON ((%s))',
                 'point': 'POINT (%s)'}
 
@@ -84,18 +88,46 @@ def Place(d):
         return [
             Att('txt', address),
             Att('txt', regions.regionForAddress(address), 'region')
-            ]
-
+        ]
+    
     return None
 
 
 def GeoShape(geo):
+    #print('here [geo]')
     _formats = {'polygon': 'POLYGON ((%s))',
-                'point': 'POINT (%s)'}
+                'point': 'POINT (%s)',
+                'box': 'BOX (%s)',}
+                
+    # for field, fmt in _formats.items():
+        # val = geo.get(field,None)
+        # if val:
+            # return _geo(field, fmt % val)
+    # raise UnhandledFormatException("Didn't handle %s in GeoShape" % json.dumps(geo))
 
     for field, fmt in _formats.items():
         val = geo.get(field,None)
-        if val:
+        if val and field == 'box':
+            #convert Box to Polygon
+            print('here: box')
+            boxString = fmt % val;
+            print(boxString)
+            newboxString = boxString.replace('BOX ', '')
+            print(newboxString)          
+            newboxString = newboxString.replace(' ', ', ')
+            print(newboxString)
+            newboxString = eval(newboxString)
+            newPoly = shapely.geometry.box(*newboxString, ccw=True)
+            #convert coords to Long/Lat (Y/X) as required by Shapely
+            newPoly = transform(lambda x, y: (y, x), newPoly)
+            #newPoly = 'POLYGON ' + str(newPoly.bounds)
+            newPoly = str(newPoly).replace(', ', ',')
+            #newPoly = f"'{newPoly}'"            
+            print(newPoly)
+            return _geo('polygon', newPoly)      
+          
+        elif val and field != 'box':
+            print(fmt % val)
             return _geo(field, fmt % val)
     raise UnhandledFormatException("Didn't handle %s in GeoShape" % json.dumps(geo))
 
@@ -117,12 +149,23 @@ def _to_geojson(geo):
 
 
 def _geo_polygon(feature):
+    print("_geo_polygon  !!!!!!!!")
     the_geom= shapely.wkt.loads(feature)
     (minx, miny, maxx, maxy) = the_geom.bounds
+    
+    print(str(minx) + "," + str(miny) + "," + str(maxx) + "," + str(maxy))
+    
     if minx == -180 and maxx == 180:
         # solr can't handle this, returns org.locationtech.spatial4j.exception.InvalidShapeException: Invalid polygon, all points are coplanar
         the_geom = shapely.ops.clip_by_rect(the_geom, -179.99, -89.99, 180.0, 89.99)
         print ("Detected invalid geometry -- +- 180 bounds. Reducing slightly")
+
+    if minx == maxx and miny == maxy:
+        # solr can't handle this, returns org.locationtech.spatial4j.exception.InvalidShapeException: Invalid polygon, all points are coplanar
+        print ("Detected invalid polygon, as it is actually a point. Buffering point to generate a polygon...")
+        the_geom = Point(minx, miny).buffer(2)
+        (minx, miny, maxx, maxy) = the_geom.bounds
+        print(str(minx) + "," + str(miny) + "," + str(maxx) + "," + str(maxy))        
 
     # the_geom.length is the perimeter, I want a characteristic length
     length = math.sqrt((maxx-minx)**2 + (maxy-miny)**2)
@@ -139,6 +182,7 @@ def _geo_polygon(feature):
     ]
 
 def _geo_default(feature):
+    #print('_geo_default !!!')
     the_geom= shapely.wkt.loads(feature)
     return [
         Att('the', feature, 'geom'),
@@ -151,9 +195,10 @@ def _geo(featuretype, feature):
     feature: wkt representation of the feature
     returns: list of attributes
     """
-
+    #print("_geo !!!!")
     _dispatch = {'polygon': _geo_polygon }
 
+    #print("Att start!!!!")
     atts= [
         Att('txt', regions.regionsForFeature(feature), 'region'),
         Att('geom', featuretype, 'type'),
@@ -161,7 +206,8 @@ def _geo(featuretype, feature):
     ]
 
     atts.extend(_dispatch.get(featuretype, _geo_default)(feature))
-
+    #print("Att end!!!!")
+    print(atts)
     return atts
 
 ###
@@ -224,4 +270,4 @@ def rdf__name(data):
     return Att(None, data, 'name')
 
 def rdfs__seeAlso(data):
-    return Att('txt', data, 'sameAs')    
+    return Att('txt', data, 'sameAs')
