@@ -70,7 +70,7 @@ def _extract_dict(d):
 
 
 def upsert(url, data, flReindex=False):
-    print('upsert')
+    #print('upsert')
     solr_params = {
         'q': '*:*',
         "fl":"id,json_source",
@@ -257,7 +257,7 @@ def genericType_toAtts(orig, rid=None):
                 except TypeError as msg:
                     dump_exception(orig, str(msg))
                     continue
-                print('here [after vals]')
+                #print('here [after vals]')
                 # this should be sorted (prefix1, val), (prefix1, val2), (prefix2, val2)
                 for prefix, val in itertools.groupby(vals, lambda x:x.prefix):
                     _val = [elt.value for elt in val if elt.value]
