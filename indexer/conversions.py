@@ -109,13 +109,12 @@ def GeoShape(geo):
         val = geo.get(field,None)
         if val and field == 'box':
             #convert Box to Polygon
-            print('here: box')
             boxString = fmt % val;
             print(boxString)
             newboxString = boxString.replace('BOX ', '')
-            print(newboxString)          
+            #print(newboxString)          
             newboxString = newboxString.replace(' ', ', ')
-            print(newboxString)
+            #print(newboxString)
             newboxString = eval(newboxString)
             newPoly = shapely.geometry.box(*newboxString, ccw=True)
             #convert coords to Long/Lat (Y/X) as required by Shapely
@@ -149,7 +148,7 @@ def _to_geojson(geo):
 
 
 def _geo_polygon(feature):
-    print("_geo_polygon  !!!!!!!!")
+    #print("_geo_polygon  !!!!!!!!")
     the_geom= shapely.wkt.loads(feature)
     (minx, miny, maxx, maxy) = the_geom.bounds
     
@@ -207,7 +206,7 @@ def _geo(featuretype, feature):
 
     atts.extend(_dispatch.get(featuretype, _geo_default)(feature))
     #print("Att end!!!!")
-    print(atts)
+    #print(atts)
     return atts
 
 ###

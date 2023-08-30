@@ -180,6 +180,7 @@ def genericType_toAtts(orig, rid=None):
                                 listForm = list(i.values())
                                 print('***Name: ' + listForm[pos+1])
                                 data.append(Att(None, listForm[pos+1], k))
+                                data.append(Att('txt', listForm[pos+1], k))
                                 data.append(Att('txt', regions.regionForName(listForm[pos+1]), 'region'))
             elif k == 'description':
                 if isinstance(v, list) == False:
@@ -189,12 +190,17 @@ def genericType_toAtts(orig, rid=None):
                     #handle case of description as list
                     for i in v:
                         pos = 0
-                        print(i.values()) 
-                        for val in i.values():
-                            if val == "en":
-                                listForm = list(i.values())
-                                print('***Description: ' + listForm[pos+1])
-                                data.append(Att(None, listForm[pos+1], k))
+                        if isinstance(i, dict) == True:                        
+                            print(i.values()) 
+                            for val in i.values():
+                                if val == "en":
+                                    listForm = list(i.values())
+                                    print('***Description: ' + listForm[pos+1])
+                                    data.append(Att(None, listForm[pos+1], k))
+                                    data.append(Att('txt', listForm[pos+1], k))
+                        else:
+                            data.append(Att(None, i, k))
+                            data.append(Att('txt', i, k))
         try:
             # check by name
             att = dispatch(k, v)
