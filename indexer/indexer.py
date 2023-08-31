@@ -156,7 +156,7 @@ def genericType_toAtts(orig, rid=None):
 
         data = [
             Att(None, _id, 'id'),
-            Att(None, orig['@type'], 'type'),
+            Att(None, projectType, 'type'),
         ]
     except KeyError as msg:
         print("Error -- didn't get id or url and type")
