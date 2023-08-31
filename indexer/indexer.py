@@ -146,10 +146,17 @@ def genericType_toAtts(orig, rid=None):
                 _id = hashlib.md5(name.encode('utf-8')).hexdigest()
             else:
                 _id = str(uuid.uuid4())
+                
+        #handle type:Project as type:ResearchProject (see issue#43)
+        if orig['@type'] == 'Project' or orig['@type'] == 'ResearchProject':
+          print('***changing type:Project to type:ResearchProject')
+          projectType = 'ResearchProject'
+        else:
+          projectType = orig['@type']                
 
         data = [
             Att(None, _id, 'id'),
-            Att(None, orig['@type'], 'type'),
+            Att(None, projectType, 'type'),
         ]
     except KeyError as msg:
         print("Error -- didn't get id or url and type")
