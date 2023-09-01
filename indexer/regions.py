@@ -51,6 +51,7 @@ def regionsForFeature(feature):
 #   Iran(Islamic Republic of),
 # * Remove stop words.
 # * Split on whitespace
+# * remove ending period e.g. we want "Ghana" from "Accra, Ghana."
 
 # Then, for properties mentioned above, we check to see if any of the 
 # countries are in the address, and map away from there.  Note, 
@@ -67,6 +68,7 @@ with open(os.path.join(os.path.dirname(__file__),'UNSD.Methodology.csv'), 'r') a
         s = s.lower()
         s = re.sub(r"\(.*\)","",s)
         s = re.sub(r"and|the|of","", s)
+        s = s.rstrip('.')
         return set(s.split(None))
     country_map_list = [(normalize(country),country) for country in text_regions.keys()]
 
@@ -104,6 +106,7 @@ if __name__ == '__main__':
     print('regionForAddress tests...')
     for address in (
             'IOC Science and Communication Centre on Harmful Algae, University of Copenhagen - University of Copenhagen, Department of Biology - DK-1353 K\u00f8benhavn K - Denmark',
+            'P. O. BOX LG 99 Legon-Accra, Ghana.',
             ):
         print('    ',regionForAddress(address))
         
