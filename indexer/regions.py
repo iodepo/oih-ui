@@ -106,7 +106,7 @@ if __name__ == '__main__':
     print('regionForAddress tests...')
     for address in (
             'IOC Science and Communication Centre on Harmful Algae, University of Copenhagen - University of Copenhagen, Department of Biology - DK-1353 K\u00f8benhavn K - Denmark',
-            'Department of Marine and Fisheries Sciences, University of Ghana, P. O. BOX LG 99 Legon-Accra, Ghana.',
+            'P. O. BOX LG 99 Legon-Accra, Ghana.',
             ):
         print('    ',regionForAddress(address))
         
