@@ -150,13 +150,13 @@ def genericType_toAtts(orig, rid=None):
         #handle type:Project as type:ResearchProject (see issue#43)
         if orig['@type'] == 'Project' or orig['@type'] == 'ResearchProject':
           print('***changing type:Project to type:ResearchProject')
-          projectType = 'ResearchProject'
+          origType = 'ResearchProject'
         else:
-          projectType = orig['@type']                
+          origType = orig['@type']                
 
         data = [
             Att(None, _id, 'id'),
-            Att(None, projectType, 'type'),
+            Att(None, origType, 'type'),
         ]
     except KeyError as msg:
         print("Error -- didn't get id or url and type")
