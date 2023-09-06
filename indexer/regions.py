@@ -1,12 +1,12 @@
 import os
 import json
-import csv
 import re
 
 import shapely
 import shapely.wkt
 import shapely.geometry
 
+from urllib.request import urlopen
 
 ###
 #  Geometry to regions
@@ -28,22 +28,21 @@ def regionsForFeature(feature):
 
 
 ###
-#  Text address / name / CountryOfLastProcessing
+#  Text address / name / CountryOfLastProcessing to Regions
+#
 # This is a super simple geocoder -- if there's text (in "address", 
 # "name", or "CountryOfLastProcessing" properties) that contains
-# a country that's spelled like we have in the CSV file, we take the
-# region from there. Note that the region doesn't exactly map to what
-# we're using elsewhere, so we should probably hand edit a country ->
-# region listing instead of using the UN one straight out.
+# a country that's spelled like the "geoAreaName" value from 
+# the UNSD "GeoArea" API endpoint, we take the
+# region from there. 
 
-# Updates in March 2023:
-#   - added regional harvesting of the "name", "countryOfLastProcessing" 
-#     properties
-#   - added the UN class "Sub-region Name" to the output
-#   - this means that in the Solr index, a resource with a "name" of 
-#        "New records of deep water blah off Argentina" 
-#     will be stored as 
-#        "txt_region": ["Americas", "Latin America and the Caribbean"]
+# For more on the UNSD API, see https://unstats.un.org/SDGAPI/swagger/
+# and see the JSON results tree for the GeoArea endpoint at 
+# https://unstats.un.org/SDGAPI/v1/sdg/GeoArea/Tree
+# We now connect through the live API, and get the list of all countries 
+# and regions in JSON, which we then parse.  Formerly, we had to 
+# manually download a CSV from 
+# https://unstats.un.org/unsd/methodology/m49/overview
 
 # Algorithim:
 # * lower everything.
@@ -59,40 +58,77 @@ def regionsForFeature(feature):
 #
 # Note -- this is a linear search, but there are only 200 countries so it's not that bad.
 
-with open(os.path.join(os.path.dirname(__file__),'UNSD.Methodology.csv'), 'r') as f:
-    dialect = csv.register_dialect('semi', delimiter=';', quoting=csv.QUOTE_NONE)
-    reader = csv.DictReader(f, dialect='semi')
-    #text_regions = {line['Country or Area'].lower():line['Region Name'] for line in reader}
-    text_regions = {line['Country or Area'].lower():[line['Region Name'],line['Sub-region Name']] for line in reader}
-    def normalize(s):
-        s = s.lower()
-        s = re.sub(r"\(.*\)","",s)
-        s = re.sub(r"and|the|of","", s)
-        s = s.rstrip('.')
-        return set(s.split(None))
-    country_map_list = [(normalize(country),country) for country in text_regions.keys()]
+def normalize(s):
+    s = s.lower()
+    s = re.sub(r"\(.*\)","",s)
+    s = re.sub(r"\[.*\]","",s)
+    s = re.sub(r"and|the|of","", s)
+    s = s.rstrip('.')
+    return set(s.split(None))
+
+#leverage the UNSD API "GeoArea" JSON endpoint, instead of locally-stored CSV
+#  see https://unstats.un.org/SDGAPI/swagger/
+unsdGeoareaEndpoint = "https://unstats.un.org/SDGAPI/v1/sdg/GeoArea/Tree"
+response = urlopen(unsdGeoareaEndpoint)
+unsdDataJSON = json.loads(response.read())
+#use the "World (total) by continental regions" branch
+continentalRegions = unsdDataJSON[1]
+continentalRegionsChildren = continentalRegions['children']
+
+#parse the JSON from the API call
+countries_dict_with_regions = {}
+country_map_list = []
+
+for list_regions in continentalRegionsChildren:
+    if list_regions['children'] == None:
+        regionName = list_regions['geoAreaName']
+        #print('Region name (no children): ' + regionName)
+    else:
+        regionName = list_regions['geoAreaName']    
+        #print('Region name: ' + regionName)
+        #loop through sub-regions
+        for list_subregions in list_regions['children']:
+            subRegionName = list_subregions['geoAreaName']
+            #print('Sub-region name: ' + subRegionName)            
+            #loop through intermediate region items
+            for list_intermediate_regions in list_subregions['children']:
+                if list_intermediate_regions['type'] == 'Region':
+                    intermediateRegionName = list_intermediate_regions['geoAreaName']
+                    #print('Intermediate region name: ' + intermediateRegionName)
+                    #loop through intermediate region children
+                    for list_intermediate_region_children in list_intermediate_regions['children']:
+                        countryName = list_intermediate_region_children['geoAreaName'].lower()
+                        #print('Country name: ' + countryName)
+                        countries_dict_with_regions[countryName] = [regionName, subRegionName] 
+                        country_map_list.append((normalize(countryName), countryName))
+                else:
+                    countryName = list_intermediate_regions['geoAreaName'].lower()
+                    #print('Country name: ' + countryName)                   
+                    countries_dict_with_regions[countryName] = [regionName, subRegionName]                 
+                    country_map_list.append((normalize(countryName), countryName))
+                    
+#print(countries_dict_with_regions)
+#print(country_map_list)
 
 def regionForAddress(address):
     normalized = normalize(address)
     for parts, country in country_map_list:
         if parts <= normalized:
-            return text_regions[country]
+            return countries_dict_with_regions[country]            
             
 def regionForName(name):
     normalized = normalize(name)
     for parts, country in country_map_list:
         if parts <= normalized:
-            return text_regions[country]
+            return countries_dict_with_regions[country]
             
 def regionForCountryOfLastProcessing(countryOfLastProcessing):
     normalized = normalize(countryOfLastProcessing)
     for parts, country in country_map_list:
         if parts <= normalized:
-            return text_regions[country]            
+            return countries_dict_with_regions[country]            
 
 if __name__ == '__main__':
-
-    #print(text_regions)
 
     print('regionsForFeature tests...')
     for feature in (
