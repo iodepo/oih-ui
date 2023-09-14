@@ -2,5 +2,5 @@
   "txt_jobTitle",
   { "key": "txt_knowsAbout", "type": "list" },
   { "key": "txt_knowsLanguage", "type": "list" },
-  "txt_nationality"
+  { "key": "txt_nationality", "type": "list" }
 ]
