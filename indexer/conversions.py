@@ -34,6 +34,7 @@ import shapely.wkt
 import shapely.geometry
 from shapely.ops import transform
 from shapely.geometry import LineString, Point, Polygon
+from shapely.validation import make_valid
 import json
 import math
 
@@ -164,7 +165,18 @@ def _geo_polygon(feature):
         print ("Detected invalid polygon, as it is actually a point. Buffering point to generate a polygon...")
         the_geom = Point(minx, miny).buffer(2)
         (minx, miny, maxx, maxy) = the_geom.bounds
-        print(str(minx) + "," + str(miny) + "," + str(maxx) + "," + str(maxy))        
+        print(str(minx) + "," + str(miny) + "," + str(maxx) + "," + str(maxy)) 
+
+    #check if valid geometry
+    if the_geom.is_valid == False:
+        print ("Detected invalid geometry, executing make_valid")        
+        the_geom = make_valid(the_geom)
+        #convert lineString to Polygon, by buffering through Shapely
+        if the_geom.geom_type == "LineString":
+            print ("Detected geometry of type LineString. Buffering line to generate a polygon...")    
+            the_geom = the_geom.buffer(2)
+            (minx, miny, maxx, maxy) = the_geom.bounds
+        print(the_geom.wkt)
 
     # the_geom.length is the perimeter, I want a characteristic length
     length = math.sqrt((maxx-minx)**2 + (maxy-miny)**2)
