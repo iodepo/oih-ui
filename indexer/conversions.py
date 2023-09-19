@@ -118,7 +118,7 @@ def GeoShape(geo):
             #print(newboxString)
             newboxString = eval(newboxString)
             newPoly = shapely.geometry.box(*newboxString, ccw=True)
-            #convert coords to Long/Lat (Y/X) as required by Shapely
+            #convert coords to Long/Lat (X/Y) as required by Shapely
             newPoly = transform(lambda x, y: (y, x), newPoly)
             #newPoly = 'POLYGON ' + str(newPoly.bounds)
             newPoly = str(newPoly).replace(', ', ',')
@@ -159,6 +159,16 @@ def _geo_polygon(feature):
         # solr can't handle this, returns org.locationtech.spatial4j.exception.InvalidShapeException: Invalid polygon, all points are coplanar
         the_geom = shapely.ops.clip_by_rect(the_geom, -179.99, -89.99, 180.0, 89.99)
         print ("Detected invalid geometry -- +- 180 bounds. Reducing slightly")
+        
+    if maxx == 180:
+        # solr can't handle this, returns org.locationtech.spatial4j.exception.InvalidShapeException: Invalid polygon, all points are coplanar
+        the_geom = shapely.ops.clip_by_rect(the_geom, minx, miny, 179.99, maxy)
+        print ("Detected invalid geometry -- +- 180 bounds. Reducing slightly")
+
+    if miny == -90 and maxy == 90:
+        # solr can't handle this, returns org.locationtech.spatial4j.exception.InvalidShapeException: Invalid polygon, all points are coplanar
+        the_geom = shapely.ops.clip_by_rect(the_geom, minx, -89.99, maxx, 89.99)
+        print ("Detected invalid geometry -- +- 90 bounds. Reducing slightly")        
 
     if minx == maxx and miny == maxy:
         # solr can't handle this, returns org.locationtech.spatial4j.exception.InvalidShapeException: Invalid polygon, all points are coplanar
