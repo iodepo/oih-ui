@@ -162,7 +162,7 @@ const HOME_PAGE_CATEGORIES =
         },
         {
             id: 'SpatialData',
-            text: 'Spatial Data',
+            text: 'Spatial Search',
             icon: map
         }
 ];
