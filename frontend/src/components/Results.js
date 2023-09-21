@@ -48,7 +48,7 @@ const tabs = [
     },
     {
         title: 'SpatialData',
-        tab_name: 'Spatial Data',
+        tab_name: 'Spatial Search',
     },
 ];
 
