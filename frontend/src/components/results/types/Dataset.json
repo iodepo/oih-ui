@@ -1,8 +1,8 @@
 [
   "name",
   { "key": "txt_sameAs", "type": ["list", "truncated", "link"] },
-  { "key": "txt_license", "type": "list", "label": "License" },  
-  "txt_citation",
+  { "key": "txt_license", "type": "list", "label": "License" },
+  { "key": "txt_citation", "type": "list", "label": "Related Works" },
   "txt_version",
   { "key": "txt_keywords", "type": "keywords" },
   {
