@@ -147,10 +147,15 @@ def genericType_toAtts(orig, rid=None):
             else:
                 _id = str(uuid.uuid4())
                 
-        #handle type:Project as type:ResearchProject (see issue#43)
+        #handle type:Project as type:ResearchProject (see https://github.com/iodepo/oih-ui/issues/43 )
         if orig['@type'] == 'Project' or orig['@type'] == 'ResearchProject':
           print('***changing type:Project to type:ResearchProject')
           origType = 'ResearchProject'
+        #handle type:DigitalDocument as type:CreativeWork (see https://github.com/iodepo/odis-arch/issues/337 )
+        elif orig['@type'] == 'CreativeWork' or orig['@type'] == 'DigitalDocument':
+          print('***changing type:DigitalDocument to type:CreativeWork')
+          origType = 'CreativeWork'        
+        
         else:
           origType = orig['@type']                
 
