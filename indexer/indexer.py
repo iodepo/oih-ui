@@ -154,8 +154,7 @@ def genericType_toAtts(orig, rid=None):
         #handle type:DigitalDocument as type:CreativeWork (see https://github.com/iodepo/odis-arch/issues/337 )
         elif orig['@type'] == 'CreativeWork' or orig['@type'] == 'DigitalDocument':
           print('***changing type:DigitalDocument to type:CreativeWork')
-          origType = 'CreativeWork'        
-        
+          origType = 'CreativeWork'
         else:
           origType = orig['@type']                
 
