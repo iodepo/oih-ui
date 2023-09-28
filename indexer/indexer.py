@@ -326,6 +326,11 @@ def genericType_toAtts(orig, rid=None):
             ret[d.key] = d.value
             continue
         ret[d.key] = list(flatten([ret[d.key], d.value]))
+    #cleanup a few properties, that have duplicate values
+    if 'txt_region' in ret:
+        ret['txt_region'] = list(set(ret['txt_region']))
+    if 'txt_nationality' in ret:
+        ret['txt_nationality'] = list(set(ret['txt_nationality']))        
     return ret
 
 def _merge_prov(orig, prov):
