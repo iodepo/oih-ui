@@ -330,7 +330,11 @@ def genericType_toAtts(orig, rid=None):
     if 'txt_region' in ret:
         ret['txt_region'] = list(set(ret['txt_region']))
     if 'txt_nationality' in ret:
-        ret['txt_nationality'] = list(set(ret['txt_nationality']))        
+        ret['txt_nationality'] = list(set(ret['txt_nationality']))
+    if 'txt_license' in ret:
+        #remove trailing slash in urls, for performing comparison
+        stripped_vals = [url.rstrip('/') for url in ret['txt_license']]
+        ret['txt_license'] = list(set(stripped_vals))
     return ret
 
 def _merge_prov(orig, prov):
