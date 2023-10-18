@@ -1,0 +1,13 @@
+$themes: (
+  //All the site themes will be added here
+  //Example:
+  light:
+    (
+      primary-color: #3498db,
+      secondary-color: #e74c3c,
+    )
+);
+
+// Available Themes are: [light, ....]
+$selected-theme: light;
+$theme: map-get($themes, $selected-theme);

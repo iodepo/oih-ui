@@ -1,3 +1,6 @@
+@import "./theme/themes.scss";
+// You can get a theme variable like this ---> map-get($theme, name-variable)
+
 #root {
   background: url("resources/landing-bg_1400.jpeg");
   background-size: 100%;

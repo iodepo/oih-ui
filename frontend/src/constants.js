@@ -8,6 +8,9 @@ import boat from "./resources/boat.png";
 import project_mgmt from "./resources/project-management.png";
 import database from "./resources/database.png";
 
+import styles from './theme/icons.scss';
+
+
 /* Bounds for regions on the map.
 
   This is just the initial bounds of the map that's shown, it doesn't
@@ -124,48 +127,49 @@ const fieldTitleFromName = (facet_name) => {
 / text: the title of the category
 / icon: the image, as defined above
 */
+const extractUrl = (urlString) => urlString.slice(4, -1);
 const HOME_PAGE_CATEGORIES =
     [
         {
             id: 'Person',
             text: 'Experts',
-            icon: diver,
+            icon: extractUrl(styles.diver),
 
         },
         {
             id: 'CreativeWork',
             text: 'Documents',
-            icon: documents
+            icon: extractUrl(styles.documents)
         },
         {
             id: 'Course',
             text: 'Training',
-            icon: thinking
+            icon: extractUrl(styles.thinking)
         },
         {
             id: 'Dataset',
             text: 'Datasets',
-            icon: database
+            icon: extractUrl(styles.database)
         },
         {
             id: 'Vehicle',
             text: 'Vessels',
-            icon: boat
+            icon: extractUrl(styles.boat)
         },
         {
             id: 'ResearchProject',
             text: 'Projects',
-            icon: project_mgmt
+            icon: extractUrl(styles.project_mgmt)
         },
         {
             id: 'Organization',
             text: 'Institutionss',
-            icon: lighthouse
+            icon: extractUrl(styles.lighthouse)
         },
         {
             id: 'SpatialData',
             text: 'Spatial Search',
-            icon: map
+            icon: extractUrl(styles.mapIcon)
         }
     ];
 
