@@ -1,21 +1,22 @@
 /* global URLSearchParams */
 
-import React, {useEffect, useState, useMemo, useCallback} from "react";
-import {useNavigate, useParams} from "react-router-dom";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import useSearchParam from "../useSearchParam";
 
 import ResultTabs from "./ResultTabs";
-import {dataServiceUrl} from '../config/environment';
-import {Row} from "react-bootstrap";
-import { regionMap, regionBoundsMap, INITIAL_BOUNDS, DEFAULT_QUERY_BOUNDS }  from '../constants';
+import { dataServiceUrl } from '../config/environment';
+import { Row } from "react-bootstrap";
+import { regionMap, regionBoundsMap, INITIAL_BOUNDS, DEFAULT_QUERY_BOUNDS } from '../constants';
 import throttle from "lodash/throttle";
 
 import ReMap from './map/ReMap';
-import Pagination, {ITEMS_PER_PAGE} from "./results/Pagination";
-import {Popup} from 'react-map-gl';
+import Pagination, { ITEMS_PER_PAGE } from "./results/Pagination";
+import { Popup } from 'react-map-gl';
 import FacetsFullWidth from "./results/FacetsFullWidth";
 
 import typeMap from './results/types/';
+import { useAppTranslation } from "TranslationsManager/context/AppTranslation";
 
 const tabs = [
     {
@@ -52,9 +53,9 @@ const tabs = [
     },
 ];
 
-const expandMapBounds = ({_sw, _ne}) => {
-    _sw = {..._sw}
-    _ne = {..._ne}
+const expandMapBounds = ({ _sw, _ne }) => {
+    _sw = { ..._sw }
+    _ne = { ..._ne }
     const size = { lat: Math.abs(_ne.lat - _sw.lat), lng: Math.abs(_ne.lng - _sw.lng) }
     _sw.lat -= Math.abs(size.lat * 0.25)
     if (Math.abs(_sw.lat) > 90) { _sw.lat = 90 * Math.sign(_sw.lat) }
@@ -73,18 +74,18 @@ const containsMapBounds = (outer, inner) => (
     outer._ne.lng > inner._ne.lng
 )
 
-const get_region_bounds = (region=null) => {
+const get_region_bounds = (region = null) => {
     let bounds;
     if (region) bounds = regionBoundsMap[region.replaceAll(' ', '_')]
     if (bounds) return bounds
     else return DEFAULT_QUERY_BOUNDS
 }
 
-const mapboxBounds_toQuery = (mb, region=null) => {
+const mapboxBounds_toQuery = (mb, region = null) => {
     /* convert '{"_sw":{"lng":17.841823484137535,"lat":-59.72391567923438},"_ne":{"lng":179.1301535622635,"lat":49.99895151432449}}'
       to [_sw.lat,_sw.lng TO _ne.lat,_ne.lng] ([-90,-180 TO 90,180])
     */
-    const {_sw, _ne} = mb;
+    const { _sw, _ne } = mb;
     if (!_sw) {
         return get_region_bounds(region);
     }
@@ -110,7 +111,7 @@ export default function Results() {
     const [mapBounds, setMapBounds] = useState(false);
 
     const navigate = useNavigate();
-    const {searchType = 'CreativeWork'} = useParams()
+    const { searchType = 'CreativeWork' } = useParams()
     const showMap = searchType === 'SpatialData'
     const [searchText, setSearchText] = useSearchParam("search_text", "");
     const [region, setRegion] = useSearchParam("region", "global");
@@ -118,6 +119,7 @@ export default function Results() {
     const [page, setPage] = useSearchParam("page", 0);
     const [facetValues, setFacetFacetValues] = useState(new Array(facets.length).fill(""))
 
+    const translationState = useAppTranslation()
     useEffect(() => {
         fetch(`${dataServiceUrl}/search?${new URLSearchParams({
             rows: 0,
@@ -161,7 +163,7 @@ export default function Results() {
             mapSearch(mapBounds, page);
         } else {
             let URI = `${dataServiceUrl}/search?`;
-            const params = new URLSearchParams({'document_type': searchType, 'start': page * ITEMS_PER_PAGE, rows: ITEMS_PER_PAGE});
+            const params = new URLSearchParams({ 'document_type': searchType, 'start': page * ITEMS_PER_PAGE, rows: ITEMS_PER_PAGE });
             if (searchText !== '') {
                 params.append('search_text', searchText)
             }
@@ -194,7 +196,7 @@ export default function Results() {
             }
             fetch(`${dataServiceUrl}/search?${geoParams.toString()}`)
                 .then(response => response.json())
-                .then(json => setCounts(prev => ({ ...prev, SpatialData: Object.values(json.counts).reduce((x, y) => x + y, 0)})))
+                .then(json => setCounts(prev => ({ ...prev, SpatialData: Object.values(json.counts).reduce((x, y) => x + y, 0) })))
         }
     }, [searchText, searchType, facetQuery, showMap, mapBounds, region, page]);
 
@@ -208,7 +210,7 @@ export default function Results() {
     };
 
     const resetDefaultSearchUrl = (type) => {
-        navigate(`/results/${type}?${new URLSearchParams({...searchText ? {search_text: searchText} : {}, ...region.toUpperCase() !== "GLOBAL" ? {region} : {}})}`)
+        navigate(`/results/${type}?${new URLSearchParams({ ...searchText ? { search_text: searchText } : {}, ...region.toUpperCase() !== "GLOBAL" ? { region } : {} })}`)
     }
 
     const clearFacetQuery = () => {
@@ -217,7 +219,7 @@ export default function Results() {
     }
 
     const [expandedMapBounds, setExpandedMapBounds] = useState(false)
-    const [allowSetMapBounds, ] = useState(true)
+    const [allowSetMapBounds,] = useState(true)
     const [viewport, setViewport] = useState({});
 
     const updateMapBounds = useCallback((bounds, viewport) => {
@@ -234,7 +236,7 @@ export default function Results() {
         if (showMap) {
             let geoJsonUrl = `${dataServiceUrl}/spatial.geojson?`;
             const params = new URLSearchParams({
-                ...searchType !== 'SpatialData' ? {'document_type': searchType} : {},
+                ...searchType !== 'SpatialData' ? { 'document_type': searchType } : {},
                 'search_text': searchText,
                 'facetType': 'the_geom',
                 'facetName': mapboxBounds_toQuery(expandedMapBounds, region),
@@ -325,16 +327,16 @@ export default function Results() {
 
 
     const maybe_set_selected_element = (eltList) => {
-        const { zoom=0 } = viewport;
-        if (!eltList || ! eltList.length) { return undefined; }
-        if (zoom < 3 ) { return undefined; }
+        const { zoom = 0 } = viewport;
+        if (!eltList || !eltList.length) { return undefined; }
+        if (zoom < 3) { return undefined; }
         // // one hit
         // if (eltList.length == 1) {
         //     setSelectedElem(eltList[0]);
         //     return eltList[0];
         // }
         // Priority to points, maybe there's a better option, but choose one of 3
-        const points = eltList.filter(e=>e.layer.type == 'circle');
+        const points = eltList.filter(e => e.layer.type == 'circle');
         if (points.length) {
             if (points.length < 3) {
                 const elem = points.pop();
@@ -344,7 +346,7 @@ export default function Results() {
             return undefined;
         }
         if (zoom > 3 && eltList && eltList.length < 100) {
-            const elements = eltList.sort((a,b) => a.properties.geom_length - b.properties.geom_length);
+            const elements = eltList.sort((a, b) => a.properties.geom_length - b.properties.geom_length);
             const elem = elements[0];
             setSelectedElem(elem);
             return elem;
@@ -352,106 +354,105 @@ export default function Results() {
         return undefined;
     };
 
-    const {zoom=0} = viewport;
+    const { zoom = 0 } = viewport;
 
     return (
         <>
-          <div id="result-container">
-            <div>
-              <ResultTabs
-                counts={counts}
-                tabList={tabs}
-                searchType={searchType}
-                resetDefaultSearchUrl={resetDefaultSearchUrl}
-                clearFacetQuery={clearFacetQuery}
-              />
-              <div id="result-section">
+            <div id="result-container">
                 <div>
-                  {facets.length > 0 &&
-                   <FacetsFullWidth
-                     facets={facets}
-                     clearFacetQuery={clearFacetQuery}
-                     facetSearch={facetSearch}
-                     facetValues={facetValues}
-                     setFacetFacetValues={setFacetFacetValues}
-                   />}
-                </div>
+                    <ResultTabs
+                        counts={counts}
+                        tabList={tabs}
+                        searchType={searchType}
+                        resetDefaultSearchUrl={resetDefaultSearchUrl}
+                        clearFacetQuery={clearFacetQuery}
+                    />
+                    <div id="result-section">
+                        <div>
+                            {facets.length > 0 &&
+                                <FacetsFullWidth
+                                    facets={facets}
+                                    clearFacetQuery={clearFacetQuery}
+                                    facetSearch={facetSearch}
+                                    facetValues={facetValues}
+                                    setFacetFacetValues={setFacetFacetValues}
+                                />}
+                        </div>
 
-                <div className="row mx-auto">
-                  <div className="col-12 container mb-3">
-                    <h6 className="primary-color text-start text-light ps-5 pt-3"> Total results found {resultCount || 0}</h6>
-                  </div>
-                  <div>
-                    <div
-                      style={{minHeight: "500px"}}
-                    >
-                      {showMap &&
-                       <div className="">
-                         <div className="row">
-                           <div className="container col-6">
-                             <ReMap
-                               externalLayers={layers}
-                               bounds={initial_bounds()}
-                               handleBoundsChange={updateMapBounds}
-                               layersState={[true]}
-                               onHover={e => {
-                                   if (!selectHold) {
-                                       maybe_set_selected_element(e.features);
-                                       setMousePos(e.lngLat);
-                                   }
-                               }}
-                               onClick={e => {
-                                   if (selectHold) {
-                                       setMousePos(e.lngLat);
-                                       const selected = maybe_set_selected_element(e.features);
-                                       setSelectHold(Boolean(selected));
-                                   } else if (selectedElem) {
-                                       setSelectHold(true);
-                                   }
-                               }}
-                               popup={tooltip}
-                               selectedId={selectedElem?.properties?.id}
-                             />
-                             <div>
-                               Note: Geometries that are larger than the map display area will not be displayed. <br/>
-                               Search results corresponding to the map area show below. <br/>
-                               <span>{(zoom <= 3) && "Zoom in to hover over areas to see the objects associated with them."}</span><br/>
-                             </div>
+                        <div className="row mx-auto">
+                            <div className="col-12 container mb-3">
+                                <h6 className="primary-color text-start text-light ps-5 pt-3"> {translationState.translation["Total results found"]}  {resultCount || 0}</h6>
+                            </div>
+                            <div>
+                                <div
+                                    style={{ minHeight: "500px" }}
+                                >
+                                    {showMap &&
+                                        <div className="">
+                                            <div className="row">
+                                                <div className="container col-6">
+                                                    <ReMap
+                                                        externalLayers={layers}
+                                                        bounds={initial_bounds()}
+                                                        handleBoundsChange={updateMapBounds}
+                                                        layersState={[true]}
+                                                        onHover={e => {
+                                                            if (!selectHold) {
+                                                                maybe_set_selected_element(e.features);
+                                                                setMousePos(e.lngLat);
+                                                            }
+                                                        }}
+                                                        onClick={e => {
+                                                            if (selectHold) {
+                                                                setMousePos(e.lngLat);
+                                                                const selected = maybe_set_selected_element(e.features);
+                                                                setSelectHold(Boolean(selected));
+                                                            } else if (selectedElem) {
+                                                                setSelectHold(true);
+                                                            }
+                                                        }}
+                                                        popup={tooltip}
+                                                        selectedId={selectedElem?.properties?.id}
+                                                    />
+                                                    <div>
+                                                        {translationState.translation["Note"]} <br />{translationState.translation["Note2"]} <br />
+                                                        <span>{(zoom <= 3) && translationState.translation["Zoom"]}</span><br />
+                                                    </div>
 
-                           </div>
-                           <div className="container col-3">
-                             {detail}
-                           </div>
-                         </div>
+                                                </div>
+                                                <div className="container col-3">
+                                                    {detail}
+                                                </div>
+                                            </div>
 
 
-                         <hr />
-                       </div>
-                      }
-                      <div className="container">
-                        <ResultList results={results}/>
-                        <Pagination searchType={searchType} resultCount={resultCount} setPage={setPage} page={page}/>
-                      </div>
+                                            <hr />
+                                        </div>
+                                    }
+                                    <div className="container">
+                                        <ResultList results={results} />
+                                        <Pagination searchType={searchType} resultCount={resultCount} setPage={setPage} page={page} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                  </div>
                 </div>
-              </div>
             </div>
-          </div>
         </>
     );
 }
 
-const ResultList = ({results}) =>
-      results.map((result) => {
-          return <Result result={result} key={result['id']}/>
-      });
+const ResultList = ({ results }) =>
+    results.map((result) => {
+        return <Result result={result} key={result['id']} />
+    });
 
-const Result = ({result}) => {
+const Result = ({ result }) => {
     var url = result['type'] === 'Person' || result['type'] === 'Organization' ? resolveAsUrl(result['id']) : result['txt_url'] || resolveAsUrl(result['id']);
-    const {Component} = typeMap[result['type']];
+    const { Component } = typeMap[result['type']];
     const [truncate, setTruncate] = useState(true);
-    const jsonLdParams = new URLSearchParams({id:result['id']}).toString();
+    const jsonLdParams = new URLSearchParams({ id: result['id'] }).toString();
     const sendGoogleEvent = () => {
         gtag('config', 'G-MQDK6BB0YQ');
         gtag(
@@ -464,7 +465,7 @@ const Result = ({result}) => {
 
         /*
         //GA4 debug code
-	    const measurement_id = `G-MQDK6BB0YQ`;
+        const measurement_id = `G-MQDK6BB0YQ`;
         const api_secret = `dtIVKr8XQHSKJ0FrI4EkDQ`;
 
         fetch(`https://www.google-analytics.com/mp/collect?measurement_id=${measurement_id}&api_secret=${api_secret}`, {
@@ -487,9 +488,9 @@ const Result = ({result}) => {
 
     return (
         <div
-                key={result['id']}
-                className="result-item container rounded-3 p-3 mb-2"
-                id="resultsDiv">
+            key={result['id']}
+            className="result-item container rounded-3 p-3 mb-2"
+            id="resultsDiv">
             <h4 className="text-start mb-3">
                 {/*
            <a href={result['type'] === 'Person' || result['type'] === 'Organization' ? resolveAsUrl(result['id']) :
@@ -499,10 +500,10 @@ const Result = ({result}) => {
            </a>
            */}
                 <a
-                        href={url}
-                        className="result-title"
-                        target="_blank"
-                        onClick={sendGoogleEvent}>
+                    href={url}
+                    className="result-title"
+                    target="_blank"
+                    onClick={sendGoogleEvent}>
                     {result['name']}
                 </a>
             </h4>
@@ -510,20 +511,20 @@ const Result = ({result}) => {
                 <div className="col">
                     <Component result={result} />
                     {'description' in result && result['type'] !== 'Person' &&
-                    <div className="col" >
-                        <p className={`result-p ${truncate ? 'description-truncate' : ''}`} onClick={() => setTruncate(!truncate)} >
-                            <b>Description:</b> {result['description']}
-                        </p>
-                    </div>
+                        <div className="col" >
+                            <p className={`result-p ${truncate ? 'description-truncate' : ''}`} onClick={() => setTruncate(!truncate)} >
+                                <b>Description:</b> {result['description']}
+                            </p>
+                        </div>
                     }
                 </div>
             </Row>
             <a
-                    href={`${dataServiceUrl}/source?${jsonLdParams}`}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className="text-align-start float-start text-decoration-none"
-                    style={{ fontSize: 'x-small' }}>
+                href={`${dataServiceUrl}/source?${jsonLdParams}`}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="text-align-start float-start text-decoration-none"
+                style={{ fontSize: 'x-small' }}>
                 View JSONLD source
             </a>
         </div>

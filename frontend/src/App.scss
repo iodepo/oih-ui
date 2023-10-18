@@ -5,13 +5,13 @@
   // note, this is positioning y based on the width to keep the manta on the page
   background-position-y: -40vw;
   min-height: 100vh;
-//  background-attachment: fixed;
+  //  background-attachment: fixed;
 }
 
 .App {
   min-height: 100vh;
   display: flex;
-  flex-direction:column;
+  flex-direction: column;
   // Undo this to make the front page less scrolly
   .search__container {
     //margin-top: 20vh;
@@ -35,17 +35,17 @@
 #headerLogo {
   width: 60px;
   height: 60px;
-  @extend .d-inline-block, .align-top
+  @extend .d-inline-block, .align-top;
 }
 
 nav.navbar-oih.navbar.navbar-expand-lg.navbar-light {
-   background: #21295c;
+  background: #21295c;
 }
 
 nav .navbar-collapse {
   position: absolute;
   top: 0;
-  background: rgba(0,24,49, 1);
+  background: rgba(0, 24, 49, 1);
   right: -100%; /* pull the menu out of the viewport from right */
   width: 25vw;
   height: 100vh;
@@ -60,7 +60,7 @@ nav .navbar-collapse.show {
 }
 
 a.text-light.menu-text.nav-link {
-    text-align: left;
+  text-align: left;
 }
 
 .close-btn {
@@ -175,7 +175,6 @@ p.result-p.truncate {
 
 .pagination {
   text-transform: capitalize;
-
 }
 
 .container__categories {
@@ -246,7 +245,7 @@ p.result-p.truncate {
   height: fit-content;
   padding: 0.2em 0.5em 0.3em 1.2em;
   top: 0.5em;
-  left: -1.0em;
+  left: -1em;
   margin-right: -1rem;
   background-color: white;
   color: #21295c;
@@ -275,7 +274,7 @@ p.result-p.truncate {
 }
 
 .category-section {
-//  background-color: rgba(0,24,49, 0.8);
+  //  background-color: rgba(0,24,49, 0.8);
   padding: 2em;
   border-radius: 3em;
   /*margin-top: 5em;*/
@@ -284,26 +283,27 @@ p.result-p.truncate {
 }
 
 #result-section {
-  background-color: rgba(0,24,49, 1);
+  background-color: rgba(0, 24, 49, 1);
   padding: 2em;
   color: white;
   opacity: 100%;
   a {
     color: #eee;
-    &:hover, &:visited, &:active {
-      color:#ddd;
+    &:hover,
+    &:visited,
+    &:active {
+      color: #ddd;
       text-decoration: underline;
     }
   }
 }
 
 #ResTabs {
-
   .react-tabs__tab {
     // tighten horizontal spacing on tabs.
     padding: 6px 0;
-    margin-right: .3rem;
-    margin-left: .3rem;
+    margin-right: 0.3rem;
+    margin-left: 0.3rem;
   }
   ul {
     padding-left: 0;
@@ -313,13 +313,13 @@ p.result-p.truncate {
     justify-content: space-evenly;
     flex-wrap: wrap;
   }
-  margin-bottom: calc(-1.0rem + 3px);
+  margin-bottom: calc(-1rem + 3px);
   // give us a bit of overhang to go single line @ 1280 px.
   margin-right: -1.3rem;
-  margin-left: -1.3rem
+  margin-left: -1.3rem;
 }
 
-.footer-bg{
+.footer-bg {
   background: #21295c;
 }
 
@@ -335,13 +335,12 @@ p.result-p.truncate {
   }
 }
 
-
 #resultsPaginate {
   margin-top: 2em;
-  display:flex;
+  display: flex;
   justify-content: center;
   .page-link {
-    background-color: rgba(0,24,49, 1);
+    background-color: rgba(0, 24, 49, 1);
   }
 }
 
@@ -364,13 +363,13 @@ p.result-p.truncate {
 }
 
 .truncate {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: white;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: white;
 }
 
 .truncate a {
-    color: white;
+  color: white;
 }
 
 /* UNDONE, super hacky css to get the map to show up */
