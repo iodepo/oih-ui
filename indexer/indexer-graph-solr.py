@@ -14,8 +14,8 @@ Steps:   1) set your Solr core endpoint variable at the commandline by:
             
          3) python indexer-graph-solr.py
 
-Output:  Records indexed into the Solr core.  Look for the "added resource" link 
-         in the command window, such as:
+Output:  Records indexed into the Solr core.  Look for the "added resource" message 
+         in the command window (which means it successfully indexed into Solr) such as:
          
            ***Processing filename: /home/apps/oih-ui-jmckenna/indexer/data/test/ttt1.json
            added resource https://catalogue.cioos.ca/dataset/00863729-b5a8-4ac6-b73a-523d463f9963.jsonld: schema:Dataset to index
