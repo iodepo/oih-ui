@@ -18,10 +18,16 @@
 <body>
 <noscript>You need to enable JavaScript to run this app.</noscript>
 <script>
+  //we don't want people to visit this page, redirect to the homepage
+  window.location.replace("https://oceaninfohub.org");
+
+  //all what follows is useless as we are redirecting to the homepage
+
   //open first popover available in your page
-  let popover = document.getElementById('popover');
-  popover.style.display = "block";
+  //let popover = document.getElementById('popover');
+  //popover.style.display = "block";
 </script>
+<!--
 <div
         class="oih-popover"
         role="dialog"
@@ -37,6 +43,7 @@
     close this warning
   </a>
 </div>
+-->
 <div id="root"></div>
 </body>
 </html>
