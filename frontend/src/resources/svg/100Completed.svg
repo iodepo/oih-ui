@@ -1,0 +1,25 @@
+<svg width="12" height="21" viewBox="0 0 12 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_62_3873)">
+<rect x="3.05176e-05" y="0.732147" width="12" height="5" fill="#6DC084"/>
+<mask id="path-3-inside-1_62_3873" fill="white">
+<path d="M3.05176e-05 5.73215H12V10.7321H3.05176e-05V5.73215Z"/>
+</mask>
+<path d="M3.05176e-05 5.73215H12V10.7321H3.05176e-05V5.73215Z" fill="#6DC084"/>
+<path d="M3.05176e-05 6.03215H12V5.43215H3.05176e-05V6.03215Z" fill="#F6F8FA" mask="url(#path-3-inside-1_62_3873)"/>
+<mask id="path-5-inside-2_62_3873" fill="white">
+<path d="M3.05176e-05 10.7321H12V15.7321H3.05176e-05V10.7321Z"/>
+</mask>
+<path d="M3.05176e-05 10.7321H12V15.7321H3.05176e-05V10.7321Z" fill="#6DC084"/>
+<path d="M3.05176e-05 11.0321H12V10.4321H3.05176e-05V11.0321Z" fill="#F6F8FA" mask="url(#path-5-inside-2_62_3873)"/>
+<mask id="path-7-inside-3_62_3873" fill="white">
+<path d="M3.05176e-05 15.7321H12V20.7321H3.05176e-05V15.7321Z"/>
+</mask>
+<path d="M3.05176e-05 15.7321H12V20.7321H3.05176e-05V15.7321Z" fill="#6DC084"/>
+<path d="M3.05176e-05 16.0321H12V15.4321H3.05176e-05V16.0321Z" fill="#F6F8FA" mask="url(#path-7-inside-3_62_3873)"/>
+</g>
+<defs>
+<clipPath id="clip0_62_3873">
+<rect x="3.05176e-05" y="0.732147" width="12" height="20" rx="2" fill="white"/>
+</clipPath>
+</defs>
+</svg>

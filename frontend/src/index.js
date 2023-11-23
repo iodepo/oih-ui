@@ -1,16 +1,20 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import App from './config/App';
-import './index.scss';
-import { AppTranslationProvider } from 'TranslationsManager/AppTranslationProvider';
+import React from "react";
+import App from "./config/App";
+import ReactDOM from "react-dom/client";
+import "./index.scss";
+import { AppTranslationProvider } from "ContextManagers/AppTranslationProvider";
+import { AppThemeProvider } from "ContextManagers/AppThemeProvider";
+import CssBaseline from "@mui/material/CssBaseline";
 
-const container = document.getElementById('root');
-const root = createRoot(container);
+const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
   <React.StrictMode>
-    <AppTranslationProvider> <App /></AppTranslationProvider>
-
+    <AppThemeProvider>
+      <CssBaseline />
+      <AppTranslationProvider>
+        <App />
+      </AppTranslationProvider>
+    </AppThemeProvider>
   </React.StrictMode>
 );
-

@@ -1,16 +1,40 @@
 import React from "react";
 import ReactPaginate from "react-paginate";
+import PaginationMUI from "@mui/material/Pagination";
 
 export const ITEMS_PER_PAGE = 10;
 
-export default function Pagination({searchType, resultCount, setPage, page}) {
-    const pageCount = Math.ceil(resultCount / ITEMS_PER_PAGE);
-    const handlePageClick = (event) => {
-        setPage(event.selected);
+export default function Pagination({ searchType, resultCount, setPage, page }) {
+  const pageCount = Math.ceil(resultCount / ITEMS_PER_PAGE);
+  const handlePageClick = (event, value) => {
+    setPage(value - 1);
   };
 
-    return (
-        <div id='resultsPaginate'>
+  return (
+    <PaginationMUI
+      key={`${searchType}-${pageCount}`}
+      siblingCount={4}
+      count={pageCount}
+      shape="rounded"
+      size="large"
+      onChange={handlePageClick}
+      defaultPage={Number(page) + 1}
+      sx={{
+        display: { xs: "none", lg: "flex" },
+        justifyContent: "center",
+        my: 2,
+        "& .MuiPaginationItem-root": {
+          color: "#2B498C",
+          "&.Mui-selected": {
+            background: "#2B498C",
+            color: "white",
+          },
+        },
+      }}
+    />
+  );
+  {
+    /* <div id='resultsPaginate'>
             <ReactPaginate
                 key={`${searchType}-${pageCount}`}
                 breakLabel="..."
@@ -33,6 +57,6 @@ export default function Pagination({searchType, resultCount, setPage, page}) {
                 id='pagination results'
                 initialPage={Number(page)}
                 />
-            </div>
-    )
+            </div> */
+  }
 }

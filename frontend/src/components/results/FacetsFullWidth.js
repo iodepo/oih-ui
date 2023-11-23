@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { fieldTitleFromName } from "../../constants";
-import { useAppTranslation } from "TranslationsManager/context/AppTranslation";
+import { useAppTranslation } from "ContextManagers/context/AppTranslation";
 
 export default function FacetsFullWidth({
   facets,
@@ -30,6 +30,7 @@ export default function FacetsFullWidth({
       <div className="ps-3 pe-3 w-75 mx-auto"></div>
       <div className="row">
         {facets.map((facet, i) => {
+          console.log(facetValues[i]);
           return (
             <div className="col" key={i}>
               <div>
@@ -43,10 +44,12 @@ export default function FacetsFullWidth({
                   defaultValue=""
                 >
                   <option value="">
-                    {translationState.translation[fieldTitleFromName(facet.name)]
-                      ? translationState.translation[
+                    {translationState.translation[
                       fieldTitleFromName(facet.name)
-                      ]
+                    ]
+                      ? translationState.translation[
+                          fieldTitleFromName(facet.name)
+                        ]
                       : fieldTitleFromName(facet.name)}
                   </option>
                   {facet.counts.map((facetCount) => (

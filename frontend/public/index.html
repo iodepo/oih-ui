@@ -1,42 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="OIH" content="OIH Global Search"/>
-  <title>OIH Global Search</title>
-  <style>
-    .oih-popover {
-      margin: auto;
-      width: 100%;
-      padding: 20px;
-      background-color: #012e6a;
-      color: white;
-    }
-  </style>
-</head>
-<body>
-<noscript>You need to enable JavaScript to run this app.</noscript>
-<script>
-  //open first popover available in your page
-  let popover = document.getElementById('popover');
-  popover.style.display = "block";
-</script>
-<div
-        class="oih-popover"
-        role="dialog"
-        id="popover"
-        data-scrollable-element="#scrollable-element">
-  <h1>This is still a beta version.</h1>
-  This page is the beta-version of the search interface for the OIH project proof of concept.<br />
-  Please visit the <a href="https://oceaninfohub.org">project's website</a> for more information.<br />
-  <br />
-  <a
-         href="#"
-         onclick="let popover = document.getElementById('popover');popover.style.display = 'none';">
-    close this warning
-  </a>
-</div>
-<div id="root"></div>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="OIH" content="OIH Global Search" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap"
+      rel="stylesheet"
+    />
+    <title>OIH Global Search</title>
+    <style>
+      .oih-popover {
+        margin: auto;
+        width: 100%;
+        padding: 20px;
+        background-color: #012e6a;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <script>
+      //open first popover available in your page
+      let popover = document.getElementById("popover");
+      popover.style.display = "block";
+    </script>
+    <div
+      class="oih-popover"
+      role="dialog"
+      id="popover"
+      data-scrollable-element="#scrollable-element"
+    >
+      <h1>This is still a beta version.</h1>
+      This page is the beta-version of the search interface for the OIH project
+      proof of concept.<br />
+      Please visit the
+      <a href="https://oceaninfohub.org">project's website</a> for more
+      information.<br />
+      <br />
+      <a
+        href="#"
+        onclick="let popover = document.getElementById('popover');popover.style.display = 'none';"
+      >
+        close this warning
+      </a>
+    </div>
+    <div id="root"></div>
+  </body>
 </html>
