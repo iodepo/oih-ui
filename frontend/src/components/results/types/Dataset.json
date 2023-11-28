@@ -3,6 +3,7 @@
   { "key": "txt_sameAs", "type": ["list", "truncated", "link"] },
   { "key": "txt_license", "type": "list", "label": "License" },
   { "key": "txt_citation", "type": "list", "label": "Related Works" },
+  { "key": "txt_creditText", "type": "list", "label": "Recommended Citation" },
   "txt_version",
   { "key": "txt_keywords", "type": "keywords" },
   {
