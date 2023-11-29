@@ -17,5 +17,6 @@
         "key": "txt_contributor",
         "type": "list",
         "label": "Contributor(s)"
-    }
+    },
+    { "key": "txt_distribution", "type": ["list", "link"] }
 ]
