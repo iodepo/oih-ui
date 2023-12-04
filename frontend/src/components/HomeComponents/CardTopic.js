@@ -21,8 +21,11 @@ const CardTopic = (props) => {
           sx={{
             borderRadius: 4,
             minHeight: { xs: "225px", lg: "200px" },
+            backgroundColor: "#172B4D",
+            border: 2,
+            borderColor: "#40AAD31A",
           }}
-          elevation={6}
+          elevation={0}
         >
           <CardContent>
             <Stack spacing={2} alignItems={"center"}>
@@ -31,7 +34,7 @@ const CardTopic = (props) => {
                 sx={{
                   width: 65,
                   height: 65,
-                  backgroundColor: "rgba(64, 170, 211, 0.2)",
+                  backgroundColor: "#40AAD31A",
                   "& .MuiAvatar-img": {
                     width: 60,
                     height: 60,
@@ -39,13 +42,22 @@ const CardTopic = (props) => {
                 }}
               />
               <Chip
-                sx={{ minWidth: "50px" }}
+                sx={{
+                  minWidth: "50px",
+
+                  backgroundColor: "white",
+                  ".MuiChip-label": {
+                    color: "#172B4D",
+                    fontWeight: 700,
+                  },
+                }}
                 label={formatNumber(counterDocuments)}
               />
               <Typography
                 variant="subtitle1"
                 textAlign={"center"}
                 fontWeight={600}
+                sx={{ color: "white" }}
               >
                 {text}
               </Typography>

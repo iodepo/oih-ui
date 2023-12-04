@@ -70,32 +70,43 @@ export default function TypesCount() {
 
   return (
     <>
-      <Header />
-      <Container maxWidth="lg" sx={{ marginBottom: 6 }}>
-        <Box
-          width={"100%"}
-          sx={{ borderRadius: 2, backgroundColor: "#EAEDF4", marginBottom: 3 }}
-        >
-          <Grid container spacing={2} p={3}>
+      <div id="home">
+        {/*  <Header /> */}
+        <Box sx={{ position: "relative", zIndex: 1 }}>
+          <Container maxWidth="md" sx={{ my: 6 }}>
             <Search />
-            {HOME_PAGE_CATEGORIES.map((cat) => (
-              <Grid item lg={3} xs={6}>
-                <CardTopic
-                  image={cat.icon}
-                  text={translationState.translation[cat.text] ?? cat.id}
-                  counterDocuments={
-                    counts[cat.id] !== undefined
-                      ? formatter.format(counts[cat.id])
-                      : 0
-                  }
-                  onClick={searchByType(cat.id)}
-                />
+          </Container>
+          <Container maxWidth="lg" sx={{ marginBottom: 6 }}>
+            <Box
+              width={"100%"}
+              sx={{
+                borderRadius: 2,
+                backgroundColor: "#13213F",
+                marginBottom: 3,
+              }}
+            >
+              <Grid container spacing={2} p={3}>
+                {/* <Search /> */}
+                {HOME_PAGE_CATEGORIES.map((cat) => (
+                  <Grid item lg={3} xs={6}>
+                    <CardTopic
+                      image={cat.icon}
+                      text={translationState.translation[cat.text] ?? cat.id}
+                      counterDocuments={
+                        counts[cat.id] !== undefined
+                          ? formatter.format(counts[cat.id])
+                          : 0
+                      }
+                      onClick={searchByType(cat.id)}
+                    />
+                  </Grid>
+                ))}
               </Grid>
-            ))}
-          </Grid>
+            </Box>
+          </Container>
+          <Footer />
         </Box>
-      </Container>
-      <Footer />
+      </div>
     </>
   );
 }
