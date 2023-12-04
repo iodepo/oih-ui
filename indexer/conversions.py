@@ -254,7 +254,7 @@ def _parseDate(field, d):
     try:
         dt = isoparse(d)
         return [
-            Att('dt', dt.isoformat(), field),
+            Att('dt', dt.isoformat(timespec='seconds').replace('+00:00', 'Z'), field),
             Att('n', dt.year, field.replace('Date', 'Year')),
         ]
     except ValueError:
