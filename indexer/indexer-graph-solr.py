@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 """
-Purpose: Load a directory of JSON files, that are generated from 
-         the ODIS graph->Solr process       
+Purpose: Load a directory of JSON files, generated from the ODIS graph->Solr 
+         process (mdp2solr.sh), into an existing Solr core.     
 
 Steps:   1) set your Solr core endpoint variable at the commandline by:
             
