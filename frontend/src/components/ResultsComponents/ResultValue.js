@@ -15,7 +15,7 @@ import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
 import CardContent from "@mui/material/CardContent";
 import Icon from "@mui/material/Icon";
-import typeMap from "../results/types";
+import TypesMap from "../configuration/typesMap";
 import Link from "@mui/material/Link";
 import { dataServiceUrl } from "../../config/environment";
 
@@ -30,11 +30,39 @@ const ResultValue = (props) => {
     return url;
   }
 
+  function formatDate(inputDateString) {
+    var inputDate = new Date(inputDateString);
+
+    var months = {
+      0: "January",
+      1: "February",
+      2: "March",
+      3: "April",
+      4: "May",
+      5: "June",
+      6: "July",
+      7: "August",
+      8: "September",
+      9: "October",
+      10: "November",
+      11: "December",
+    };
+
+    var year = inputDate.getFullYear();
+    var monthNumber = inputDate.getMonth();
+    var day = inputDate.getDate();
+
+    var monthName = months[monthNumber];
+
+    var formattedDate = year + " " + monthName + " " + day;
+
+    return formattedDate;
+  }
   var url =
     result["type"] === "Person" || result["type"] === "Organization"
       ? resolveAsUrl(result["id"])
       : result["txt_url"] || resolveAsUrl(result["id"]);
-  const { Component } = typeMap[result["type"]];
+  const { Component } = TypesMap[result["type"]];
   const [truncate, setTruncate] = useState(true);
   const jsonLdParams = new URLSearchParams({ id: result["id"] }).toString();
   const sendGoogleEvent = () => {
@@ -70,7 +98,7 @@ const ResultValue = (props) => {
     <Card
       key={result["id"]}
       sx={{
-        borderRadius: 0,
+        borderRadius: 1,
         border: 1,
         borderColor: "rgba(0, 0, 0, 0.12)",
 
@@ -104,43 +132,32 @@ const ResultValue = (props) => {
 
       <CardContent>
         <Stack spacing={1}>
-          <Link href={url} target="_blank" onClick={sendGoogleEvent}>
+          <Link
+            href={url}
+            underline="hover"
+            target="_blank"
+            onClick={sendGoogleEvent}
+          >
             <Typography sx={{ fontSize: 21, color: "#0F1A31" }} gutterBottom>
               {result["name"]}
             </Typography>
           </Link>
-          <Box>
-            {/* <Stack direction={"row"} spacing={2}>
-              <Typography
-                variant="body2"
-                display={"flex"}
-                alignItems={"center"}
-                sx={{ fontSize: "12px", gap: 1 }}
-              >
-                <CircleIcon
-                  fontSize="small"
-                  sx={{ fontSize: "12px", color: "#2B498C" }}
-                />
-                {topic}
-              </Typography>
 
-              <Typography
-                variant="body2"
-                display={"flex"}
-                alignItems={"center"}
-                sx={{ fontSize: "12px", gap: 1 }}
-              >
-                <CircleIcon
-                  fontSize="small"
-                  sx={{ fontSize: "12px", color: "#40AAD3" }}
-                />
-                {provider}
-              </Typography>
-            </Stack> */}
-          </Box>
           <Component result={result} />
           {"description" in result && result["type"] !== "Person" && (
-            <Typography sx={{ fontSize: "16px" }}>
+            <Typography
+              sx={{
+                fontSize: "16px",
+                ...(truncate && {
+                  display: "-webkit-box",
+                  maxWidth: "100%",
+                  WebkitLineClamp: 4,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }),
+              }}
+              onClick={() => setTruncate(false)}
+            >
               {result["description"]}
             </Typography>
           )}
@@ -192,22 +209,28 @@ const ResultValue = (props) => {
               alignItems={"center"}
               gap={2}
             >
-              {/* <Box display={"flex"} gap={1}>
-                <Typography sx={{ fontSize: "12px", color: "#42526E" }}>
-                  Contributor(s):
-                </Typography>
-                <Typography
-                  sx={{
-                    fontSize: "12px",
-                    color: "#42526E",
-                    bgcolor: "#DFE1E6",
-                    fontWeight: 700,
-                  }}
-                >
-                  SCOR/IGBP
-                </Typography>
-              </Box>
-              Authored on{" " + "23-11-2023"} */}
+              {"txt_contributor" in result && (
+                <Box display={"flex"} gap={1}>
+                  <Typography sx={{ fontSize: "12px", color: "#42526E" }}>
+                    Contributor(s):
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: "12px",
+                      color: "#42526E",
+                      bgcolor: "#DFE1E6",
+                      fontWeight: 700,
+                      padding: "0 4px",
+                      borderRadius: 1,
+                    }}
+                  >
+                    {result["txt_contributor"].join(", ")}
+                  </Typography>
+                </Box>
+              )}
+              {"indexed_ts" in result && (
+                <>Indexed by ODIS on{" " + formatDate(result["indexed_ts"])}</>
+              )}
             </Typography>
             <Button
               startIcon={<CodeOutlinedIcon />}
@@ -219,6 +242,9 @@ const ResultValue = (props) => {
                 backgroundColor: "#EAEDF4",
                 textTransform: "none",
                 color: "#1A2C54",
+                "&:hover": {
+                  color: "#ffffff",
+                },
               }}
               href={`${dataServiceUrl}/source?${jsonLdParams}`}
               target="_blank"

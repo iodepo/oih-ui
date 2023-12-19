@@ -5,6 +5,19 @@ import Button from "@mui/material/Button";
 import LinkMui from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import CircleIcon from "@mui/icons-material/Circle";
+import Box from "@mui/material/Box";
+import Tooltip from "@mui/material/Tooltip";
+import { CATEGORIES } from "../configuration/constants";
+
+const cutWithDots = (sentence, maxLength) => {
+  if (sentence.length > maxLength) {
+    var cutSentence = sentence.slice(0, maxLength) + "...";
+    return cutSentence;
+  } else {
+    return sentence;
+  }
+};
 
 const Keyword = ({ keyword }) => {
   const [truncated, setTruncated] = useState(true);
@@ -15,6 +28,10 @@ const Keyword = ({ keyword }) => {
         maxWidth: truncated ? "12em" : undefined,
         marginRight: 1,
         fontSize: "12px",
+        border: "1px solid #aaa",
+        borderRadius: "4px",
+        background: "transparent",
+        height: "20px",
       }}
       onClick={() => setTruncated(!truncated)}
     />
@@ -43,7 +60,6 @@ const Keywords = ({ result }) => {
       {keywordsTruncated && (
         <Button
           variant="outlined"
-          className="btn-outline-secondary text-light mx-1 badge"
           sx={{
             verticalAlign: "super",
             color: "#7B8FB7",
@@ -68,7 +84,7 @@ const Keywords = ({ result }) => {
 };
 
 const Id = ({ result }) => (
-  <Typography sx={{ color: "black" }}>{result}</Typography>
+  <Typography sx={{ color: "black", fontSize: "12px" }}>{result}</Typography>
 );
 
 const Link = ({ result, Inner = Id }) => (
@@ -76,7 +92,8 @@ const Link = ({ result, Inner = Id }) => (
     href={result}
     rel="noopener noreferrer"
     target="_blank"
-    sx={{ fontSize: "12px" }}
+    sx={{ ".MuiTypography-root": { fontSize: "12px" } }}
+    underline="hover"
   >
     <Inner result={result} />
   </LinkMui>
@@ -86,8 +103,8 @@ const DocumentAttributeList = ({ result, Inner = Id }) => (
   <>
     {result.map((item, i) => (
       <Fragment key={i}>
-        <Inner result={item} />
-        {i != result.length - 1 ? "," : ""}{" "}
+        <Inner result={i != result.length - 1 ? item + "," : item + ""} />
+        {/* {i != result.length - 1 ? "" : ""}{" "} */}
       </Fragment>
     ))}
   </>
@@ -112,12 +129,51 @@ const Truncate = ({ result, Inner = Id }) => {
   );
 };
 
+const Providers = ({ result, Inner = Id, topic }) => {
+  return (
+    <Box sx={{ marginBottom: 1 }}>
+      <Stack direction={"row"} spacing={2}>
+        <Typography
+          variant="body2"
+          display={"flex"}
+          alignItems={"center"}
+          sx={{ fontSize: "10px", gap: 1 }}
+        >
+          <CircleIcon
+            fontSize="small"
+            sx={{ fontSize: "10px", color: "#2B498C" }}
+          />
+          {CATEGORIES.find((t) => t.id === topic).text}
+        </Typography>
+        {result.map((r) => (
+          <Tooltip key={r} title={r} arrow>
+            <Typography
+              variant="body2"
+              component="span"
+              display={"flex"}
+              alignItems={"center"}
+              sx={{ fontSize: "10px", gap: 1 }}
+            >
+              <CircleIcon
+                fontSize="small"
+                sx={{ fontSize: "10px", color: "#40AAD3" }}
+              />
+              <Box sx={{ fontSize: "10px", gap: 1 }}>{cutWithDots(r, 20)}</Box>
+            </Typography>
+          </Tooltip>
+        ))}
+      </Stack>
+    </Box>
+  );
+};
+
 const typeMap = {
   string: Id,
   list: DocumentAttributeList,
   keywords: Keywords,
   link: Link,
   truncated: Truncate,
+  circle: Providers,
 };
 
 // Takes a component ref: a string index into `typeMap`, a function of result => content or (result, inner) => content where inner is a Component, or a list of component refs
@@ -154,7 +210,12 @@ const ResultElem = ({ result, name, children, type = undefined }) => {
       columnGap={1}
       sx={{ fontSize: "12px", display: "flex", marginBottom: 1 }}
     >
-      <b>{children}:</b> <Component result={result[name]} />
+      {type !== "circle" && (
+        <>
+          <b>{children}:</b>{" "}
+        </>
+      )}
+      <Component result={result[name]} topic={result["type"]} />
     </Typography>
   ) : null;
   {

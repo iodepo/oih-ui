@@ -1,5 +1,8 @@
 import React, { useReducer } from "react";
-import { DarkTheme, LightTheme } from "./stores/themes";
+import {
+  SecondaryTheme,
+  PrimaryTheme,
+} from "../components/configuration/themes";
 import reducer from "./reducers/AppThemeReducer";
 import useCookies from "./useCookies";
 import { AppThemeUIStore } from "./context/AppTheme";
@@ -11,10 +14,10 @@ function AppThemeProvider(props) {
   let themeKind;
 
   if (useCookies.getCookie("theme") === "dark") {
-    theme = DarkTheme;
+    theme = SecondaryTheme;
     themeKind = "dark";
   } else {
-    theme = LightTheme;
+    theme = PrimaryTheme;
     themeKind = "light";
   }
 
@@ -27,17 +30,17 @@ function AppThemeProvider(props) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   function setTheme(themeKind) {
-    let theme = DarkTheme;
+    let theme = SecondaryTheme;
 
     switch (themeKind) {
       case "dark":
-        theme = DarkTheme;
+        theme = SecondaryTheme;
         break;
       case "light":
-        theme = LightTheme;
+        theme = PrimaryTheme;
         break;
       default:
-        theme = DarkTheme;
+        theme = SecondaryTheme;
         break;
     }
     useCookies.setCookie("theme", themeKind);

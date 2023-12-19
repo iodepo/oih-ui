@@ -9,7 +9,10 @@ import {
 } from "react-router-dom";
 import useSearchParam from "../useSearchParam";
 
-import { PROMOTED_REGIONS, randomSampleQueries } from "../constants";
+import {
+  PROMOTED_REGIONS,
+  randomSampleQueries,
+} from "./configuration/constants";
 import { SupportedLangugesEnum } from "ContextManagers/AppTranslationProvider";
 import { useAppTranslation } from "ContextManagers/context/AppTranslation";
 import useCookies from "ContextManagers/useCookies";
@@ -29,7 +32,10 @@ import LightbulbOutlinedIcon from "@mui/icons-material/LightbulbOutlined";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import ShareIcon from "@mui/icons-material/Share";
 import LinkMui from "@mui/material/Link";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import Accordion from "@mui/material/Accordion";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AdvancedSearch from "./ResultsComponents/AdvancedSearch";
 
 // Set once, will change for every load, not every key click
 const currentSampleQueries = randomSampleQueries(4);
@@ -133,6 +139,7 @@ const SearchHome = (props) => {
     hrefFor,
   } = props;
 
+  const palette = "custom.homepage.searchBar.";
   return (
     <Grid item container justifyContent={"space-between"} spacing={4}>
       <Grid item xs={12} lg={12}>
@@ -147,20 +154,22 @@ const SearchHome = (props) => {
             <Box>
               <Grid container justifyContent={"space-between"}>
                 <Grid item xs={6} lg={12}>
-                  <InputLabel
-                    disabled
-                    id="demo-simple-select-label"
-                  ></InputLabel>
+                  <InputLabel disabled></InputLabel>
                   <Select
                     startAdornment={
-                      <PublicIcon sx={{ marginRight: 1, color: "#1A2C54" }} />
+                      <PublicIcon
+                        sx={{
+                          marginRight: 1,
+                          color: palette + "iconsColor",
+                        }}
+                      />
                     }
                     defaultValue={"Global"}
                     name="searchRegion"
                     onChange={(e) => setRegion(e.target.value)}
                     sx={{
-                      backgroundColor: "#FFFFFF",
-                      color: "#1A2C54",
+                      backgroundColor: palette + "bgColor",
+                      color: palette + "iconsColor",
                       fontWeight: 600,
                       borderBottomRightRadius: 0,
                       borderTopRightRadius: 0,
@@ -168,7 +177,7 @@ const SearchHome = (props) => {
                         borderRight: "none",
                       },
                       ".MuiSelect-icon": {
-                        color: "#1A2C54",
+                        color: palette + "iconsColor",
                       },
                     }}
                   >
@@ -181,77 +190,28 @@ const SearchHome = (props) => {
                     })}
                   </Select>
                 </Grid>
-                {/* <Grid
-                  item
-                  xs={5}
-                  lg={0}
-                  justifyContent={"end"}
-                  display={{ xs: "flex", lg: "none" }}
-                >
-                  <Select
-                    defaultValue={
-                      useCookies.getCookie("language")
-                        ? useCookies.getCookie("language")
-                        : SupportedLangugesEnum.En
-                    }
-                    name="languageChoice"
-                    onChange={(e) => changeTranslation(e.target.value)}
-                    sx={{
-                      backgroundColor: "#FFFFFF",
-                      color: "black",
-                      fontWeight: 600,
-                      borderRadius: 0,
-                    }}
-                  >
-                    <MenuItem
-                      key={SupportedLangugesEnum.En}
-                      value={SupportedLangugesEnum.En}
-                    >
-                      {SupportedLangugesEnum.En}
-                    </MenuItem>
-                    <MenuItem
-                      key={SupportedLangugesEnum.Es}
-                      value={SupportedLangugesEnum.Es}
-                    >
-                      {SupportedLangugesEnum.Es}
-                    </MenuItem>
-                    <MenuItem
-                      key={SupportedLangugesEnum.Ru}
-                      value={SupportedLangugesEnum.Ru}
-                    >
-                      {SupportedLangugesEnum.Ru}
-                    </MenuItem>
-                    <MenuItem
-                      key={SupportedLangugesEnum.Fr}
-                      value={SupportedLangugesEnum.Fr}
-                    >
-                      {SupportedLangugesEnum.Fr}
-                    </MenuItem>
-                  </Select>
-                </Grid> */}
               </Grid>
             </Box>
 
             <TextField
               fullWidth
               sx={{
-                backgroundColor: "#FFFFFF",
+                backgroundColor: palette + "bgColor",
                 "& .MuiFormLabel-root": {
                   fontSize: { xs: "14px", lg: "20px" },
                 },
-                borderBottomLeftRadius: 0,
-                borderTopLeftRadius: 0,
-                borderBottomRightRadius: 1,
-                borderTopRightRadius: 1,
               }}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <SearchIcon sx={{ color: "#BDC7DB" }} />
+                    <SearchIcon sx={{ color: palette + "searchIcon" }} />
                   </InputAdornment>
                 ),
                 style: {
-                  borderRadius: 1,
+                  borderBottomLeftRadius: 0,
+                  borderTopLeftRadius: 0,
+                  borderBottomRightRadius: 4,
+                  borderTopRightRadius: 4,
                 },
               }}
               placeholder={placeholder()}
@@ -267,7 +227,7 @@ const SearchHome = (props) => {
             sx={{
               borderRadius: { xs: 2, lg: 1 },
               width: { xs: "100%", lg: "auto" },
-              backgroundColor: "#40AAD3",
+              backgroundColor: palette + "bgColorButton",
               textTransform: "none",
             }}
             onClick={() => {
@@ -297,7 +257,10 @@ const SearchHome = (props) => {
         {currentSampleQueries.map((query, ix) => (
           <LinkMui
             key={ix}
-            sx={{ color: "white", textDecorationColor: "white" }}
+            sx={{
+              color: palette + "colorLink",
+              textDecorationColor: palette + "colorLink",
+            }}
             // Touch up the internal state to match the navigation
             onClick={(e) => setSearchQuery(query)}
             // do the navigation
@@ -325,13 +288,13 @@ const SearchHome = (props) => {
           name="languageChoice"
           onChange={(e) => changeTranslation(e.target.value)}
           sx={{
-            backgroundColor: "#FFFFFF",
-            color: "black",
+            backgroundColor: palette + "bgColor",
+            color: palette + "iconsColor",
             fontWeight: 600,
             borderRadius: 0,
             height: "34px",
             ".MuiSelect-icon": {
-              color: "#1A2C54",
+              color: palette + "iconsColor",
             },
           }}
         >
@@ -378,11 +341,19 @@ const SearchResult = (props) => {
     changeTranslation,
     url,
   } = props;
+  const [openAdvancedSearch, setOpenAdvancedSearch] = useState(false);
+
+  const palette = "custom.resultPage.searchBar.";
   return (
     <>
       <Container
         maxWidth="lg"
-        sx={{ background: { xs: "#1A2C54", lg: "none" } }}
+        sx={{
+          backgroundColor: {
+            xs: palette + "bgColorBoxMobile",
+            lg: "transparent",
+          },
+        }}
       >
         <Grid container spacing={2} mt={6}>
           <Grid item container justifyContent={"space-between"} spacing={4}>
@@ -394,83 +365,124 @@ const SearchResult = (props) => {
                   gap: { xs: 1, lg: 1 },
                 }}
               >
-                <Box>
-                  <Grid container justifyContent={"space-between"}>
-                    <Grid item xs={12} lg={12}>
-                      <InputLabel disabled></InputLabel>
-                      <Select
-                        startAdornment={
-                          <PublicIcon
-                            sx={{ marginRight: 1, color: "#1A2C54" }}
-                          />
-                        }
-                        defaultValue={"Global"}
-                        fullWidth
-                        sx={{
-                          backgroundColor: { xs: "transparent", lg: "#e2e6e6" },
-                          color: { xs: "white", lg: "black" },
-                          fontWeight: 600,
-                          borderRadius: 0,
-                          ".MuiOutlinedInput-notchedOutline": {
-                            xs: { border: "none" },
-                          },
-                          ".MuiSelect-icon": {
-                            color: { xs: "white", lg: "black" },
-                          },
-                        }}
-                        onChange={(e) => setRegion(e.target.value)}
-                      >
-                        {Object.entries(PROMOTED_REGIONS).map(
-                          ([region, title]) => {
-                            return (
-                              <MenuItem key={region} value={region}>
-                                {translationState.translation[region]}
-                              </MenuItem>
-                            );
+                <Box
+                  display="flex"
+                  width={"100%"}
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", lg: "row" },
+                    gap: { xs: 1, lg: 0 },
+                  }}
+                >
+                  <Box>
+                    <Grid container justifyContent={"space-between"}>
+                      <Grid item xs={6} lg={12}>
+                        <InputLabel disabled></InputLabel>
+                        <Select
+                          startAdornment={
+                            <PublicIcon
+                              sx={{
+                                marginRight: 1,
+                                color: {
+                                  xs: palette + "iconsColorMobile",
+                                  lg: palette + "iconsColorDesktop",
+                                },
+                              }}
+                            />
                           }
-                        )}
-                      </Select>
+                          defaultValue={"Global"}
+                          fullWidth
+                          sx={{
+                            backgroundColor: {
+                              xs: "transparent",
+                              lg: palette + "bgColorSelectDesktop",
+                            },
+                            color: {
+                              xs: palette + "iconsColorMobile",
+                              lg: palette + "iconsColorDesktop",
+                            },
+                            fontWeight: 600,
+                            borderBottomRightRadius: 0,
+                            borderTopRightRadius: 0,
+                            ".MuiOutlinedInput-notchedOutline": {
+                              borderRight: { lg: "none" },
+                            },
+                            ".MuiSelect-icon": {
+                              color: {
+                                xs: palette + "iconsColorMobile",
+                                lg: palette + "iconsColorDesktop",
+                              },
+                            },
+                          }}
+                          onChange={(e) => setRegion(e.target.value)}
+                        >
+                          {Object.entries(PROMOTED_REGIONS).map(
+                            ([region, title]) => {
+                              return (
+                                <MenuItem key={region} value={region}>
+                                  {translationState.translation[region]}
+                                </MenuItem>
+                              );
+                            }
+                          )}
+                        </Select>
+                      </Grid>
                     </Grid>
-                  </Grid>
+                  </Box>
+                  <TextField
+                    fullWidth
+                    sx={{
+                      backgroundColor: {
+                        xs: palette + "bgColorTextfieldMobile",
+                        lg: palette + "bgColorSelectDesktop",
+                      },
+                      "& .MuiFormLabel-root": {
+                        fontSize: { xs: "14px", lg: "16px" },
+                        color: {
+                          xs: palette + "colorTextfieldMobile",
+                          lg: palette + "colorTextfieldDesktop",
+                        },
+                      },
+                      ".MuiOutlinedInput-notchedOutline": {
+                        /*   xs: { border: "none" }, */
+                      },
+                    }}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <SearchIcon
+                            sx={{
+                              color: {
+                                xs: palette + "iconsColorMobile",
+                                lg: palette + "searchIconDesktop",
+                              },
+                            }}
+                          />
+                        </InputAdornment>
+                      ),
+                      style: {
+                        borderBottomLeftRadius: 0,
+                        borderTopLeftRadius: 0,
+                        borderBottomRightRadius: 4,
+                        borderTopRightRadius: 4,
+                      },
+                    }}
+                    placeholder={placeholder()}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    name="search"
+                  />
                 </Box>
 
-                <TextField
-                  fullWidth
-                  sx={{
-                    backgroundColor: { xs: "#13213F", lg: "#e2e6e6" },
-                    "& .MuiFormLabel-root": {
-                      fontSize: { xs: "14px", lg: "20px" },
-                      color: "#7B8FB7",
-                    },
-                    ".MuiOutlinedInput-notchedOutline": {
-                      xs: { border: "none" },
-                    },
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <SearchIcon
-                          sx={{ color: { xs: "white", lg: "#7B8FB7" } }}
-                        />
-                      </InputAdornment>
-                    ),
-                    style: {
-                      borderRadius: 0,
-                    },
-                  }}
-                  label="Search across our Global partners"
-                  placeholder={placeholder()}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  name="search"
-                />
                 <Typography
                   variant="body2"
                   alignItems={"start"}
                   display={{ xs: "flex", lg: "none" }}
                   sx={{ color: "#BDC7DB", my: 2 }}
                 >
-                  <LightbulbOutlinedIcon sx={{ color: "#F8BB27" }} />
+                  <LightbulbOutlinedIcon
+                    sx={{ color: palette + "iconProtip" }}
+                  />
                   ProTip! Enhance your search precision with AND, OR, and XOR
                   operators, and filter results using 'contains' and 'not
                   contains.' Specify 'all' or 'any' to fine-tune your query.
@@ -481,8 +493,9 @@ const SearchResult = (props) => {
                   sx={{
                     borderRadius: 2,
                     width: { xs: "100%", lg: "15%" },
-                    backgroundColor: "#40AAD3",
+                    backgroundColor: palette + "bgColorButton",
                     textTransform: "none",
+                    height: "56px",
                   }}
                   onClick={() => {
                     sendGoogleEvent();
@@ -496,12 +509,20 @@ const SearchResult = (props) => {
                   disableElevation
                   sx={{
                     borderRadius: 2,
-                    color: { xs: "white", lg: "#2B498C" },
+                    color: {
+                      xs: palette + "colorTextfieldMobile",
+                      lg: palette + "colorTextfieldDesktop",
+                    },
                     marginLeft: 2,
                     textTransform: "none",
+                    fontSize: "12px",
+                    whiteSpace: "noWrap",
+                    width: "20%",
+                    padding: 0,
                   }}
+                  onClick={() => setOpenAdvancedSearch(!openAdvancedSearch)}
                 >
-                  Advanced
+                  Show Advanced
                 </Button>
               </Box>
             </Grid>
@@ -514,22 +535,39 @@ const SearchResult = (props) => {
               justifyContent={{ xs: "space-between", lg: "end" }}
               sx={{ gap: 1 }}
             >
-              <ShareIcon sx={{ color: { xs: "white", lg: "#1A2C54" } }} />
+              <ShareIcon
+                sx={{
+                  color: {
+                    xs: palette + "colorTextfieldMobile",
+                    lg: palette + "colorTextfieldDesktop",
+                  },
+                }}
+              />
               <Box display={"flex"} alignItems={"center"} gap={2}>
                 <Select
                   startAdornment={<FileDownloadIcon />}
                   defaultValue="Export"
                   sx={{
-                    backgroundColor: { xs: "transparent", lg: "#DEE2ED" },
-                    color: { xs: "white", lg: "#1A2C54" },
+                    backgroundColor: {
+                      xs: "transparent",
+                      lg: palette + "bgExportButtonDesktop",
+                    },
+                    color: {
+                      xs: palette + "iconsColorMobile",
+                      lg: palette + "iconsColorDesktop",
+                    },
                     fontWeight: 700,
                     borderRadius: 1,
+                    height: "34px",
                     ".MuiOutlinedInput-notchedOutline": {
-                      xs: { borderColor: "white" },
-                      lg: { borderColor: "#BDC7DB" },
+                      xs: { borderColor: palette + "borderColorSelectMobile" },
+                      lg: { borderColor: palette + "borderColorSelectDesktop" },
                     },
                     ".MuiSelect-icon": {
-                      color: { xs: "white", lg: "#1A2C54" },
+                      color: {
+                        xs: palette + "iconsColorMobile",
+                        lg: palette + "iconsColorDesktop",
+                      },
                     },
                     marginLeft: { xs: "120px", lg: "90px" },
                   }}
@@ -546,16 +584,26 @@ const SearchResult = (props) => {
                   name="languageChoice"
                   onChange={(e) => changeTranslation(e.target.value)}
                   sx={{
-                    backgroundColor: { xs: "transparent", lg: "#FFFFFF" },
-                    color: { xs: "white", lg: "#1A2C54" },
+                    backgroundColor: {
+                      xs: "transparent",
+                      lg: palette + "bgColorSelectDesktop",
+                    },
+                    color: {
+                      xs: palette + "iconsColorMobile",
+                      lg: palette + "iconsColorDesktop",
+                    },
                     fontWeight: 600,
                     borderRadius: 1,
+                    height: "34px",
                     ".MuiOutlinedInput-notchedOutline": {
-                      xs: { borderColor: "white" },
-                      lg: { borderColor: "#BDC7DB" },
+                      xs: { borderColor: palette + "borderColorSelectMobile" },
+                      lg: { borderColor: palette + "borderColorSelectDesktop" },
                     },
                     ".MuiSelect-icon": {
-                      color: { xs: "white", lg: "#1A2C54" },
+                      color: {
+                        xs: palette + "iconsColorMobile",
+                        lg: palette + "iconsColorDesktop",
+                      },
                     },
                   }}
                 >
@@ -587,57 +635,24 @@ const SearchResult = (props) => {
               </Box>
             </Grid>
           </Grid>
-          <Grid item xs={12} lg={7}>
-            <Typography
-              variant="body2"
-              alignItems={"start"}
-              display={{ xs: "none", lg: "flex" }}
-              sx={{ color: "#BDC7DB" }}
+          <Grid item lg={12}>
+            <Accordion
+              expanded={openAdvancedSearch}
+              onChange={(e) => e.preventDefault}
+              elevation={0}
             >
-              <LightbulbOutlinedIcon sx={{ color: "#F8BB27" }} />
-              ProTip! Enhance your search precision with AND, OR, and XOR
-              operators, and filter results using 'contains' and 'not contains.'
-              Specify 'all' or 'any' to fine-tune your query.
-            </Typography>
-          </Grid>
-          <Grid item lg={12} />
-          <Grid
-            item
-            container
-            columnGap={2}
-            lg={6}
-            display={{ xs: "none", lg: "flex" }}
-          >
-            <Select
-              defaultValue="All"
-              sx={{
-                color: "black",
-                fontWeight: 600,
-                borderRadius: 1,
-              }}
-            >
-              <MenuItem value="All">All</MenuItem>
-            </Select>
-            <Select
-              defaultValue="Operator"
-              sx={{
-                color: "black",
-                fontWeight: 600,
-                borderRadius: 1,
-              }}
-            >
-              <MenuItem value="Operator">Operator</MenuItem>
-            </Select>
-            <Select
-              defaultValue="Booleans"
-              sx={{
-                color: "black",
-                fontWeight: 600,
-                borderRadius: 1,
-              }}
-            >
-              <MenuItem value="Booleans">Booleans</MenuItem>
-            </Select>
+              <AccordionSummary
+                aria-controls="panel1d-content"
+                id="panel1d-header"
+                sx={{ display: "none" }}
+              ></AccordionSummary>
+              <AccordionDetails>
+                <AdvancedSearch
+                  setSearchQuery={setSearchQuery}
+                  searchQuery={searchQuery}
+                />
+              </AccordionDetails>
+            </Accordion>
           </Grid>
         </Grid>
       </Container>

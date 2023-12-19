@@ -3,6 +3,7 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 export default function Footer() {
+  const palette = "custom.homepage.footer.";
   return (
     <Container
       maxWidth="md"
@@ -11,7 +12,11 @@ export default function Footer() {
       }}
     >
       <Stack spacing={3} alignItems={"center"}>
-        <Typography variant="body1" align="center" sx={{ color: "white" }}>
+        <Typography
+          variant="body1"
+          align="center"
+          sx={{ color: palette + "labelColor" }}
+        >
           Lorem ipsum dolor sit amet consectetur. Elementum blandit tincidunt
           sed sit faucibus pellentesque arcu turpis odio. Tempor aliquam
           fermentum at dolor. Aliquam leo blandit sem turpis enim.
@@ -19,7 +24,11 @@ export default function Footer() {
         <Button
           variant="contained"
           disableElevation
-          sx={{ width: 200, backgroundColor: "white", color: "#1A2C54" }}
+          sx={{
+            width: 200,
+            backgroundColor: palette + "bgColorButton",
+            color: palette + "labelColorButton",
+          }}
         >
           Discover more
         </Button>

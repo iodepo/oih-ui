@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { dataServiceUrl } from "../../config/environment";
 import { useNavigate } from "react-router-dom";
 import useSearchParam from "../../useSearchParam";
-import { regionBoundsMap, HOME_PAGE_CATEGORIES } from "../../constants";
+import { regionBoundsMap, CATEGORIES } from "../configuration/constants";
 import { useAppTranslation } from "ContextManagers/context/AppTranslation";
 import Header from "./Header";
 import Container from "@mui/material/Container";
@@ -68,6 +68,7 @@ export default function TypesCount() {
   const searchByType = (type) => (event) =>
     navigate(`/results/${type}?${region ? "region=" + region : ""}`);
 
+  const palette = "custom.homepage.tabs.";
   return (
     <>
       <div id="home">
@@ -81,13 +82,13 @@ export default function TypesCount() {
               width={"100%"}
               sx={{
                 borderRadius: 2,
-                backgroundColor: "#13213F",
+                backgroundColor: palette + "bgColorBox",
                 marginBottom: 3,
               }}
             >
               <Grid container spacing={2} p={3}>
                 {/* <Search /> */}
-                {HOME_PAGE_CATEGORIES.map((cat) => (
+                {CATEGORIES.map((cat) => (
                   <Grid item lg={3} xs={6}>
                     <CardTopic
                       image={cat.icon}

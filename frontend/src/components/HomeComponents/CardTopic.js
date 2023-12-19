@@ -13,7 +13,7 @@ const CardTopic = (props) => {
   function formatNumber(num) {
     return num.toString();
   }
-
+  const palette = "custom.homepage.tabs.cards.";
   return (
     <>
       <CardActionArea onClick={onClick}>
@@ -21,9 +21,9 @@ const CardTopic = (props) => {
           sx={{
             borderRadius: 4,
             minHeight: { xs: "225px", lg: "200px" },
-            backgroundColor: "#172B4D",
+            backgroundColor: palette + "bgColor",
             border: 2,
-            borderColor: "#40AAD31A",
+            borderColor: palette + "borderColor",
           }}
           elevation={0}
         >
@@ -34,7 +34,7 @@ const CardTopic = (props) => {
                 sx={{
                   width: 65,
                   height: 65,
-                  backgroundColor: "#40AAD31A",
+                  backgroundColor: palette + "bgColorAvatar",
                   "& .MuiAvatar-img": {
                     width: 60,
                     height: 60,
@@ -45,9 +45,9 @@ const CardTopic = (props) => {
                 sx={{
                   minWidth: "50px",
 
-                  backgroundColor: "white",
+                  backgroundColor: palette + "bgColorChip",
                   ".MuiChip-label": {
-                    color: "#172B4D",
+                    color: palette + "bgColor",
                     fontWeight: 700,
                   },
                 }}
@@ -57,7 +57,7 @@ const CardTopic = (props) => {
                 variant="subtitle1"
                 textAlign={"center"}
                 fontWeight={600}
-                sx={{ color: "white" }}
+                sx={{ color: palette + "labelColor" }}
               >
                 {text}
               </Typography>

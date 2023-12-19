@@ -14,6 +14,7 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import React, { useState } from "react";
 import IconButton from "@mui/material/IconButton";
 import Chip from "@mui/material/Chip";
+import Tooltip from "@mui/material/Tooltip";
 
 const GenericFacet = (props) => {
   const { facet, i, title, setValue, facetSearch, clear } = props;
@@ -35,13 +36,14 @@ const GenericFacet = (props) => {
     setNumberToShow((prev) => prev + 5);
   };
 
+  const palette = "custom.resultPage.filters.";
   return (
     <>
       <Toolbar
         disableGutters
         sx={{
           fontWeight: 700,
-          color: "#7B8FB7",
+          color: palette + "categoryColor",
           justifyContent: "space-between",
         }}
       >
@@ -51,12 +53,14 @@ const GenericFacet = (props) => {
       <Box>
         <TextField
           fullWidth
+          size="small"
           sx={{
             backgroundColor: "#ffffff",
             "& .MuiFormLabel-root": {
               fontSize: "12px",
-              color: "#7B8FB7",
+              color: palette + "categoryColor",
             },
+            borderRadius: 1,
           }}
           onChange={(e) => handleInputChange(e.target.value, facet.counts)}
           InputProps={{
@@ -80,34 +84,57 @@ const GenericFacet = (props) => {
 
             return (
               <ListItem key={facetCount.name} disablePadding>
-                <ListItemButton role={undefined} dense>
-                  <ListItemIcon>
-                    <Checkbox
-                      edge="start"
-                      tabIndex={-1}
-                      onChange={(e) => {
-                        debugger;
-                        if (!e.target.checked) {
-                          clear();
-                        } else {
-                          setValue(i, facetCount.name);
-                          facetSearch(facet.name, facetCount.name);
-                        }
+                <Tooltip
+                  arrow
+                  placement="right"
+                  title={facetCount.name}
+                  sx={{
+                    display: facetCount.name.length < 15 ? "none" : "flex",
+                  }}
+                >
+                  <ListItemButton role={undefined} dense>
+                    <ListItemIcon sx={{ minWidth: 0 }}>
+                      <Checkbox
+                        edge="start"
+                        tabIndex={-1}
+                        onChange={(e) => {
+                          debugger;
+                          if (!e.target.checked) {
+                            clear();
+                          } else {
+                            setValue(i, facetCount.name);
+                            facetSearch(facet.name, facetCount.name);
+                          }
+                        }}
+                        disableRipple
+                        inputProps={{ "aria-labelledby": labelId }}
+                      />
+                    </ListItemIcon>
+                    <ListItemText
+                      primaryTypographyProps={{
+                        noWrap: true,
+                        variant: "subtitle2",
                       }}
-                      disableRipple
-                      inputProps={{ "aria-labelledby": labelId }}
+                      id={labelId}
+                      className={facet.name}
+                      sx={{ fontSize: "12px", marginRight: "10px" }}
+                      primary={facetCount.name}
                     />
-                  </ListItemIcon>
-                  <ListItemText
-                    id={labelId}
-                    className={facet.name}
-                    primary={facetCount.name}
-                  />
-                  <Chip
-                    sx={{ minWidth: "60px", fontSize: "12px" }}
-                    label={facetCount.count}
-                  />
-                </ListItemButton>
+                    <Chip
+                      sx={{
+                        background: palette + "bgColorChip",
+                        height: "20px",
+                        fontSize: "12px",
+                        borderRadius: "12px",
+                        ".MuiChip-label": {
+                          padding: "5px",
+                          color: palette + "labelChipColor",
+                        },
+                      }}
+                      label={facetCount.count}
+                    />
+                  </ListItemButton>
+                </Tooltip>
               </ListItem>
             );
           })}
@@ -122,11 +149,11 @@ const GenericFacet = (props) => {
           <IconButton onClick={handleShowMoreClick}>
             <AddCircleOutlineOutlinedIcon
               sx={{
-                color: "#7B8FB7",
+                color: palette + "categoryColor",
               }}
             />
           </IconButton>
-          More Keywords
+          Add more
         </Toolbar>
       )}
     </>

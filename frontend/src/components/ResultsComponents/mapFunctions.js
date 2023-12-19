@@ -1,5 +1,5 @@
-import { DEFAULT_QUERY_BOUNDS } from "constants";
-import { regionBoundsMap } from "constants";
+import { DEFAULT_QUERY_BOUNDS } from "../configuration/constants";
+import { regionBoundsMap } from "../configuration/constants";
 
 const expandMapBounds = ({ _sw, _ne }) => {
   _sw = { ..._sw };

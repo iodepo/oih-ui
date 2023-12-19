@@ -12,8 +12,8 @@ import {
   regionBoundsMap,
   INITIAL_BOUNDS,
   DEFAULT_QUERY_BOUNDS,
-  tabs,
-} from "../../constants";
+  CATEGORIES,
+} from "../configuration/constants";
 import throttle from "lodash/throttle";
 
 import ReMap from "../map/ReMap";
@@ -21,7 +21,7 @@ import Pagination, { ITEMS_PER_PAGE } from "../results/Pagination";
 import { Popup } from "react-map-gl";
 import FacetsFullWidth from "../results/FacetsFullWidth";
 
-import typeMap from "../results/types";
+import typeMap from "../configuration/typesMap";
 import { useAppTranslation } from "ContextManagers/context/AppTranslation";
 import Search from "components/Search";
 import Box from "@mui/material/Box";
@@ -141,7 +141,6 @@ export default function Results() {
     if (showMap) {
       mapSearch(mapBounds, page);
     } else {
-      debugger;
       let URI = `${dataServiceUrl}/search?`;
       const params = new URLSearchParams({
         document_type: searchType,
@@ -190,7 +189,6 @@ export default function Results() {
   }, [searchText, searchType, facetQuery, showMap, mapBounds, region, page]);
 
   const facetSearch = (name, value) => {
-    debugger;
     //const selectedIndex = event.target.selectedIndex;
     const clickedFacetQuery = new URLSearchParams({
       facetType: name,
@@ -379,6 +377,7 @@ export default function Results() {
 
   const { zoom = 0 } = viewport;
 
+  const paletteFilter = "custom.resultPage.filters.";
   return (
     <>
       <Search />
@@ -407,7 +406,7 @@ export default function Results() {
               <AccordionDetails>
                 <FilterBy
                   counts={counts}
-                  tabList={tabs}
+                  tabList={CATEGORIES}
                   searchType={searchType}
                   resetDefaultSearchUrl={resetDefaultSearchUrl}
                   clearFacetQuery={clearFacetQuery}
@@ -432,10 +431,10 @@ export default function Results() {
                 variant="outlined"
                 startIcon={<ClearIcon />}
                 sx={{
-                  color: "#7B8FB7",
-                  backgroundColor: "#F6F8FA",
+                  color: paletteFilter + "categoryColor",
+                  backgroundColor: paletteFilter + "categorySelectedBgColor",
                   "&.MuiButton-outlined": {
-                    borderColor: "#BDC7DB",
+                    borderColor: paletteFilter + "borderColorFilterMobile",
                   },
                 }}
                 endIcon={
@@ -461,9 +460,9 @@ export default function Results() {
                 startIcon={<FilterListIcon />}
                 onClick={() => setOpenDialog(true)}
                 sx={{
-                  color: "#7B8FB7",
+                  color: paletteFilter + "categoryColor",
                   "&.MuiButton-outlined": {
-                    borderColor: "#BDC7DB",
+                    borderColor: paletteFilter + "borderColorFilterMobile",
                   },
                 }}
               >
@@ -491,7 +490,7 @@ export default function Results() {
                 <DialogContent>
                   <FilterBy
                     counts={counts}
-                    tabList={tabs}
+                    tabList={CATEGORIES}
                     searchType={searchType}
                     resetDefaultSearchUrl={resetDefaultSearchUrl}
                     clearFacetQuery={clearFacetQuery}
@@ -511,10 +510,10 @@ export default function Results() {
                 </DialogActions> */}
               </Dialog>
               <IconButton
-                aria-label="delete"
+                aria-label="filterListIcon"
                 sx={{
                   border: 1,
-                  borderColor: "#BDC7DB",
+                  borderColor: paletteFilter + "borderColorFilterMobile",
                   borderRadius: 1,
                   maxHeight: "36px",
                 }}
@@ -530,7 +529,10 @@ export default function Results() {
                 justifyContent={"space-between"}
                 alignItems={"center"}
               >
-                <Typography variant="subtitle2" sx={{ color: "#7B8FB7" }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{ color: paletteFilter + "categoryColor" }}
+                >
                   <b>{resultCount || 0}</b>{" "}
                   {translationState.translation["Total results found"]}{" "}
                 </Typography>
@@ -549,7 +551,6 @@ export default function Results() {
                     }
                     fullWidth
                     sx={{
-                      backgroundColor: "#FFFFFF",
                       color: "black",
                       fontWeight: 600,
                       fontSize: "12px",
@@ -575,7 +576,7 @@ export default function Results() {
                 borderRadius: 1,
                 fontWeight: 700,
                 textTransform: "none",
-                color: "#1A2C54",
+                color: "black",
               }}
             >
               Show more
@@ -589,191 +590,6 @@ export default function Results() {
           </Grid>
         </Grid>
       </Container>
-      {/* <div id="result-container">
-        <div>
-          <ResultTabs
-            counts={counts}
-            tabList={tabs}
-            searchType={searchType}
-            resetDefaultSearchUrl={resetDefaultSearchUrl}
-            clearFacetQuery={clearFacetQuery}
-          />
-          <div id="result-section">
-            <div>
-              {facets.length > 0 && (
-                <FacetsFullWidth
-                  facets={facets}
-                  clearFacetQuery={clearFacetQuery}
-                  facetSearch={facetSearch}
-                  facetValues={facetValues}
-                  setFacetFacetValues={setFacetFacetValues}
-                />
-              )}
-            </div>
-
-            <div className="row mx-auto">
-              <div className="col-12 container mb-3">
-                <h6 className="primary-color text-start text-light ps-5 pt-3">
-                  {" "}
-                  {translationState.translation["Total results found"]}{" "}
-                  {resultCount || 0}
-                </h6>
-              </div>
-              <div>
-                <div style={{ minHeight: "500px" }}>
-                  {showMap && (
-                    <div className="">
-                      <div className="row">
-                        <div className="container col-6">
-                          <ReMap
-                            externalLayers={layers}
-                            bounds={initial_bounds()}
-                            handleBoundsChange={updateMapBounds}
-                            layersState={[true]}
-                            onHover={(e) => {
-                              if (!selectHold) {
-                                maybe_set_selected_element(e.features);
-                                setMousePos(e.lngLat);
-                              }
-                            }}
-                            onClick={(e) => {
-                              if (selectHold) {
-                                setMousePos(e.lngLat);
-                                const selected = maybe_set_selected_element(
-                                  e.features
-                                );
-                                setSelectHold(Boolean(selected));
-                              } else if (selectedElem) {
-                                setSelectHold(true);
-                              }
-                            }}
-                            popup={tooltip}
-                            selectedId={selectedElem?.properties?.id}
-                          />
-                          <div>
-                            {translationState.translation["Note"]} <br />
-                            {translationState.translation["Note2"]} <br />
-                            <span>
-                              {zoom <= 3 &&
-                                translationState.translation["Zoom"]}
-                            </span>
-                            <br />
-                          </div>
-                        </div>
-                        <div className="container col-3">{detail}</div>
-                      </div>
-
-                      <hr />
-                    </div>
-                  )}
-                  <div className="container">
-                    <ResultList results={results} />
-                    <Pagination
-                      searchType={searchType}
-                      resultCount={resultCount}
-                      setPage={setPage}
-                      page={page}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div> */}
     </>
   );
 }
-
-const ResultList = ({ results }) =>
-  results.map((result) => {
-    return <Result result={result} key={result["id"]} />;
-  });
-
-const Result = ({ result }) => {
-  var url =
-    result["type"] === "Person" || result["type"] === "Organization"
-      ? resolveAsUrl(result["id"])
-      : result["txt_url"] || resolveAsUrl(result["id"]);
-  const { Component } = typeMap[result["type"]];
-  const [truncate, setTruncate] = useState(true);
-  const jsonLdParams = new URLSearchParams({ id: result["id"] }).toString();
-  const sendGoogleEvent = () => {
-    gtag("config", "G-MQDK6BB0YQ");
-    gtag("event", "click_on_result", {
-      oih_result_target: url,
-    });
-
-    /*
-        //GA4 debug code
-        const measurement_id = `G-MQDK6BB0YQ`;
-        const api_secret = `dtIVKr8XQHSKJ0FrI4EkDQ`;
-
-        fetch(`https://www.google-analytics.com/mp/collect?measurement_id=${measurement_id}&api_secret=${api_secret}`, {
-            method: "POST",
-            body: JSON.stringify({
-                client_id: 'arno.clientId',
-                events: [
-                    {
-                        name: 'click_on_result_fetch',
-                        params: {
-                            'target': url
-                        },
-                    }
-                ]
-            })
-        });
-
-         */
-  };
-
-  return (
-    <div
-      key={result["id"]}
-      className="result-item container rounded-3 p-3 mb-2"
-      id="resultsDiv"
-    >
-      <h4 className="text-start mb-3">
-        {/*
-           <a href={result['type'] === 'Person' || result['type'] === 'Organization' ? resolveAsUrl(result['id']) :
-                    result['txt_url'] || resolveAsUrl(result['id'])}
-              className="result-title" target="_blank">
-             {result['name']}
-           </a>
-           */}
-        <a
-          href={url}
-          className="result-title"
-          target="_blank"
-          onClick={sendGoogleEvent}
-        >
-          {result["name"]}
-        </a>
-      </h4>
-      <Row className="">
-        <div className="col">
-          <Component result={result} />
-          {"description" in result && result["type"] !== "Person" && (
-            <div className="col">
-              <p
-                className={`result-p ${truncate ? "description-truncate" : ""}`}
-                onClick={() => setTruncate(!truncate)}
-              >
-                <b>Description:</b> {result["description"]}
-              </p>
-            </div>
-          )}
-        </div>
-      </Row>
-      <a
-        href={`${dataServiceUrl}/source?${jsonLdParams}`}
-        target="_blank"
-        rel="noreferrer noopener"
-        className="text-align-start float-start text-decoration-none"
-        style={{ fontSize: "x-small" }}
-      >
-        View JSONLD source
-      </a>
-    </div>
-  );
-};

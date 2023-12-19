@@ -1,0 +1,21 @@
+[
+  {
+    "key": "txt_provider",
+    "type": "circle"
+  },
+  {
+    "key": "id",
+    "type": ["truncated", "link"]
+  },
+
+  {
+    "key": "txt_author",
+    "type": "list",
+    "label": "Author(s)"
+  },
+  "txt_identifier",
+  {
+    "key": "txt_keywords",
+    "type": "keywords"
+  }
+]

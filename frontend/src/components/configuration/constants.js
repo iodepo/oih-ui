@@ -1,12 +1,13 @@
-/* images for icons on home page, see HOME+_PAGE_CATEGORIES */
-import experts from "./resources/svg/experts.svg";
-import institution from "./resources/svg/institution.svg";
-import training from "./resources/svg/training.svg";
-import documents from "./resources/svg/documents.svg";
-import spatial from "./resources/svg/spatial.svg";
-import vessels from "./resources/svg/vessels.svg";
-import projects from "./resources/svg/projects.svg";
-import datasets from "./resources/svg/datasets.svg";
+import experts from "../../resources/svg/experts.svg";
+import institution from "../../resources/svg/institution.svg";
+import training from "../../resources/svg/training.svg";
+import documents from "../../resources/svg/documents.svg";
+import spatial from "../../resources/svg/spatial.svg";
+import vessels from "../../resources/svg/vessels.svg";
+import projects from "../../resources/svg/projects.svg";
+import datasets from "../../resources/svg/datasets.svg";
+
+//  --  START MAP REGION --
 
 /* Bounds for regions on the map.
 
@@ -86,6 +87,16 @@ const regionBoundsMap = Object.fromEntries(
   Object.entries(regionMap).map(([k, v]) => [k, boundsToQuery(v)])
 );
 
+const INITIAL_BOUNDS = [
+  { lon: -20, lat: -50 }, // w s
+  { lon: 320, lat: 50 }, // e n
+];
+const DEFAULT_QUERY_BOUNDS = boundsToQuery(INITIAL_BOUNDS);
+
+//  --  END MAP REGION --
+
+//  --  START SEARCHBAR REGION --
+
 /* Name: title mapping of the regions that show up in the search bar.
   Add more items here to search different regions.
 */
@@ -121,11 +132,7 @@ const randomSampleQueries = (n) =>
     .map(([_, e]) => e)
     .slice(0, n);
 
-const INITIAL_BOUNDS = [
-  { lon: -20, lat: -50 }, // w s
-  { lon: 320, lat: 50 }, // e n
-];
-const DEFAULT_QUERY_BOUNDS = boundsToQuery(INITIAL_BOUNDS);
+//  --  END SEARCHBAR REGION --
 
 /*
 Field name -> Title mapping for facets.
@@ -158,22 +165,20 @@ const fieldTitleFromName = (facet_name) => {
   return field_name.charAt(0).toUpperCase() + field_name.slice(1);
 };
 
-/* The front page count/categories.
-/ id: is the url fragement of the results type for the link, e.g. /results/<id>?page=0
-/ text: the title of the category
-/ icon: the image, as defined above
-*/
-const HOME_PAGE_CATEGORIES = [
-  {
-    id: "Person",
-    text: "Experts",
-    icon: experts,
-  },
+//  --  START CATEGORIES REGION --
+
+const CATEGORIES = [
   {
     id: "CreativeWork",
     text: "Documents",
     icon: documents,
   },
+  {
+    id: "Person",
+    text: "Experts",
+    icon: experts,
+  },
+
   {
     id: "Course",
     text: "Training",
@@ -196,7 +201,7 @@ const HOME_PAGE_CATEGORIES = [
   },
   {
     id: "Organization",
-    text: "Institutionss",
+    text: "Institutions",
     icon: institution,
   },
   {
@@ -205,41 +210,91 @@ const HOME_PAGE_CATEGORIES = [
     icon: spatial,
   },
 ];
+//  --  END CATEGORIES REGION --
 
-const tabs = [
-  {
-    title: "CreativeWork",
-    tab_name: "Documents",
+// -- START REGION PALETTE --
+
+const primaryPalette = {
+  homepage: {
+    searchBar: {
+      iconsColor: "#1A2C54",
+      bgColor: "#FFFFFF",
+      searchIcon: "#BDC7DB",
+      bgColorButton: "#40AAD3",
+      colorLink: "#FFFFFF",
+    },
+    tabs: {
+      bgColorBox: "#13213F",
+      cards: {
+        bgColor: "#172B4D",
+        borderColor: "#40AAD31A",
+        bgColorAvatar: "#40AAD31A",
+        bgColorChip: "#FFFFFF",
+        labelColor: "#FFFFFF",
+      },
+    },
+    footer: {
+      labelColor: "#FFFFFF",
+      bgColorButton: "#FFFFFF",
+      labelColorButton: "#1A2C54",
+    },
   },
-  {
-    title: "Person",
-    tab_name: "Experts",
+  resultPage: {
+    searchBar: {
+      bgColorBoxMobile: "#1A2C54",
+      iconsColorMobile: "#FFFFFF",
+      iconsColorDesktop: "#1A2C54",
+      bgColorSelectDesktop: "#FFFFFF",
+      bgColorTextfieldMobile: "#13213F",
+      colorTextfieldMobile: "#FFFFFF",
+      colorTextfieldDesktop: "#2B498C",
+      searchIconDesktop: "#7B8FB7",
+      iconProtip: "#F8BB27",
+      bgColorButton: "#40AAD3",
+      bgExportButtonDesktop: "#DEE2ED",
+      borderColorSelectMobile: "#FFFFFF",
+      borderColorSelectDesktop: "#BDC7DB",
+    },
+    filters: {
+      categoryColor: "#7B8FB7",
+      categorySelectedBgColor: "#F6F8FA",
+      topicSelectedBorderColor: "#2B498C",
+      providerSelectedBorderColor: "#40AAD3",
+      bgColorChip: "#DFE4EE",
+      labelChipColor: "#172B4D",
+      colorButtonMobile: "#FFFFFF",
+      borderColorFilterMobile: "#BDC7DB",
+    },
   },
-  {
-    title: "Organization",
-    tab_name: "Institutions",
-  },
-  {
-    title: "Dataset",
-    tab_name: "Datasets",
-  },
-  {
-    title: "Course",
-    tab_name: "Training",
-  },
-  {
-    title: "Vehicle",
-    tab_name: "Vessels",
-  },
-  {
-    title: "ResearchProject",
-    tab_name: "Projects",
-  },
-  {
-    title: "SpatialData",
-    tab_name: "Spatial Search",
-  },
-];
+};
+// -- END REGION PALETTE --
+
+// -- START REGION BACKGROUND IMAGE --
+
+// Just change the relative path of the image
+import backgroundImageUrl from "../../resources/landing-bg_1400.jpeg";
+const backgroundImage = `
+  #home {
+    flex-direction: column;
+    display: flex;
+    position: relative;
+    min-height: 100vh;
+    background: url(${backgroundImageUrl});
+    background-size: 100%;
+    background-position-y: -40vw;
+  }
+
+  #home::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+`;
+// -- END REGION BACKGROUND IMAGE --
 
 export {
   regionMap,
@@ -250,6 +305,7 @@ export {
   INITIAL_BOUNDS,
   DEFAULT_QUERY_BOUNDS,
   fieldTitleFromName,
-  HOME_PAGE_CATEGORIES,
-  tabs,
+  CATEGORIES,
+  primaryPalette,
+  backgroundImage,
 };
