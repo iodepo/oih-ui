@@ -1,8 +1,5 @@
 import React, { useReducer } from "react";
-import {
-  SecondaryTheme,
-  PrimaryTheme,
-} from "../components/configuration/themes";
+import { SecondaryTheme, PrimaryTheme } from "../components/portability/themes";
 import reducer from "./reducers/AppThemeReducer";
 import useCookies from "./useCookies";
 import { AppThemeUIStore } from "./context/AppTheme";

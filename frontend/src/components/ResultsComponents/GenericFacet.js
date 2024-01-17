@@ -15,9 +15,19 @@ import React, { useState } from "react";
 import IconButton from "@mui/material/IconButton";
 import Chip from "@mui/material/Chip";
 import Tooltip from "@mui/material/Tooltip";
+import { useAppTranslation } from "ContextManagers/context/AppTranslation";
 
 const GenericFacet = (props) => {
-  const { facet, i, title, setValue, facetSearch, clear } = props;
+  const {
+    facet,
+    i,
+    title,
+    setValue,
+    facetSearch,
+    clear,
+    setFilterChosenMobile,
+    filterChosenMobile,
+  } = props;
   const [searchInput, setSearchInput] = useState("");
   const [filteredFaces, setFilteredFaces] = useState([]);
   const [numberToShow, setNumberToShow] = useState(5);
@@ -36,6 +46,7 @@ const GenericFacet = (props) => {
     setNumberToShow((prev) => prev + 5);
   };
 
+  const translationState = useAppTranslation();
   const palette = "custom.resultPage.filters.";
   return (
     <>
@@ -47,7 +58,7 @@ const GenericFacet = (props) => {
           justifyContent: "space-between",
         }}
       >
-        {title}
+        {translationState.translation[title] || title}
         <FilterListIcon />
       </Toolbar>
       <Box>
@@ -73,7 +84,7 @@ const GenericFacet = (props) => {
               borderRadius: 0,
             },
           }}
-          label="Search..."
+          label={translationState.translation["Search"] + "..."}
         />
       </Box>
       <List>
@@ -92,18 +103,31 @@ const GenericFacet = (props) => {
                     display: facetCount.name.length < 15 ? "none" : "flex",
                   }}
                 >
-                  <ListItemButton role={undefined} dense>
+                  <ListItemButton sx={{ display: "flex" }} dense>
                     <ListItemIcon sx={{ minWidth: 0 }}>
                       <Checkbox
                         edge="start"
                         tabIndex={-1}
                         onChange={(e) => {
-                          debugger;
                           if (!e.target.checked) {
                             clear();
+                            setFilterChosenMobile((f) =>
+                              f.filter((d) => d.type !== title.toLowerCase())
+                            );
                           } else {
                             setValue(i, facetCount.name);
                             facetSearch(facet.name, facetCount.name);
+                            const isGenericFilterSet = filterChosenMobile.find(
+                              (f) => f.type === facetCount.name
+                            );
+                            if (isGenericFilterSet ?? true)
+                              setFilterChosenMobile((prev) => [
+                                ...prev,
+                                {
+                                  type: facetCount.name,
+                                  text: facetCount.name,
+                                },
+                              ]);
                           }
                         }}
                         disableRipple
@@ -153,7 +177,7 @@ const GenericFacet = (props) => {
               }}
             />
           </IconButton>
-          Add more
+          {translationState.translation["Add more"]}
         </Toolbar>
       )}
     </>

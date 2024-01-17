@@ -4,8 +4,14 @@ import PaginationMUI from "@mui/material/Pagination";
 
 export const ITEMS_PER_PAGE = 10;
 
-export default function Pagination({ searchType, resultCount, setPage, page }) {
-  const pageCount = Math.ceil(resultCount / ITEMS_PER_PAGE);
+export default function Pagination({
+  searchType,
+  resultCount,
+  setPage,
+  page,
+  showMorePages,
+}) {
+  const pageCount = Math.ceil(resultCount / (ITEMS_PER_PAGE + showMorePages));
   const handlePageClick = (event, value) => {
     setPage(value - 1);
   };

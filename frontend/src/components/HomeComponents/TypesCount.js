@@ -5,7 +5,8 @@ import React, { useEffect, useState } from "react";
 import { dataServiceUrl } from "../../config/environment";
 import { useNavigate } from "react-router-dom";
 import useSearchParam from "../../useSearchParam";
-import { regionBoundsMap, CATEGORIES } from "../configuration/constants";
+import { CATEGORIES } from "../portability/configuration";
+import { regionBoundsMap } from "../../constants";
 import { useAppTranslation } from "ContextManagers/context/AppTranslation";
 import Header from "./Header";
 import Container from "@mui/material/Container";
@@ -88,8 +89,8 @@ export default function TypesCount() {
             >
               <Grid container spacing={2} p={3}>
                 {/* <Search /> */}
-                {CATEGORIES.map((cat) => (
-                  <Grid item lg={3} xs={6}>
+                {CATEGORIES.map((cat, index) => (
+                  <Grid key={index} item lg={3} xs={6}>
                     <CardTopic
                       image={cat.icon}
                       text={translationState.translation[cat.text] ?? cat.id}

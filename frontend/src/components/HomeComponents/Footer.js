@@ -2,8 +2,12 @@ import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
+import { useAppTranslation } from "ContextManagers/context/AppTranslation";
+
 export default function Footer() {
+  const translationState = useAppTranslation();
   const palette = "custom.homepage.footer.";
+
   return (
     <Container
       maxWidth="md"
@@ -17,9 +21,7 @@ export default function Footer() {
           align="center"
           sx={{ color: palette + "labelColor" }}
         >
-          Lorem ipsum dolor sit amet consectetur. Elementum blandit tincidunt
-          sed sit faucibus pellentesque arcu turpis odio. Tempor aliquam
-          fermentum at dolor. Aliquam leo blandit sem turpis enim.
+          {translationState.translation["Description homepage"]}
         </Typography>
         <Button
           variant="contained"
@@ -30,7 +32,7 @@ export default function Footer() {
             color: palette + "labelColorButton",
           }}
         >
-          Discover more
+          {translationState.translation["Discover more"]}
         </Button>
       </Stack>
     </Container>

@@ -9,10 +9,7 @@ import {
 } from "react-router-dom";
 import useSearchParam from "../useSearchParam";
 
-import {
-  PROMOTED_REGIONS,
-  randomSampleQueries,
-} from "./configuration/constants";
+import { PROMOTED_REGIONS, randomSampleQueries } from "../constants";
 import { SupportedLangugesEnum } from "ContextManagers/AppTranslationProvider";
 import { useAppTranslation } from "ContextManagers/context/AppTranslation";
 import useCookies from "ContextManagers/useCookies";
@@ -29,14 +26,17 @@ import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import LightbulbOutlinedIcon from "@mui/icons-material/LightbulbOutlined";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import ShareIcon from "@mui/icons-material/Share";
 import LinkMui from "@mui/material/Link";
 import Accordion from "@mui/material/Accordion";
+import IconButton from "@mui/material/IconButton";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AdvancedSearch from "./ResultsComponents/AdvancedSearch";
-
+import Export from "./ResultsComponents/Export";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
 // Set once, will change for every load, not every key click
 const currentSampleQueries = randomSampleQueries(4);
 
@@ -200,6 +200,10 @@ const SearchHome = (props) => {
                 "& .MuiFormLabel-root": {
                   fontSize: { xs: "14px", lg: "20px" },
                 },
+                borderBottomLeftRadius: 0,
+                borderTopLeftRadius: 0,
+                borderBottomRightRadius: 4,
+                borderTopRightRadius: 4,
               }}
               InputProps={{
                 endAdornment: (
@@ -207,12 +211,7 @@ const SearchHome = (props) => {
                     <SearchIcon sx={{ color: palette + "searchIcon" }} />
                   </InputAdornment>
                 ),
-                style: {
-                  borderBottomLeftRadius: 0,
-                  borderTopLeftRadius: 0,
-                  borderBottomRightRadius: 4,
-                  borderTopRightRadius: 4,
-                },
+                style: {},
               }}
               placeholder={placeholder()}
               value={searchQuery}
@@ -267,7 +266,7 @@ const SearchHome = (props) => {
             to={hrefFor(region, query)}
             component={RouterLink} // Ensure you import RouterLink from react-router-dom
           >
-            <Typography variant="subtitle1">
+            <Typography variant="subtitle1" noWrap>
               {translationState.translation[query]}
             </Typography>
           </LinkMui>
@@ -342,17 +341,14 @@ const SearchResult = (props) => {
     url,
   } = props;
   const [openAdvancedSearch, setOpenAdvancedSearch] = useState(false);
-
+  const [openDialog, setOpenDialog] = useState(false);
   const palette = "custom.resultPage.searchBar.";
   return (
     <>
       <Container
         maxWidth="lg"
         sx={{
-          backgroundColor: {
-            xs: palette + "bgColorBoxMobile",
-            lg: "transparent",
-          },
+          backgroundColor: "transparent",
         }}
       >
         <Grid container spacing={2} mt={6}>
@@ -376,17 +372,14 @@ const SearchResult = (props) => {
                 >
                   <Box>
                     <Grid container justifyContent={"space-between"}>
-                      <Grid item xs={6} lg={12}>
+                      <Grid item xs={12} lg={12}>
                         <InputLabel disabled></InputLabel>
                         <Select
                           startAdornment={
                             <PublicIcon
                               sx={{
                                 marginRight: 1,
-                                color: {
-                                  xs: palette + "iconsColorMobile",
-                                  lg: palette + "iconsColorDesktop",
-                                },
+                                color: palette + "iconsColor",
                               }}
                             />
                           }
@@ -397,21 +390,16 @@ const SearchResult = (props) => {
                               xs: "transparent",
                               lg: palette + "bgColorSelectDesktop",
                             },
-                            color: {
-                              xs: palette + "iconsColorMobile",
-                              lg: palette + "iconsColorDesktop",
-                            },
+                            color: palette + "iconsColor",
                             fontWeight: 600,
                             borderBottomRightRadius: 0,
                             borderTopRightRadius: 0,
                             ".MuiOutlinedInput-notchedOutline": {
                               borderRight: { lg: "none" },
+                              borderWidth: { xs: 0, lg: "1px" },
                             },
                             ".MuiSelect-icon": {
-                              color: {
-                                xs: palette + "iconsColorMobile",
-                                lg: palette + "iconsColorDesktop",
-                              },
+                              color: palette + "iconsColor",
                             },
                           }}
                           onChange={(e) => setRegion(e.target.value)}
@@ -438,10 +426,7 @@ const SearchResult = (props) => {
                       },
                       "& .MuiFormLabel-root": {
                         fontSize: { xs: "14px", lg: "16px" },
-                        color: {
-                          xs: palette + "colorTextfieldMobile",
-                          lg: palette + "colorTextfieldDesktop",
-                        },
+                        color: palette + "colorTextfield",
                       },
                       ".MuiOutlinedInput-notchedOutline": {
                         /*   xs: { border: "none" }, */
@@ -452,10 +437,7 @@ const SearchResult = (props) => {
                         <InputAdornment position="end">
                           <SearchIcon
                             sx={{
-                              color: {
-                                xs: palette + "iconsColorMobile",
-                                lg: palette + "searchIconDesktop",
-                              },
+                              color: palette + "searchIcon",
                             }}
                           />
                         </InputAdornment>
@@ -478,14 +460,12 @@ const SearchResult = (props) => {
                   variant="body2"
                   alignItems={"start"}
                   display={{ xs: "flex", lg: "none" }}
-                  sx={{ color: "#BDC7DB", my: 2 }}
+                  sx={{ color: palette + "colorTextProTip", my: 2 }}
                 >
                   <LightbulbOutlinedIcon
                     sx={{ color: palette + "iconProtip" }}
                   />
-                  ProTip! Enhance your search precision with AND, OR, and XOR
-                  operators, and filter results using 'contains' and 'not
-                  contains.' Specify 'all' or 'any' to fine-tune your query.
+                  {translationState.translation["Pro Tip"]}
                 </Typography>
                 <Button
                   variant="contained"
@@ -495,10 +475,10 @@ const SearchResult = (props) => {
                     width: { xs: "100%", lg: "15%" },
                     backgroundColor: palette + "bgColorButton",
                     textTransform: "none",
-                    height: "56px",
+                    height: { xs: "40px", lg: "56px" },
                   }}
                   onClick={() => {
-                    sendGoogleEvent();
+                    //sendGoogleEvent();
                     handleSubmit();
                   }}
                 >
@@ -509,22 +489,44 @@ const SearchResult = (props) => {
                   disableElevation
                   sx={{
                     borderRadius: 2,
-                    color: {
-                      xs: palette + "colorTextfieldMobile",
-                      lg: palette + "colorTextfieldDesktop",
-                    },
-                    marginLeft: 2,
+                    color: palette + "colorTextfield",
+                    marginLeft: 3,
                     textTransform: "none",
                     fontSize: "12px",
                     whiteSpace: "noWrap",
+                    fontWeight: 600,
+                    margin: "0 auto",
+                    lineHeight: "18px",
+
                     width: "20%",
                     padding: 0,
                   }}
                   onClick={() => setOpenAdvancedSearch(!openAdvancedSearch)}
                 >
-                  Show Advanced
+                  {!openAdvancedSearch
+                    ? translationState.translation["Show advanced"]
+                    : translationState.translation["Hide advanced"]}
                 </Button>
               </Box>
+            </Grid>
+            <Grid item xs={12} lg={0} display={{ xs: "block", lg: "none" }}>
+              <Accordion
+                expanded={openAdvancedSearch}
+                onChange={(e) => e.preventDefault}
+                elevation={0}
+              >
+                <AccordionSummary
+                  aria-controls="panel1d-content"
+                  id="panel1d-header"
+                  sx={{ display: "none" }}
+                ></AccordionSummary>
+                <AccordionDetails sx={{ padding: 0 }}>
+                  <AdvancedSearch
+                    setSearchQuery={setSearchQuery}
+                    searchQuery={searchQuery}
+                  />
+                </AccordionDetails>
+              </Accordion>
             </Grid>
             <Grid
               item
@@ -535,45 +537,30 @@ const SearchResult = (props) => {
               justifyContent={{ xs: "space-between", lg: "end" }}
               sx={{ gap: 1 }}
             >
-              <ShareIcon
-                sx={{
-                  color: {
-                    xs: palette + "colorTextfieldMobile",
-                    lg: palette + "colorTextfieldDesktop",
-                  },
-                }}
-              />
-              <Box display={"flex"} alignItems={"center"} gap={2}>
-                <Select
-                  startAdornment={<FileDownloadIcon />}
-                  defaultValue="Export"
+              <IconButton
+                aria-label="share"
+                onClick={() => setOpenDialog(!openDialog)}
+              >
+                <ShareIcon
                   sx={{
-                    backgroundColor: {
-                      xs: "transparent",
-                      lg: palette + "bgExportButtonDesktop",
-                    },
-                    color: {
-                      xs: palette + "iconsColorMobile",
-                      lg: palette + "iconsColorDesktop",
-                    },
-                    fontWeight: 700,
-                    borderRadius: 1,
-                    height: "34px",
-                    ".MuiOutlinedInput-notchedOutline": {
-                      xs: { borderColor: palette + "borderColorSelectMobile" },
-                      lg: { borderColor: palette + "borderColorSelectDesktop" },
-                    },
-                    ".MuiSelect-icon": {
-                      color: {
-                        xs: palette + "iconsColorMobile",
-                        lg: palette + "iconsColorDesktop",
-                      },
-                    },
-                    marginLeft: { xs: "120px", lg: "90px" },
+                    color: palette + "colorTextfield",
                   }}
-                >
-                  <MenuItem value="Export">Export</MenuItem>
-                </Select>
+                />
+              </IconButton>
+              <Dialog
+                open={openDialog}
+                onClose={() => setOpenDialog(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+              >
+                <DialogTitle id="alert-dialog-title">
+                  Work in progress
+                </DialogTitle>
+                <DialogContent></DialogContent>
+              </Dialog>
+
+              <Box display={"flex"} alignItems={"center"} gap={2}>
+                <Export palette={palette} />
                 <Select
                   defaultValue={"EN"}
                   value={
@@ -588,22 +575,15 @@ const SearchResult = (props) => {
                       xs: "transparent",
                       lg: palette + "bgColorSelectDesktop",
                     },
-                    color: {
-                      xs: palette + "iconsColorMobile",
-                      lg: palette + "iconsColorDesktop",
-                    },
+                    color: palette + "iconsColor",
                     fontWeight: 600,
                     borderRadius: 1,
                     height: "34px",
                     ".MuiOutlinedInput-notchedOutline": {
-                      xs: { borderColor: palette + "borderColorSelectMobile" },
-                      lg: { borderColor: palette + "borderColorSelectDesktop" },
+                      borderColor: palette + "borderColorSelect",
                     },
                     ".MuiSelect-icon": {
-                      color: {
-                        xs: palette + "iconsColorMobile",
-                        lg: palette + "iconsColorDesktop",
-                      },
+                      color: palette + "iconsColor",
                     },
                   }}
                 >
@@ -635,7 +615,7 @@ const SearchResult = (props) => {
               </Box>
             </Grid>
           </Grid>
-          <Grid item lg={12}>
+          <Grid item xs={0} lg={12} display={{ xs: "none", lg: "block" }}>
             <Accordion
               expanded={openAdvancedSearch}
               onChange={(e) => e.preventDefault}

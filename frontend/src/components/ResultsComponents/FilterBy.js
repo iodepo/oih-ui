@@ -16,7 +16,7 @@ import Chip from "@mui/material/Chip";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import Button from "@mui/material/Button";
 import { useAppTranslation } from "ContextManagers/context/AppTranslation";
-import { fieldTitleFromName } from "../configuration/constants";
+import { fieldTitleFromName } from "../../constants";
 import GenericFacet from "./GenericFacet";
 import Tooltip from "@mui/material/Tooltip";
 
@@ -34,6 +34,10 @@ const FilterBy = (props) => {
     facetValues, //Look FacetsFullWidth
     setFacetFacetValues,
     isMobile,
+    setFilterChosenMobile,
+    filterChosenMobile,
+    selectedProvider,
+    setSelectedProvider,
   } = props;
 
   const changeSearchType = (type) => (event) => {
@@ -71,7 +75,7 @@ const FilterBy = (props) => {
                   justifyContent: "space-between",
                 }}
               >
-                {title}
+                {translationState.translation[title] || title}
                 <FilterListIcon />
               </Toolbar>
               <List>
@@ -103,10 +107,21 @@ const FilterBy = (props) => {
                           if (selectedProvider === facetCount.name) {
                             clear();
                             setSelectedProvider("");
+                            setFilterChosenMobile((f) =>
+                              f.filter((d) => d.type !== "provider")
+                            );
                           } else {
                             setValue(i, facetCount.name);
                             facetSearch(facet.name, facetCount.name);
                             setSelectedProvider(facetCount.name);
+                            const isProviderFilterSet = filterChosenMobile.find(
+                              (f) => f.type === "provider"
+                            );
+                            if (isProviderFilterSet ?? true)
+                              setFilterChosenMobile((prev) => [
+                                ...prev,
+                                { type: "provider", text: facetCount.name },
+                              ]);
                           }
                         }}
                       >
@@ -143,6 +158,8 @@ const FilterBy = (props) => {
         default:
           return (
             <GenericFacet
+              setFilterChosenMobile={setFilterChosenMobile}
+              filterChosenMobile={filterChosenMobile}
               facet={facet}
               i={i}
               title={title}
@@ -155,9 +172,7 @@ const FilterBy = (props) => {
     }
   };
 
-  const [selectedProvider, setSelectedProvider] = useState("");
   const translationState = useAppTranslation();
-
   const palette = "custom.resultPage.filters.";
   return (
     <>
@@ -170,51 +185,66 @@ const FilterBy = (props) => {
           justifyContent: "space-between",
         }}
       >
-        Topic
+        {translationState.translation["Topic"]}
         <FilterListIcon />
       </Toolbar>
       <Divider />
 
       <List>
-        {tabList.map((tab, index) => (
-          <ListItem key={tab.id} disablePadding>
-            <ListItemButton
-              selected={tab.id === searchType}
-              sx={{
-                justifyContent: "space-between",
-                height: "35px",
-                "&.Mui-selected": {
-                  backgroundColor: palette + "categorySelectedBgColor",
-                  borderLeft: 4,
-                  borderColor: palette + "topicSelectedBorderColor",
-                },
-              }}
-              onClick={changeSearchType(tab.id)}
-            >
-              <ListItemText
-                primaryTypographyProps={{
-                  noWrap: true,
-                  variant: "subtitle2",
-                }}
-                sx={{ marginRight: "10px" }}
-                primary={translationState.translation[tab.text]}
-              />
-              <Chip
+        {tabList.map((tab, index) => {
+          return (
+            <ListItem key={tab.id} disablePadding>
+              <ListItemButton
+                selected={tab.id === searchType}
                 sx={{
-                  background: palette + "bgColorChip",
-                  height: "20px",
-                  fontSize: "12px",
-                  borderRadius: "12px",
-                  ".MuiChip-label": {
-                    padding: "5px",
-                    color: palette + "labelChipColor",
+                  justifyContent: "space-between",
+                  height: "35px",
+                  "&.Mui-selected": {
+                    backgroundColor: palette + "categorySelectedBgColor",
+                    borderLeft: 4,
+                    borderColor: palette + "topicSelectedBorderColor",
                   },
                 }}
-                label={formatter.format(counts[tab.id] || 0)}
-              />
-            </ListItemButton>
-          </ListItem>
-        ))}
+                onClick={() => {
+                  changeSearchType(tab.id);
+                  const updatedItems = filterChosenMobile.map((f) => {
+                    if (f.type === "searchType") {
+                      return {
+                        ...f,
+                        text: tab.text,
+                      };
+                    }
+                    return f;
+                  });
+
+                  setFilterChosenMobile(updatedItems);
+                }}
+              >
+                <ListItemText
+                  primaryTypographyProps={{
+                    noWrap: true,
+                    variant: "subtitle2",
+                  }}
+                  sx={{ marginRight: "10px" }}
+                  primary={translationState.translation[tab.text]}
+                />
+                <Chip
+                  sx={{
+                    background: palette + "bgColorChip",
+                    height: "20px",
+                    fontSize: "12px",
+                    borderRadius: "12px",
+                    ".MuiChip-label": {
+                      padding: "5px",
+                      color: palette + "labelChipColor",
+                    },
+                  }}
+                  label={formatter.format(counts[tab.id] || 0)}
+                />
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
       </List>
       {/* End Topics */}
       {/* Start Facets */}
@@ -243,7 +273,7 @@ const FilterBy = (props) => {
           color: palette + "colorButtonMobile",
         }}
       >
-        Apply
+        {translationState.translation["Apply"]}
       </Button>
     </>
   );

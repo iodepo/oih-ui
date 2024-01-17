@@ -8,9 +8,9 @@ import Typography from "@mui/material/Typography";
 import CircleIcon from "@mui/icons-material/Circle";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
-import { CATEGORIES } from "../configuration/constants";
+import { CATEGORIES } from "../portability/configuration";
 
-const cutWithDots = (sentence, maxLength) => {
+export const cutWithDots = (sentence, maxLength) => {
   if (sentence.length > maxLength) {
     var cutSentence = sentence.slice(0, maxLength) + "...";
     return cutSentence;
@@ -208,7 +208,13 @@ const ResultElem = ({ result, name, children, type = undefined }) => {
       component={"span"}
       alignItems={"center"}
       columnGap={1}
-      sx={{ fontSize: "12px", display: "flex", marginBottom: 1 }}
+      sx={{
+        fontSize: "12px",
+        display: "flex",
+        marginBottom: 1,
+        flexWrap: "wrap",
+        gap: "6px",
+      }}
     >
       {type !== "circle" && (
         <>

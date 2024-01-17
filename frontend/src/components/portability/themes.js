@@ -1,5 +1,5 @@
 import createTheme from "@mui/material/styles/createTheme";
-import { backgroundImage, primaryPalette } from "./constants";
+import { backgroundImage, primaryPalette } from "./configuration";
 
 const font = "Montserrat, sans-serif, Roboto, Arial";
 const PrimaryTheme = createTheme({

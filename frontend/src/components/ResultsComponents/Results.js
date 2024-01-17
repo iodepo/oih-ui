@@ -3,25 +3,20 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useSearchParam from "../../useSearchParam";
-
-import ResultTabs from "./ResultTabs";
 import { dataServiceUrl } from "../../config/environment";
-import { Row } from "react-bootstrap";
+import { CATEGORIES } from "../portability/configuration";
 import {
   regionMap,
   regionBoundsMap,
   INITIAL_BOUNDS,
   DEFAULT_QUERY_BOUNDS,
-  CATEGORIES,
-} from "../configuration/constants";
+} from "../../constants";
 import throttle from "lodash/throttle";
 
 import ReMap from "../map/ReMap";
 import Pagination, { ITEMS_PER_PAGE } from "../results/Pagination";
 import { Popup } from "react-map-gl";
 import FacetsFullWidth from "../results/FacetsFullWidth";
-
-import typeMap from "../configuration/typesMap";
 import { useAppTranslation } from "ContextManagers/context/AppTranslation";
 import Search from "components/Search";
 import Box from "@mui/material/Box";
@@ -46,9 +41,6 @@ import ClearIcon from "@mui/icons-material/Clear";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
-import Fab from "@mui/material/Fab";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-//import Pagination from "@mui/material/Pagination";
 
 import {
   expandMapBounds,
@@ -56,6 +48,7 @@ import {
   mapboxBounds_toQuery,
 } from "./mapFunctions";
 import ResultValue from "./ResultValue";
+import { cutWithDots } from "components/results/Result";
 
 function resolveAsUrl(url) {
   const pattern = /^((http|https):\/\/)/;
@@ -74,6 +67,10 @@ export default function Results() {
   const [counts, setCounts] = useState({});
   const [facets, setFacets] = useState([]);
   const [mapBounds, setMapBounds] = useState(false);
+  const [showMorePages, setShowMorePages] = useState(0);
+  const [isMobile, setIsMobile] = useState(window.innerWidth >= 768);
+  const [filterChosenMobile, setFilterChosenMobile] = useState([]);
+  const [selectedProvider, setSelectedProvider] = useState("");
 
   const navigate = useNavigate();
   const { searchType = "CreativeWork" } = useParams();
@@ -82,12 +79,38 @@ export default function Results() {
   const [region, setRegion] = useSearchParam("region", "global");
   const [facetQuery, setFacetQuery] = useSearchParam("facet_query");
   const [page, setPage] = useSearchParam("page", 0);
+
   const [facetValues, setFacetFacetValues] = useState(
     new Array(facets.length).fill("")
   );
 
   const [openDialog, setOpenDialog] = useState(false);
   const translationState = useAppTranslation();
+
+  useEffect(() => {
+    const category = CATEGORIES.find((category) => category.id === searchType);
+
+    setFilterChosenMobile([{ type: "searchType", text: category.text }]);
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const newIsMobile = window.innerWidth >= 768;
+
+      if (isMobile !== newIsMobile) {
+        setShowMorePages(0);
+      }
+
+      setIsMobile(newIsMobile);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [isMobile]);
+
   useEffect(() => {
     fetch(
       `${dataServiceUrl}/search?${new URLSearchParams({
@@ -114,8 +137,8 @@ export default function Results() {
         ...(searchType !== "SpatialData" ? { document_type: searchType } : {}),
         facetType: "the_geom",
         facetName: mapboxBounds_toQuery(mapBounds, region),
-        rows: ITEMS_PER_PAGE,
-        start: page * ITEMS_PER_PAGE,
+        rows: ITEMS_PER_PAGE + showMorePages,
+        start: page * (ITEMS_PER_PAGE + showMorePages),
       });
       if (searchText !== "") {
         params.append("search_text", searchText);
@@ -144,8 +167,8 @@ export default function Results() {
       let URI = `${dataServiceUrl}/search?`;
       const params = new URLSearchParams({
         document_type: searchType,
-        start: page * ITEMS_PER_PAGE,
-        rows: ITEMS_PER_PAGE,
+        start: page * (ITEMS_PER_PAGE + showMorePages),
+        rows: ITEMS_PER_PAGE + showMorePages,
       });
       if (searchText !== "") {
         params.append("search_text", searchText);
@@ -186,7 +209,16 @@ export default function Results() {
           }))
         );
     }
-  }, [searchText, searchType, facetQuery, showMap, mapBounds, region, page]);
+  }, [
+    searchText,
+    searchType,
+    facetQuery,
+    showMap,
+    mapBounds,
+    region,
+    page,
+    showMorePages,
+  ]);
 
   const facetSearch = (name, value) => {
     //const selectedIndex = event.target.selectedIndex;
@@ -375,8 +407,22 @@ export default function Results() {
     return undefined;
   };
 
-  const { zoom = 0 } = viewport;
+  const setValue = (i, value) =>
+    setFacetFacetValues((values) => [
+      ...values.slice(0, i),
+      value,
+      ...values.slice(i + 1, values.length),
+    ]);
 
+  const clear = useCallback(
+    (e) => {
+      setFacetFacetValues(new Array(facets.length).fill(""));
+      clearFacetQuery();
+    },
+    [clearFacetQuery, setValue]
+  );
+
+  const { zoom = 0 } = viewport;
   const paletteFilter = "custom.resultPage.filters.";
   return (
     <>
@@ -397,14 +443,26 @@ export default function Results() {
               elevation={0}
             >
               <AccordionSummary
-                expandIcon={<ViewSidebarOutlinedIcon />}
+                expandIcon={
+                  <ViewSidebarOutlinedIcon
+                    sx={{ color: paletteFilter + "textFilter" }}
+                  />
+                }
                 aria-controls="panel1a-content"
                 id="panel1a-header"
               >
-                <Typography>Filter by</Typography>
+                <Typography
+                  sx={{ color: paletteFilter + "textFilter", fontWeight: 700 }}
+                >
+                  {translationState.translation["Filter by"]}
+                </Typography>
               </AccordionSummary>
               <AccordionDetails>
                 <FilterBy
+                  selectedProvider={selectedProvider}
+                  setSelectedProvider={setSelectedProvider}
+                  setFilterChosenMobile={setFilterChosenMobile}
+                  filterChosenMobile={filterChosenMobile}
                   counts={counts}
                   tabList={CATEGORIES}
                   searchType={searchType}
@@ -427,32 +485,52 @@ export default function Results() {
             gap={2}
           >
             <Box>
-              <Button
-                variant="outlined"
-                startIcon={<ClearIcon />}
-                sx={{
-                  color: paletteFilter + "categoryColor",
-                  backgroundColor: paletteFilter + "categorySelectedBgColor",
-                  "&.MuiButton-outlined": {
-                    borderColor: paletteFilter + "borderColorFilterMobile",
-                  },
-                }}
-                endIcon={
-                  <Chip
-                    size="small"
+              {filterChosenMobile.map((item, index) => {
+                return (
+                  <Button
+                    key={index}
+                    variant="outlined"
+                    startIcon={
+                      item.type === "searchType" ? <></> : <ClearIcon />
+                    }
+                    disabled={item.type === "searchType" ? true : false}
                     sx={{
-                      maxWidth: "40px",
-                      maxHeight: "20px",
-                      ".MuiChip-label": {
-                        fontSize: "12px",
+                      color: paletteFilter + "categoryColor",
+                      backgroundColor:
+                        paletteFilter + "categorySelectedBgColor",
+                      marginRight: 1,
+                      marginBottom: filterChosenMobile.length > 1 ? 1 : 0,
+                      "&.MuiButton-outlined": {
+                        borderColor: paletteFilter + "borderColorFilterMobile",
                       },
                     }}
-                    label={"42K"}
-                  />
-                }
-              >
-                Documents
-              </Button>
+                    onClick={() => {
+                      if (item.type === "provider") setSelectedProvider("");
+                      clear();
+                      setFilterChosenMobile((f) =>
+                        f.filter((d) => d.type !== item.type)
+                      );
+                    }}
+                    /* endIcon={
+                      <Chip
+                        size="small"
+                        sx={{
+                          maxWidth: "40px",
+                          maxHeight: "20px",
+                          ".MuiChip-label": {
+                            overflow: "visible",
+                            fontSize: "9px",
+                          },
+                        }}
+                        label={item.count}
+                      />
+                    } */
+                  >
+                    {translationState.translation[item.text] ||
+                      cutWithDots(item.text, 10)}
+                  </Button>
+                );
+              })}
             </Box>
             <Box display={"flex"} alignItems={"center"} gap={1}>
               <Button
@@ -479,7 +557,12 @@ export default function Results() {
                   sx={{ paddingRight: "10px" }}
                 >
                   <Box display="flex" alignItems="center">
-                    <Box flexGrow={1}>Filter by</Box>
+                    <Box
+                      flexGrow={1}
+                      sx={{ color: paletteFilter + "textFilter" }}
+                    >
+                      {translationState.translation["Filter by"]}
+                    </Box>
                     <Box>
                       <IconButton onClick={() => setOpenDialog(false)}>
                         <ClearIcon />
@@ -489,6 +572,10 @@ export default function Results() {
                 </DialogTitle>
                 <DialogContent>
                   <FilterBy
+                    selectedProvider={selectedProvider}
+                    setSelectedProvider={setSelectedProvider}
+                    setFilterChosenMobile={setFilterChosenMobile}
+                    filterChosenMobile={filterChosenMobile}
                     counts={counts}
                     tabList={CATEGORIES}
                     searchType={searchType}
@@ -545,7 +632,7 @@ export default function Results() {
                           variant="subtitle2"
                           sx={{ color: "#7B8FB7" }}
                         >
-                          Sort by:
+                          {translationState.translation["Sort by"]}:
                         </Typography>
                       </InputAdornment>
                     }
@@ -559,7 +646,7 @@ export default function Results() {
                     }}
                   >
                     <MenuItem value="Recently updated">
-                      Recently updated
+                      {translationState.translation["Recently updated"]}
                     </MenuItem>
                   </Select>
                 </Box>
@@ -577,11 +664,15 @@ export default function Results() {
                 fontWeight: 700,
                 textTransform: "none",
                 color: "black",
+                width: "100%",
+                marginTop: 2,
               }}
+              onClick={() => setShowMorePages((prev) => prev + 5)}
             >
               Show more
             </Button>
             <Pagination
+              showMorePages={showMorePages}
               searchType={searchType}
               resultCount={resultCount}
               setPage={setPage}

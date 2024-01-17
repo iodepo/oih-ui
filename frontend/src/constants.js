@@ -1,12 +1,3 @@
-import experts from "../../resources/svg/experts.svg";
-import institution from "../../resources/svg/institution.svg";
-import training from "../../resources/svg/training.svg";
-import documents from "../../resources/svg/documents.svg";
-import spatial from "../../resources/svg/spatial.svg";
-import vessels from "../../resources/svg/vessels.svg";
-import projects from "../../resources/svg/projects.svg";
-import datasets from "../../resources/svg/datasets.svg";
-
 //  --  START MAP REGION --
 
 /* Bounds for regions on the map.
@@ -165,137 +156,6 @@ const fieldTitleFromName = (facet_name) => {
   return field_name.charAt(0).toUpperCase() + field_name.slice(1);
 };
 
-//  --  START CATEGORIES REGION --
-
-const CATEGORIES = [
-  {
-    id: "CreativeWork",
-    text: "Documents",
-    icon: documents,
-  },
-  {
-    id: "Person",
-    text: "Experts",
-    icon: experts,
-  },
-
-  {
-    id: "Course",
-    text: "Training",
-    icon: training,
-  },
-  {
-    id: "Dataset",
-    text: "Datasets",
-    icon: datasets,
-  },
-  {
-    id: "Vehicle",
-    text: "Vessels",
-    icon: vessels,
-  },
-  {
-    id: "ResearchProject",
-    text: "Projects",
-    icon: projects,
-  },
-  {
-    id: "Organization",
-    text: "Institutions",
-    icon: institution,
-  },
-  {
-    id: "SpatialData",
-    text: "Spatial Search",
-    icon: spatial,
-  },
-];
-//  --  END CATEGORIES REGION --
-
-// -- START REGION PALETTE --
-
-const primaryPalette = {
-  homepage: {
-    searchBar: {
-      iconsColor: "#1A2C54",
-      bgColor: "#FFFFFF",
-      searchIcon: "#BDC7DB",
-      bgColorButton: "#40AAD3",
-      colorLink: "#FFFFFF",
-    },
-    tabs: {
-      bgColorBox: "#13213F",
-      cards: {
-        bgColor: "#172B4D",
-        borderColor: "#40AAD31A",
-        bgColorAvatar: "#40AAD31A",
-        bgColorChip: "#FFFFFF",
-        labelColor: "#FFFFFF",
-      },
-    },
-    footer: {
-      labelColor: "#FFFFFF",
-      bgColorButton: "#FFFFFF",
-      labelColorButton: "#1A2C54",
-    },
-  },
-  resultPage: {
-    searchBar: {
-      bgColorBoxMobile: "#1A2C54",
-      iconsColorMobile: "#FFFFFF",
-      iconsColorDesktop: "#1A2C54",
-      bgColorSelectDesktop: "#FFFFFF",
-      bgColorTextfieldMobile: "#13213F",
-      colorTextfieldMobile: "#FFFFFF",
-      colorTextfieldDesktop: "#2B498C",
-      searchIconDesktop: "#7B8FB7",
-      iconProtip: "#F8BB27",
-      bgColorButton: "#40AAD3",
-      bgExportButtonDesktop: "#DEE2ED",
-      borderColorSelectMobile: "#FFFFFF",
-      borderColorSelectDesktop: "#BDC7DB",
-    },
-    filters: {
-      categoryColor: "#7B8FB7",
-      categorySelectedBgColor: "#F6F8FA",
-      topicSelectedBorderColor: "#2B498C",
-      providerSelectedBorderColor: "#40AAD3",
-      bgColorChip: "#DFE4EE",
-      labelChipColor: "#172B4D",
-      colorButtonMobile: "#FFFFFF",
-      borderColorFilterMobile: "#BDC7DB",
-    },
-  },
-};
-// -- END REGION PALETTE --
-
-// -- START REGION BACKGROUND IMAGE --
-
-// Just change the relative path of the image
-import backgroundImageUrl from "../../resources/landing-bg_1400.jpeg";
-const backgroundImage = `
-  #home {
-    flex-direction: column;
-    display: flex;
-    position: relative;
-    min-height: 100vh;
-    background: url(${backgroundImageUrl});
-    background-size: 100%;
-    background-position-y: -40vw;
-  }
-
-  #home::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-  }
-`;
-// -- END REGION BACKGROUND IMAGE --
-
 export {
   regionMap,
   regionBoundsMap,
@@ -305,7 +165,4 @@ export {
   INITIAL_BOUNDS,
   DEFAULT_QUERY_BOUNDS,
   fieldTitleFromName,
-  CATEGORIES,
-  primaryPalette,
-  backgroundImage,
 };

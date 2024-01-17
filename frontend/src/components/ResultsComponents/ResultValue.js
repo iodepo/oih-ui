@@ -15,12 +15,16 @@ import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
 import CardContent from "@mui/material/CardContent";
 import Icon from "@mui/material/Icon";
-import TypesMap from "../configuration/typesMap";
+import TypesMap from "../portability/typesMap";
 import Link from "@mui/material/Link";
 import { dataServiceUrl } from "../../config/environment";
+import { useAppTranslation } from "ContextManagers/context/AppTranslation";
+import SearchIcon from "@mui/icons-material/Search";
 
 const ResultValue = (props) => {
   const { result } = props;
+  const translationState = useAppTranslation();
+  const [iconLD, setIconLD] = useState(<CodeOutlinedIcon />);
 
   function resolveAsUrl(url) {
     const pattern = /^((http|https):\/\/)/;
@@ -58,6 +62,7 @@ const ResultValue = (props) => {
 
     return formattedDate;
   }
+
   var url =
     result["type"] === "Person" || result["type"] === "Organization"
       ? resolveAsUrl(result["id"])
@@ -229,11 +234,15 @@ const ResultValue = (props) => {
                 </Box>
               )}
               {"indexed_ts" in result && (
-                <>Indexed by ODIS on{" " + formatDate(result["indexed_ts"])}</>
+                <>
+                  {translationState.translation["Indexed by ODIS on"] +
+                    " " +
+                    formatDate(result["indexed_ts"])}
+                </>
               )}
             </Typography>
             <Button
-              startIcon={<CodeOutlinedIcon />}
+              startIcon={iconLD}
               variant="contained"
               disableElevation
               sx={{
@@ -249,8 +258,10 @@ const ResultValue = (props) => {
               href={`${dataServiceUrl}/source?${jsonLdParams}`}
               target="_blank"
               rel="noreferrer noopener"
+              onMouseEnter={() => setIconLD(<SearchIcon />)}
+              onMouseLeave={() => setIconLD(<CodeOutlinedIcon />)}
             >
-              View JSONLD source
+              {translationState.translation["View JSONLD source"]}
             </Button>
           </Box>
         </Stack>

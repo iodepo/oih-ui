@@ -10,12 +10,16 @@ import ButtonGroup from "@mui/material/ButtonGroup";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { useAppTranslation } from "ContextManagers/context/AppTranslation";
+import Alert from "@mui/material/Alert";
 
 const AdvancedSearch = (props) => {
   const { setSearchQuery, searchQuery } = props;
 
+  const translationState = useAppTranslation();
   const [counter, setCounter] = useState(1);
+  const [alertMessage, setAlertMessage] = useState("");
   const [searchAdvancedQuery, setSearchAdvancedQuery] = useState({
     0: {
       category: "Topic",
@@ -24,6 +28,12 @@ const AdvancedSearch = (props) => {
       textfield: "",
     },
   });
+
+  const createSearchQuery = () => {
+    const keys = Object.keys(searchAdvancedQuery);
+
+    keys.forEach((k) => {});
+  };
   return (
     <>
       <Grid item container gap={1}>
@@ -35,9 +45,7 @@ const AdvancedSearch = (props) => {
             sx={{ color: "#BDC7DB" }}
           >
             <LightbulbOutlinedIcon sx={{ color: "#F8BB27" }} />
-            ProTip! Enhance your search precision with AND, OR, and XOR
-            operators, and filter results using 'contains' and 'not contains.'
-            Specify 'all' or 'any' to fine-tune your query.
+            {translationState.translation["Pro Tip"]}
           </Typography>
         </Grid>
         <Grid item lg={12} />
@@ -45,7 +53,7 @@ const AdvancedSearch = (props) => {
           <Typography
             variant="body1"
             alignItems={"start"}
-            sx={{ color: "#1A2C54", fontWeight: 700 }}
+            sx={{ color: "#1A2C54", fontWeight: 700, fontSize: "16px" }}
           >
             Filter
           </Typography>
@@ -56,13 +64,197 @@ const AdvancedSearch = (props) => {
           columnGap={1}
           rowGap={1}
           lg={8}
-          display={{ xs: "none", lg: "flex" }}
+          display={{ xs: "flex", lg: "flex" }}
         >
           {Object.keys(searchAdvancedQuery).map((key) => {
-            console.log(key);
             return (
-              <Grid item lg={12}>
-                <Box display="flex" alignItems={"center"} columnGap={1}>
+              <Grid item xs={12} lg={12} key={key}>
+                <Box display={{ lg: "none" }} sx={{ marginBottom: 1 }}>
+                  <Grid container display={"flex"} spacing={1}>
+                    <Grid item xs={10}>
+                      <Select
+                        defaultValue="Topic"
+                        sx={{
+                          color: "#1A2C54",
+                          fontWeight: 600,
+                          borderRadius: 1,
+                          height: "40px",
+                          width: "100%",
+                        }}
+                        onChange={(e) => {
+                          const obj = {
+                            ...searchAdvancedQuery[key],
+                            category: e.target.value,
+                          };
+                          setSearchAdvancedQuery({
+                            ...searchAdvancedQuery,
+                            [key]: obj,
+                          });
+                        }}
+                      >
+                        <MenuItem value="Topic">
+                          {translationState.translation["Topic"]}
+                        </MenuItem>
+                        <MenuItem value="Provider">
+                          {translationState.translation["Provider"]}
+                        </MenuItem>
+                        <MenuItem value="Authors">
+                          {translationState.translation["Authors"]}
+                        </MenuItem>
+                      </Select>
+                    </Grid>
+                    <Grid item xs={2}>
+                      <IconButton
+                        aria-label="add"
+                        sx={{
+                          border: " 1px solid #aaa",
+                          borderRadius: "6px",
+                          backgroundColor: "#D8EEDE",
+                          marginRight: 1,
+                        }}
+                        onClick={() => {
+                          const obj = {
+                            category: "Topic",
+                            subCategory: "Documents",
+                            operator: "Contains",
+                            textfield: "",
+                          };
+                          setSearchAdvancedQuery({
+                            ...searchAdvancedQuery,
+                            [counter]: obj,
+                          });
+                          setCounter(counter + 1);
+                        }}
+                      >
+                        <AddIcon sx={{ color: "#2DA44E" }} />
+                      </IconButton>
+                      {Object.keys(searchAdvancedQuery).length > 1 && (
+                        <IconButton
+                          aria-label="remove"
+                          sx={{
+                            border: " 1px solid #aaa",
+                            borderRadius: "6px",
+                            backgroundColor: "#FBE5E6",
+                          }}
+                          onClick={(e) => {
+                            const updatedSearchAdvancedQuery = {
+                              ...searchAdvancedQuery,
+                            };
+
+                            delete updatedSearchAdvancedQuery[key];
+
+                            /* const sortedKeys = Object.keys(
+                          updatedSearchAdvancedQuery
+                        ).sort();
+
+                        const newSearchAdvancedQuery = {};
+                        sortedKeys.forEach((sortedKey, index) => {
+                          newSearchAdvancedQuery[index] =
+                            updatedSearchAdvancedQuery[sortedKey];
+                        });
+ */
+                            setSearchAdvancedQuery(updatedSearchAdvancedQuery);
+                          }}
+                        >
+                          <DeleteIcon sx={{ color: "#CC0000" }} />
+                        </IconButton>
+                      )}
+                    </Grid>
+                    {searchAdvancedQuery[key].category === "Topic" && (
+                      <Grid item xs={12}>
+                        <Select
+                          defaultValue="Documents"
+                          sx={{
+                            color: "#1A2C54",
+                            fontWeight: 600,
+                            borderRadius: 1,
+                            height: "40px",
+                            width: "100%",
+                          }}
+                          onChange={(e) => {
+                            const obj = {
+                              ...searchAdvancedQuery[key],
+                              subCategory: e.target.value,
+                            };
+                            setSearchAdvancedQuery({
+                              ...searchAdvancedQuery,
+                              [key]: obj,
+                            });
+                          }}
+                        >
+                          <MenuItem value="Documents">
+                            {translationState.translation["Documents"]}
+                          </MenuItem>
+                        </Select>
+                      </Grid>
+                    )}
+                    {searchAdvancedQuery[key].category === "Provider" && (
+                      <Grid item xs={12}>
+                        <Select
+                          defaultValue="Aquadocs"
+                          sx={{
+                            color: "#1A2C54",
+                            fontWeight: 600,
+                            borderRadius: 1,
+                            height: "40px",
+                            width: "100%",
+                          }}
+                          onChange={(e) => {
+                            const obj = {
+                              ...searchAdvancedQuery[key],
+                              subCategory: e.target.value,
+                            };
+                            setSearchAdvancedQuery({
+                              ...searchAdvancedQuery,
+                              [key]: obj,
+                            });
+                          }}
+                        >
+                          <MenuItem value="Aquadocs">Aquadocs</MenuItem>
+                        </Select>
+                      </Grid>
+                    )}
+                    <Grid item xs={12}>
+                      <Select
+                        defaultValue="Contains"
+                        sx={{
+                          color: "#1A2C54",
+                          fontWeight: 600,
+                          borderRadius: 1,
+                          height: "40px",
+                          width: "100%",
+                        }}
+                      >
+                        <MenuItem value="Contains">Contains</MenuItem>
+                        <MenuItem value="NotContains">Not Contains</MenuItem>
+                        <MenuItem value="Equals">Equals</MenuItem>
+                        <MenuItem value="Not Equals">Not Equals</MenuItem>
+                      </Select>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <OutlinedInput
+                        sx={{ height: "40px", marginRight: 4, width: "100%" }}
+                        onInput={(e) => {
+                          const obj = {
+                            ...searchAdvancedQuery[key],
+                            textfield: e.target.value,
+                          };
+                          setSearchAdvancedQuery({
+                            ...searchAdvancedQuery,
+                            [key]: obj,
+                          });
+                        }}
+                        value={_.textfield}
+                        placeholder="Please enter text"
+                      />
+                    </Grid>
+                  </Grid>
+                </Box>
+                <Box
+                  display={{ xs: "none", lg: "flex" }}
+                  alignItems={"center"}
+                  columnGap={1}
+                >
                   <Select
                     defaultValue="Topic"
                     sx={{
@@ -71,22 +263,77 @@ const AdvancedSearch = (props) => {
                       borderRadius: 1,
                       height: "40px",
                     }}
-                  >
-                    <MenuItem value="Topic">Topic</MenuItem>
-                    <MenuItem value="Provider">Provider</MenuItem>
-                  </Select>
-
-                  <Select
-                    defaultValue="Documents"
-                    sx={{
-                      color: "#1A2C54",
-                      fontWeight: 600,
-                      borderRadius: 1,
-                      height: "40px",
+                    onChange={(e) => {
+                      const obj = {
+                        ...searchAdvancedQuery[key],
+                        category: e.target.value,
+                      };
+                      setSearchAdvancedQuery({
+                        ...searchAdvancedQuery,
+                        [key]: obj,
+                      });
                     }}
                   >
-                    <MenuItem value="Documents">Documents</MenuItem>
+                    <MenuItem value="Topic">
+                      {translationState.translation["Topic"]}
+                    </MenuItem>
+                    <MenuItem value="Provider">
+                      {translationState.translation["Provider"]}
+                    </MenuItem>
+                    <MenuItem value="Authors">
+                      {translationState.translation["Authors"]}
+                    </MenuItem>
                   </Select>
+
+                  {searchAdvancedQuery[key].category === "Topic" && (
+                    <Select
+                      defaultValue="Documents"
+                      sx={{
+                        color: "#1A2C54",
+                        fontWeight: 600,
+                        borderRadius: 1,
+                        height: "40px",
+                      }}
+                      onChange={(e) => {
+                        const obj = {
+                          ...searchAdvancedQuery[key],
+                          subCategory: e.target.value,
+                        };
+                        setSearchAdvancedQuery({
+                          ...searchAdvancedQuery,
+                          [key]: obj,
+                        });
+                      }}
+                    >
+                      <MenuItem value="Documents">
+                        {translationState.translation["Documents"]}
+                      </MenuItem>
+                    </Select>
+                  )}
+
+                  {searchAdvancedQuery[key].category === "Provider" && (
+                    <Select
+                      defaultValue="Aquadocs"
+                      sx={{
+                        color: "#1A2C54",
+                        fontWeight: 600,
+                        borderRadius: 1,
+                        height: "40px",
+                      }}
+                      onChange={(e) => {
+                        const obj = {
+                          ...searchAdvancedQuery[key],
+                          subCategory: e.target.value,
+                        };
+                        setSearchAdvancedQuery({
+                          ...searchAdvancedQuery,
+                          [key]: obj,
+                        });
+                      }}
+                    >
+                      <MenuItem value="Aquadocs">Aquadocs</MenuItem>
+                    </Select>
+                  )}
 
                   <Select
                     defaultValue="Contains"
@@ -119,57 +366,77 @@ const AdvancedSearch = (props) => {
                     placeholder="Please enter text"
                   />
 
-                  <ButtonGroup
-                    disableElevation
-                    variant="contained"
-                    aria-label="Disabled elevation buttons"
+                  <IconButton
+                    aria-label="add"
+                    sx={{
+                      border: " 1px solid #aaa",
+                      borderRadius: "6px",
+                      backgroundColor: "#D8EEDE",
+                    }}
+                    onClick={() => {
+                      const obj = {
+                        category: "Topic",
+                        subCategory: "Documents",
+                        operator: "Contains",
+                        textfield: "",
+                      };
+                      setSearchAdvancedQuery({
+                        ...searchAdvancedQuery,
+                        [counter]: obj,
+                      });
+                      setCounter(counter + 1);
+                    }}
                   >
-                    <IconButton
-                      aria-label="add"
-                      sx={{
-                        border: " 1px solid #aaa",
-                        borderRadius: "6px 0 0 6px",
-                      }}
-                      onClick={() => {
-                        setCounter((c) => c + 1);
-                        const obj = {
-                          id: counter,
-                          category: "Topic",
-                          subCategory: "Documents",
-                          operator: "Contains",
-                          textfield: "",
-                        };
-                        setSearchAdvancedQuery({ ...searchAdvancedQuery, obj });
-                      }}
-                    >
-                      <AddIcon sx={{ color: "#1A2C54" }} />
-                    </IconButton>
+                    <AddIcon sx={{ color: "#2DA44E" }} />
+                  </IconButton>
+                  {Object.keys(searchAdvancedQuery).length > 1 && (
                     <IconButton
                       aria-label="remove"
                       sx={{
                         border: " 1px solid #aaa",
-                        borderLeft: "none",
-                        borderRadius: "0 6px 6px 0",
+                        borderRadius: "6px",
+                        backgroundColor: "#FBE5E6",
                       }}
-                      disabled={searchAdvancedQuery.length === 1}
                       onClick={(e) => {
+                        debugger;
                         const updatedSearchAdvancedQuery = {
                           ...searchAdvancedQuery,
                         };
 
                         delete updatedSearchAdvancedQuery[key];
 
+                        /* const sortedKeys = Object.keys(
+                          updatedSearchAdvancedQuery
+                        ).sort();
+
+                        const newSearchAdvancedQuery = {};
+                        sortedKeys.forEach((sortedKey, index) => {
+                          newSearchAdvancedQuery[index] =
+                            updatedSearchAdvancedQuery[sortedKey];
+                        });
+ */
                         setSearchAdvancedQuery(updatedSearchAdvancedQuery);
                       }}
                     >
-                      <RemoveIcon sx={{ color: "#1A2C54" }} />
+                      <DeleteIcon sx={{ color: "#CC0000" }} />
                     </IconButton>
-                  </ButtonGroup>
+                  )}
                 </Box>
               </Grid>
             );
           })}
-          <Grid item lg={12}>
+          {alertMessage && (
+            <Grid item xs={12}>
+              <Alert severity="error">{alertMessage}</Alert>
+            </Grid>
+          )}
+          <Grid
+            item
+            xs={12}
+            display={"flex"}
+            flexDirection={{ xs: "column", lg: "row" }}
+            sx={{ width: "100%" }}
+          >
             <Button
               variant="contained"
               disableElevation
@@ -179,7 +446,7 @@ const AdvancedSearch = (props) => {
                 textTransform: "none",
               }}
             >
-              Apply
+              {translationState.translation["Apply"]}
             </Button>
             <Button
               variant="text"
@@ -202,7 +469,7 @@ const AdvancedSearch = (props) => {
                 padding: 0,
               }}
             >
-              Clear
+              {translationState.translation["Clear"]}
             </Button>
           </Grid>
         </Grid>

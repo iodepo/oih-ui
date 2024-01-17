@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { fieldTitleFromName } from "../configuration/constants";
+import { fieldTitleFromName } from "../../constants";
 import { useAppTranslation } from "ContextManagers/context/AppTranslation";
 
 export default function FacetsFullWidth({
