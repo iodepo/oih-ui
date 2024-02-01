@@ -1,4 +1,4 @@
-//  --  START MAP REGION --
+import { boundsToQuery } from "utilities/mapUtility";
 
 /* Bounds for regions on the map.
 
@@ -66,103 +66,9 @@ const regionMap = {
   ],
 };
 
-const boundsToQuery = (mb) => {
-  /* convert '{"_sw":{"lon":17.841823484137535,"lat":-59.72391567923438},"_ne":{"lon":179.1301535622635,"lat":49.99895151432449}}'
-      to [_sw.lat,_sw.lon TO _ne.lat,_ne.lon] ([-90,-180 TO 90,180])
-    */
-  const [_sw, _ne] = mb;
-  return `[${_sw.lat},${_sw.lon} TO ${_ne.lat},${_ne.lon}]`;
-};
-
-const regionBoundsMap = Object.fromEntries(
-  Object.entries(regionMap).map(([k, v]) => [k, boundsToQuery(v)])
-);
-
 const INITIAL_BOUNDS = [
   { lon: -20, lat: -50 }, // w s
   { lon: 320, lat: 50 }, // e n
 ];
-const DEFAULT_QUERY_BOUNDS = boundsToQuery(INITIAL_BOUNDS);
 
-//  --  END MAP REGION --
-
-//  --  START SEARCHBAR REGION --
-
-/* Name: title mapping of the regions that show up in the search bar.
-  Add more items here to search different regions.
-*/
-const PROMOTED_REGIONS = {
-  Global: "Global",
-  //        'Atlantic Ocean': 'Atlantic Ocean',
-  "Latin America and the Caribbean": "Latin America & the Caribbean",
-  Africa: "Africa",
-  Oceania: "Pacific Small Island Developing States",
-  Europe: "Europe",
-  Americas: "North & South America",
-  Asia: "Asia",
-};
-
-/* Sample queries for the home page. 4 random items from this list will be added
-   on each view/session
-*/
-const SAMPLE_QUERIES = [
-  "Coral Reef",
-  "Rare Species",
-  "Pelagic",
-  "Bathymetric",
-  "Whale",
-  "Shark",
-  "Hydrothermal Vent",
-  "Tidal",
-  "Heavy Metals",
-];
-
-const randomSampleQueries = (n) =>
-  SAMPLE_QUERIES.map((e) => [Math.random(), e])
-    .sort((a, b) => a[0] - b[0])
-    .map(([_, e]) => e)
-    .slice(0, n);
-
-//  --  END SEARCHBAR REGION --
-
-/*
-Field name -> Title mapping for facets.
-
-Note that this does not include the type_ prefix, so that it will be
-used for any of the dt_ or txt_ or n_ fields, if available.
-*/
-const fieldNameMap = {
-  includedindatacatalog: "Catalog",
-  jobtitle: "Job Title",
-  knowsabout: "Knows About",
-  knowslanguage: "Language",
-  memberof: "Within Directory",
-  variablemeasured: "Variable Measured",
-  educationalcredentialawarded: "Credential Awarded",
-  vehiclespecialusage: "Vehicle Usage",
-  areaserved: "Area",
-  startyear: "Starting Between",
-  endyear: "Ending Between",
-};
-
-const fieldTitleFromName = (facet_name) => {
-  // strip off id_/txt_ from the leading bit.
-  const field_name = facet_name.substring(facet_name.indexOf("_") + 1);
-
-  const lower_field_name = field_name.toLowerCase();
-  if (fieldNameMap[lower_field_name]) {
-    return fieldNameMap[lower_field_name];
-  }
-  return field_name.charAt(0).toUpperCase() + field_name.slice(1);
-};
-
-export {
-  regionMap,
-  regionBoundsMap,
-  PROMOTED_REGIONS,
-  SAMPLE_QUERIES,
-  randomSampleQueries,
-  INITIAL_BOUNDS,
-  DEFAULT_QUERY_BOUNDS,
-  fieldTitleFromName,
-};
+export { regionMap, INITIAL_BOUNDS };
