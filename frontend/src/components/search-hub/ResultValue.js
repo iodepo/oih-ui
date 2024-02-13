@@ -20,6 +20,7 @@ import Link from "@mui/material/Link";
 import { dataServiceUrl } from "../../config/environment";
 import { useAppTranslation } from "context/context/AppTranslation";
 import SearchIcon from "@mui/icons-material/Search";
+import { trackingMatomoClickResults } from "utilities/trackingUtility";
 
 const ResultValue = (props) => {
   const { result } = props;
@@ -72,11 +73,10 @@ const ResultValue = (props) => {
   const [truncate, setTruncate] = useState(true);
   const jsonLdParams = new URLSearchParams({ id: result["id"] }).toString();
   const sendGoogleEvent = () => {
-    gtag("config", "G-MQDK6BB0YQ");
+    /*gtag("config", "G-MQDK6BB0YQ");
     gtag("event", "click_on_result", {
       oih_result_target: url,
-    });
-
+    });*/
     /*
         //GA4 debug code
         const measurement_id = `G-MQDK6BB0YQ`;
@@ -142,7 +142,8 @@ const ResultValue = (props) => {
             href={url}
             underline="hover"
             target="_blank"
-            onClick={sendGoogleEvent}
+            onClick={() => trackingMatomoClickResults(url)}
+            onAuxClick={() => trackingMatomoClickResults(url)}
           >
             <Typography sx={{ fontSize: 21, color: "#0F1A31" }} gutterBottom>
               {result["name"]}

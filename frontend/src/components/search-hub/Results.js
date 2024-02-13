@@ -4,11 +4,11 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSearchParam } from "utilities/generalUtility";
 import { dataServiceUrl } from "../../config/environment";
-import { CATEGORIES } from "../../portability/configuration";
+import { CATEGORIES, ITEMS_PER_PAGE } from "../../portability/configuration";
 import { regionMap, INITIAL_BOUNDS } from "../../constants";
 import { boundsToQuery, regionBoundsMap } from "utilities/mapUtility";
 import throttle from "lodash/throttle";
-import Pagination, { ITEMS_PER_PAGE } from "./Pagination";
+import Pagination from "./Pagination";
 import { Popup } from "react-map-gl";
 import { useAppTranslation } from "context/context/AppTranslation";
 import Search from "components/search/Search";
@@ -36,7 +36,7 @@ import DialogContent from "@mui/material/DialogContent";
 import {
   expandMapBounds,
   containsMapBounds,
-  mapboxBounds_toQuery,
+  mapLibreBounds_toQuery,
 } from "utilities/mapUtility";
 import ResultValue from "./ResultValue";
 import { cutWithDots } from "components/results/ResultDetails";
@@ -120,7 +120,7 @@ export default function Results() {
       const params = new URLSearchParams({
         ...(searchType !== "SpatialData" ? { document_type: searchType } : {}),
         facetType: "the_geom",
-        facetName: mapboxBounds_toQuery(mapBounds, region),
+        facetName: mapLibreBounds_toQuery(mapBounds, region),
         rows: ITEMS_PER_PAGE + showMorePages,
         start: page * (ITEMS_PER_PAGE + showMorePages),
       });
@@ -257,7 +257,7 @@ export default function Results() {
         ...(searchType !== "SpatialData" ? { document_type: searchType } : {}),
         search_text: searchText,
         facetType: "the_geom",
-        facetName: mapboxBounds_toQuery(expandedMapBounds, region),
+        facetName: mapLibreBounds_toQuery(expandedMapBounds, region),
       });
       if (region !== "" && region.toUpperCase() !== "GLOBAL") {
         params.append("region", region);
@@ -349,46 +349,6 @@ export default function Results() {
     else return boundsToQuery(INITIAL_BOUNDS);
   };
 
-  const initial_bounds = () => {
-    const bounds = regionMap[region.replaceAll(" ", "_")];
-    if (bounds) return bounds;
-    else return INITIAL_BOUNDS;
-  };
-
-  const maybe_set_selected_element = (eltList) => {
-    const { zoom = 0 } = viewport;
-    if (!eltList || !eltList.length) {
-      return undefined;
-    }
-    if (zoom < 3) {
-      return undefined;
-    }
-    // // one hit
-    // if (eltList.length == 1) {
-    //     setSelectedElem(eltList[0]);
-    //     return eltList[0];
-    // }
-    // Priority to points, maybe there's a better option, but choose one of 3
-    const points = eltList.filter((e) => e.layer.type == "circle");
-    if (points.length) {
-      if (points.length < 3) {
-        const elem = points.pop();
-        setSelectedElem(elem);
-        return elem;
-      }
-      return undefined;
-    }
-    if (zoom > 3 && eltList && eltList.length < 100) {
-      const elements = eltList.sort(
-        (a, b) => a.properties.geom_length - b.properties.geom_length
-      );
-      const elem = elements[0];
-      setSelectedElem(elem);
-      return elem;
-    }
-    return undefined;
-  };
-
   const setValue = (i, value) =>
     setFacetFacetValues((values) => [
       ...values.slice(0, i),
@@ -406,6 +366,7 @@ export default function Results() {
 
   const { zoom = 0 } = viewport;
   const paletteFilter = "custom.resultPage.filters.";
+
   return (
     <>
       <Search
@@ -422,7 +383,7 @@ export default function Results() {
         }}
       />
       <Container maxWidth="lg" sx={{ marginBottom: { xs: 5, lg: 0 } }}>
-        <Grid container mt={{ xs: 4, lg: 0 }}>
+        <Grid container mt={{ xs: 4, lg: 0 }} gap={{ xs: 1, lg: 0 }}>
           <Grid item lg={3} display={{ xs: "none", lg: "block" }}>
             <Accordion
               defaultExpanded
@@ -459,6 +420,7 @@ export default function Results() {
                   facetValues={facetValues}
                   setFacetFacetValues={setFacetFacetValues}
                   facets={facets}
+                  facetQuery={facetQuery}
                   isMobile={false}
                 />
               </AccordionDetails>
@@ -471,54 +433,6 @@ export default function Results() {
             justifyContent={"space-between"}
             gap={2}
           >
-            <Box>
-              {filterChosenMobile.map((item, index) => {
-                return (
-                  <Button
-                    key={index}
-                    variant="outlined"
-                    startIcon={
-                      item.type === "searchType" ? <></> : <ClearIcon />
-                    }
-                    disabled={item.type === "searchType" ? true : false}
-                    sx={{
-                      color: paletteFilter + "categoryColor",
-                      backgroundColor:
-                        paletteFilter + "categorySelectedBgColor",
-                      marginRight: 1,
-                      marginBottom: filterChosenMobile.length > 1 ? 1 : 0,
-                      "&.MuiButton-outlined": {
-                        borderColor: paletteFilter + "borderColorFilterMobile",
-                      },
-                    }}
-                    onClick={() => {
-                      if (item.type === "provider") setSelectedProvider("");
-                      clear();
-                      setFilterChosenMobile((f) =>
-                        f.filter((d) => d.type !== item.type)
-                      );
-                    }}
-                    /* endIcon={
-                      <Chip
-                        size="small"
-                        sx={{
-                          maxWidth: "40px",
-                          maxHeight: "20px",
-                          ".MuiChip-label": {
-                            overflow: "visible",
-                            fontSize: "9px",
-                          },
-                        }}
-                        label={item.count}
-                      />
-                    } */
-                  >
-                    {translationState.translation[item.text] ||
-                      cutWithDots(item.text, 10)}
-                  </Button>
-                );
-              })}
-            </Box>
             <Box display={"flex"} alignItems={"center"} gap={1}>
               <Button
                 variant="outlined"
@@ -573,6 +487,7 @@ export default function Results() {
                     setFacetFacetValues={setFacetFacetValues}
                     facets={facets}
                     isMobile={true}
+                    facetQuery={facetQuery}
                   />
                 </DialogContent>
                 {/* 
@@ -583,19 +498,56 @@ export default function Results() {
                   </Button>
                 </DialogActions> */}
               </Dialog>
-              <IconButton
-                aria-label="filterListIcon"
-                sx={{
-                  border: 1,
-                  borderColor: paletteFilter + "borderColorFilterMobile",
-                  borderRadius: 1,
-                  maxHeight: "36px",
-                }}
-              >
-                <FilterListIcon />
-              </IconButton>
             </Box>
+            <IconButton
+              aria-label="filterListIcon"
+              sx={{
+                border: 1,
+                borderColor: paletteFilter + "borderColorFilterMobile",
+                borderRadius: 1,
+                maxHeight: "36px",
+              }}
+            >
+              <FilterListIcon />
+            </IconButton>
           </Grid>
+          <Box
+            sx={{
+              display: { xs: "flex", lg: "none" },
+              overflowX: "auto",
+              gap: 1,
+            }}
+          >
+            {filterChosenMobile.map((item, index) => {
+              return (
+                <Button
+                  key={index}
+                  variant="outlined"
+                  startIcon={item.type === "searchType" ? <></> : <ClearIcon />}
+                  disabled={item.type === "searchType" ? true : false}
+                  sx={{
+                    color: paletteFilter + "categoryColor",
+                    backgroundColor: paletteFilter + "categorySelectedBgColor",
+                    "&.MuiButton-outlined": {
+                      borderColor: paletteFilter + "borderColorFilterMobile",
+                    },
+                    flex: "0 0 auto", // Imposta larghezza fissa
+                    minWidth: 0,
+                  }}
+                  onClick={() => {
+                    if (item.type === "provider") setSelectedProvider("");
+                    clear();
+                    setFilterChosenMobile((f) =>
+                      f.filter((d) => d.type !== item.type)
+                    );
+                  }}
+                >
+                  {translationState.translation[item.text] ||
+                    cutWithDots(item.text, 10)}
+                </Button>
+              );
+            })}
+          </Box>
           <Grid item lg={9} xs={12} columnSpacing={2}>
             <Stack spacing={2}>
               <Box

@@ -85,11 +85,16 @@ export default function TypesCount() {
                 <Grid item xs={5}>
                   <SearchHubEntrypoint />
                 </Grid>
-                <Grid item container spacing={2} xs={7} sx={{ p: "24px" }}>
+                <Grid
+                  item
+                  container
+                  spacing={2}
+                  xs={7} /* sx={{ p: "24px" }} */
+                >
                   <Grid item xs={12}>
                     <Search />
                   </Grid>
-                  <Grid item container spacing={2} p={3} xs={12}>
+                  <Grid item container spacing={2} xs={12}>
                     {CATEGORIES.map((cat, index) => {
                       if (cat.id !== "SpatialData")
                         return (

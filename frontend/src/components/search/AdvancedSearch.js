@@ -6,10 +6,8 @@ import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import LightbulbOutlinedIcon from "@mui/icons-material/LightbulbOutlined";
 import OutlinedInput from "@mui/material/OutlinedInput";
-import ButtonGroup from "@mui/material/ButtonGroup";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
-import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useAppTranslation } from "context/context/AppTranslation";
 import Alert from "@mui/material/Alert";
@@ -22,7 +20,7 @@ import TextField from "@mui/material/TextField";
 
 const AdvancedSearch = (props) => {
   const { setSearchQuery, searchQuery, facets } = props;
-
+  const palette = "custom.resultPage.searchBar.advancedSearch.";
   const translationState = useAppTranslation();
   const [facetsToShow, setFacetsToShow] = useState(facets);
   const [alertMessage, setAlertMessage] = useState("");
@@ -93,9 +91,9 @@ const AdvancedSearch = (props) => {
             variant="body2"
             alignItems={"start"}
             display={{ xs: "none", lg: "flex" }}
-            sx={{ color: "#BDC7DB" }}
+            sx={{ color: palette + "colorTextProTip" }}
           >
-            <LightbulbOutlinedIcon sx={{ color: "#F8BB27" }} />
+            <LightbulbOutlinedIcon sx={{ color: palette + "iconProtip" }} />
             {translationState.translation["Pro Tip"]}
           </Typography>
         </Grid>
@@ -113,14 +111,18 @@ const AdvancedSearch = (props) => {
           <Typography
             variant="body1"
             alignItems={"start"}
-            sx={{ color: "#1A2C54", fontWeight: 700, fontSize: "16px" }}
+            sx={{
+              color: palette + "colorTypography",
+              fontWeight: 700,
+              fontSize: "16px",
+            }}
           >
             Search for:
           </Typography>
           <Select
             defaultValue="Documents"
             sx={{
-              color: "#1A2C54",
+              color: palette + "colorTypography",
               fontWeight: 600,
               borderRadius: 1,
               height: "30px",
@@ -174,7 +176,7 @@ const AdvancedSearch = (props) => {
                           <Divider
                             textAlign="left"
                             sx={{
-                              color: "#7B8FB7",
+                              color: palette + "dividerColor",
                               fontWeight: 700,
                               "&::before, &::after": {
                                 borderColor: "rgba(0, 0, 0, 0.50);",
@@ -192,7 +194,7 @@ const AdvancedSearch = (props) => {
                               <Select
                                 defaultValue={"Provider"}
                                 sx={{
-                                  color: "#1A2C54",
+                                  color: palette + "colorTypography",
                                   fontWeight: 600,
                                   borderRadius: 1,
                                   height: "40px",
@@ -232,8 +234,8 @@ const AdvancedSearch = (props) => {
                                 sx={{
                                   height: "40px",
                                   minWidth: "44px",
-                                  borderColor: "#DEE2ED",
-                                  color: "#1A2C54",
+                                  borderColor: palette + "borderColor",
+                                  color: palette + "colorTypography",
                                   width: "50px",
                                 }}
                                 onClick={() => {
@@ -269,8 +271,8 @@ const AdvancedSearch = (props) => {
                                 sx={{
                                   height: "40px",
                                   minWidth: "44px",
-                                  borderColor: "#DEE2ED",
-                                  color: "#1A2C54",
+                                  borderColor: palette + "borderColor",
+                                  color: palette + "colorTypography",
                                   width: "50px",
                                 }}
                                 onClick={() => {
@@ -338,7 +340,7 @@ const AdvancedSearch = (props) => {
                               <Select
                                 defaultValue="Contains"
                                 sx={{
-                                  color: "#1A2C54",
+                                  color: palette + "colorTypography",
                                   fontWeight: 600,
                                   borderRadius: 1,
                                   height: "40px",
@@ -428,7 +430,7 @@ const AdvancedSearch = (props) => {
                                   <Typography
                                     variant="body1"
                                     sx={{
-                                      color: "#DEE2ED",
+                                      color: palette + "andOrColor",
                                       paddingLeft: 2,
                                       fontWeight: 700,
                                       marginBottom: "3px",
@@ -447,7 +449,7 @@ const AdvancedSearch = (props) => {
                             <Divider
                               textAlign="left"
                               sx={{
-                                color: "#7B8FB7",
+                                color: palette + "dividerColor",
                                 fontWeight: 700,
                                 "&::before, &::after": {
                                   borderColor: "rgba(0, 0, 0, 0.50);",
@@ -466,7 +468,7 @@ const AdvancedSearch = (props) => {
                         <Divider
                           textAlign="left"
                           sx={{
-                            color: "#7B8FB7",
+                            color: palette + "dividerColor",
                             fontWeight: 700,
                             "&::before, &::after": {
                               borderColor: "rgba(0, 0, 0, 0.50);",
@@ -490,7 +492,7 @@ const AdvancedSearch = (props) => {
                             <Select
                               defaultValue={"Provider"}
                               sx={{
-                                color: "#1A2C54",
+                                color: palette + "colorTypography",
                                 fontWeight: 600,
                                 borderRadius: 1,
                                 height: "40px",
@@ -525,7 +527,7 @@ const AdvancedSearch = (props) => {
                             <Select
                               defaultValue="Contains"
                               sx={{
-                                color: "#1A2C54",
+                                color: palette + "colorTypography",
                                 fontWeight: 600,
                                 borderRadius: 1,
                                 height: "40px",
@@ -609,8 +611,8 @@ const AdvancedSearch = (props) => {
                               sx={{
                                 height: "40px",
                                 minWidth: "44px",
-                                borderColor: "#DEE2ED",
-                                color: "#1A2C54",
+                                borderColor: palette + "borderColor",
+                                color: palette + "colorTypography",
                                 width: "50px",
                               }}
                               onClick={() => {
@@ -646,8 +648,8 @@ const AdvancedSearch = (props) => {
                               sx={{
                                 height: "40px",
                                 minWidth: "44px",
-                                borderColor: "#DEE2ED",
-                                color: "#1A2C54",
+                                borderColor: palette + "borderColor",
+                                color: palette + "colorTypography",
                                 width: "50px",
                               }}
                               onClick={() => {
@@ -717,7 +719,7 @@ const AdvancedSearch = (props) => {
                               <Typography
                                 variant="body1"
                                 sx={{
-                                  color: "#DEE2ED",
+                                  color: palette + "andOrColor",
                                   paddingLeft: 2,
                                   fontWeight: 700,
                                   marginBottom: "3px",
@@ -734,7 +736,7 @@ const AdvancedSearch = (props) => {
                         <Divider
                           textAlign="left"
                           sx={{
-                            color: "#7B8FB7",
+                            color: palette + "dividerColor",
                             fontWeight: 700,
                             "&::before, &::after": {
                               borderColor: "rgba(0, 0, 0, 0.50);",
@@ -754,7 +756,7 @@ const AdvancedSearch = (props) => {
                             <Select
                               defaultValue={""}
                               sx={{
-                                color: "#1A2C54",
+                                color: palette + "colorTypography",
                                 fontWeight: 600,
                                 borderRadius: 1,
                                 height: "40px",
@@ -806,7 +808,7 @@ const AdvancedSearch = (props) => {
               onClick={createSearchQuery}
               sx={{
                 borderRadius: 2,
-                backgroundColor: "#40AAD3",
+                backgroundColor: palette + "buttonBgColor",
                 textTransform: "none",
               }}
             >
@@ -833,7 +835,7 @@ const AdvancedSearch = (props) => {
                 })
               }
               sx={{
-                color: "#2B498C",
+                color: palette + "clearButtonColor",
                 textTransform: "none",
                 fontSize: "14px",
                 padding: 0,

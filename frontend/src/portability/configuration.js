@@ -6,14 +6,15 @@ import spatial from "../resources/svg/spatial.svg";
 import vessels from "../resources/svg/vessels.svg";
 import projects from "../resources/svg/projects.svg";
 import datasets from "../resources/svg/datasets.svg";
-import ReactGA from "react-ga4";
+/* import ReactGA from "react-ga4";
 
 ReactGA.initialize([
   {
     trackingId: "G-QJ5XJMZFXW",
   },
-]);
+]); */
 
+export const ITEMS_PER_PAGE = 10;
 /*
 Field name -> Title mapping for facets.
 
@@ -154,10 +155,13 @@ const primaryPalette = {
         labelColor: colors.primaryColor.light1,
       },
     },
-    footer: {
-      labelColor: colors.primaryColor.light,
-      bgColorButton: colors.primaryColor.light,
-      labelColorButton: colors.primaryColor.dark2,
+    mapViewerEntrypoint: {
+      colorTypography: colors.neutral.main,
+      buttonBgColor: colors.accentColor.main,
+    },
+    searchHubEntrypoint: {
+      colorTypography: colors.neutral.main,
+      buttonBgColor: colors.accentColor.main,
     },
   },
   resultPage: {
@@ -172,6 +176,16 @@ const primaryPalette = {
       bgExportButton: colors.primaryColor.light,
       borderColorSelect: colors.primaryColor.light2,
       colorTextProTip: colors.primaryColor.light2,
+      advancedSearch: {
+        iconProtip: "#F8BB27",
+        colorTextProTip: colors.primaryColor.light2,
+        colorTypography: colors.primaryColor.dark2,
+        dividerColor: colors.primaryColor.darker3,
+        borderColor: colors.primaryColor.light,
+        andOrColor: colors.primaryColor.light,
+        buttonBgColor: colors.accentColor.main,
+        clearButtonColor: colors.primaryColor.main,
+      },
     },
     filters: {
       textFilter: colors.primaryColor.dark2,
@@ -184,6 +198,12 @@ const primaryPalette = {
       colorButtonMobile: colors.primaryColor.light,
       colorButtonDesktop: colors.accentColor.main,
       borderColorFilterMobile: colors.primaryColor.light2,
+    },
+  },
+  map: {
+    container: {
+      openBgArrow: colors.neutral.main,
+      openBgArrowHover: colors.primaryColor.main,
     },
   },
 };

@@ -27,6 +27,24 @@ const CardTopic = (props) => {
             border: 2,
             borderColor: palette + "borderColor",
             display: "flex",
+            transition: "transform 0.3s",
+            "&:hover": {
+              transform: "scale(1.1)",
+            },
+            "@keyframes pulse": {
+              "0%": {
+                transform: "scale(1)",
+              },
+              "50%": {
+                transform: "scale(1.1)",
+              },
+              "100%": {
+                transform: "scale(1)",
+              },
+            },
+            "&:hover .MuiAvatar-root": {
+              animation: "pulse 1s infinite",
+            },
           }}
           elevation={0}
         >

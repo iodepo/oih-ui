@@ -1,7 +1,5 @@
 import Box from "@mui/material/Box";
 import React, { useCallback, useState } from "react";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import Divider from "@mui/material/Divider";
 import Toolbar from "@mui/material/Toolbar";
 import List from "@mui/material/List";
@@ -13,8 +11,6 @@ import Button from "@mui/material/Button";
 import { useAppTranslation } from "context/context/AppTranslation";
 import { fieldTitleFromName } from "utilities/generalUtility";
 import GenericFacet from "./GenericFacet";
-import Tooltip from "@mui/material/Tooltip";
-import IconButton from "@mui/material/IconButton";
 
 const formatter = Intl.NumberFormat([], { notation: "compact" });
 
@@ -34,6 +30,7 @@ const FilterBy = (props) => {
     filterChosenMobile,
     selectedProvider,
     setSelectedProvider,
+    facetQuery,
   } = props;
 
   const changeSearchType = (type) => {
@@ -59,7 +56,8 @@ const FilterBy = (props) => {
   const drawFacets = (facet, i) => {
     const title = fieldTitleFromName(facet.name);
     if (title) {
-      switch (title) {
+      /* Old version PROVIDER */
+      /*  switch (title) {
         case "Provider":
           return (
             <>
@@ -183,7 +181,22 @@ const FilterBy = (props) => {
               setIsClearAll={setIsClearAll}
             />
           );
-      }
+      } */
+      return (
+        <GenericFacet
+          setFilterChosenMobile={setFilterChosenMobile}
+          filterChosenMobile={filterChosenMobile}
+          facet={facet}
+          i={i}
+          title={title}
+          setValue={setValue}
+          facetSearch={facetSearch}
+          clear={clear}
+          isClearAll={isClearAll}
+          setIsClearAll={setIsClearAll}
+          facetQuery={facetQuery}
+        />
+      );
     }
   };
 
@@ -207,64 +220,64 @@ const FilterBy = (props) => {
         }}
       >
         {translationState.translation["Topic"]}
-        <FilterListIcon />
       </Toolbar>
       <Divider />
 
       <List>
         {tabList.map((tab, index) => {
-          return (
-            <ListItem key={tab.id} disablePadding>
-              <ListItemButton
-                selected={tab.id === searchType}
-                sx={{
-                  justifyContent: "space-between",
-                  height: "35px",
-                  "&.Mui-selected": {
-                    backgroundColor: palette + "categorySelectedBgColor",
-                    borderLeft: 4,
-                    borderColor: palette + "topicSelectedBorderColor",
-                  },
-                }}
-                onClick={() => {
-                  changeSearchType(tab.id);
-                  const updatedItems = filterChosenMobile.map((f) => {
-                    if (f.type === "searchType") {
-                      return {
-                        ...f,
-                        text: tab.text,
-                      };
-                    }
-                    return f;
-                  });
-
-                  setFilterChosenMobile(updatedItems);
-                }}
-              >
-                <ListItemText
-                  primaryTypographyProps={{
-                    noWrap: true,
-                    variant: "subtitle2",
-                  }}
-                  sx={{ marginRight: "10px" }}
-                  primary={translationState.translation[tab.text]}
-                />
-                <Chip
+          if (tab.id !== "")
+            return (
+              <ListItem key={tab.id} disablePadding>
+                <ListItemButton
+                  selected={tab.id === searchType}
                   sx={{
-                    background: palette + "bgColorChip",
-                    height: "20px",
-                    fontSize: "12px",
-                    borderRadius: "12px",
-                    ".MuiChip-label": {
-                      padding: "5px",
-                      color: palette + "labelChipColor",
+                    justifyContent: "space-between",
+                    height: "35px",
+                    "&.Mui-selected": {
+                      backgroundColor: palette + "categorySelectedBgColor",
+                      borderLeft: 4,
+                      borderColor: palette + "topicSelectedBorderColor",
                     },
                   }}
-                  label={formatter.format(counts[tab.id] || 0)}
-                />
-              </ListItemButton>
-            </ListItem>
-          );
+                  onClick={() => {
+                    changeSearchType(tab.id);
+                    const updatedItems = filterChosenMobile.map((f) => {
+                      if (f.type === "searchType") {
+                        return {
+                          ...f,
+                          text: tab.text,
+                        };
+                      }
+                      return f;
+                    });
+
+                    setFilterChosenMobile(updatedItems);
+                  }}
+                >
+                  <ListItemText
+                    primaryTypographyProps={{
+                      noWrap: true,
+                      variant: "subtitle2",
+                    }}
+                    sx={{ marginRight: "10px" }}
+                    primary={translationState.translation[tab.text]}
+                  />
+                  <Chip
+                    sx={{
+                      background: palette + "bgColorChip",
+                      height: "20px",
+                      fontSize: "12px",
+                      borderRadius: "12px",
+                      ".MuiChip-label": {
+                        padding: "5px",
+                        color: palette + "labelChipColor",
+                      },
+                    }}
+                    label={formatter.format(counts[tab.id] || 0)}
+                  />
+                </ListItemButton>
+              </ListItem>
+            );
         })}
       </List>
       {/* End Topics */}
@@ -276,7 +289,11 @@ const FilterBy = (props) => {
               a.name === "txt_provider" ? -1 : b.name === "txt_provider" ? 1 : 0
             )
             .map((facet, i) => {
-              return <Box key={i}>{drawFacets(facet, i)}</Box>;
+              return (
+                <Box sx={{ minHeight: "450px" }} key={i}>
+                  {drawFacets(facet, i)}
+                </Box>
+              );
             })}
         </>
       )}

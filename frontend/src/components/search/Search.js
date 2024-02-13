@@ -4,7 +4,7 @@ import {
   useNavigate,
   useLocation,
   useSearchParams,
-  RouterLink,
+  /* RouterLink, */
 } from "react-router-dom";
 import { useSearchParam } from "utilities/generalUtility";
 import { PROMOTED_REGIONS } from "../../portability/configuration";
@@ -33,14 +33,13 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AdvancedSearch from "./AdvancedSearch";
 import { Export } from "../search-hub/Export";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
 import Avatar from "@mui/material/Avatar";
 import FrenchFlag from "../../resources/svg/FrenchFlag.svg";
 import RussianFlag from "../../resources/svg/RussianFlag.svg";
 import EnglishFlag from "../../resources/svg/EnglishFlag.svg";
 import SpanishFlag from "../../resources/svg/SpanishFlag.svg";
+import Tooltip from "@mui/material/Tooltip";
+import { trackingMatomoSearch } from "utilities/trackingUtility";
 
 // Set once, will change for every load, not every key click
 const currentSampleQueries = randomSampleQueries(4);
@@ -91,19 +90,20 @@ export default function Search(props) {
       translationState.translation["Partners"],
     [region, useCookies.getCookie("language")]
   );
-  const sendGoogleEvent = () => {
-    let searchElements = document.getElementsByName("search");
+  const sendMatomoEvent = (regionValue) => {
+    /*let searchElements = document.getElementsByName("search");
     let search = searchElements[0];
     let regionElements = document.getElementsByName("searchRegion");
-    let region = regionElements[0];
+    let region = regionElements[0];*/
+
     //console.log(element.value);
-    gtag("config", "G-MQDK6BB0YQ");
+    /*gtag("config", "G-MQDK6BB0YQ");
     gtag("event", "click_on_search", {
       oih_search_text: search.value,
       oih_search_region: region.value,
-    });
+    });*/
+    trackingMatomoSearch(searchQuery, regionValue, resultCount);
   };
-
   const searchAdvancedSearch = (type) => {
     navigate(
       `/results/${type}?${region ? "region=" + region : ""}&accordionOpen=true`
@@ -139,7 +139,7 @@ export default function Search(props) {
       placeholder={placeholder}
       searchQuery={searchQuery}
       setSearchQuery={setSearchQuery}
-      sendGoogleEvent={sendGoogleEvent}
+      sendMatomoEvent={sendMatomoEvent}
       handleSubmit={handleSubmit}
       changeTranslation={changeTranslation}
       url={url}
@@ -157,7 +157,7 @@ export default function Search(props) {
       placeholder={placeholder}
       searchQuery={searchQuery}
       setSearchQuery={setSearchQuery}
-      sendGoogleEvent={sendGoogleEvent}
+      sendMatomoEvent={sendMatomoEvent}
       handleSubmit={handleSubmit}
       changeTranslation={changeTranslation}
       hrefFor={hrefFor}
@@ -174,7 +174,7 @@ const SearchHome = (props) => {
     placeholder,
     searchQuery,
     setSearchQuery,
-    sendGoogleEvent,
+    sendMatomoEvent,
     handleSubmit,
     changeTranslation,
     hrefFor,
@@ -265,6 +265,12 @@ const SearchHome = (props) => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               name="search"
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  sendMatomoEvent(region);
+                  handleSubmit();
+                }
+              }}
             />
           </Box>
 
@@ -278,7 +284,7 @@ const SearchHome = (props) => {
               textTransform: "none",
             }}
             onClick={() => {
-              sendGoogleEvent();
+              sendMatomoEvent(region);
               handleSubmit();
             }}
           >
@@ -294,11 +300,7 @@ const SearchHome = (props) => {
         sx={{ gap: 2 }}
         alignItems="center"
       >
-        <Typography
-          variant="h6"
-          component="span"
-          sx={{ color: "white", fontWeight: 700 }}
-        >
+        <Typography component="span" sx={{ color: "white", fontWeight: 700 }}>
           {translationState.translation["Try"]}:
         </Typography>
         {currentSampleQueries.map((query, ix) => (
@@ -308,16 +310,20 @@ const SearchHome = (props) => {
               color: palette + "colorLink",
               textDecorationColor: "#FFFFFF",
               cursor: "pointer",
+              fontSize: "14px",
+              whiteSpace: "noWrap",
+              "&:hover": {
+                color: palette + "bgColorButton",
+                textDecorationColor: palette + "bgColorButton",
+              },
             }}
             // Touch up the internal state to match the navigation
             onClick={(e) => setSearchQuery(query)}
             // do the navigation
             to={hrefFor(region, query)}
-            component={RouterLink} // Ensure you import RouterLink from react-router-dom
+            /* component={RouterLink} */ // Ensure you import RouterLink from react-router-dom
           >
-            <Typography variant="subtitle1" noWrap>
-              {translationState.translation[query]}
-            </Typography>
+            {translationState.translation[query]}
           </LinkMui>
         ))}
       </Grid>
@@ -332,9 +338,13 @@ const SearchHome = (props) => {
             color: palette + "bgColorButton",
             textDecoration: "none",
             cursor: "pointer",
+            transition: "transform 0.3s",
+            "&:hover": {
+              transform: "scale(1.1)",
+            },
           }}
           onClick={() => searchAdvancedSearch("CreativeWork")}
-          component={RouterLink}
+          /* component={RouterLink} */
         >
           <Typography variant="subtitle1" noWrap>
             Advanced
@@ -353,7 +363,7 @@ const SearchResult = (props) => {
     placeholder,
     searchQuery,
     setSearchQuery,
-    sendGoogleEvent,
+    sendMatomoEvent,
     handleSubmit,
     changeTranslation,
     url,
@@ -364,7 +374,7 @@ const SearchResult = (props) => {
     languageIcon,
   } = props;
   const [openAdvancedSearch, setOpenAdvancedSearch] = useState(false);
-  const [openDialog, setOpenDialog] = useState(false);
+  const [openTooltip, setOpenTooltip] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -378,6 +388,14 @@ const SearchResult = (props) => {
 
     searchParams.delete("accordionOpen");
   }, [location.search, navigate]);
+  const handleCopyToClipboard = async () => {
+    var currentUrl = window.location.href;
+    await navigator.clipboard.writeText(currentUrl);
+    setOpenTooltip(true);
+    setTimeout(() => {
+      setOpenTooltip(false);
+    }, 2000);
+  };
 
   return (
     <>
@@ -387,8 +405,8 @@ const SearchResult = (props) => {
           backgroundColor: "transparent",
         }}
       >
-        <Grid container spacing={2} mt={6}>
-          <Grid item container justifyContent={"space-between"} spacing={4}>
+        <Grid container mt={6}>
+          <Grid item container>
             <Grid item xs={12} lg={8}>
               <Box
                 sx={{
@@ -407,7 +425,7 @@ const SearchResult = (props) => {
                   }}
                 >
                   <Box>
-                    <Grid container justifyContent={"space-between"}>
+                    <Grid container>
                       <Grid item xs={12} lg={12}>
                         <InputLabel disabled></InputLabel>
                         <Select
@@ -440,7 +458,10 @@ const SearchResult = (props) => {
                               color: palette + "iconsColor",
                             },
                           }}
-                          onChange={(e) => setRegion(e.target.value)}
+                          onChange={(e) => {
+                            setRegion(e.target.value);
+                            sendMatomoEvent(e.target.value);
+                          }}
                         >
                           {Object.entries(PROMOTED_REGIONS).map(
                             ([region, title]) => {
@@ -491,6 +512,12 @@ const SearchResult = (props) => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     name="search"
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        sendMatomoEvent(region);
+                        handleSubmit();
+                      }
+                    }}
                   />
                 </Box>
 
@@ -516,7 +543,7 @@ const SearchResult = (props) => {
                     height: { xs: "40px", lg: "56px" },
                   }}
                   onClick={() => {
-                    //sendGoogleEvent();
+                    sendMatomoEvent(region);
                     handleSubmit();
                   }}
                 >
@@ -537,7 +564,8 @@ const SearchResult = (props) => {
                     lineHeight: "18px",
                     whiteSpace: "normal",
 
-                    width: "20%",
+                    width: { xs: "100%", lg: "20%" },
+                    marginBottom: { xs: "10px", lg: 0 },
                     padding: 0,
                   }}
                   onClick={() => setOpenAdvancedSearch(!openAdvancedSearch)}
@@ -577,34 +605,29 @@ const SearchResult = (props) => {
               justifyContent={{ xs: "space-between" }}
               sx={{ gap: 1 }}
             >
-              <IconButton
-                aria-label="share"
-                onClick={() => setOpenDialog(!openDialog)}
+              <Tooltip
+                PopperProps={{
+                  disablePortal: true,
+                }}
+                open={openTooltip}
+                disableFocusListener
+                disableHoverListener
+                disableTouchListener
+                title="The URL has been copied to the clipboard"
               >
-                <ShareIcon
-                  sx={{
-                    color: palette + "colorTextfield",
-                  }}
-                />
-              </IconButton>
-              <Dialog
-                open={openDialog}
-                onClose={() => setOpenDialog(false)}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-              >
-                <DialogTitle id="alert-dialog-title">
-                  Work in progress
-                </DialogTitle>
-                <DialogContent></DialogContent>
-              </Dialog>
+                <IconButton
+                  aria-label="share"
+                  onClick={() => handleCopyToClipboard()}
+                >
+                  <ShareIcon
+                    sx={{
+                      color: palette + "colorTextfield",
+                    }}
+                  />
+                </IconButton>
+              </Tooltip>
 
-              <Box
-                display={"flex"}
-                alignItems={"center"}
-                gap={2}
-                sx={{ marginLeft: { xs: "120px", lg: "90px" } }}
-              >
+              <Box display={"flex"} alignItems={"center"} gap={2}>
                 <Export
                   palette={palette}
                   uri={uri}
@@ -631,6 +654,9 @@ const SearchResult = (props) => {
                       borderRadius: 1,
                       height: "34px",
                       width: "70px",
+                      ".MuiSelect-outlined": {
+                        overflow: "unset",
+                      },
                       ".MuiOutlinedInput-notchedOutline": {
                         borderColor: palette + "borderColorSelect",
                         borderRight: 0,
@@ -758,7 +784,7 @@ const SearchResult = (props) => {
                 <Button
                   className="btn-lg btn-info rounded-0 text-dark"
                   type="submit"
-                  onClick={sendGoogleEvent}
+                  onClick={sendMatomoEvent}
                 >
                   <span className="h6">
                     {translationState.translation["Search"]}

@@ -1,3 +1,4 @@
+import { INITIAL_BOUNDS } from "constants";
 import { regionMap } from "constants";
 
 const boundsToQuery = (mb) => {
@@ -46,7 +47,7 @@ const get_region_bounds = (region = null) => {
   else return boundsToQuery(INITIAL_BOUNDS);
 };
 
-const mapboxBounds_toQuery = (mb, region = null) => {
+const mapLibreBounds_toQuery = (mb, region = null) => {
   /* convert '{"_sw":{"lng":17.841823484137535,"lat":-59.72391567923438},"_ne":{"lng":179.1301535622635,"lat":49.99895151432449}}'
       to [_sw.lat,_sw.lng TO _ne.lat,_ne.lng] ([-90,-180 TO 90,180])
     */
@@ -61,6 +62,6 @@ export {
   regionBoundsMap,
   expandMapBounds,
   containsMapBounds,
-  mapboxBounds_toQuery,
+  mapLibreBounds_toQuery,
   get_region_bounds,
 };

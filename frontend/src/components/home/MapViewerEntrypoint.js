@@ -5,11 +5,18 @@ import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import { useAppTranslation } from "context/context/AppTranslation";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
+import MapContainer from "components/map-view/MapContainer";
+import { useNavigate } from "react-router-dom";
 
 export default function MapViewerEntrypoint() {
   const translationState = useAppTranslation();
-  const palette = "custom.homepage.footer.";
+  const palette = "custom.homepage.mapViewerEntrypoint.";
 
+  const navigate = useNavigate();
+
+  const goToMap = () => {
+    navigate(`/map-viewer`);
+  };
   return (
     <Container
       maxWidth="xl"
@@ -29,19 +36,21 @@ export default function MapViewerEntrypoint() {
           >
             <Box
               sx={{
-                backgroundColor: "white",
                 height: "100%",
                 borderRadius: "30px",
                 border: "6px solid black",
                 width: "100%",
+                position: "relative",
               }}
-            ></Box>
+            >
+              <MapContainer isHome={true} />
+            </Box>
           </Box>
         </Grid>
         <Grid item xs={5}>
           <Typography
             fontWeight={{ xs: 800, lg: 700 }}
-            sx={{ fontSize: "36px", color: "white" }}
+            sx={{ fontSize: "36px", color: palette + "colorTypography" }}
             gutterBottom
           >
             Lorem ipsum dolor sit amet consecte Mauris.
@@ -60,12 +69,12 @@ export default function MapViewerEntrypoint() {
             sx={{
               borderRadius: { xs: 2, lg: 1 },
               width: { xs: "100%", lg: "auto" },
-              backgroundColor: "#40AAD3",
+              backgroundColor: palette + "buttonBgColor",
               marginTop: 2,
               textTransform: "none",
             }}
             onClick={() => {
-              goToCatalogue("CreativeWork");
+              goToMap("CreativeWork");
             }}
             endIcon={<ArrowRightAltIcon />}
           >

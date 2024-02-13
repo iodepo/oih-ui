@@ -1,7 +1,6 @@
 import React from "react";
 import PaginationMUI from "@mui/material/Pagination";
-
-export const ITEMS_PER_PAGE = 10;
+import { ITEMS_PER_PAGE } from "portability/configuration";
 
 export default function Pagination({
   searchType,
