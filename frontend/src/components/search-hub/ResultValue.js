@@ -237,7 +237,7 @@ const ResultValue = (props) => {
               )}
               {"indexed_ts" in result && (
                 <>
-                  {translationState.translation["Indexed by ODIS on"] +
+                  {translationState.translation["Indexed through ODIS"] +
                     " " +
                     formatDate(result["indexed_ts"])}
                 </>

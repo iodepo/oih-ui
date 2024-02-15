@@ -174,7 +174,6 @@ const AdvancedSearch = (props) => {
                       {index === 1 && (
                         <Grid item xs={12}>
                           <Divider
-                            textAlign="left"
                             sx={{
                               color: palette + "dividerColor",
                               fontWeight: 700,
@@ -189,8 +188,8 @@ const AdvancedSearch = (props) => {
                       )}
                       {searchAdvancedQuery[key].map((v, index2) => {
                         return (
-                          <Box key={index2}>
-                            <Grid item xs={7}>
+                          <>
+                            <Grid key={index2} item xs={7}>
                               <Select
                                 defaultValue={"Provider"}
                                 sx={{
@@ -431,23 +430,22 @@ const AdvancedSearch = (props) => {
                                     variant="body1"
                                     sx={{
                                       color: palette + "andOrColor",
-                                      paddingLeft: 2,
                                       fontWeight: 700,
                                       marginBottom: "3px",
+                                      textAlign: "center",
                                     }}
                                   >
                                     OR
                                   </Typography>
                                 </Grid>
                               )}
-                          </Box>
+                          </>
                         );
                       })}
                       {index !== Object.keys(searchAdvancedQuery).length - 1 &&
                         Object.keys(searchAdvancedQuery).length > 2 && (
                           <Grid item xs={12}>
                             <Divider
-                              textAlign="left"
                               sx={{
                                 color: palette + "dividerColor",
                                 fontWeight: 700,
@@ -734,7 +732,7 @@ const AdvancedSearch = (props) => {
                     {index !== Object.keys(searchAdvancedQuery).length - 1 &&
                       Object.keys(searchAdvancedQuery).length > 2 && (
                         <Divider
-                          textAlign="left"
+                          textAlign={"left"}
                           sx={{
                             color: palette + "dividerColor",
                             fontWeight: 700,
@@ -800,7 +798,7 @@ const AdvancedSearch = (props) => {
             xs={12}
             display={"flex"}
             flexDirection={{ xs: "column", lg: "row" }}
-            sx={{ width: "100%" }}
+            sx={{ width: "100%", mb: { xs: 2, lg: "unset" } }}
           >
             <Button
               variant="contained"

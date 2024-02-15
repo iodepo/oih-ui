@@ -225,7 +225,7 @@ const FilterBy = (props) => {
 
       <List>
         {tabList.map((tab, index) => {
-          if (tab.id !== "")
+          if (tab.id !== "SpatialData")
             return (
               <ListItem key={tab.id} disablePadding>
                 <ListItemButton

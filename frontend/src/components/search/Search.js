@@ -192,17 +192,28 @@ const SearchHome = (props) => {
             gap: { xs: 1, lg: 2 },
           }}
         >
-          <Box display="flex" width={"100%"}>
+          <Box
+            display="flex"
+            width={"100%"}
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", lg: "row" },
+              gap: { xs: 1, lg: 0 },
+            }}
+          >
             <Box>
-              <Grid container justifyContent={"space-between"}>
-                <Grid item xs={6} lg={12}>
+              <Grid
+                container
+                justifyContent={{ xs: "unset", lg: "space-between" }}
+              >
+                <Grid item xs={12} lg={12}>
                   <InputLabel disabled></InputLabel>
                   <Select
                     startAdornment={
                       <PublicIcon
                         sx={{
                           marginRight: 1,
-                          color: palette + "iconsColor",
+                          color: { xs: "#FFFFFF", lg: palette + "iconsColor" },
                         }}
                       />
                     }
@@ -212,16 +223,21 @@ const SearchHome = (props) => {
                     name="searchRegion"
                     onChange={(e) => setRegion(e.target.value)}
                     sx={{
-                      backgroundColor: palette + "bgColor",
-                      color: palette + "iconsColor",
+                      backgroundColor: {
+                        xs: "transparent",
+                        lg: palette + "bgColor",
+                      },
+                      color: { xs: "#FFFFFF", lg: palette + "iconsColor" },
                       fontWeight: 600,
                       borderBottomRightRadius: 0,
                       borderTopRightRadius: 0,
+                      width: "100%",
                       ".MuiOutlinedInput-notchedOutline": {
-                        borderRight: "none",
+                        borderRight: { lg: "none" },
+                        borderWidth: { xs: 0, lg: "1px" },
                       },
                       ".MuiSelect-icon": {
-                        color: palette + "iconsColor",
+                        color: { xs: "#FFFFFF", lg: palette + "iconsColor" },
                       },
                     }}
                   >
@@ -240,15 +256,16 @@ const SearchHome = (props) => {
             <TextField
               fullWidth
               sx={{
-                backgroundColor: palette + "bgColor",
+                backgroundColor: { xs: "#DFE1E71A", lg: palette + "bgColor" },
                 "& .MuiFormLabel-root": {
                   fontSize: { xs: "14px", lg: "20px" },
                 },
                 "& .MuiOutlinedInput-root": {
-                  borderBottomLeftRadius: 0,
-                  borderTopLeftRadius: 0,
+                  borderBottomLeftRadius: { xs: 4, lg: 0 },
+                  borderTopLeftRadius: { xs: 4, lg: 0 },
                   borderBottomRightRadius: 4,
                   borderTopRightRadius: 4,
+                  color: { xs: "#7B8FB7", lg: "unset" },
                 },
                 borderBottomRightRadius: 4,
                 borderTopRightRadius: 4,
@@ -256,7 +273,11 @@ const SearchHome = (props) => {
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <SearchIcon sx={{ color: palette + "searchIcon" }} />
+                    <SearchIcon
+                      sx={{
+                        color: { xs: "#7B8FB7", lg: palette + "searchIcon" },
+                      }}
+                    />
                   </InputAdornment>
                 ),
                 style: {},
@@ -278,6 +299,7 @@ const SearchHome = (props) => {
             variant="contained"
             disableElevation
             sx={{
+              display: { xs: "none", lg: "flex" },
               borderRadius: { xs: 2, lg: 1 },
               width: { xs: "100%", lg: "auto" },
               backgroundColor: palette + "bgColorButton",
@@ -294,10 +316,16 @@ const SearchHome = (props) => {
       </Grid>
       <Grid
         item
-        xs={10}
+        xs={12}
         lg={8}
         display="flex"
-        sx={{ gap: 2 }}
+        sx={{
+          gap: 2,
+          maxWidth: "unset",
+          overflowX: { xs: "auto", md: "visible" },
+          flexBasis: "100%",
+          height: "70px",
+        }}
         alignItems="center"
       >
         <Typography component="span" sx={{ color: "white", fontWeight: 700 }}>
@@ -329,8 +357,52 @@ const SearchHome = (props) => {
       </Grid>
       <Grid
         item
+        xs={12}
+        sx={{
+          display: { xs: "flex", lg: "none" },
+        }}
+      >
+        <Typography
+          variant="body2"
+          alignItems={"start"}
+          display={{ xs: "flex", lg: "none" }}
+          sx={{ color: "#BDC7DB", my: 2 }}
+        >
+          <LightbulbOutlinedIcon sx={{ color: "#F8BB27" }} />
+          {translationState.translation["Pro Tip"]}
+        </Typography>
+      </Grid>
+      <Grid
+        item
+        xs={12}
+        lg={8}
+        sx={{
+          display: { xs: "flex", lg: "none" },
+        }}
+        alignItems="center"
+      >
+        <Button
+          variant="contained"
+          disableElevation
+          sx={{
+            borderRadius: { xs: 2, lg: 1 },
+            width: { xs: "100%", lg: "auto" },
+            backgroundColor: palette + "bgColorButton",
+            textTransform: "none",
+          }}
+          onClick={() => {
+            sendMatomoEvent(region);
+            handleSubmit();
+          }}
+        >
+          {translationState.translation["Search"]}
+        </Button>
+      </Grid>
+      <Grid
+        item
         display={{ xs: "flex", lg: "flex" }}
-        justifyContent={"end"}
+        justifyContent={{ xs: "center", lg: "end" }}
+        xs={12}
         lg={2}
       >
         <LinkMui

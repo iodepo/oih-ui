@@ -95,17 +95,14 @@ const GenericFacet = (props) => {
 
   const isChecked = (name) => {
     if (selectedFacets.length > 0) {
-      return selectedFacets.some((s) => {
-        const titleFacet = fieldTitleFromName(s.facetType);
-        return titleFacet === title && s.facetName === name;
-      });
+      return selectedFacets.includes(name);
     }
-    return checkedItems.includes(name);
+    return false;
   };
 
   useEffect(() => {
     if (isClearAll) {
-      setCheckedItems([]);
+      setSelectedFacets([]);
       setSearchInput("");
       setFilteredFacet(facet.counts);
       setIsClearAll(false);
@@ -120,9 +117,13 @@ const GenericFacet = (props) => {
 
       for (let i = 0; i < pairs.length; i += 2) {
         const facetType = pairs[i].split("=")[1];
-        const facetName = pairs[i + 1].split("=")[1].replaceAll("+", " ");
+        if (fieldTitleFromName(facetType) === title) {
+          const facetName = decodeURIComponent(
+            pairs[i + 1].split("=")[1].replaceAll("+", " ")
+          );
 
-        extractedPairs.push({ facetType, facetName });
+          extractedPairs.push(facetName);
+        }
       }
       setSelectedFacets(extractedPairs);
     }
@@ -211,12 +212,12 @@ const GenericFacet = (props) => {
                       checked={isChecked(facetCount.name)}
                       onChange={(e) => {
                         const updatedCheckedItems = e.target.checked
-                          ? [...checkedItems, facetCount.name]
-                          : checkedItems.filter(
+                          ? [...selectedFacets, facetCount.name]
+                          : selectedFacets.filter(
                               (item) => item !== facetCount.name
                             );
 
-                        setCheckedItems(updatedCheckedItems);
+                        setSelectedFacets(updatedCheckedItems);
                         if (!e.target.checked) {
                           clear();
                           setFilterChosenMobile((f) =>

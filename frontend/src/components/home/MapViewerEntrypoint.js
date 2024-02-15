@@ -24,8 +24,17 @@ export default function MapViewerEntrypoint() {
         my: 6,
       }}
     >
-      <Grid container spacing={4}>
-        <Grid item xs={7} sx={{ display: "flex", justifyContent: "end" }}>
+      <Grid
+        container
+        spacing={4}
+        sx={{ flexDirection: { xs: "column-reverse", lg: "unset" } }}
+      >
+        <Grid
+          item
+          xs={12}
+          lg={7}
+          sx={{ display: "flex", justifyContent: "end" }}
+        >
           <Box
             sx={{
               height: "370px",
@@ -47,7 +56,7 @@ export default function MapViewerEntrypoint() {
             </Box>
           </Box>
         </Grid>
-        <Grid item xs={5}>
+        <Grid xs={12} item lg={5}>
           <Typography
             fontWeight={{ xs: 800, lg: 700 }}
             sx={{ fontSize: "36px", color: palette + "colorTypography" }}
@@ -68,7 +77,7 @@ export default function MapViewerEntrypoint() {
             disableElevation
             sx={{
               borderRadius: { xs: 2, lg: 1 },
-              width: { xs: "100%", lg: "auto" },
+              width: "auto",
               backgroundColor: palette + "buttonBgColor",
               marginTop: 2,
               textTransform: "none",

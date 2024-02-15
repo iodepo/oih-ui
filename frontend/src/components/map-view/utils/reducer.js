@@ -35,5 +35,10 @@ export const reducer = (state, action) => {
         ...state,
         zoom: action.zoom,
       };
+    case "setLoading":
+      return {
+        ...state,
+        loading: action.loading,
+      };
   }
 };

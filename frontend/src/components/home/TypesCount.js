@@ -78,18 +78,21 @@ export default function TypesCount() {
             maxWidth="false"
             sx={{
               backgroundColor: palette + "bgColorBox",
+              paddingRight: { xs: 0, md: "auto" },
+              paddingLeft: { xs: 0, md: "auto" },
             }}
           >
-            <Container maxWidth="xl" sx={{ py: 8 }}>
+            <Container maxWidth="xl" sx={{ py: { xs: 2, lg: 8 } }}>
               <Grid container spacing={2}>
-                <Grid item xs={5}>
+                <Grid item xs={12} lg={5}>
                   <SearchHubEntrypoint />
                 </Grid>
                 <Grid
                   item
                   container
                   spacing={2}
-                  xs={7} /* sx={{ p: "24px" }} */
+                  xs={12}
+                  lg={7} /* sx={{ p: "24px" }} */
                 >
                   <Grid item xs={12}>
                     <Search />
@@ -98,7 +101,7 @@ export default function TypesCount() {
                     {CATEGORIES.map((cat, index) => {
                       if (cat.id !== "SpatialData")
                         return (
-                          <Grid key={index} item lg={4} xs={6}>
+                          <Grid key={index} item lg={4} xs={12}>
                             <CardTopic
                               image={cat.icon}
                               text={

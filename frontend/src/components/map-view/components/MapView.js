@@ -14,7 +14,6 @@ const MapView = (props) => {
     baseOpacity,
     isHome,
     zoom,
-    stopZoom,
   } = props;
   const mapInitRef = useRef(null);
   var h3Resolution = 2;
@@ -33,12 +32,11 @@ const MapView = (props) => {
   }, [clustering, hexOpacity, showPoints, showRegions]);
 
   useEffect(() => {
-    if (zoom === "in") {
+    if (zoom > 0) {
       mapInitRef.current.zoomIn();
-    } else if (zoom === "out") {
+    } else if (zoom < 0) {
       mapInitRef.current.zoomOut();
     }
-    stopZoom();
   }, [zoom]);
   useEffect(() => {
     if (container.current) {

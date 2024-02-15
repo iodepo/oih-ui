@@ -35,7 +35,7 @@ export default function SearchHubEntrypoint() {
         disableElevation
         sx={{
           borderRadius: { xs: 2, lg: 1 },
-          width: { xs: "100%", lg: "auto" },
+          width: { xs: "unset", lg: "auto" },
           backgroundColor: palette + "buttonBgColor",
           marginTop: 2,
           textTransform: "none",

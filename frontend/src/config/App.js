@@ -14,6 +14,10 @@ function App() {
           <Route path="results/:searchType" element={<Results />} />
           <Route path="results/" element={<Results />} />
           <Route path="/map-viewer" element={<MapContainer isHome={false} />} />
+          <Route
+            path="/map-viewer/:searchType"
+            element={<MapContainer isHome={false} />}
+          />
           <Route path="/" element={<TypesCount />}></Route>
         </Routes>
       </AppContainer>

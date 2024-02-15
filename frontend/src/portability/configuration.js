@@ -224,6 +224,14 @@ const backgroundImage = `
     background-position-y: -40vw;
   }
 
+  @media screen and (max-width: 600px) {
+    #home{
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+    }
+  }
+
   #home::after {
     content: "";
     position: absolute;

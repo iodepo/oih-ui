@@ -1,4 +1,5 @@
-import { useRef, useReducer, useState, useEffect } from "react";
+import { useRef, useReducer, useState, useEffect, useCallback } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import ToolbarHome from "./components/ToolbarHome";
 import ToolbarMapView from "./components/ToolbarMapView";
 import { EMODNET, NO_CLUSTER } from "./utils/constants";
@@ -14,6 +15,7 @@ import { ITEMS_PER_PAGE } from "portability/configuration";
 import { dataServiceUrl } from "config/environment";
 import { mapLibreBounds_toQuery } from "utilities/mapUtility";
 import { throttle } from "lodash";
+import { useSearchParam } from "utilities/generalUtility";
 
 const MapContainer = (props) => {
   const { isHome } = props;
@@ -24,49 +26,76 @@ const MapContainer = (props) => {
     baseOpacity: 0.4,
     showPoints: false,
     showRegions: false,
-    zoom: "none",
+    zoom: 0,
     region: "Global",
+    isLoading: false,
   });
 
   //Maybe move inside useReducer? Discuss
 
+  const navigate = useNavigate();
   const [results, setResults] = useState([]);
-  const [searchText, setSearchText] = useState("");
+  const [params] = useSearchParams();
+  const [searchText, setSearchText] = useState(
+    params.has("search_text") ? params.get("search_text") : ""
+  );
   const [resultsCount, setResultsCount] = useState(0);
   const [mapBounds, setMapBounds] = useState(false);
+  const [open, setOpen] = useState(true);
 
   const mapRef = useRef(null);
 
+  const hrefFor = (region, query) =>
+    `/map-viewer?${new URLSearchParams({
+      ...(query ? { search_text: query } : {}),
+      ...(region && region.toUpperCase() !== "GLOBAL" ? { region } : {}),
+    })}`;
+
+  const handleSubmit = useCallback(
+    () => navigate(hrefFor("Global", searchText)),
+    [navigate, searchText]
+  );
   const changeBaseLayer = (layer) => {
     dispatch({ type: "setBaseLayer", baseLayer: layer });
   };
 
   const applyZoom = (zoomType) => {
-    dispatch({ type: "setZoom", zoom: zoomType });
+    let value;
+    if (zoomType === "out") {
+      if (state.zoom >= 0) {
+        value = -1;
+      } else if (state.zoom < 0) {
+        value = state.zoom - 1;
+      }
+    } else if (zoomType === "in") {
+      if (state.zoom <= 0) {
+        value = 1;
+      } else if (state.zoom > 0) {
+        value = state.zoom + 1;
+      }
+    }
+    dispatch({ type: "setZoom", zoom: value });
   };
-  const stopZoom = () => {
-    dispatch({ type: "setZoom", zoom: "none" });
-  };
-  const [open, setOpen] = useState(true);
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
+  const handleDrawer = (isOpen) => {
+    setOpen(isOpen);
   };
 
-  const handleDrawerClose = () => {
-    setOpen(false);
+  const setLoading = (isLoading) => {
+    dispatch({ type: "setLoading", loading: isLoading });
   };
 
   useEffect(() => {
     getDataSpatialSearch();
-  }, []);
+  }, [navigate, params]);
 
-  const getDataSpatialSearch = throttle(() => {
+  const getDataSpatialSearch = throttle((page = 1) => {
+    page === 1 && setLoading(true);
     let URI = `${dataServiceUrl}/search?`;
     const params = new URLSearchParams({
       facetType: "the_geom",
       facetName: mapLibreBounds_toQuery(mapBounds, /* region */ "GLOBAL"),
-      rows: ITEMS_PER_PAGE,
+      rows: ITEMS_PER_PAGE * page,
       start: 0,
     });
     if (searchText !== "") {
@@ -83,6 +112,7 @@ const MapContainer = (props) => {
         setResults(json.docs);
         const count = json.count;
         setResultsCount(count);
+        page === 1 && setLoading(false);
       });
   }, 1000);
 
@@ -101,7 +131,6 @@ const MapContainer = (props) => {
           showPoints={state.showPoints}
           showRegions={state.showRegions}
           zoom={state.zoom}
-          stopZoom={stopZoom}
           isHome={isHome}
         />
       )}
@@ -125,9 +154,12 @@ const MapContainer = (props) => {
               <DrawerContent
                 results={results}
                 setSearchText={setSearchText}
+                searchText={searchText}
                 resultsCount={resultsCount}
                 mapBounds={mapBounds}
+                isLoading={state.loading}
                 getDataSpatialSearch={getDataSpatialSearch}
+                handleSubmit={handleSubmit}
               />
             </Drawer>
             {open ? (
@@ -147,7 +179,7 @@ const MapContainer = (props) => {
                     },
                   },
                 }}
-                onClick={handleDrawerClose}
+                onClick={() => handleDrawer(false)}
               >
                 <ChevronLeftIcon />
               </IconButton>
@@ -168,7 +200,7 @@ const MapContainer = (props) => {
                     },
                   },
                 }}
-                onClick={handleDrawerOpen}
+                onClick={() => handleDrawer(true)}
               >
                 <ChevronRightIcon />
               </IconButton>
@@ -198,7 +230,6 @@ const MapContainer = (props) => {
               showRegions={state.showRegions}
               isHome={isHome}
               zoom={state.zoom}
-              stopZoom={stopZoom}
             />
           </Box>
         </Box>

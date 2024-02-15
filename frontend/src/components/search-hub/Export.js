@@ -126,7 +126,6 @@ const Export = (props) => {
         window.URL.revokeObjectURL(url);
         break;
       case "pdf":
-        debugger;
         const doc = createPDF(data.data, data.title);
         blob = await pdf(doc).toBlob();
         url = window.URL.createObjectURL(blob);
@@ -393,14 +392,22 @@ const Export = (props) => {
             <ToggleButton value="pdf">PDF</ToggleButton>
           </ToggleButtonGroup>
           <Divider />
-          <Box display={"flex"} sx={{ gap: 1, justifyContent: "end" }}>
+          <Box
+            display={"flex"}
+            sx={{ gap: 1, justifyContent: "space-between" }}
+          >
             <Button
+              sx={{ color: "#40AAD3" }}
               size="small"
               onClick={() => onClickExport(numberOfItems, typeOfExport)}
             >
-              Done
+              Export
             </Button>
-            <Button size="small" onClick={handleClose}>
+            <Button
+              size="small"
+              sx={{ color: "#7B8FB7" }}
+              onClick={handleClose}
+            >
               Cancel
             </Button>
           </Box>

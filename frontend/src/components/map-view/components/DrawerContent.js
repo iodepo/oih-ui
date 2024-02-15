@@ -19,6 +19,11 @@ import Paper from "@mui/material/Paper";
 import { visuallyHidden } from "@mui/utils";
 import CircleIcon from "@mui/icons-material/Circle";
 import Tooltip from "@mui/material/Tooltip";
+import { cutWithDots } from "components/results/ResultDetails";
+import InfiniteScroll from "react-infinite-scroll-component";
+import { ITEMS_PER_PAGE } from "portability/configuration";
+import { Export } from "components/search-hub/Export";
+import CircularProgress from "@mui/material/CircularProgress";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -52,22 +57,22 @@ const DrawerContent = (props) => {
   const {
     results,
     setSearchText,
+    searchText,
     resultsCount,
     mapBounds,
     getDataSpatialSearch,
+    isLoading,
+    handleSubmit,
   } = props;
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("");
   const [dataTable, setDataTable] = useState([]);
-
-  function createData(name, calories, fat, carbs, protein) {
-    return { name, calories, fat, carbs, protein };
-  }
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     setDataTable(
       results.map((r) => {
-        return { name: r.name, id: r.index_id };
+        return { name: r.name, id: r.index_id, provider: r.txt_provider };
       })
     );
   }, [results]);
@@ -90,17 +95,13 @@ const DrawerContent = (props) => {
     [order, orderBy, dataTable]
   );
 
+  useEffect(() => {
+    getDataSpatialSearch(page);
+  }, [page]);
+
   return (
     <Box>
       <Grid container spacing={2} sx={{ padding: "16px" }}>
-        <Grid item xs={12}>
-          <Typography
-            variant="subtitle"
-            sx={{ color: "#0F1A31", fontSize: "14px", fontWeight: 700 }}
-          >
-            {resultsCount + " results"}
-          </Typography>
-        </Grid>
         <Grid item xs={12} sx={{ display: "flex", gap: "12px" }}>
           <Button
             variant="outlined"
@@ -139,6 +140,7 @@ const DrawerContent = (props) => {
                 border: "none",
               },
             }}
+            value={searchText}
             placeholder={"Search"}
             InputProps={{
               startAdornment: (
@@ -151,13 +153,13 @@ const DrawerContent = (props) => {
                 </InputAdornment>
               ),
             }}
-            onChange={(e) => {
+            onInput={(e) => {
               setSearchText(e.target.value);
             }}
             name="search"
             onKeyPress={(e) => {
               if (e.key === "Enter") {
-                getDataSpatialSearch();
+                handleSubmit();
               }
             }}
           />
@@ -174,8 +176,7 @@ const DrawerContent = (props) => {
               textTransform: "none",
             }}
             onClick={() => {
-              /* sendMatomoEvent(region);
-              handleSubmit(); */
+              handleSubmit();
             }}
           >
             Search
@@ -184,104 +185,152 @@ const DrawerContent = (props) => {
       </Grid>
       <Grid container spacing={2}>
         <Grid item xs={12} mt={2}>
-          <TableContainer component={Paper} sx={{ boxShadow: 0 }}>
-            <Table sx={{ minWidth: 450 }} aria-label="simple table">
-              <TableHead>
-                <TableRow
-                  sx={{
-                    background: "#F8FAFB",
-                    ".MuiTableCell-root": {
-                      border: 0,
-                    },
-                  }}
-                >
-                  {headCells.map((headCell, index) => (
-                    <TableCell
-                      key={index}
-                      sortDirection={orderBy === headCell.id ? order : false}
-                      sx={{ fontSize: "12px" }}
-                    >
-                      <TableSortLabel
-                        active={orderBy === headCell.id}
-                        direction={orderBy === headCell.id ? order : "asc"}
-                        onClick={handleRequestSort(headCell.id)}
-                      >
-                        {headCell.label}
-                        {orderBy === headCell.id ? (
-                          <Box component="span" sx={visuallyHidden}>
-                            {order === "desc"
-                              ? "sorted descending"
-                              : "sorted ascending"}
-                          </Box>
-                        ) : null}
-                      </TableSortLabel>
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {visibleRows.map((row, index) => {
-                  debugger;
-                  return (
+          <TableContainer
+            component={Paper}
+            sx={{ boxShadow: 0, height: "36.375rem" }}
+          >
+            {isLoading && (
+              <CircularProgress sx={{ display: "flex", margin: "0 auto" }} />
+            )}
+            {!isLoading && (
+              <InfiniteScroll
+                dataLength={visibleRows.length}
+                next={() => {
+                  console.log("end");
+                  setPage(page + 1);
+                }}
+                height={"36.375rem"}
+                hasMore={ITEMS_PER_PAGE * page < parseInt(resultsCount)}
+                loader={<h4></h4>}
+                endMessage={<p>No more items</p>}
+              >
+                <Table>
+                  <TableHead>
                     <TableRow
-                      key={index}
-                      hover
-                      onClick={(event) => {}}
-                      role="checkbox"
-                      tabIndex={-1}
-                      key={row.id}
                       sx={{
-                        cursor: "pointer",
-                        background: index % 2 === 0 ? "#FFFFFF" : "#E8EDF2",
+                        background: "#F8FAFB",
                         ".MuiTableCell-root": {
                           border: 0,
                         },
                       }}
                     >
-                      <TableCell sx={{ fontSize: "13px" }}>
-                        <Box display={"flex"} sx={{ flexDirection: "row" }}>
-                          {row.name}
-                          <Box
-                            display={"flex"}
-                            sx={{ flexDirection: "column" }}
+                      {headCells.map((headCell, index) => (
+                        <TableCell
+                          key={index}
+                          sortDirection={
+                            orderBy === headCell.id ? order : false
+                          }
+                          sx={{
+                            fontSize: "12px",
+                            paddingTop: 0,
+                            paddingBottom: 0,
+                          }}
+                          size="small"
+                        >
+                          <TableSortLabel
+                            active={orderBy === headCell.id}
+                            direction={orderBy === headCell.id ? order : "asc"}
+                            onClick={handleRequestSort(headCell.id)}
                           >
-                            {row["txt_provider"].map((r) => {
-                              return (
-                                <>
-                                  <Tooltip key={r} title={r} arrow>
-                                    <Typography
-                                      variant="body2"
-                                      component="span"
-                                      display={"flex"}
-                                      alignItems={"center"}
-                                      sx={{ fontSize: "10px", gap: 1 }}
-                                    >
-                                      <CircleIcon
-                                        fontSize="small"
-                                        sx={{
-                                          fontSize: "10px",
-                                          color: "#40AAD3",
-                                        }}
-                                      />
-                                      <Box sx={{ fontSize: "10px", gap: 1 }}>
-                                        {cutWithDots(r, 20)}
-                                      </Box>
-                                    </Typography>
-                                  </Tooltip>
-                                </>
-                              );
-                            })}
-                          </Box>
-                        </Box>
-                      </TableCell>
+                            {headCell.label}
+                            {orderBy === headCell.id ? (
+                              <Box component="span" sx={visuallyHidden}>
+                                {order === "desc"
+                                  ? "sorted descending"
+                                  : "sorted ascending"}
+                              </Box>
+                            ) : null}
+                          </TableSortLabel>
+                        </TableCell>
+                      ))}
                     </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                  </TableHead>
+                  <TableBody>
+                    {visibleRows.map((row, index2) => {
+                      return (
+                        <TableRow
+                          key={index2}
+                          hover
+                          onClick={(event) => {}}
+                          role="checkbox"
+                          tabIndex={-1}
+                          key={row.id}
+                          sx={{
+                            cursor: "pointer",
+                            background:
+                              index2 % 2 === 0 ? "#FFFFFF" : "#E8EDF2",
+                            ".MuiTableCell-root": {
+                              border: 0,
+                            },
+                          }}
+                        >
+                          <TableCell sx={{ fontSize: "16px" }}>
+                            <Box
+                              display={"flex"}
+                              sx={{ flexDirection: "column", gap: 1 }}
+                            >
+                              {row.name}
+                              <Box
+                                display={"flex"}
+                                sx={{ flexDirection: "row", gap: 1 }}
+                              >
+                                {row.provider.map((r) => {
+                                  return (
+                                    <>
+                                      <Tooltip key={r} title={r} arrow>
+                                        <Typography
+                                          variant="body2"
+                                          component="span"
+                                          display={"flex"}
+                                          alignItems={"center"}
+                                          sx={{ fontSize: "10px", gap: 1 }}
+                                        >
+                                          <CircleIcon
+                                            fontSize="small"
+                                            sx={{
+                                              fontSize: "10px",
+                                              color: "#40AAD3",
+                                            }}
+                                          />
+                                          <Box
+                                            sx={{ fontSize: "10px", gap: 1 }}
+                                          >
+                                            {cutWithDots(r, 20)}
+                                          </Box>
+                                        </Typography>
+                                      </Tooltip>
+                                    </>
+                                  );
+                                })}
+                              </Box>
+                            </Box>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </InfiniteScroll>
+            )}
           </TableContainer>
         </Grid>
       </Grid>
+      <Box sx={{ position: "absolute", bottom: 8, left: 8 }}>
+        <Export
+          palette={"custom.resultPage.searchBar."}
+          uri={"uri"}
+          searchType={""}
+          resultCount={resultsCount}
+        />
+      </Box>
+      <Box sx={{ position: "absolute", bottom: 8, right: 8 }}>
+        <Typography
+          variant="subtitle"
+          sx={{ color: "#0F1A31", fontSize: "14px", fontWeight: 700 }}
+        >
+          {resultsCount + " results"}
+        </Typography>
+      </Box>
     </Box>
   );
 };
