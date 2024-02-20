@@ -1,5 +1,5 @@
 import { useRef, useReducer, useState, useEffect, useCallback } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import ToolbarHome from "./components/ToolbarHome";
 import ToolbarMapView from "./components/ToolbarMapView";
 import { EMODNET, NO_CLUSTER } from "./utils/constants";
@@ -19,6 +19,7 @@ import { useSearchParam } from "utilities/generalUtility";
 
 const MapContainer = (props) => {
   const { isHome } = props;
+  const [params] = useSearchParams();
   const [state, dispatch] = useReducer(reducer, {
     baseLayer: EMODNET,
     clustering: NO_CLUSTER,
@@ -27,23 +28,36 @@ const MapContainer = (props) => {
     showPoints: false,
     showRegions: false,
     zoom: 0,
-    region: "Global",
     isLoading: false,
+    center: [65.468754, 44.57875],
   });
 
   //Maybe move inside useReducer? Discuss
 
   const navigate = useNavigate();
+  const location = useLocation();
   const [results, setResults] = useState([]);
-  const [params] = useSearchParams();
+
+  const [region, setRegion] = useState(
+    params.has("region") ? params.get("region") : "Global"
+  );
   const [searchText, setSearchText] = useState(
     params.has("search_text") ? params.get("search_text") : ""
   );
   const [resultsCount, setResultsCount] = useState(0);
   const [mapBounds, setMapBounds] = useState(false);
   const [open, setOpen] = useState(true);
+  const [facets, setFacets] = useState([]);
 
   const mapRef = useRef(null);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const lng = searchParams.get("lng");
+    const lat = searchParams.get("lat");
+
+    if (lng && lat) setCenter([lng, lat]);
+  }, []);
 
   const hrefFor = (region, query) =>
     `/map-viewer?${new URLSearchParams({
@@ -52,8 +66,8 @@ const MapContainer = (props) => {
     })}`;
 
   const handleSubmit = useCallback(
-    () => navigate(hrefFor("Global", searchText)),
-    [navigate, searchText]
+    () => navigate(hrefFor(region, searchText)),
+    [navigate, searchText, region]
   );
   const changeBaseLayer = (layer) => {
     dispatch({ type: "setBaseLayer", baseLayer: layer });
@@ -85,6 +99,10 @@ const MapContainer = (props) => {
     dispatch({ type: "setLoading", loading: isLoading });
   };
 
+  const setCenter = (center) => {
+    dispatch({ type: "setCenter", center: center });
+  };
+
   useEffect(() => {
     getDataSpatialSearch();
   }, [navigate, params]);
@@ -94,16 +112,16 @@ const MapContainer = (props) => {
     let URI = `${dataServiceUrl}/search?`;
     const params = new URLSearchParams({
       facetType: "the_geom",
-      facetName: mapLibreBounds_toQuery(mapBounds, /* region */ "GLOBAL"),
+      facetName: mapLibreBounds_toQuery(mapBounds, region),
       rows: ITEMS_PER_PAGE * page,
       start: 0,
     });
     if (searchText !== "") {
       params.append("search_text", searchText);
     }
-    /* if (region && region.toUpperCase() !== "GLOBAL") {
-    params.append("region", "GLOBAL");
-    } */
+    if (region && region.toUpperCase() !== "GLOBAL") {
+      params.append("region", region);
+    }
     URI += [params.toString()].filter((e) => e).join("&");
 
     fetch(URI)
@@ -112,6 +130,7 @@ const MapContainer = (props) => {
         setResults(json.docs);
         const count = json.count;
         setResultsCount(count);
+        setFacets(json.facets.filter((facet) => facet.counts.length > 0));
         page === 1 && setLoading(false);
       });
   }, 1000);
@@ -120,7 +139,9 @@ const MapContainer = (props) => {
 
   return (
     <>
-      {isHome && <ToolbarHome changeBaseLayer={changeBaseLayer} />}
+      {isHome && (
+        <ToolbarHome changeBaseLayer={changeBaseLayer} center={state.center} />
+      )}
       {state && isHome && (
         <MapView
           container={mapRef}
@@ -132,6 +153,8 @@ const MapContainer = (props) => {
           showRegions={state.showRegions}
           zoom={state.zoom}
           isHome={isHome}
+          setCenter={setCenter}
+          centerMap={state.center}
         />
       )}
 
@@ -219,7 +242,13 @@ const MapContainer = (props) => {
               }),
             }}
           >
-            <ToolbarMapView applyZoom={applyZoom} />
+            <ToolbarMapView
+              applyZoom={applyZoom}
+              facets={facets}
+              setRegion={setRegion}
+              region={region}
+              handleSubmit={handleSubmit}
+            />
             <MapView
               container={mapRef}
               baseLayer={state.baseLayer}
@@ -230,6 +259,8 @@ const MapContainer = (props) => {
               showRegions={state.showRegions}
               isHome={isHome}
               zoom={state.zoom}
+              setCenter={setCenter}
+              centerMap={state.center}
             />
           </Box>
         </Box>

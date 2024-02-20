@@ -8,7 +8,7 @@ import { EMODNET, ARCGIS, USGS } from "../utils/constants";
 import { useNavigate } from "react-router-dom";
 
 const ToolbarHome = (props) => {
-  const { changeBaseLayer } = props;
+  const { changeBaseLayer, center } = props;
   const [selectedLayer, setSelectedLayer] = useState(EMODNET);
   const handleButtonClick = (layer) => {
     setSelectedLayer(layer);
@@ -18,7 +18,7 @@ const ToolbarHome = (props) => {
   const navigate = useNavigate();
 
   const goToMap = () => {
-    navigate(`/map-viewer`);
+    navigate(`/map-viewer?lng=${center[0]}&lat=${center[1]}`);
   };
   return (
     <>

@@ -40,5 +40,10 @@ export const reducer = (state, action) => {
         ...state,
         loading: action.loading,
       };
+    case "setCenter":
+      return {
+        ...state,
+        center: action.center,
+      };
   }
 };

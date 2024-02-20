@@ -14,6 +14,8 @@ const MapView = (props) => {
     baseOpacity,
     isHome,
     zoom,
+    centerMap,
+    setCenter,
   } = props;
   const mapInitRef = useRef(null);
   var h3Resolution = 2;
@@ -42,17 +44,12 @@ const MapView = (props) => {
     if (container.current) {
       container.current.innerHTML = "";
       let zoom = 4;
-      let center = [65.468754, 44.57875];
       if (mapInitRef.current) {
         zoom = mapInitRef.current.getZoom();
-        center = [
-          mapInitRef.current.getCenter().lng,
-          mapInitRef.current.getCenter().lat,
-        ];
       }
       mapInitRef.current = initMap(
         container.current,
-        center,
+        centerMap,
         baseLayer,
         baseOpacity,
         zoom
@@ -67,6 +64,15 @@ const MapView = (props) => {
             showPoints,
             showRegions
           );
+      });
+
+      mapInitRef.current.on("moveend", function () {
+        if (mapInitRef.current) {
+          setCenter([
+            mapInitRef.current.getCenter().lng,
+            mapInitRef.current.getCenter().lat,
+          ]);
+        }
       });
     }
   }, [baseLayer, baseOpacity]);

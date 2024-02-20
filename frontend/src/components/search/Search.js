@@ -477,7 +477,20 @@ const SearchResult = (props) => {
           backgroundColor: "transparent",
         }}
       >
-        <Grid container mt={6}>
+        {openAdvancedSearch && (
+          <Box
+            sx={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              zIndex: 1,
+            }}
+          ></Box>
+        )}
+        <Grid container mt={6} sx={{ position: "relative", zIndex: 2 }}>
           <Grid item container>
             <Grid item xs={12} lg={8}>
               <Box
@@ -505,10 +518,13 @@ const SearchResult = (props) => {
                             <PublicIcon
                               sx={{
                                 marginRight: 1,
-                                color: palette + "iconsColor",
+                                color: openAdvancedSearch
+                                  ? "rgba(0, 0, 0, 0.3)"
+                                  : palette + "iconsColor",
                               }}
                             />
                           }
+                          disabled={openAdvancedSearch}
                           defaultValue={
                             region.charAt(0).toUpperCase() + region.slice(1)
                           }
@@ -528,6 +544,9 @@ const SearchResult = (props) => {
                             },
                             ".MuiSelect-icon": {
                               color: palette + "iconsColor",
+                            },
+                            "&.Mui-disabled": {
+                              backgroundColor: "rgba(0, 0, 0, 0.12)",
                             },
                           }}
                           onChange={(e) => {
@@ -550,10 +569,15 @@ const SearchResult = (props) => {
                   </Box>
                   <TextField
                     fullWidth
+                    disabled={openAdvancedSearch}
                     sx={{
                       backgroundColor: {
-                        xs: palette + "bgColorTextfieldMobile",
-                        lg: palette + "bgColorSelectDesktop",
+                        xs: openAdvancedSearch
+                          ? "rgba(0, 0, 0, 0.12)"
+                          : palette + "bgColorTextfieldMobile",
+                        lg: openAdvancedSearch
+                          ? "rgba(0, 0, 0, 0.12)"
+                          : palette + "bgColorSelectDesktop",
                       },
                       "& .MuiFormLabel-root": {
                         fontSize: { xs: "14px", lg: "16px" },
@@ -568,7 +592,9 @@ const SearchResult = (props) => {
                         <InputAdornment position="end">
                           <SearchIcon
                             sx={{
-                              color: palette + "searchIcon",
+                              color: openAdvancedSearch
+                                ? "rgba(0, 0, 0, 0.3)"
+                                : palette + "searchIcon",
                             }}
                           />
                         </InputAdornment>
@@ -607,6 +633,7 @@ const SearchResult = (props) => {
                 <Button
                   variant="contained"
                   disableElevation
+                  disabled={openAdvancedSearch}
                   sx={{
                     borderRadius: 2,
                     width: { xs: "100%", lg: "15%" },

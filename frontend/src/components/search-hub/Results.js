@@ -5,11 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useSearchParam } from "utilities/generalUtility";
 import { dataServiceUrl } from "../../config/environment";
 import { CATEGORIES, ITEMS_PER_PAGE } from "../../portability/configuration";
-import { regionMap, INITIAL_BOUNDS } from "../../constants";
-import { boundsToQuery, regionBoundsMap } from "utilities/mapUtility";
-import throttle from "lodash/throttle";
 import Pagination from "./Pagination";
-import { Popup } from "react-map-gl";
 import { useAppTranslation } from "context/context/AppTranslation";
 import Search from "components/search/Search";
 import Box from "@mui/material/Box";
@@ -33,23 +29,16 @@ import ClearIcon from "@mui/icons-material/Clear";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
-import {
-  expandMapBounds,
-  containsMapBounds,
-  mapLibreBounds_toQuery,
-} from "utilities/mapUtility";
 import ResultValue from "./ResultValue";
 import { cutWithDots } from "components/results/ResultDetails";
-
-const fetchDetail = (id) =>
-  fetch(`${dataServiceUrl}/detail?id=${id}`).then((r) => r.json());
+import Support from "./Support";
 
 export default function Results() {
   const [results, setResults] = useState([]);
   const [resultCount, setResultCount] = useState(0);
   const [counts, setCounts] = useState({});
   const [facets, setFacets] = useState([]);
-  const [mapBounds, setMapBounds] = useState(false);
+
   const [showMorePages, setShowMorePages] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth >= 768);
   const [filterChosenMobile, setFilterChosenMobile] = useState([]);
@@ -58,7 +47,6 @@ export default function Results() {
 
   const navigate = useNavigate();
   const { searchType = "CreativeWork" } = useParams();
-  const showMap = searchType === "SpatialData";
   const [searchText, setSearchText] = useSearchParam("search_text", "");
   const [region, setRegion] = useSearchParam("region", "global");
   const [facetQuery, setFacetQuery] = useSearchParam("facet_query");
@@ -97,13 +85,12 @@ export default function Results() {
   }, [isMobile]);
 
   useEffect(() => {
-    console.log("mapSearch", facetQuery);
     fetch(
       `${dataServiceUrl}/search?${new URLSearchParams({
         rows: 0,
         include_facets: false,
         ...(region.toUpperCase() !== "GLOBAL" ? { region } : {}),
-        ...(searchText ? { search_text: searchText } : {})
+        ...(searchText ? { search_text: searchText } : {}),
       })}`
     )
       .then((response) => response.json())
@@ -116,43 +103,12 @@ export default function Results() {
       );
   }, [region, searchText, searchType]);
 
-  const mapSearch = useCallback(
-    throttle((mapBounds, page) => {
-      let URI = `${dataServiceUrl}/search?`;
-      const params = new URLSearchParams({
-        ...(searchType !== "SpatialData" ? { document_type: searchType } : {}),
-        facetType: "the_geom",
-        facetName: mapLibreBounds_toQuery(mapBounds, region),
-        rows: ITEMS_PER_PAGE + showMorePages,
-        start: page * (ITEMS_PER_PAGE + showMorePages),
-      });
-      if (searchText !== "") {
-        params.append("search_text", searchText);
-      }
-      if (region && region.toUpperCase() !== "GLOBAL") {
-        params.append("region", region);
-      }
-
-      URI += [params.toString(), facetQuery].filter((e) => e).join("&");
-      setCurrentURI(URI);
-
-      fetch(URI)
-        .then((response) => response.json())
-        .then((json) => {
-          setResults(json.docs);
-          setFacets(json.facets.filter((facet) => facet.counts.length > 0));
-          const count = json.count;
-          setResultCount(count);
-          setCounts((prev) => ({ ...prev, [searchType]: count }));
-        });
-    }, 1000),
-    [dataServiceUrl, searchText, searchType, region, facetQuery]
-  );
-
-  useEffect(() => {
-    if (showMap) {
+  useEffect(
+    () => {
+      /*  if (showMap) {
       mapSearch(mapBounds, page);
-    } else {
+    } else { */
+      debugger;
       let URI = `${dataServiceUrl}/search?`;
       const params = new URLSearchParams({
         document_type: searchType,
@@ -165,7 +121,9 @@ export default function Results() {
       if (region.toUpperCase() !== "GLOBAL") {
         params.append("region", region);
       }
-      URI += [params.toString(), facetQuery, fq ? fq : ''].filter((e) => e).join("&");
+      URI += [params.toString(), facetQuery, fq ? "fq=" + fq : ""]
+        .filter((e) => e)
+        .join("&");
       setCurrentURI(URI);
 
       fetch(URI)
@@ -177,38 +135,17 @@ export default function Results() {
           setCounts((prev) => ({ ...prev, [searchType]: count }));
           setFacets(json.facets.filter((facet) => facet.counts.length > 0));
         });
-
-      const geoParams = new URLSearchParams({
-        facetType: "the_geom",
-        facetName: get_region_bounds(),
-        include_facets: false,
-        rows: 0,
-      });
-      if (region && region.toUpperCase() !== "GLOBAL") {
-        geoParams.append("region", region);
-      }
-      if (searchText) {
-        geoParams.append("search_text", searchText);
-      }
-      fetch(`${dataServiceUrl}/search?${geoParams.toString()}`)
-        .then((response) => response.json())
-        .then((json) =>
-          setCounts((prev) => ({
-            ...prev,
-            SpatialData: Object.values(json.counts).reduce((x, y) => x + y, 0),
-          }))
-        );
-    }
-  }, [
-    searchText,
-    searchType,
-    facetQuery,
-    showMap,
-    mapBounds,
-    region,
-    page,
-    showMorePages,
-  ]);
+    },
+    /*  } */ [
+      searchText,
+      searchType,
+      facetQuery,
+      region,
+      page,
+      showMorePages,
+      fq,
+    ]
+  );
 
   const facetSearch = (name, value) => {
     //const selectedIndex = event.target.selectedIndex;
@@ -233,125 +170,6 @@ export default function Results() {
     resetDefaultSearchUrl(searchType);
   };
 
-  const [expandedMapBounds, setExpandedMapBounds] = useState(false);
-  const [allowSetMapBounds] = useState(true);
-  const [viewport, setViewport] = useState({});
-
-  const updateMapBounds = useCallback(
-    (bounds, viewport) => {
-      setViewport(viewport);
-      if (allowSetMapBounds) {
-        setMapBounds(bounds);
-        if (
-          !expandedMapBounds ||
-          !containsMapBounds(expandedMapBounds, bounds)
-        ) {
-          setExpandedMapBounds(expandMapBounds(bounds));
-        }
-      }
-    },
-    [expandedMapBounds, setMapBounds, setExpandedMapBounds, allowSetMapBounds]
-  );
-
-  const geoJsonUrl = useMemo(() => {
-    if (showMap) {
-      let geoJsonUrl = `${dataServiceUrl}/spatial.geojson?`;
-      const params = new URLSearchParams({
-        ...(searchType !== "SpatialData" ? { document_type: searchType } : {}),
-        search_text: searchText,
-        facetType: "the_geom",
-        facetName: mapLibreBounds_toQuery(expandedMapBounds, region),
-      });
-      if (region !== "" && region.toUpperCase() !== "GLOBAL") {
-        params.append("region", region);
-      }
-      geoJsonUrl += [params.toString(), facetQuery].filter((e) => e).join("&");
-      return geoJsonUrl;
-    }
-    return null;
-  }, [
-    showMap,
-    dataServiceUrl,
-    searchType,
-    searchText,
-    region,
-    expandedMapBounds,
-    facetQuery,
-  ]);
-
-  const layers = useMemo(() => {
-    return [
-      {
-        id: "search_results_layer",
-        label: "Search Results",
-        type: "geojson",
-        url: geoJsonUrl,
-        cluster: true,
-      },
-    ];
-  }, [geoJsonUrl]);
-
-  const [mousePos, setMousePos] = useState(undefined);
-  const [selectedElem, setSelectedElem] = useState(undefined);
-  const [selectedDetails, setSelectedDetails] = useState(undefined);
-  const [selectHold, setSelectHold] = useState(false);
-  useEffect(() => {
-    if (selectedElem == undefined) {
-      setSelectedDetails(undefined);
-      return;
-    }
-    fetchDetail(selectedElem.properties.id).then((d) => {
-      if (!d) {
-        setSelectedDetails(undefined);
-        return;
-      }
-      let position;
-      switch (selectedElem.layer.type) {
-        case "circle":
-          position = /POINT +\((-?\d+\.\d+) +(-?\d+\.\d+)\)/g
-            .exec(d.the_geom)
-            ?.map((i) => parseFloat(i))
-            ?.slice(1);
-          if (position == undefined) {
-            console.log(d.the_geom);
-          }
-          break;
-        case "line":
-          position = undefined;
-          break;
-      }
-      setSelectedDetails({ detail: d, position });
-    });
-  }, [selectedElem?.properties?.id]);
-
-  const tooltip = (() => {
-    if (!selectedDetails || !selectedElem) return null;
-    let [lng, lat] = selectedDetails.position ?? mousePos;
-    while (lng - mousePos[0] > +180) {
-      lng -= 360.0;
-    }
-    while (lng - mousePos[0] < -180) {
-      lng += 360.0;
-    }
-    return (
-      <Popup
-        latitude={lat}
-        longitude={lng}
-        dynamicPosition={true}
-        closeButton={false}
-        className="w-25"
-      >
-        {selectedDetails.detail.name}
-      </Popup>
-    );
-  })();
-
-  const get_region_bounds = () => {
-    const bounds = regionBoundsMap[region.replaceAll(" ", "_")];
-    if (bounds) return bounds;
-    else return boundsToQuery(INITIAL_BOUNDS);
-  };
-
   const setValue = (i, value) =>
     setFacetFacetValues((values) => [
       ...values.slice(0, i),
@@ -367,7 +185,6 @@ export default function Results() {
     [clearFacetQuery, setValue]
   );
 
-  const { zoom = 0 } = viewport;
   const paletteFilter = "custom.resultPage.filters.";
 
   return (
@@ -386,6 +203,7 @@ export default function Results() {
         }}
       />
       <Container maxWidth="lg" sx={{ marginBottom: { xs: 5, lg: 0 } }}>
+        <Support />
         <Grid container mt={{ xs: 4, lg: 0 }} gap={{ xs: 1, lg: 0 }}>
           <Grid item lg={3} display={{ xs: "none", lg: "block" }}>
             <Accordion
@@ -534,7 +352,7 @@ export default function Results() {
                     "&.MuiButton-outlined": {
                       borderColor: paletteFilter + "borderColorFilterMobile",
                     },
-                    flex: "0 0 auto", // Imposta larghezza fissa
+                    flex: "0 0 auto",
                     minWidth: 0,
                   }}
                   onClick={() => {

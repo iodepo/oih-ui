@@ -13,11 +13,11 @@ import { useAppTranslation } from "context/context/AppTranslation";
 import Alert from "@mui/material/Alert";
 import { CATEGORIES } from "portability/configuration";
 import Divider from "@mui/material/Divider";
-import {fieldTitleFromName, useSearchParam} from "utilities/generalUtility";
+import { fieldTitleFromName, useSearchParam } from "utilities/generalUtility";
 import { dataServiceUrl } from "config/environment";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const AdvancedSearch = (props) => {
   const { setSearchQuery, searchQuery, facets } = props;
@@ -40,7 +40,7 @@ const AdvancedSearch = (props) => {
       },
     ],
   });
-  const navigator = useNavigate();
+  const navigate = useNavigate();
   const [region, setRegion] = useSearchParam("region", "global");
 
   const changeTopic = (topic) => {
@@ -76,27 +76,39 @@ const AdvancedSearch = (props) => {
   }, []);
 
   const createSearchQuery = () => {
+    debugger;
     // Build SOLR facet query
-    let facetQuery = `type:(${searchAdvancedQuery[0].value})`;
+    /* let facetQuery = `type:(${searchAdvancedQuery[0].value})`; */
+    let facetQuery = "";
+
+    const idTabName = CATEGORIES.find(
+      (c) => c.text === searchAdvancedQuery[0].value
+    ).id;
 
     /** @type {{id: number, category: string, value: string, operator: string, textfield: string}[][]} */
     const groups = Object.values(searchAdvancedQuery).toSpliced(0, 1);
 
-    const categories = {
-      Provider: 'provider',
-      Keywords: 'keywords',
-      Contributor: 'contributor'
-    }
+    const categories = facetsToShow.reduce((acc, f) => {
+      const t = fieldTitleFromName(f.name);
+      acc[t] = f.name;
+      return acc;
+    }, {});
 
     function valueMapper(text, operator) {
-      if (operator.endsWith('Contains')) {
+      if (operator.endsWith("Contains")) {
         return `*${text}*`;
       }
       return text;
     }
 
+    let firstGroup = true;
     for (const group of groups) {
-      facetQuery += ' AND (';
+      if (firstGroup) {
+        facetQuery += "(";
+        firstGroup = false;
+      } else {
+        facetQuery += " AND (";
+      }
 
       for (const [index, value] of group.entries()) {
         if (!value.textfield) {
@@ -106,25 +118,24 @@ const AdvancedSearch = (props) => {
         }
 
         facetQuery +=
-          (value.operator.startsWith('Not') ? '-' : '')
-          + "txt_"
-          + categories[value.category] + ":" + valueMapper(value.textfield, value.operator);
+          (value.operator.startsWith("Not") ? "-" : "") +
+          categories[value.category] +
+          ":" +
+          valueMapper(value.textfield, value.operator);
 
         if (index < group.length - 1) {
-          facetQuery += ' OR ';
+          facetQuery += " OR ";
         }
       }
-      facetQuery += ')';
+      facetQuery += ")";
     }
 
-    const [_, url, tabName = ""] = window.location.pathname.split("/");
-
     const hrefFor = (region, query) =>
-      `/results/${tabName}?${new URLSearchParams({
+      `/results/${idTabName}?${new URLSearchParams({
         ...(query ? { fq: query } : {}),
         ...(region && region.toUpperCase() !== "GLOBAL" ? { region } : {}),
       })}`;
-    navigator(hrefFor(region, facetQuery))
+    navigate(hrefFor(region, facetQuery));
   };
 
   return (
@@ -298,7 +309,7 @@ const AdvancedSearch = (props) => {
                                         category: "Provider",
                                         value: "",
                                         operator: "Contains",
-                                        text: ""
+                                        text: "",
                                       },
                                     ],
                                   });
@@ -335,7 +346,7 @@ const AdvancedSearch = (props) => {
                                         category: "Provider",
                                         value: "",
                                         operator: "Contains",
-                                        text: ""
+                                        text: "",
                                       },
                                     ],
                                   };
@@ -688,7 +699,7 @@ const AdvancedSearch = (props) => {
                                       category: "Provider",
                                       value: "",
                                       operator: "Contains",
-                                      text: ""
+                                      text: "",
                                     },
                                   ],
                                 });
@@ -725,7 +736,7 @@ const AdvancedSearch = (props) => {
                                       category: "Provider",
                                       value: "",
                                       operator: "Contains",
-                                      text: ""
+                                      text: "",
                                     },
                                   ],
                                 };
@@ -868,7 +879,7 @@ const AdvancedSearch = (props) => {
                 textTransform: "none",
               }}
             >
-              {translationState.translation["Apply"]}
+              {translationState.translation["Search"]}
             </Button>
             <Button
               variant="text"
