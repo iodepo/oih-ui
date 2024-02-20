@@ -60,7 +60,7 @@ app.add_middleware(
 
 @app.get("/search")
 def search(search_text: str = None, document_type: str = None, region: str = None, facetType: list = Query(default=[]),
-           facetName: list = Query(default=[]), start=0, rows=10, include_facets: bool = True):
+           facetName: list = Query(default=[]), fq=None, start=0, rows=10, include_facets: bool = True):
 
     facetFields = FACET_FIELDS.get(document_type, AVAILABLE_FACETS)
     facet_interval_fields = FACET_INTERVALS.get(document_type, [])
@@ -77,6 +77,7 @@ def search(search_text: str = None, document_type: str = None, region: str = Non
                      facetType, facetName,
                      facetFields=list(queryFacetFields) if include_facets else ['type'],
                      facet_interval_fields=facet_interval_fields,
+                     fq=fq,
                      region=region,
                      start=start,
                      rows=rows
@@ -84,7 +85,7 @@ def search(search_text: str = None, document_type: str = None, region: str = Non
 
     facets = facet_counts(data['facet_counts']['facet_fields'], facetFields) if include_facets else []
     facets.extend(render_facet_intervals(data['facet_counts'].get('facet_intervals',{})))
-    
+
     return {
         'docs': data['response']['docs'],
         # make sure pagination gets the right number of items back so it doesn't need to calculate it.
@@ -238,7 +239,7 @@ def _toFeature(result, geometry_source='geojson_geom'):
 class ParameterError(Exception): pass
 
 class SolrQuery:
-    def __init__(self, search_text=None, document_type=None, facetType=None, facetName=None, facetFields=None, facet_interval_fields=None, region=None,
+    def __init__(self, search_text=None, document_type=None, facetType=None, facetName=None, facetFields=None, facet_interval_fields=None, region=None, fq=None,
                  start=0, **kwargs):
 
         # Dismax query parser needs to have the search term in the query, not * or :.
@@ -261,6 +262,8 @@ class SolrQuery:
         if facet_interval_fields:
             solr_search_query.add_facet_interval(facet_interval_fields, facet_intervals )
 
+        if fq:
+            solr_search_query.add_raw_fq(fq)
         if facetType and facetName and len(facetType) == len(facetName):
             for type, value in zip(facetType, facetName):
                 solr_search_query.add_fq(type, value)

@@ -50,6 +50,9 @@ class SolrQueryBuilder:
 
         self.params['fq'].append(self._fmt(name) % {'name': name, 'value':value})
 
+    def add_raw_fq(self, value):
+        self.params['fq'] = value
+
     def add_facet_interval(self, interval_fields, facet_intervals):
         self.params["facet.interval"] = interval_fields
         self.params["facet.interval.set"] = facet_intervals
