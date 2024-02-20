@@ -13,10 +13,11 @@ import { useAppTranslation } from "context/context/AppTranslation";
 import Alert from "@mui/material/Alert";
 import { CATEGORIES } from "portability/configuration";
 import Divider from "@mui/material/Divider";
-import { fieldTitleFromName } from "utilities/generalUtility";
+import {fieldTitleFromName, useSearchParam} from "utilities/generalUtility";
 import { dataServiceUrl } from "config/environment";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
+import {useNavigate} from "react-router-dom";
 
 const AdvancedSearch = (props) => {
   const { setSearchQuery, searchQuery, facets } = props;
@@ -39,6 +40,8 @@ const AdvancedSearch = (props) => {
       },
     ],
   });
+  const navigator = useNavigate();
+  const [region, setRegion] = useSearchParam("region", "global");
 
   const changeTopic = (topic) => {
     const idTopic = CATEGORIES.find((c) => c.text === topic).id;
@@ -73,16 +76,57 @@ const AdvancedSearch = (props) => {
   }, []);
 
   const createSearchQuery = () => {
-    const keys = Object.keys(searchAdvancedQuery);
-    console.log(searchAdvancedQuery);
-    keys.forEach((k) => {
-      if (searchAdvancedQuery[k].subCategory === "") {
-        setAlertMessage(
-          "Please kindly fill in all fields or, if not applicable, feel free to remove them"
-        );
+    // Build SOLR facet query
+    let facetQuery = `type:(${searchAdvancedQuery[0].value})`;
+
+    /** @type {{id: number, category: string, value: string, operator: string, textfield: string}[][]} */
+    const groups = Object.values(searchAdvancedQuery).toSpliced(0, 1);
+
+    const categories = {
+      Provider: 'provider',
+      Keywords: 'keywords',
+      Contributor: 'contributor'
+    }
+
+    function valueMapper(text, operator) {
+      if (operator.endsWith('Contains')) {
+        return `*${text}*`;
       }
-    });
+      return text;
+    }
+
+    for (const group of groups) {
+      facetQuery += ' AND (';
+
+      for (const [index, value] of group.entries()) {
+        if (!value.textfield) {
+          setAlertMessage(
+            "Please kindly fill in all fields or, if not applicable, feel free to remove them"
+          );
+        }
+
+        facetQuery +=
+          (value.operator.startsWith('Not') ? '-' : '')
+          + "txt_"
+          + categories[value.category] + ":" + valueMapper(value.textfield, value.operator);
+
+        if (index < group.length - 1) {
+          facetQuery += ' OR ';
+        }
+      }
+      facetQuery += ')';
+    }
+
+    const [_, url, tabName = ""] = window.location.pathname.split("/");
+
+    const hrefFor = (region, query) =>
+      `/results/${tabName}?${new URLSearchParams({
+        ...(query ? { fq: query } : {}),
+        ...(region && region.toUpperCase() !== "GLOBAL" ? { region } : {}),
+      })}`;
+    navigator(hrefFor(region, facetQuery))
   };
+
   return (
     <>
       <Grid item container gap={1}>
@@ -254,7 +298,7 @@ const AdvancedSearch = (props) => {
                                         category: "Provider",
                                         value: "",
                                         operator: "Contains",
-                                        text: "",
+                                        text: ""
                                       },
                                     ],
                                   });
@@ -291,7 +335,7 @@ const AdvancedSearch = (props) => {
                                         category: "Provider",
                                         value: "",
                                         operator: "Contains",
-                                        text: "",
+                                        text: ""
                                       },
                                     ],
                                   };
@@ -589,6 +633,20 @@ const AdvancedSearch = (props) => {
                                   marginRight: 4,
                                   width: "250px",
                                 }}
+                                onInput={(e) => {
+                                  const newArray = [
+                                    ...searchAdvancedQuery[key],
+                                  ];
+                                  const updatedArray = newArray.map((obj) =>
+                                    obj.id === v.id
+                                      ? { ...obj, textfield: e.target.value }
+                                      : obj
+                                  );
+                                  setSearchAdvancedQuery({
+                                    ...searchAdvancedQuery,
+                                    [key]: updatedArray,
+                                  });
+                                }}
                                 renderInput={(params) => (
                                   <TextField
                                     sx={{
@@ -630,7 +688,7 @@ const AdvancedSearch = (props) => {
                                       category: "Provider",
                                       value: "",
                                       operator: "Contains",
-                                      text: "",
+                                      text: ""
                                     },
                                   ],
                                 });
@@ -667,7 +725,7 @@ const AdvancedSearch = (props) => {
                                       category: "Provider",
                                       value: "",
                                       operator: "Contains",
-                                      text: "",
+                                      text: ""
                                     },
                                   ],
                                 };
@@ -744,7 +802,7 @@ const AdvancedSearch = (props) => {
                           AND
                         </Divider>
                       )}
-                    {/*   
+                    {/*
                     {facets.map((f, index) => {
                       const title = fieldTitleFromName(f.name);
                       const values = f.counts;

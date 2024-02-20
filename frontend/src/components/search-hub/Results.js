@@ -62,6 +62,7 @@ export default function Results() {
   const [searchText, setSearchText] = useSearchParam("search_text", "");
   const [region, setRegion] = useSearchParam("region", "global");
   const [facetQuery, setFacetQuery] = useSearchParam("facet_query");
+  const [fq, setFq] = useSearchParam("fq");
   const [page, setPage] = useSearchParam("page", 0);
 
   const [facetValues, setFacetFacetValues] = useState(
@@ -96,12 +97,13 @@ export default function Results() {
   }, [isMobile]);
 
   useEffect(() => {
+    console.log("mapSearch", facetQuery);
     fetch(
       `${dataServiceUrl}/search?${new URLSearchParams({
         rows: 0,
         include_facets: false,
         ...(region.toUpperCase() !== "GLOBAL" ? { region } : {}),
-        ...(searchText ? { search_text: searchText } : {}),
+        ...(searchText ? { search_text: searchText } : {})
       })}`
     )
       .then((response) => response.json())
@@ -130,6 +132,7 @@ export default function Results() {
       if (region && region.toUpperCase() !== "GLOBAL") {
         params.append("region", region);
       }
+
       URI += [params.toString(), facetQuery].filter((e) => e).join("&");
       setCurrentURI(URI);
 
@@ -162,7 +165,7 @@ export default function Results() {
       if (region.toUpperCase() !== "GLOBAL") {
         params.append("region", region);
       }
-      URI += [params.toString(), facetQuery].filter((e) => e).join("&");
+      URI += [params.toString(), facetQuery, fq ? fq : ''].filter((e) => e).join("&");
       setCurrentURI(URI);
 
       fetch(URI)
@@ -490,7 +493,7 @@ export default function Results() {
                     facetQuery={facetQuery}
                   />
                 </DialogContent>
-                {/* 
+                {/*
                 <DialogActions>
                   <Button onClick={handleClose}>Disagree</Button>
                   <Button onClick={handleClose} autoFocus>
