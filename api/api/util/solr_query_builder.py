@@ -8,7 +8,7 @@ DEFAULT_FACET_FIELDS = ['txt_knowsAbout', 'name', 'txt_knowsLanguage', 'txt_nati
 class SolrQueryBuilder:
 
     def __init__(self, rows=10, facet_min_count=1, start=0,
-                 query='*:*', sort='score desc, indexed_ts desc',
+                 query='*:*', sort='indexed_ts desc',
                  facet='true', flList=None):
         self.params = {
             'q.op':'AND',  # default op to AND  # applies to dismax and standard query parser
