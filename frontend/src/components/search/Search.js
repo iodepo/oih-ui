@@ -231,7 +231,7 @@ const SearchHome = (props) => {
                       fontWeight: 600,
                       borderBottomRightRadius: 0,
                       borderTopRightRadius: 0,
-                      width: "100%",
+                      width: { xs: "100%", lg: "132px" },
                       ".MuiOutlinedInput-notchedOutline": {
                         borderRight: { lg: "none" },
                         borderWidth: { xs: 0, lg: "1px" },
@@ -548,6 +548,7 @@ const SearchResult = (props) => {
                             "&.Mui-disabled": {
                               backgroundColor: "rgba(0, 0, 0, 0.12)",
                             },
+                            width: { xs: "100%", lg: "132px" },
                           }}
                           onChange={(e) => {
                             setRegion(e.target.value);

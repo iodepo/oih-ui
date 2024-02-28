@@ -30,10 +30,10 @@ import MenuItem from "@mui/material/MenuItem";
 import Avatar from "@mui/material/Avatar";
 import useCookies from "context/useCookies";
 import { SupportedLangugesEnum } from "context/AppTranslationProvider";
-import FrenchFlag from "../../../resources/svg/FrenchFlag.svg";
-import RussianFlag from "../../../resources/svg/RussianFlag.svg";
-import EnglishFlag from "../../../resources/svg/EnglishFlag.svg";
-import SpanishFlag from "../../../resources/svg/SpanishFlag.svg";
+import FrenchFlag from "../../../../resources/svg/FrenchFlag.svg";
+import RussianFlag from "../../../../resources/svg/RussianFlag.svg";
+import EnglishFlag from "../../../../resources/svg/EnglishFlag.svg";
+import SpanishFlag from "../../../../resources/svg/SpanishFlag.svg";
 import { useAppTranslation } from "context/context/AppTranslation";
 import ResultValue from "components/search-hub/ResultValue";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
@@ -77,6 +77,10 @@ const DrawerContent = (props) => {
     getDataSpatialSearch,
     isLoading,
     handleSubmit,
+    setSelectedFacets,
+    selectedFacets,
+    facetSearch,
+    clear,
   } = props;
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("");
@@ -246,31 +250,71 @@ const DrawerContent = (props) => {
               <Avatar src={languageIcon} sx={{ width: 20, height: 20 }} />
             </Box>
           </Box>
-          <Box p={"12px 22px 42px 22px"}>
+          <Box p={"10px 20px 40px 20px"}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                <Stack direction={"row"} spacing={1}>
-                  <Button
-                    variant="outlined"
-                    sx={{ height: "18px", fontSize: "12px" }}
-                    endIcon={<CloseIcon sx={{ fontSize: "16px" }} />}
-                  >
-                    Send
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    sx={{ height: "18px", fontSize: "12px" }}
-                    endIcon={<CloseIcon sx={{ fontSize: "16px" }} />}
-                  >
-                    Send
-                  </Button>
-                  <Divider orientation="vertical" flexItem />
-                  <Button
-                    variant="text"
-                    sx={{ height: "18px", fontSize: "12px" }}
-                  >
-                    Send
-                  </Button>
+                <Stack direction={"row"} spacing={1} useFlexGap flexWrap="wrap">
+                  {selectedFacets.length > 0 &&
+                    selectedFacets.map((s, index) => {
+                      return (
+                        <Button
+                          key={index}
+                          variant="contained"
+                          sx={{
+                            height: "18px",
+                            fontSize: "12px",
+                            minWidth: 0,
+                            boxShadow: 0,
+                            flex: "0 0 auto",
+                            background: "#F6F8FA",
+                            color: "#1A2C54",
+                            textTransform: "none",
+                            "&:hover": {
+                              background: "#1A2C54",
+                              color: "#F6F8FA",
+                            },
+                          }}
+                          endIcon={
+                            <CloseIcon
+                              sx={{ fontSize: "16px", color: "#7B8FB7" }}
+                            />
+                          }
+                          onClick={() => {
+                            setSelectedFacets(
+                              selectedFacets.filter(
+                                (x) => x.name !== s.name && x.value !== s.value
+                              )
+                            );
+                            facetSearch(s.name, s.value, false);
+                          }}
+                        >
+                          {cutWithDots(s.value, 10)}
+                        </Button>
+                      );
+                    })}
+
+                  {selectedFacets.length > 0 && (
+                    <Divider
+                      orientation="vertical"
+                      flexItem
+                      sx={{ borderColor: "#1A2C54", borderWidth: 1 }}
+                    />
+                  )}
+                  {selectedFacets.length > 0 && (
+                    <Button
+                      variant="text"
+                      sx={{
+                        height: "18px",
+                        fontSize: "14px",
+                        color: "#40AAD3",
+                        fontWeight: 700,
+                        textTransform: "none",
+                      }}
+                      onClick={() => clear()}
+                    >
+                      Clear filters
+                    </Button>
+                  )}
                 </Stack>
               </Grid>
               <Grid item xs={9}>
@@ -339,7 +383,7 @@ const DrawerContent = (props) => {
           <Box sx={{ height: "inherit" }} ref={mainBoxRef}>
             <TableContainer
               component={Paper}
-              sx={{ boxShadow: 0, height: mainBoxHeight }}
+              sx={{ boxShadow: 0, height: mainBoxHeight - 20 }}
             >
               {isLoading && (
                 <CircularProgress sx={{ display: "flex", margin: "0 auto" }} />
@@ -350,7 +394,7 @@ const DrawerContent = (props) => {
                   next={() => {
                     setPage(page + 1);
                   }}
-                  height={mainBoxHeight}
+                  height={mainBoxHeight - 20}
                   hasMore={ITEMS_PER_PAGE * page < parseInt(resultsCount)}
                   loader={<h4></h4>}
                   endMessage={<p>No more items</p>}

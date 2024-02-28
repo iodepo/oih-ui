@@ -23,10 +23,11 @@ import SearchIcon from "@mui/icons-material/Search";
 import { trackingMatomoClickResults } from "utilities/trackingUtility";
 
 const ResultValue = (props) => {
-  const { result } = props;
+  const { result, completeValue } = props;
 
   const translationState = useAppTranslation();
   const [iconLD, setIconLD] = useState(<CodeOutlinedIcon />);
+  const isVerified = true;
 
   function resolveAsUrl(url) {
     const pattern = /^((http|https):\/\/)/;
@@ -112,7 +113,7 @@ const ResultValue = (props) => {
       }}
       elevation={0}
     >
-      {/* {isVerified && (
+      {isVerified && (
         <CardHeader
           avatar={
             <Chip
@@ -134,7 +135,7 @@ const ResultValue = (props) => {
             />
           }
         />
-      )} */}
+      )}
 
       <CardContent>
         <Stack spacing={1}>
@@ -169,7 +170,7 @@ const ResultValue = (props) => {
             </Typography>
           )}
 
-          {/* <Typography
+          <Typography
             sx={{ fontSize: "12px", color: "#42526E" }}
             display={"flex"}
             alignItems={"center"}
@@ -198,7 +199,7 @@ const ResultValue = (props) => {
                 color: "#42526E",
               }}
             />
-          </Typography> */}
+          </Typography>
 
           <Box
             display={"flex"}

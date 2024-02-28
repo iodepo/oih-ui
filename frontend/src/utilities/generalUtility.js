@@ -22,7 +22,15 @@ const fieldTitleFromName = (facet_name) => {
 function useSearchParam(param, def = undefined) {
   const [params, setParams] = useSearchParams();
   const setParam = useCallback(
-    (value) => setParams({ ...Object.fromEntries(params), [param]: value }),
+    (value) => {
+      const updatedParams = { ...Object.fromEntries(params) };
+      if (value === "") {
+        delete updatedParams[param];
+      } else {
+        updatedParams[param] = value;
+      }
+      setParams(updatedParams);
+    },
     [param, params, setParams]
   );
   return [params.has(param) ? params.get(param) : def, setParam];

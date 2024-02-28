@@ -23,35 +23,18 @@ const FilterBy = (props) => {
     clearFacetQuery,
     facets,
     facetSearch,
-    facetValues,
-    setFacetFacetValues,
-    isMobile,
     setFilterChosenMobile,
     filterChosenMobile,
     selectedProvider,
     setSelectedProvider,
     facetQuery,
+    clear,
   } = props;
 
   const changeSearchType = (type) => {
     clearFacetQuery();
     resetDefaultSearchUrl(type);
   };
-
-  const setValue = (i, value) =>
-    setFacetFacetValues((values) => [
-      ...values.slice(0, i),
-      value,
-      ...values.slice(i + 1, values.length),
-    ]);
-
-  const clear = useCallback(
-    (e) => {
-      setFacetFacetValues(new Array(facets.length).fill(""));
-      clearFacetQuery();
-    },
-    [clearFacetQuery, setValue]
-  );
 
   const drawFacets = (facet, i) => {
     const title = fieldTitleFromName(facet.name);
@@ -105,7 +88,6 @@ const FilterBy = (props) => {
                               f.filter((d) => d.type !== "provider")
                             );
                           } else {
-                            setValue(i, facetCount.name);
                             facetSearch(facet.name, facetCount.name);
                             setSelectedProvider(facetCount.name);
                             const isProviderFilterSet = filterChosenMobile.find(
@@ -174,7 +156,6 @@ const FilterBy = (props) => {
               facet={facet}
               i={i}
               title={title}
-              setValue={setValue}
               facetSearch={facetSearch}
               clear={clear}
               isClearAll={isClearAll}
@@ -189,7 +170,6 @@ const FilterBy = (props) => {
           facet={facet}
           i={i}
           title={title}
-          setValue={setValue}
           facetSearch={facetSearch}
           clear={clear}
           isClearAll={isClearAll}

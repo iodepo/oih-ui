@@ -34,9 +34,8 @@ const AdvancedSearch = (props) => {
       {
         id: 0,
         category: "Provider",
-        value: "",
         operator: "Contains",
-        text: "",
+        textfield: "",
       },
     ],
   });
@@ -76,15 +75,15 @@ const AdvancedSearch = (props) => {
   }, []);
 
   const createSearchQuery = () => {
-    debugger;
+    let searchQueryBuild = "{{";
     // Build SOLR facet query
-    /* let facetQuery = `type:(${searchAdvancedQuery[0].value})`; */
     let facetQuery = "";
 
     const idTabName = CATEGORIES.find(
       (c) => c.text === searchAdvancedQuery[0].value
     ).id;
-
+    searchQueryBuild +=
+      ' (Topic IS "' + searchAdvancedQuery[0].value + '") AND (';
     /** @type {{id: number, category: string, value: string, operator: string, textfield: string}[][]} */
     const groups = Object.values(searchAdvancedQuery).toSpliced(0, 1);
 
@@ -108,6 +107,7 @@ const AdvancedSearch = (props) => {
         firstGroup = false;
       } else {
         facetQuery += " AND (";
+        searchQueryBuild += " AND (";
       }
 
       for (const [index, value] of group.entries()) {
@@ -115,6 +115,25 @@ const AdvancedSearch = (props) => {
           setAlertMessage(
             "Please kindly fill in all fields or, if not applicable, feel free to remove them"
           );
+        }
+
+        if (group.length > 1) {
+          searchQueryBuild +=
+            "( " +
+            value.category +
+            " " +
+            value.operator.replace(/([a-z])([A-Z])/g, "$1 $2").toUpperCase() +
+            ' "' +
+            value.textfield +
+            '" )';
+        } else {
+          searchQueryBuild +=
+            value.category +
+            " " +
+            value.operator.replace(/([a-z])([A-Z])/g, "$1 $2").toUpperCase() +
+            ' "' +
+            value.textfield +
+            '"';
         }
 
         facetQuery +=
@@ -125,11 +144,14 @@ const AdvancedSearch = (props) => {
 
         if (index < group.length - 1) {
           facetQuery += " OR ";
+          searchQueryBuild += " OR ";
         }
       }
+      searchQueryBuild += ")";
       facetQuery += ")";
     }
-
+    searchQueryBuild += " }}";
+    setSearchQuery(searchQueryBuild);
     const hrefFor = (region, query) =>
       `/results/${idTabName}?${new URLSearchParams({
         ...(query ? { fq: query } : {}),
@@ -194,9 +216,8 @@ const AdvancedSearch = (props) => {
                   {
                     id: 0,
                     category: "Provider",
-                    value: "",
                     operator: "Contains",
-                    text: "",
+                    textfield: "",
                   },
                 ],
               };
@@ -220,10 +241,10 @@ const AdvancedSearch = (props) => {
           display={{ xs: "flex", lg: "flex" }}
           alignItems={"center"}
         >
-          {Object.keys(searchAdvancedQuery).map((key, index) => {
-            if (key !== "0") {
+          {Object.keys(searchAdvancedQuery).map((id, index) => {
+            if (id !== "0") {
               return (
-                <Grid item xs={12} lg={12} key={key}>
+                <Grid key={index} item xs={12} lg={12}>
                   <Box display={{ lg: "none" }}>
                     <Grid container display={"flex"} spacing={1}>
                       {index === 1 && (
@@ -241,7 +262,7 @@ const AdvancedSearch = (props) => {
                           </Divider>
                         </Grid>
                       )}
-                      {searchAdvancedQuery[key].map((v, index2) => {
+                      {searchAdvancedQuery[id].map((v, index2) => {
                         return (
                           <>
                             <Grid key={index2} item xs={7}>
@@ -255,9 +276,7 @@ const AdvancedSearch = (props) => {
                                   width: "100%",
                                 }}
                                 onChange={(e) => {
-                                  const newArray = [
-                                    ...searchAdvancedQuery[key],
-                                  ];
+                                  const newArray = [...searchAdvancedQuery[id]];
                                   const updatedArray = newArray.map((obj) =>
                                     obj.id === v.id
                                       ? { ...obj, category: e.target.value }
@@ -266,7 +285,7 @@ const AdvancedSearch = (props) => {
 
                                   setSearchAdvancedQuery({
                                     ...searchAdvancedQuery,
-                                    [key]: updatedArray,
+                                    [id]: updatedArray,
                                   });
                                 }}
                               >
@@ -294,22 +313,22 @@ const AdvancedSearch = (props) => {
                                 }}
                                 onClick={() => {
                                   const lastID =
-                                    searchAdvancedQuery[key][
-                                      searchAdvancedQuery[key].length - 1
+                                    searchAdvancedQuery[id][
+                                      searchAdvancedQuery[id].length - 1
                                     ].id;
 
                                   const newKey = parseInt(lastID) + 1;
 
                                   setSearchAdvancedQuery({
                                     ...searchAdvancedQuery,
-                                    [key]: [
-                                      ...searchAdvancedQuery[key],
+                                    [id]: [
+                                      ...searchAdvancedQuery[id],
                                       {
                                         id: newKey,
                                         category: "Provider",
-                                        value: "",
+
                                         operator: "Contains",
-                                        text: "",
+                                        textfield: "",
                                       },
                                     ],
                                   });
@@ -320,7 +339,7 @@ const AdvancedSearch = (props) => {
                               <Button
                                 variant={"outlined"}
                                 disabled={
-                                  index2 !== searchAdvancedQuery[key].length - 1
+                                  index2 !== searchAdvancedQuery[id].length - 1
                                 }
                                 sx={{
                                   height: "40px",
@@ -333,7 +352,7 @@ const AdvancedSearch = (props) => {
                                   const keys = Object.keys(searchAdvancedQuery);
 
                                   const lastKey = Math.max(
-                                    ...keys.map((key) => parseInt(key, 10))
+                                    ...keys.map((k) => parseInt(k, 10))
                                   );
 
                                   const newKey = lastKey + 1;
@@ -344,9 +363,9 @@ const AdvancedSearch = (props) => {
                                       {
                                         id: 0,
                                         category: "Provider",
-                                        value: "",
+
                                         operator: "Contains",
-                                        text: "",
+                                        textfield: "",
                                       },
                                     ],
                                   };
@@ -356,7 +375,7 @@ const AdvancedSearch = (props) => {
                               >
                                 AND
                               </Button>
-                              {(searchAdvancedQuery[key].length > 1 ||
+                              {(searchAdvancedQuery[id].length > 1 ||
                                 index >= 2) && (
                                 <IconButton
                                   aria-label="remove"
@@ -370,14 +389,14 @@ const AdvancedSearch = (props) => {
                                       const updatedSearchAdvancedQuery = {
                                         ...prevState,
                                       };
-                                      delete updatedSearchAdvancedQuery[key];
-                                      const updatedArray = prevState[
-                                        key
-                                      ].filter((f) => f.id !== v.id);
+                                      delete updatedSearchAdvancedQuery[id];
+                                      const updatedArray = prevState[id].filter(
+                                        (f) => f.id !== v.id
+                                      );
                                       if (updatedArray.length > 0)
                                         return {
                                           ...updatedSearchAdvancedQuery,
-                                          [key]: updatedArray,
+                                          [id]: updatedArray,
                                         };
                                       else
                                         return {
@@ -401,9 +420,7 @@ const AdvancedSearch = (props) => {
                                   width: "100%",
                                 }}
                                 onChange={(e) => {
-                                  const newArray = [
-                                    ...searchAdvancedQuery[key],
-                                  ];
+                                  const newArray = [...searchAdvancedQuery[id]];
                                   const updatedArray = newArray.map((obj) =>
                                     obj.id === v.id
                                       ? { ...obj, operator: e.target.value }
@@ -412,7 +429,7 @@ const AdvancedSearch = (props) => {
 
                                   setSearchAdvancedQuery({
                                     ...searchAdvancedQuery,
-                                    [key]: updatedArray,
+                                    [id]: updatedArray,
                                   });
                                 }}
                               >
@@ -437,7 +454,7 @@ const AdvancedSearch = (props) => {
                                   }}
                                   onInput={(e) => {
                                     const newArray = [
-                                      ...searchAdvancedQuery[key],
+                                      ...searchAdvancedQuery[id],
                                     ];
                                     const updatedArray = newArray.map((obj) =>
                                       obj.id === v.id
@@ -446,7 +463,7 @@ const AdvancedSearch = (props) => {
                                     );
                                     setSearchAdvancedQuery({
                                       ...searchAdvancedQuery,
-                                      [key]: updatedArray,
+                                      [id]: updatedArray,
                                     });
                                   }}
                                   placeholder="Please enter text"
@@ -456,7 +473,20 @@ const AdvancedSearch = (props) => {
                                 v.operator === "NotEquals") && (
                                 <Autocomplete
                                   disablePortal
-                                  id="combo-box-demo"
+                                  onChange={(e, newValue) => {
+                                    const newArray = [
+                                      ...searchAdvancedQuery[id],
+                                    ];
+                                    const updatedArray = newArray.map((obj) =>
+                                      obj.id === v.id
+                                        ? { ...obj, textfield: newValue.value }
+                                        : obj
+                                    );
+                                    setSearchAdvancedQuery({
+                                      ...searchAdvancedQuery,
+                                      [id]: updatedArray,
+                                    });
+                                  }}
                                   options={showCorrectSubFacets(v.category)}
                                   sx={{
                                     height: "40px",
@@ -478,8 +508,8 @@ const AdvancedSearch = (props) => {
                                 />
                               )}
                             </Grid>
-                            {index2 !== searchAdvancedQuery[key].length - 1 &&
-                              searchAdvancedQuery[key].length > 1 && (
+                            {index2 !== searchAdvancedQuery[id].length - 1 &&
+                              searchAdvancedQuery[id].length > 1 && (
                                 <Grid item xs={12}>
                                   <Typography
                                     variant="body1"
@@ -533,9 +563,9 @@ const AdvancedSearch = (props) => {
                         </Divider>
                       </Grid>
                     )}
-                    {searchAdvancedQuery[key].map((v, index2) => {
+                    {searchAdvancedQuery[id].map((v, index2) => {
                       return (
-                        <Box key={v.id}>
+                        <Box key={v.index2}>
                           <Box
                             display={{ xs: "none", lg: "flex" }}
                             alignItems={"center"}
@@ -553,7 +583,7 @@ const AdvancedSearch = (props) => {
                                 minWidth: "8.5rem",
                               }}
                               onChange={(e) => {
-                                const newArray = [...searchAdvancedQuery[key]];
+                                const newArray = [...searchAdvancedQuery[id]];
                                 const updatedArray = newArray.map((obj) =>
                                   obj.id === v.id
                                     ? { ...obj, category: e.target.value }
@@ -562,7 +592,7 @@ const AdvancedSearch = (props) => {
 
                                 setSearchAdvancedQuery({
                                   ...searchAdvancedQuery,
-                                  [key]: updatedArray,
+                                  [id]: updatedArray,
                                 });
                               }}
                             >
@@ -588,7 +618,7 @@ const AdvancedSearch = (props) => {
                                 minWidth: "8.5rem",
                               }}
                               onChange={(e) => {
-                                const newArray = [...searchAdvancedQuery[key]];
+                                const newArray = [...searchAdvancedQuery[id]];
                                 const updatedArray = newArray.map((obj) =>
                                   obj.id === v.id
                                     ? { ...obj, operator: e.target.value }
@@ -597,7 +627,7 @@ const AdvancedSearch = (props) => {
 
                                 setSearchAdvancedQuery({
                                   ...searchAdvancedQuery,
-                                  [key]: updatedArray,
+                                  [id]: updatedArray,
                                 });
                               }}
                             >
@@ -617,9 +647,7 @@ const AdvancedSearch = (props) => {
                                   width: "250px",
                                 }}
                                 onInput={(e) => {
-                                  const newArray = [
-                                    ...searchAdvancedQuery[key],
-                                  ];
+                                  const newArray = [...searchAdvancedQuery[id]];
                                   const updatedArray = newArray.map((obj) =>
                                     obj.id === v.id
                                       ? { ...obj, textfield: e.target.value }
@@ -627,7 +655,7 @@ const AdvancedSearch = (props) => {
                                   );
                                   setSearchAdvancedQuery({
                                     ...searchAdvancedQuery,
-                                    [key]: updatedArray,
+                                    [id]: updatedArray,
                                   });
                                 }}
                                 placeholder="Please enter text"
@@ -637,26 +665,23 @@ const AdvancedSearch = (props) => {
                               v.operator === "NotEquals") && (
                               <Autocomplete
                                 disablePortal
-                                id="combo-box-demo"
+                                onChange={(e, newValue) => {
+                                  const newArray = [...searchAdvancedQuery[id]];
+                                  const updatedArray = newArray.map((obj) =>
+                                    obj.id === v.id
+                                      ? { ...obj, textfield: newValue.value }
+                                      : obj
+                                  );
+                                  setSearchAdvancedQuery({
+                                    ...searchAdvancedQuery,
+                                    [id]: updatedArray,
+                                  });
+                                }}
                                 options={showCorrectSubFacets(v.category)}
                                 sx={{
                                   height: "40px",
                                   marginRight: 4,
                                   width: "250px",
-                                }}
-                                onInput={(e) => {
-                                  const newArray = [
-                                    ...searchAdvancedQuery[key],
-                                  ];
-                                  const updatedArray = newArray.map((obj) =>
-                                    obj.id === v.id
-                                      ? { ...obj, textfield: e.target.value }
-                                      : obj
-                                  );
-                                  setSearchAdvancedQuery({
-                                    ...searchAdvancedQuery,
-                                    [key]: updatedArray,
-                                  });
                                 }}
                                 renderInput={(params) => (
                                   <TextField
@@ -684,22 +709,22 @@ const AdvancedSearch = (props) => {
                               }}
                               onClick={() => {
                                 const lastID =
-                                  searchAdvancedQuery[key][
-                                    searchAdvancedQuery[key].length - 1
+                                  searchAdvancedQuery[id][
+                                    searchAdvancedQuery[id].length - 1
                                   ].id;
 
                                 const newKey = parseInt(lastID) + 1;
 
                                 setSearchAdvancedQuery({
                                   ...searchAdvancedQuery,
-                                  [key]: [
-                                    ...searchAdvancedQuery[key],
+                                  [id]: [
+                                    ...searchAdvancedQuery[id],
                                     {
                                       id: newKey,
                                       category: "Provider",
-                                      value: "",
+
                                       operator: "Contains",
-                                      text: "",
+                                      textfield: "",
                                     },
                                   ],
                                 });
@@ -710,7 +735,7 @@ const AdvancedSearch = (props) => {
                             <Button
                               variant={"outlined"}
                               disabled={
-                                index2 !== searchAdvancedQuery[key].length - 1
+                                index2 !== searchAdvancedQuery[id].length - 1
                               }
                               sx={{
                                 height: "40px",
@@ -723,7 +748,7 @@ const AdvancedSearch = (props) => {
                                 const keys = Object.keys(searchAdvancedQuery);
 
                                 const lastKey = Math.max(
-                                  ...keys.map((key) => parseInt(key, 10))
+                                  ...keys.map((k) => parseInt(k, 10))
                                 );
 
                                 const newKey = lastKey + 1;
@@ -734,9 +759,9 @@ const AdvancedSearch = (props) => {
                                     {
                                       id: 0,
                                       category: "Provider",
-                                      value: "",
+
                                       operator: "Contains",
-                                      text: "",
+                                      textfield: "",
                                     },
                                   ],
                                 };
@@ -747,7 +772,7 @@ const AdvancedSearch = (props) => {
                               AND
                             </Button>
 
-                            {(searchAdvancedQuery[key].length > 1 ||
+                            {(searchAdvancedQuery[id].length > 1 ||
                               Object.keys(searchAdvancedQuery).length > 2) && (
                               <IconButton
                                 aria-label="remove"
@@ -761,14 +786,14 @@ const AdvancedSearch = (props) => {
                                     const updatedSearchAdvancedQuery = {
                                       ...prevState,
                                     };
-                                    delete updatedSearchAdvancedQuery[key];
-                                    const updatedArray = prevState[key].filter(
+                                    delete updatedSearchAdvancedQuery[id];
+                                    const updatedArray = prevState[id].filter(
                                       (f) => f.id !== v.id
                                     );
                                     if (updatedArray.length > 0)
                                       return {
                                         ...updatedSearchAdvancedQuery,
-                                        [key]: updatedArray,
+                                        [id]: updatedArray,
                                       };
                                     else
                                       return {
@@ -781,8 +806,8 @@ const AdvancedSearch = (props) => {
                               </IconButton>
                             )}
                           </Box>
-                          {index2 !== searchAdvancedQuery[key].length - 1 &&
-                            searchAdvancedQuery[key].length > 1 && (
+                          {index2 !== searchAdvancedQuery[id].length - 1 &&
+                            searchAdvancedQuery[id].length > 1 && (
                               <Typography
                                 variant="body1"
                                 sx={{
@@ -894,9 +919,9 @@ const AdvancedSearch = (props) => {
                     {
                       id: 0,
                       category: "Provider",
-                      value: "",
+
                       operator: "Contains",
-                      text: "",
+                      textfield: "",
                     },
                   ],
                 })

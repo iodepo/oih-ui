@@ -1,21 +1,18 @@
 import { useRef, useReducer, useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import ToolbarHome from "./components/ToolbarHome";
-import ToolbarMapView from "./components/ToolbarMapView";
 import { EMODNET, NO_CLUSTER } from "./utils/constants";
 import { reducer } from "./utils/reducer";
 import MapView from "./components/MapView";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import Drawer from "@mui/material/Drawer";
 import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-import DrawerContent from "./components/DrawerContent";
 import { ITEMS_PER_PAGE } from "portability/configuration";
 import { dataServiceUrl } from "config/environment";
 import { mapLibreBounds_toQuery } from "utilities/mapUtility";
 import { throttle } from "lodash";
 import { useSearchParam } from "utilities/generalUtility";
+import DesktopMapView from "./components/desktop/DesktopMapView";
+import MobileMapView from "./components/mobile/MobileMapView";
+import { useMediaQuery, useTheme } from "@mui/material";
 
 const MapContainer = (props) => {
   const { isHome } = props;
@@ -48,7 +45,9 @@ const MapContainer = (props) => {
   const [mapBounds, setMapBounds] = useState(false);
   const [open, setOpen] = useState(true);
   const [facets, setFacets] = useState([]);
-
+  const [facetQuery, setFacetQuery] = useSearchParam("facet_query");
+  const [selectedFacets, setSelectedFacets] = useState([]);
+  const [initCenter, setInitCenter] = useState([65.468754, 44.57875]);
   const mapRef = useRef(null);
 
   useEffect(() => {
@@ -56,17 +55,18 @@ const MapContainer = (props) => {
     const lng = searchParams.get("lng");
     const lat = searchParams.get("lat");
 
-    if (lng && lat) setCenter([lng, lat]);
+    if (lng && lat) setInitCenter([lng, lat]);
   }, []);
 
-  const hrefFor = (region, query) =>
+  const hrefFor = (region, query, facetQuery) =>
     `/map-viewer?${new URLSearchParams({
       ...(query ? { search_text: query } : {}),
+      ...(facetQuery ? { facet_query: facetQuery } : {}),
       ...(region && region.toUpperCase() !== "GLOBAL" ? { region } : {}),
     })}`;
 
   const handleSubmit = useCallback(
-    () => navigate(hrefFor(region, searchText)),
+    () => navigate(hrefFor(region, searchText, facetQuery)),
     [navigate, searchText, region]
   );
   const changeBaseLayer = (layer) => {
@@ -103,6 +103,26 @@ const MapContainer = (props) => {
     dispatch({ type: "setCenter", center: center });
   };
 
+  const facetSearch = (name, value, checked) => {
+    const clickedFacetQuery = new URLSearchParams({
+      facetType: name,
+      facetName: value,
+    }).toString();
+    if (checked) {
+      setFacetQuery([facetQuery, clickedFacetQuery].filter((e) => e).join("&"));
+    } else {
+      const filteredQuery = facetQuery.replace(clickedFacetQuery, "");
+      let cleanedQuery = filteredQuery.endsWith("&")
+        ? filteredQuery.slice(0, -1)
+        : filteredQuery;
+      cleanedQuery = cleanedQuery.startsWith("&")
+        ? cleanedQuery.slice(1)
+        : cleanedQuery;
+      cleanedQuery = cleanedQuery.replace("&&", "&");
+      setFacetQuery(cleanedQuery);
+    }
+  };
+
   useEffect(() => {
     getDataSpatialSearch();
   }, [navigate, params]);
@@ -122,7 +142,7 @@ const MapContainer = (props) => {
     if (region && region.toUpperCase() !== "GLOBAL") {
       params.append("region", region);
     }
-    URI += [params.toString()].filter((e) => e).join("&");
+    URI += [params.toString(), facetQuery].filter((e) => e).join("&");
 
     fetch(URI)
       .then((response) => response.json())
@@ -135,8 +155,15 @@ const MapContainer = (props) => {
       });
   }, 1000);
 
+  const clear = () => {
+    setSelectedFacets([]);
+    setFacetQuery("");
+  };
+
   const palette = "custom.container.map.";
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   return (
     <>
       {isHome && (
@@ -154,115 +181,82 @@ const MapContainer = (props) => {
           zoom={state.zoom}
           isHome={isHome}
           setCenter={setCenter}
-          centerMap={state.center}
+          initCenter={initCenter}
         />
       )}
 
-      {state && !isHome && (
-        <Box>
-          <Box display={"flex"} alignItems={"center"}>
-            <Drawer
-              sx={{
-                width: "35%",
-                flexShrink: 0,
-                "& .MuiDrawer-paper": {
-                  width: "35%",
-                  boxSizing: "border-box",
-                },
-              }}
-              variant="persistent"
-              anchor="left"
-              open={open}
-            >
-              <DrawerContent
-                results={results}
-                setSearchText={setSearchText}
-                searchText={searchText}
-                resultsCount={resultsCount}
-                mapBounds={mapBounds}
-                isLoading={state.loading}
-                getDataSpatialSearch={getDataSpatialSearch}
-                handleSubmit={handleSubmit}
-              />
-            </Drawer>
-            {open ? (
-              <IconButton
-                sx={{
-                  position: "absolute",
-                  bottom: "70%",
-                  left: "35%",
-                  background: "white",
-                  borderRadius: "0 10px 10px 0",
-                  paddingLeft: 0,
-                  paddingRight: 0,
-                  "&:hover": {
-                    background: "#2B498C",
-                    "& .MuiSvgIcon-root": {
-                      color: "#FFFFFF",
-                    },
-                  },
-                }}
-                onClick={() => handleDrawer(false)}
-              >
-                <ChevronLeftIcon />
-              </IconButton>
-            ) : (
-              <IconButton
-                sx={{
-                  position: "absolute",
-                  bottom: "70%",
-                  left: "0%",
-                  background: "white",
-                  borderRadius: "0 10px 10px 0",
-                  paddingLeft: 0,
-                  paddingRight: 0,
-                  "&:hover": {
-                    background: "#2B498C",
-                    "& .MuiSvgIcon-root": {
-                      color: "#FFFFFF",
-                    },
-                  },
-                }}
-                onClick={() => handleDrawer(true)}
-              >
-                <ChevronRightIcon />
-              </IconButton>
-            )}
-          </Box>
+      {state && !isHome && !isMobile && (
+        <Box display={{ xs: "none", md: "block" }}>
+          <DesktopMapView
+            results={results}
+            setSearchText={setSearchText}
+            searchText={searchText}
+            resultsCount={resultsCount}
+            mapBounds={mapBounds}
+            isLoading={state.loading}
+            getDataSpatialSearch={getDataSpatialSearch}
+            handleSubmit={handleSubmit}
+            setSelectedFacets={setSelectedFacets}
+            selectedFacets={selectedFacets}
+            facetSearch={facetSearch}
+            clear={clear}
+            open={open}
+            handleDrawer={handleDrawer}
+            applyZoom={applyZoom}
+            facets={facets}
+            setRegion={setRegion}
+            facetQuery={facetQuery}
+            region={region}
+            container={mapRef}
+            baseLayer={state.baseLayer}
+            baseOpacity={state.baseOpacity}
+            clustering={state.clustering}
+            hexOpacity={state.hexOpacity}
+            showPoints={state.showPoints}
+            showRegions={state.showRegions}
+            isHome={isHome}
+            zoom={state.zoom}
+            setCenter={setCenter}
+            initCenter={initCenter}
+          />
+        </Box>
+      )}
 
-          <Box
-            sx={{
-              height: "100vh",
-              ...(!open && { position: "absolute", zIndex: -1, width: "100%" }),
-              ...(open && {
-                position: "absolute",
-                zIndex: -1,
-                right: 0,
-                width: "65%",
-              }),
-            }}
-          >
-            <ToolbarMapView
-              applyZoom={applyZoom}
-              facets={facets}
-              setRegion={setRegion}
-              region={region}
-              handleSubmit={handleSubmit}
-            />
-            <MapView
-              container={mapRef}
-              baseLayer={state.baseLayer}
-              baseOpacity={state.baseOpacity}
-              clustering={state.clustering}
-              hexOpacity={state.hexOpacity}
-              showPoints={state.showPoints}
-              showRegions={state.showRegions}
-              isHome={isHome}
-              zoom={state.zoom}
-              setCenter={setCenter}
-              centerMap={state.center}
-            />
-          </Box>
+      {state && !isHome && isMobile && (
+        <Box>
+          <MobileMapView
+            results={results}
+            setSearchText={setSearchText}
+            searchText={searchText}
+            resultsCount={resultsCount}
+            mapBounds={mapBounds}
+            isLoading={state.loading}
+            getDataSpatialSearch={getDataSpatialSearch}
+            handleSubmit={handleSubmit}
+            setSelectedFacets={setSelectedFacets}
+            selectedFacets={selectedFacets}
+            facetSearch={facetSearch}
+            clear={clear}
+            open={open}
+            handleDrawer={handleDrawer}
+            applyZoom={applyZoom}
+            facets={facets}
+            setRegion={setRegion}
+            facetQuery={facetQuery}
+            region={region}
+            container={mapRef}
+            baseLayer={state.baseLayer}
+            baseOpacity={state.baseOpacity}
+            clustering={state.clustering}
+            hexOpacity={state.hexOpacity}
+            showPoints={state.showPoints}
+            showRegions={state.showRegions}
+            isHome={isHome}
+            zoom={state.zoom}
+            setCenter={setCenter}
+            initCenter={initCenter}
+            changeBaseLayer={changeBaseLayer}
+          />
         </Box>
       )}
     </>

@@ -14,8 +14,8 @@ const MapView = (props) => {
     baseOpacity,
     isHome,
     zoom,
-    centerMap,
     setCenter,
+    initCenter,
   } = props;
   const mapInitRef = useRef(null);
   var h3Resolution = 2;
@@ -49,7 +49,7 @@ const MapView = (props) => {
       }
       mapInitRef.current = initMap(
         container.current,
-        centerMap,
+        initCenter,
         baseLayer,
         baseOpacity,
         zoom
@@ -75,7 +75,7 @@ const MapView = (props) => {
         }
       });
     }
-  }, [baseLayer, baseOpacity]);
+  }, [baseLayer, baseOpacity, initCenter]);
 
   useEffect(() => {
     mapInitRef.current &&

@@ -4,7 +4,11 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSearchParam } from "utilities/generalUtility";
 import { dataServiceUrl } from "../../config/environment";
-import { CATEGORIES, ITEMS_PER_PAGE } from "../../portability/configuration";
+import {
+  CATEGORIES,
+  ITEMS_PER_PAGE,
+  idFacets,
+} from "../../portability/configuration";
 import Pagination from "./Pagination";
 import { useAppTranslation } from "context/context/AppTranslation";
 import Search from "components/search/Search";
@@ -40,7 +44,6 @@ export default function Results() {
   const [facets, setFacets] = useState([]);
 
   const [showMorePages, setShowMorePages] = useState(0);
-  const [isMobile, setIsMobile] = useState(window.innerWidth >= 768);
   const [filterChosenMobile, setFilterChosenMobile] = useState([]);
   const [selectedProvider, setSelectedProvider] = useState("");
   const [currentURI, setCurrentURI] = useState("");
@@ -53,10 +56,6 @@ export default function Results() {
   const [fq, setFq] = useSearchParam("fq");
   const [page, setPage] = useSearchParam("page", 0);
 
-  const [facetValues, setFacetFacetValues] = useState(
-    new Array(facets.length).fill("")
-  );
-
   const [openDialog, setOpenDialog] = useState(false);
   const translationState = useAppTranslation();
 
@@ -65,24 +64,6 @@ export default function Results() {
 
     setFilterChosenMobile([{ type: "searchType", text: category.text }]);
   }, []);
-
-  useEffect(() => {
-    const handleResize = () => {
-      const newIsMobile = window.innerWidth >= 768;
-
-      if (isMobile !== newIsMobile) {
-        setShowMorePages(0);
-      }
-
-      setIsMobile(newIsMobile);
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [isMobile]);
 
   useEffect(() => {
     fetch(
@@ -108,14 +89,15 @@ export default function Results() {
       /*  if (showMap) {
       mapSearch(mapBounds, page);
     } else { */
-      debugger;
       let URI = `${dataServiceUrl}/search?`;
       const params = new URLSearchParams({
         document_type: searchType,
         start: page * (ITEMS_PER_PAGE + showMorePages),
         rows: ITEMS_PER_PAGE + showMorePages,
       });
+
       if (searchText !== "") {
+        destructuringSearchTextAdvanced(searchText);
         params.append("search_text", searchText);
       }
       if (region.toUpperCase() !== "GLOBAL") {
@@ -147,8 +129,77 @@ export default function Results() {
     ]
   );
 
+  const destructuringSearchTextAdvanced = (text) => {
+    function valueMapper(text, operator) {
+      if (operator.endsWith("Contains")) {
+        return `*${text}*`;
+      }
+      return text;
+    }
+    let resultQuery = "";
+    let idTopic = "";
+    console.log(facets);
+    let regex = /{{(.*?)}}/;
+    var regexCondition =
+      /\((\w+)\s*(not\s*contains|not\s*equals|contains|equals|is)\s*"([^"]*)"\)/i;
+    let match = regex.exec(text);
+    /* (txt_provider:*AAAA* OR -txt_keywords:*VVVV*) AND (txt_contributor:UNESCO) */
+    if (match) {
+      /* debugger; */
+      let andGroup = match[1].trim().toLowerCase().split("and");
+      andGroup.forEach((ag) => {
+        if (ag.toLowerCase().includes(" or ")) {
+          let orGroup = ag.trim().split(" or ");
+          orGroup.forEach((og) => {
+            var matchCondition = og.trim().match(regexCondition);
+            if (matchCondition) {
+              var category = matchCondition[1];
+              var operator = matchCondition[2];
+              var value = matchCondition[3];
+              if (category === "topic") {
+                idTopic = CATEGORIES.find(
+                  (c) => c.text.toLowerCase() === value
+                ).id;
+              } else {
+                resultQuery +=
+                  "(" +
+                  idFacets[category] +
+                  ":" +
+                  valueMapper(value, operator) +
+                  ")";
+              }
+            }
+            resultQuery += " OR ";
+          });
+          resultQuery += " AND ";
+        } else {
+          var matchCondition = ag.trim().match(regexCondition);
+          if (matchCondition) {
+            var category = matchCondition[1];
+            var operator = matchCondition[2];
+            var value = matchCondition[3];
+            if (category === "topic") {
+              idTopic = CATEGORIES.find(
+                (c) => c.text.toLowerCase() === value
+              ).id;
+            } else {
+              resultQuery +=
+                "(" +
+                idFacets[category] +
+                ":" +
+                valueMapper(value, operator) +
+                ")";
+              resultQuery += " AND ";
+            }
+          }
+        }
+      });
+    } else {
+      return text;
+    }
+  };
+
   const facetSearch = (name, value) => {
-    //const selectedIndex = event.target.selectedIndex;
     const clickedFacetQuery = new URLSearchParams({
       facetType: name,
       facetName: value,
@@ -166,23 +217,14 @@ export default function Results() {
   };
 
   const clearFacetQuery = () => {
-    setFacetFacetValues(new Array(facets.length).fill(""));
     resetDefaultSearchUrl(searchType);
   };
 
-  const setValue = (i, value) =>
-    setFacetFacetValues((values) => [
-      ...values.slice(0, i),
-      value,
-      ...values.slice(i + 1, values.length),
-    ]);
-
   const clear = useCallback(
     (e) => {
-      setFacetFacetValues(new Array(facets.length).fill(""));
       clearFacetQuery();
     },
-    [clearFacetQuery, setValue]
+    [clearFacetQuery]
   );
 
   const paletteFilter = "custom.resultPage.filters.";
@@ -238,11 +280,9 @@ export default function Results() {
                   resetDefaultSearchUrl={resetDefaultSearchUrl}
                   clearFacetQuery={clearFacetQuery}
                   facetSearch={facetSearch}
-                  facetValues={facetValues}
-                  setFacetFacetValues={setFacetFacetValues}
                   facets={facets}
                   facetQuery={facetQuery}
-                  isMobile={false}
+                  clear={clear}
                 />
               </AccordionDetails>
             </Accordion>
@@ -304,20 +344,10 @@ export default function Results() {
                     resetDefaultSearchUrl={resetDefaultSearchUrl}
                     clearFacetQuery={clearFacetQuery}
                     facetSearch={facetSearch}
-                    facetValues={facetValues}
-                    setFacetFacetValues={setFacetFacetValues}
                     facets={facets}
-                    isMobile={true}
                     facetQuery={facetQuery}
                   />
                 </DialogContent>
-                {/*
-                <DialogActions>
-                  <Button onClick={handleClose}>Disagree</Button>
-                  <Button onClick={handleClose} autoFocus>
-                    Agree
-                  </Button>
-                </DialogActions> */}
               </Dialog>
             </Box>
             <IconButton
@@ -412,7 +442,11 @@ export default function Results() {
                 </Box>
               </Box>
               {results.map((result) => (
-                <ResultValue result={result} key={result["id"]} />
+                <ResultValue
+                  result={result}
+                  completeValue={100}
+                  key={result["id"]}
+                />
               ))}
             </Stack>
             <Button

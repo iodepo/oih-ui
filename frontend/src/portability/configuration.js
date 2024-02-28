@@ -35,6 +35,23 @@ const fieldNameMap = {
   endyear: "Ending Between",
 };
 
+const idFacets = {
+  keywords: "txt_keywords",
+  provider: "txt_provider",
+  "variable measured": "txt_variableMeasured",
+  type: "type",
+  "within directory": "txt_memberOf",
+  language: "txt_knowsLanguage",
+  "job title": "txt_jobTitle",
+  "knows about": "txt_knowsAbout",
+  affiliation: "txt_affiliation",
+  contributor: "txt_contributor",
+  author: "txt_author",
+  "credential awarded": "txt_educationalCredentialAwarded",
+  "vehicle usage": "txt_vehicleSpecialUsage",
+  area: "txt_areaServed",
+};
+
 /* Name: title mapping of the regions that show up in the search bar.
   Add more items here to search different regions.
 */
@@ -251,4 +268,5 @@ export {
   PROMOTED_REGIONS,
   fieldNameMap,
   SAMPLE_QUERIES,
+  idFacets,
 };
