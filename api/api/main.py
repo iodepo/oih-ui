@@ -60,7 +60,7 @@ app.add_middleware(
 
 @app.get("/search")
 def search(search_text: str = None, document_type: str = None, region: str = None, facetType: list = Query(default=[]),
-           facetName: list = Query(default=[]), fq=None, start=0, rows=10, include_facets: bool = True):
+           facetName: list = Query(default=[]), fq=None, start=0, rows=10, sort: str = 'indexed_ts desc', include_facets: bool = True):
 
     facetFields = FACET_FIELDS.get(document_type, AVAILABLE_FACETS)
     facet_interval_fields = FACET_INTERVALS.get(document_type, [])
@@ -80,7 +80,8 @@ def search(search_text: str = None, document_type: str = None, region: str = Non
                      fq=fq,
                      region=region,
                      start=start,
-                     rows=rows
+                     rows=rows,
+                     sort=sort
                      ).json()
 
     facets = facet_counts(data['facet_counts']['facet_fields'], facetFields) if include_facets else []
