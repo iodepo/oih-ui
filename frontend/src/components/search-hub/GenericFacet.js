@@ -168,7 +168,7 @@ const GenericFacet = (props) => {
           size="small"
           value={searchInput}
           sx={{
-            backgroundColor: "#ffffff",
+            backgroundColor: palette + "bgTextfield",
             "& .MuiFormLabel-root": {
               fontSize: "12px",
               color: palette + "categoryColor",

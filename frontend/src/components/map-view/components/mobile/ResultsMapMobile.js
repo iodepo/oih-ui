@@ -60,7 +60,8 @@ const ResultsMapMobile = (props) => {
   useEffect(() => {
     getDataSpatialSearch(page);
   }, [page]);
-
+  const translationState = useAppTranslation();
+  const palette = "custom.mapView.mobile.resultsMap.";
   return (
     <SwipeableDrawer
       anchor="bottom"
@@ -105,15 +106,15 @@ const ResultsMapMobile = (props) => {
                 variant="body2"
                 sx={{
                   fontWeight: 700,
-                  color: "#0F1A31",
+                  color: palette + "colorTypography",
                   fontSize: "14px",
                   zIndex: 1,
                 }}
               >
-                Results
+                {translationState.translation["Results"]}
               </Typography>
               <IconButton
-                sx={{ color: "#0F1A31" }}
+                sx={{ color: palette + "colorTypography" }}
                 onClick={() => setOpenSwipeDrawer(false)}
               >
                 <CloseIcon />
@@ -136,18 +137,21 @@ const ResultsMapMobile = (props) => {
                           minWidth: 0,
                           boxShadow: 0,
                           flex: "0 0 auto",
-                          background: "#F6F8FA",
-                          color: "#1A2C54",
+                          backgroundColor: palette + "bgButton",
+                          color: palette + "colorButton",
                           textTransform: "none",
                           "&:hover": {
-                            background: "#1A2C54",
-                            color: "#F6F8FA",
+                            backgroundColor: palette + "colorButton",
+                            color: palette + "bgButton",
                           },
                           marginBottom: 2,
                         }}
                         endIcon={
                           <CloseIcon
-                            sx={{ fontSize: "16px", color: "#7B8FB7" }}
+                            sx={{
+                              fontSize: "16px",
+                              color: palette + "colorTypography",
+                            }}
                           />
                         }
                         onClick={() => {
@@ -170,14 +174,14 @@ const ResultsMapMobile = (props) => {
                     sx={{
                       height: "18px",
                       fontSize: "14px",
-                      color: "#40AAD3",
+                      color: palette + "colorButtonClear",
                       fontWeight: 700,
                       textTransform: "none",
                       whiteSpace: "noWrap",
                     }}
                     onClick={() => clear()}
                   >
-                    Clear filters
+                    {translationState.translation["Clear filters"]}
                   </Button>
                 )}
               </Stack>
@@ -185,13 +189,15 @@ const ResultsMapMobile = (props) => {
             <Typography
               variant="subtitle"
               sx={{
-                color: "#0F1A31",
+                color: palette + "colorTypography",
                 fontSize: "14px",
                 fontWeight: 700,
                 zIndex: 1,
               }}
             >
-              {resultsCount + " results"}
+              {resultsCount +
+                " " +
+                translationState.translation["Results"].toLowerCase()}
             </Typography>
             <Divider sx={{ zIndex: 1 }} />
             <Box sx={{ zIndex: 1, height: "inherit" }}>
@@ -266,7 +272,8 @@ const ResultsMapMobile = (props) => {
                                                 fontSize="small"
                                                 sx={{
                                                   fontSize: "10px",
-                                                  color: "#40AAD3",
+                                                  color:
+                                                    palette + "colorProvider",
                                                 }}
                                               />
                                               <Box
@@ -309,7 +316,7 @@ const ResultsMapMobile = (props) => {
 
 const ResultDetails = (props) => {
   const { result, setSelectedResult } = props;
-
+  const palette = "custom.mapView.mobile.resultsMap.";
   return (
     <Stack
       sx={{
@@ -330,7 +337,7 @@ const ResultDetails = (props) => {
         >
           <KeyboardBackspaceIcon
             sx={{
-              color: "grey",
+              color: palette + "colorTypography",
             }}
           />
         </IconButton>

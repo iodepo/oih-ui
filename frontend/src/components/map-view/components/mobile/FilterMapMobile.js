@@ -33,6 +33,8 @@ const FilterMapMobile = (props) => {
     facetSearch,
   } = props;
   const translationState = useAppTranslation();
+
+  const palette = "custom.mapView.mobile.filterMap.";
   return (
     <Box sx={{ display: "flex", gap: 1, overflowX: "auto" }}>
       <Select
@@ -52,7 +54,7 @@ const FilterMapMobile = (props) => {
         sx={{
           height: "30px",
           fontSize: "14px",
-          backgroundColor: "#FFFFFF",
+          backgroundColor: palette + "bgButton",
           maxWidth: "140px",
           ".MuiOutlinedInput-notchedOutline": {
             borderWidth: 0,
@@ -75,7 +77,6 @@ const FilterMapMobile = (props) => {
           const counter = selectedFacets.filter(
             (s) => s.name === f.name
           ).length;
-          const counterTitle = counter > 0 ? "[" + counter + "]" : "";
           return (
             <>
               <Button
@@ -84,9 +85,9 @@ const FilterMapMobile = (props) => {
                 sx={{
                   height: "30px",
                   fontSize: "14px",
-                  backgroundColor: "#FFFFFF",
+                  backgroundColor: palette + "bgButton",
                   maxWidth: "165px",
-                  color: "#1A2C54",
+                  color: palette + "colorButton",
                   textTransform: "none",
                   boxShadow: "none",
                   flex: "0 0 auto",
@@ -94,26 +95,44 @@ const FilterMapMobile = (props) => {
                   ".MuiButton-startIcon": { marginRight: "2px" },
                   ".MuiButton-endIcon": { marginLeft: 0 },
                   "&:hover": {
-                    background: "#1A2C54",
-                    color: "#FFFFFF",
+                    backgroundColor: palette + "colorButton",
+                    color: palette + "bgButton",
                     ".MuiSvgIcon-root": {
-                      color: "#FFFFFF",
+                      color: palette + "bgButton",
                     },
                   },
                 }}
                 startIcon={
-                  <HelpOutlineIcon
-                    sx={{
-                      fontSize: "14px",
-                      color: "#1A2C54",
-                    }}
-                  />
+                  <>
+                    {counter === 0 && (
+                      <HelpOutlineIcon
+                        sx={{
+                          fontSize: "14px",
+                          color: palette + "iconColor",
+                        }}
+                      />
+                    )}
+                    {counter > 0 && (
+                      <Box
+                        sx={{
+                          color: palette + "colorBox",
+                          fontSize: "12px !important",
+                          width: "20px",
+                          height: "20px",
+                          borderRadius: "12px",
+                          backgroundColor: palette + "bgBox",
+                        }}
+                      >
+                        {counter}
+                      </Box>
+                    )}
+                  </>
                 }
                 endIcon={
                   <KeyboardArrowDownIcon
                     sx={{
                       fontSize: "14px",
-                      color: "#1A2C54",
+                      color: palette + "iconColor",
                     }}
                   />
                 }
@@ -124,8 +143,11 @@ const FilterMapMobile = (props) => {
                   })
                 }
               >
-                {title.replace(" Between", "").replace(" Measured", "") +
-                  counterTitle}
+                {
+                  translationState.translation[
+                    title.replace(" Between", "").replace(" Measured", "")
+                  ]
+                }
               </Button>
               <Popover
                 /* id={id} */
@@ -151,7 +173,7 @@ const FilterMapMobile = (props) => {
                     size="small"
                     /* value={searchInput} */
                     sx={{
-                      backgroundColor: "#ffffff",
+                      backgroundColor: palette + "bgButton",
                       "& .MuiFormLabel-root": {
                         fontSize: "12px",
                       },
@@ -217,7 +239,7 @@ const FilterMapMobile = (props) => {
                               sx={{
                                 ".MuiTypography-root": {
                                   fontSize: "12px",
-                                  color: "#1A2C54",
+                                  color: palette + "colorTypography",
                                 },
                               }}
                             />

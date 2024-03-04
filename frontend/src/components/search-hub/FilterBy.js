@@ -269,11 +269,7 @@ const FilterBy = (props) => {
               a.name === "txt_provider" ? -1 : b.name === "txt_provider" ? 1 : 0
             )
             .map((facet, i) => {
-              return (
-                <Box sx={{ minHeight: "450px" }} key={i}>
-                  {drawFacets(facet, i)}
-                </Box>
-              );
+              return <Box key={i}>{drawFacets(facet, i)}</Box>;
             })}
         </>
       )}

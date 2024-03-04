@@ -28,6 +28,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 import { cutWithDots } from "components/results/ResultDetails";
 import Tooltip from "@mui/material/Tooltip";
+import Badge from "@mui/material/Badge";
 
 const ToolbarDesktopMapView = (props) => {
   const {
@@ -41,7 +42,6 @@ const ToolbarDesktopMapView = (props) => {
     selectedFacets,
     setSelectedFacets,
   } = props;
-  const translationState = useAppTranslation();
   const [filteredFacets, setFilteredFacets] = useState(facets);
 
   const [openPopoverFilter, setOpenPopoverFilter] = useState(null);
@@ -97,6 +97,8 @@ const ToolbarDesktopMapView = (props) => {
     });
   };
 
+  const translationState = useAppTranslation();
+  const palette = "custom.mapView.desktop.toolbar.";
   return (
     <>
       <Box
@@ -133,7 +135,7 @@ const ToolbarDesktopMapView = (props) => {
               sx={{
                 height: "24px",
                 fontSize: "14px",
-                backgroundColor: "#FFFFFF",
+                backgroundColor: palette + "bgButton",
                 maxWidth: "140px",
                 ".MuiOutlinedInput-notchedOutline": {
                   borderWidth: 0,
@@ -155,7 +157,6 @@ const ToolbarDesktopMapView = (props) => {
                 const counter = selectedFacets.filter(
                   (s) => s.name === f.name
                 ).length;
-                const counterTitle = counter > 0 ? "[" + counter + "]" : "";
                 return (
                   <>
                     <Button
@@ -164,34 +165,52 @@ const ToolbarDesktopMapView = (props) => {
                       sx={{
                         height: "24px",
                         fontSize: "14px",
-                        backgroundColor: "#FFFFFF",
+                        backgroundColor: palette + "bgButton",
                         maxWidth: "135px",
-                        color: "#1A2C54",
+                        color: palette + "colorButton",
                         textTransform: "none",
                         boxShadow: "none",
                         ".MuiButton-startIcon": { marginRight: "2px" },
                         ".MuiButton-endIcon": { marginLeft: 0 },
                         "&:hover": {
-                          background: "#1A2C54",
-                          color: "#FFFFFF",
+                          backgroundColor: palette + "colorButton",
+                          color: palette + "bgButton",
                           ".MuiSvgIcon-root": {
-                            color: "#FFFFFF",
+                            color: palette + "bgButton",
                           },
                         },
                       }}
                       startIcon={
-                        <HelpOutlineIcon
-                          sx={{
-                            fontSize: "14px",
-                            color: "#1A2C54",
-                          }}
-                        />
+                        <>
+                          {counter === 0 && (
+                            <HelpOutlineIcon
+                              sx={{
+                                fontSize: "14px",
+                                color: palette + "colorIcon",
+                              }}
+                            />
+                          )}
+                          {counter > 0 && (
+                            <Box
+                              sx={{
+                                color: palette + "colorBox",
+                                fontSize: "12px !important",
+                                width: "20px",
+                                height: "20px",
+                                borderRadius: "12px",
+                                backgroundColor: palette + "bgBox",
+                              }}
+                            >
+                              {counter}
+                            </Box>
+                          )}
+                        </>
                       }
                       endIcon={
                         <KeyboardArrowDownIcon
                           sx={{
                             fontSize: "14px",
-                            color: "#1A2C54",
+                            color: palette + "colorIcon",
                           }}
                         />
                       }
@@ -202,8 +221,11 @@ const ToolbarDesktopMapView = (props) => {
                         })
                       }
                     >
-                      {title.replace(" Between", "").replace(" Measured", "") +
-                        counterTitle}
+                      {
+                        translationState.translation[
+                          title.replace(" Between", "").replace(" Measured", "")
+                        ]
+                      }
                     </Button>
                     <Popover
                       /* id={id} */
@@ -235,7 +257,7 @@ const ToolbarDesktopMapView = (props) => {
                           size="small"
                           /* value={searchInput} */
                           sx={{
-                            backgroundColor: "#ffffff",
+                            backgroundColor: palette + "bgButton",
                             "& .MuiFormLabel-root": {
                               fontSize: "12px",
                             },
@@ -305,7 +327,7 @@ const ToolbarDesktopMapView = (props) => {
                                     sx={{
                                       ".MuiTypography-root": {
                                         fontSize: "12px",
-                                        color: "#1A2C54",
+                                        color: palette + "colorTypography",
                                       },
                                     }}
                                   />
@@ -337,7 +359,7 @@ const ToolbarDesktopMapView = (props) => {
           <Fade in={openFilterMap} mountOnEnter unmountOnExit>
             <Box
               sx={{
-                backgroundColor: "white",
+                backgroundColor: palette + "bgBox2",
                 height: "100%",
                 borderRadius: "6px",
 
@@ -357,7 +379,7 @@ const ToolbarDesktopMapView = (props) => {
           <Fade in={openFilterMap} mountOnEnter unmountOnExit>
             <Box
               sx={{
-                backgroundColor: "white",
+                backgroundColor: palette + "bgBox2",
                 height: "100%",
                 borderRadius: "6px",
                 padding: "12px",
@@ -392,7 +414,7 @@ const ToolbarDesktopMapView = (props) => {
                             color: "#1A2C54",
                           },
                         }}
-                        label="Show Clustering"
+                        label={translationState.translation["Show Clustering"]}
                       />
                       <Box
                         sx={{
@@ -402,21 +424,21 @@ const ToolbarDesktopMapView = (props) => {
                       >
                         <FormControlLabel
                           control={<Checkbox size="small" />}
-                          label="Heatmap"
+                          label={translationState.translation["Heatmap"]}
                           sx={{
                             ".MuiTypography-root": {
                               fontSize: "12px",
-                              color: "#1A2C54",
+                              color: palette + "colorTypography",
                             },
                           }}
                         />
                         <FormControlLabel
                           control={<Checkbox size="small" />}
-                          label="H3 Layer"
+                          label={translationState.translation["H3 Layer"]}
                           sx={{
                             ".MuiTypography-root": {
                               fontSize: "12px",
-                              color: "#1A2C54",
+                              color: palette + "colorTypography",
                             },
                           }}
                         />
@@ -429,10 +451,10 @@ const ToolbarDesktopMapView = (props) => {
                           sx={{
                             fontSize: "12px",
                             fontWeight: 700,
-                            color: "#1A2C54",
+                            color: palette + "colorTypography",
                           }}
                         >
-                          Opacity layer
+                          {translationState.translation["Opacity layer"]}
                         </Typography>
                         <Slider
                           defaultValue={50}
@@ -446,7 +468,8 @@ const ToolbarDesktopMapView = (props) => {
                     sx={{
                       height: "139px",
                       width: "50%",
-                      border: "1px solid #DEE2ED",
+                      border: "1px solid",
+                      borderColor: palette + "borderColor",
                       borderRadius: "6px",
                       padding: "12px",
                     }}
@@ -464,10 +487,10 @@ const ToolbarDesktopMapView = (props) => {
                           ".MuiTypography-root": {
                             fontSize: "12px",
                             fontWeight: 700,
-                            color: "#1A2C54",
+                            color: palette + "colorTypography",
                           },
                         }}
-                        label="Show Clustering"
+                        label={translationState.translation["Show Clustering"]}
                       />
                       <FormControlLabel
                         control={
@@ -481,10 +504,10 @@ const ToolbarDesktopMapView = (props) => {
                           ".MuiTypography-root": {
                             fontSize: "12px",
                             fontWeight: 700,
-                            color: "#1A2C54",
+                            color: palette + "colorTypography",
                           },
                         }}
-                        label="Show Clustering"
+                        label={translationState.translation["Show Clustering"]}
                       />
                     </Stack>
                   </Box>
@@ -504,35 +527,35 @@ const ToolbarDesktopMapView = (props) => {
         >
           <IconButton
             sx={{
-              backgroundColor: "#FFFFFF",
+              backgroundColor: palette + "bgButton",
               borderRadius: 2,
               width: "45px",
               "&:hover": {
-                background: "#13213F",
+                backgroundColor: palette + "colorIcon",
                 "& .MuiSvgIcon-root": {
-                  color: "#FFFFFF",
+                  color: palette + "bgButton",
                 },
               },
             }}
             onClick={() => setOpenFilterMap(!openFilterMap)}
           >
-            <LayersIcon sx={{ color: "#13213F" }} />
+            <LayersIcon sx={{ color: palette + "colorIcon" }} />
           </IconButton>
           <ButtonGroup
             orientation="vertical"
             variant="contained"
             sx={{
-              backgroundColor: "#FFFFFF",
+              backgroundColor: palette + "bgButton",
               borderRadius: 2,
               width: "45px",
               boxShadow: 0,
             }}
           >
             <IconButton onClick={() => applyZoom("in")}>
-              <AddIcon sx={{ color: "#13213F" }} />
+              <AddIcon sx={{ color: palette + "colorIcon" }} />
             </IconButton>
             <IconButton onClick={() => applyZoom("out")}>
-              <RemoveIcon sx={{ color: "#13213F" }} />
+              <RemoveIcon sx={{ color: palette + "colorIcon" }} />
             </IconButton>
           </ButtonGroup>
         </Box>

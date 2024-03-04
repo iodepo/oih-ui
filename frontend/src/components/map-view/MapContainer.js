@@ -160,8 +160,6 @@ const MapContainer = (props) => {
     setFacetQuery("");
   };
 
-  const palette = "custom.container.map.";
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   return (

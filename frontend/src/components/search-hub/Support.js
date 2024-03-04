@@ -14,11 +14,15 @@ import Divider from "@mui/material/Divider";
 import HelpIcon from "@mui/icons-material/Help";
 import FlagIcon from "@mui/icons-material/Flag";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useAppTranslation } from "context/context/AppTranslation";
 
 const Support = () => {
   const [openSupport, setOpenSupport] = useState(false);
   const [selectedWindow, setSelectedWindow] = useState("menu");
 
+  const translationState = useAppTranslation();
+
+  const palette = "custom.resultPage.support.";
   return (
     <>
       <IconButton
@@ -26,7 +30,7 @@ const Support = () => {
         size="large"
         onClick={() => setOpenSupport(true)}
         sx={{
-          background: "#2B498C",
+          backgroundColor: palette + "bgIconSupport",
           position: "fixed",
           bottom: 25,
           right: 25,
@@ -34,7 +38,7 @@ const Support = () => {
           zIndex: 2,
           "&:hover": {
             transform: "scale(1.1)",
-            background: "#2B498C",
+            backgroundColor: palette + "bgIconSupport",
           },
           "@keyframes pulse": {
             "0%": {
@@ -52,7 +56,10 @@ const Support = () => {
           },
         }}
       >
-        <SupportIcon fontSize="inherit" sx={{ color: "#FFFFFF" }} />
+        <SupportIcon
+          fontSize="inherit"
+          sx={{ color: palette + "colorIconSupport" }}
+        />
       </IconButton>
       <Dialog
         onClose={() => setOpenSupport(false)}
@@ -73,13 +80,13 @@ const Support = () => {
               aria-label="back"
               onClick={() => setSelectedWindow("menu")}
             >
-              <ArrowBackIcon sx={{ color: "#000000" }} />
+              <ArrowBackIcon sx={{ color: palette + "iconColor" }} />
             </IconButton>
           ) : (
-            <Box>Need Help?</Box>
+            <Box>{translationState.translation["Need help"]}</Box>
           )}
           <IconButton aria-label="close" onClick={() => setOpenSupport(false)}>
-            <CloseIcon sx={{ color: "#000000" }} />
+            <CloseIcon sx={{ color: palette + "iconColor" }} />
           </IconButton>
         </DialogTitle>
         <DialogContent sx={{ mb: 2 }}>
@@ -94,7 +101,7 @@ const Support = () => {
                       gap: 1,
                     }}
                   >
-                    <RocketLaunchIcon sx={{ color: "#1A2C54" }} />
+                    <RocketLaunchIcon sx={{ color: palette + "iconColor" }} />
                     <Box sx={{ width: "100%" }}>
                       <Box
                         sx={{
@@ -106,24 +113,26 @@ const Support = () => {
                           variant="body1"
                           sx={{
                             fontWeight: 700,
-                            color: "#1A2C54",
+                            color: palette + "colorTypography",
                             lineHeight: 2.5,
                           }}
                         >
-                          Understanding search
+                          {translationState.translation["Understanding Search"]}
                         </Typography>
                         <IconButton
                           aria-label="close"
                           onClick={() => setSelectedWindow("understanding")}
                         >
-                          <KeyboardArrowRightIcon sx={{ color: "#1A2C54" }} />
+                          <KeyboardArrowRightIcon
+                            sx={{ color: palette + "iconColor" }}
+                          />
                         </IconButton>
                       </Box>
                       <Typography
                         variant="body2"
                         sx={{
                           fontWeight: 400,
-                          color: "#BDC7DB",
+                          color: palette + "colorSubTypography",
                           lineHeight: 0,
                         }}
                       >
@@ -141,7 +150,7 @@ const Support = () => {
                       gap: 1,
                     }}
                   >
-                    <HelpIcon sx={{ color: "#1A2C54" }} />
+                    <HelpIcon sx={{ color: palette + "iconColor" }} />
                     <Box sx={{ width: "100%" }}>
                       <Box
                         sx={{
@@ -153,24 +162,26 @@ const Support = () => {
                           variant="body1"
                           sx={{
                             fontWeight: 700,
-                            color: "#1A2C54",
+                            color: palette + "colorTypography",
                             lineHeight: 2.5,
                           }}
                         >
-                          Faq
+                          {translationState.translation["Faq"]}
                         </Typography>
                         <IconButton
                           aria-label="close"
                           onClick={() => setSelectedWindow("faq")}
                         >
-                          <KeyboardArrowRightIcon sx={{ color: "#1A2C54" }} />
+                          <KeyboardArrowRightIcon
+                            sx={{ color: palette + "iconColor" }}
+                          />
                         </IconButton>
                       </Box>
                       <Typography
                         variant="body2"
                         sx={{
                           fontWeight: 400,
-                          color: "#BDC7DB",
+                          color: palette + "colorSubTypography",
                           lineHeight: 0,
                         }}
                       >
@@ -188,7 +199,7 @@ const Support = () => {
                       gap: 1,
                     }}
                   >
-                    <FlagIcon sx={{ color: "#1A2C54" }} />
+                    <FlagIcon sx={{ color: palette + "iconColor" }} />
                     <Box sx={{ width: "100%" }}>
                       <Box
                         sx={{
@@ -200,24 +211,26 @@ const Support = () => {
                           variant="body1"
                           sx={{
                             fontWeight: 700,
-                            color: "#1A2C54",
+                            color: palette + "colorTypography",
                             lineHeight: 2.5,
                           }}
                         >
-                          Report a bug
+                          {translationState.translation["Report bug"]}
                         </Typography>
                         <IconButton
                           aria-label="close"
                           onClick={() => setSelectedWindow("report")}
                         >
-                          <KeyboardArrowRightIcon sx={{ color: "#1A2C54" }} />
+                          <KeyboardArrowRightIcon
+                            sx={{ color: palette + "iconColor" }}
+                          />
                         </IconButton>
                       </Box>
                       <Typography
                         variant="body2"
                         sx={{
                           fontWeight: 400,
-                          color: "#BDC7DB",
+                          color: palette + "colorSubTypography",
                           lineHeight: 0,
                         }}
                       >

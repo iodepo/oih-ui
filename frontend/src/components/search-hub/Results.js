@@ -1,8 +1,8 @@
 /* global URLSearchParams */
 
 import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useSearchParam } from "utilities/generalUtility";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { fieldTitleFromName, useSearchParam } from "utilities/generalUtility";
 import { dataServiceUrl } from "../../config/environment";
 import {
   CATEGORIES,
@@ -36,12 +36,14 @@ import DialogContent from "@mui/material/DialogContent";
 import ResultValue from "./ResultValue";
 import { cutWithDots } from "components/results/ResultDetails";
 import Support from "./Support";
+import SortIcon from "@mui/icons-material/Sort";
 
 export default function Results() {
   const [results, setResults] = useState([]);
   const [resultCount, setResultCount] = useState(0);
   const [counts, setCounts] = useState({});
   const [facets, setFacets] = useState([]);
+  const [params] = useSearchParams();
 
   const [showMorePages, setShowMorePages] = useState(0);
   const [filterChosenMobile, setFilterChosenMobile] = useState([]);
@@ -54,6 +56,7 @@ export default function Results() {
   const [region, setRegion] = useSearchParam("region", "global");
   const [facetQuery, setFacetQuery] = useSearchParam("facet_query");
   const [fq, setFq] = useSearchParam("fq");
+  const [sort, setSort] = useSearchParam("sort");
   const [page, setPage] = useSearchParam("page", 0);
 
   const [openDialog, setOpenDialog] = useState(false);
@@ -103,7 +106,12 @@ export default function Results() {
       if (region.toUpperCase() !== "GLOBAL") {
         params.append("region", region);
       }
-      URI += [params.toString(), facetQuery, fq ? "fq=" + fq : ""]
+      URI += [
+        params.toString(),
+        facetQuery,
+        fq ? "fq=" + fq : "",
+        sort ? "sort=" + sort : "",
+      ]
         .filter((e) => e)
         .join("&");
       setCurrentURI(URI);
@@ -126,6 +134,7 @@ export default function Results() {
       page,
       showMorePages,
       fq,
+      sort,
     ]
   );
 
@@ -211,6 +220,7 @@ export default function Results() {
     navigate(
       `/results/${type}?${new URLSearchParams({
         ...(searchText ? { search_text: searchText } : {}),
+        ...(sort ? { sort: sort } : {}),
         ...(region.toUpperCase() !== "GLOBAL" ? { region } : {}),
       })}`
     );
@@ -259,6 +269,7 @@ export default function Results() {
                     sx={{ color: paletteFilter + "textFilter" }}
                   />
                 }
+                sx={{ paddingLeft: 0 }}
                 aria-controls="panel1a-content"
                 id="panel1a-header"
               >
@@ -268,7 +279,7 @@ export default function Results() {
                   {translationState.translation["Filter by"]}
                 </Typography>
               </AccordionSummary>
-              <AccordionDetails>
+              <AccordionDetails sx={{ paddingLeft: 0 }}>
                 <FilterBy
                   selectedProvider={selectedProvider}
                   setSelectedProvider={setSelectedProvider}
@@ -350,17 +361,47 @@ export default function Results() {
                 </DialogContent>
               </Dialog>
             </Box>
-            <IconButton
-              aria-label="filterListIcon"
-              sx={{
-                border: 1,
-                borderColor: paletteFilter + "borderColorFilterMobile",
-                borderRadius: 1,
-                maxHeight: "36px",
-              }}
-            >
-              <FilterListIcon />
-            </IconButton>
+            <Box>
+              <Select
+                defaultValue={sort ? sort : "indexed_ts desc"}
+                startAdornment={
+                  <InputAdornment position="start">
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ color: paletteFilter + "categoryColor" }}
+                    >
+                      {translationState.translation["Sort by"]}:
+                    </Typography>
+                  </InputAdornment>
+                }
+                fullWidth
+                sx={{
+                  color: "black",
+                  fontWeight: 600,
+                  fontSize: "12px",
+                  borderRadius: 0,
+                  height: "35px",
+                }}
+                onChange={(e) => setSort(e.target.value)}
+              >
+                <MenuItem value="indexed_ts desc">
+                  {translationState.translation["Recently updated"]}
+                </MenuItem>
+                <MenuItem value="indexed_ts asc">Last updated</MenuItem>
+
+                {facets.map((f) => {
+                  const title = fieldTitleFromName(f.name);
+                  return [
+                    <MenuItem key={`${f.name}-asc`} value={`${f.name} asc`}>
+                      {title} ↑
+                    </MenuItem>,
+                    <MenuItem key={`${f.name}-desc`} value={`${f.name} desc`}>
+                      {title} ↓
+                    </MenuItem>,
+                  ];
+                })}
+              </Select>
+            </Box>
           </Grid>
           <Box
             sx={{
@@ -415,12 +456,12 @@ export default function Results() {
                 </Typography>
                 <Box>
                   <Select
-                    defaultValue={"Recently updated"}
+                    defaultValue={sort ? sort : "indexed_ts desc"}
                     startAdornment={
                       <InputAdornment position="start">
                         <Typography
                           variant="subtitle2"
-                          sx={{ color: "#7B8FB7" }}
+                          sx={{ color: paletteFilter + "categoryColor" }}
                         >
                           {translationState.translation["Sort by"]}:
                         </Typography>
@@ -434,10 +475,27 @@ export default function Results() {
                       borderRadius: 0,
                       height: "35px",
                     }}
+                    onChange={(e) => setSort(e.target.value)}
                   >
-                    <MenuItem value="Recently updated">
+                    <MenuItem value="indexed_ts desc">
                       {translationState.translation["Recently updated"]}
                     </MenuItem>
+                    <MenuItem value="indexed_ts asc">Last updated</MenuItem>
+
+                    {facets.map((f) => {
+                      const title = fieldTitleFromName(f.name);
+                      return [
+                        <MenuItem key={`${f.name}-asc`} value={`${f.name} asc`}>
+                          {title} ↑
+                        </MenuItem>,
+                        <MenuItem
+                          key={`${f.name}-desc`}
+                          value={`${f.name} desc`}
+                        >
+                          {title} ↓
+                        </MenuItem>,
+                      ];
+                    })}
                   </Select>
                 </Box>
               </Box>

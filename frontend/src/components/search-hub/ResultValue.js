@@ -27,7 +27,21 @@ const ResultValue = (props) => {
 
   const translationState = useAppTranslation();
   const [iconLD, setIconLD] = useState(<CodeOutlinedIcon />);
-  const isVerified = true;
+  var CryptoJS = require("crypto-js");
+  function isVerified(id) {
+    debugger;
+    const hash = CryptoJS.SHA256(id).toString();
+    const fifthChar = hash.charAt(4);
+    const fifthNumber = parseInt(fifthChar, 16);
+    return fifthNumber > 5;
+  }
+
+  function getCompleteness(id) {
+    const hash = CryptoJS.SHA256(id);
+    const completenessLevels = [50, 70, 100];
+    const hashInt = parseInt(hash, 16);
+    return completenessLevels[hashInt % completenessLevels.length];
+  }
 
   function resolveAsUrl(url) {
     const pattern = /^((http|https):\/\/)/;
@@ -101,6 +115,7 @@ const ResultValue = (props) => {
          */
   };
 
+  const palette = "custom.resultPage.resultsDetails.";
   return (
     <Card
       key={result["id"]}
@@ -113,7 +128,7 @@ const ResultValue = (props) => {
       }}
       elevation={0}
     >
-      {isVerified && (
+      {isVerified(result["id"]) && (
         <CardHeader
           avatar={
             <Chip
@@ -127,9 +142,9 @@ const ResultValue = (props) => {
               variant="outlined"
               color="success"
               sx={{
-                color: "#1A7F37",
+                color: palette + "colorChipVerified",
                 ".MuiChip-avatar": {
-                  color: "#2DA44E",
+                  color: palette + "colorVerifiedAvatar",
                 },
               }}
             />
@@ -140,13 +155,16 @@ const ResultValue = (props) => {
       <CardContent>
         <Stack spacing={1}>
           <Link
-            href={url}
+            href={url === "" ? `/record/${jsonLdParams}` : url}
             underline="hover"
             target="_blank"
             onClick={() => trackingMatomoClickResults(url)}
             onAuxClick={() => trackingMatomoClickResults(url)}
           >
-            <Typography sx={{ fontSize: 21, color: "#0F1A31" }} gutterBottom>
+            <Typography
+              sx={{ fontSize: 21, color: palette + "colorTypography" }}
+              gutterBottom
+            >
               {result["name"]}
             </Typography>
           </Link>
@@ -179,9 +197,9 @@ const ResultValue = (props) => {
               <img
                 alt=""
                 src={
-                  completeValue === 50
+                  getCompleteness(result["id"]) === 50
                     ? completed50
-                    : completeValue === 75
+                    : getCompleteness(result["id"]) === 75
                     ? completed75
                     : completed100
                 }
@@ -190,13 +208,17 @@ const ResultValue = (props) => {
               />
             </Icon>
             Data completeness{" "}
-            {completeValue === 50 ? 50 : completeValue === 75 ? 75 : 100}
+            {getCompleteness(result["id"]) === 50
+              ? 50
+              : getCompleteness(result["id"]) === 75
+              ? 75
+              : 100}
             %
             <InfoOutlinedIcon
               sx={{
                 marginLeft: 1,
                 fontSize: "14px",
-                color: "#42526E",
+                color: palette + "completenessColor",
               }}
             />
           </Typography>
@@ -211,7 +233,7 @@ const ResultValue = (props) => {
               component={"span"}
               sx={{
                 fontSize: { xs: "10px", md: "12px" },
-                color: "#42526E",
+                color: palette + "contributorColor",
               }}
               display={"flex"}
               alignItems={"center"}
@@ -219,14 +241,19 @@ const ResultValue = (props) => {
             >
               {"txt_contributor" in result && (
                 <Box display={"flex"} gap={1}>
-                  <Typography sx={{ fontSize: "12px", color: "#42526E" }}>
+                  <Typography
+                    sx={{
+                      fontSize: "12px",
+                      color: palette + "contributorColor",
+                    }}
+                  >
                     Contributor(s):
                   </Typography>
                   <Typography
                     sx={{
                       fontSize: "12px",
-                      color: "#42526E",
-                      bgcolor: "#DFE1E6",
+                      color: palette + "contributorColor",
+                      backgroundColor: palette + "bgContributor",
                       fontWeight: 700,
                       padding: "0 4px",
                       borderRadius: 1,
@@ -251,9 +278,9 @@ const ResultValue = (props) => {
               sx={{
                 borderRadius: 2,
                 fontWeight: 700,
-                backgroundColor: "#EAEDF4",
+                backgroundColor: palette + "bgViewJson",
                 textTransform: "none",
-                color: "#1A2C54",
+                color: palette + "colorViewJson",
                 "&:hover": {
                   color: "#ffffff",
                 },

@@ -10,6 +10,7 @@ import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import { CATEGORIES } from "../../portability/configuration";
 
+const palette = "custom.resultPage.resultsDetails.";
 export const cutWithDots = (sentence, maxLength) => {
   if (sentence.length > maxLength) {
     var cutSentence = sentence.slice(0, maxLength) + "...";
@@ -28,7 +29,8 @@ const Keyword = ({ keyword }) => {
         maxWidth: truncated ? "12em" : undefined,
         marginRight: 1,
         fontSize: "12px",
-        border: "1px solid #aaa",
+        border: "1px solid",
+        borderColor: palette + "chipBorder",
         borderRadius: "4px",
         background: "transparent",
         height: "20px",
@@ -62,9 +64,9 @@ const Keywords = ({ result }) => {
           variant="outlined"
           sx={{
             verticalAlign: "super",
-            color: "#7B8FB7",
+            color: palette + "keywordsColor",
             "&.MuiButton-outlined": {
-              borderColor: "#BDC7DB",
+              borderColor: palette + "keywordsBorderColor",
             },
           }}
           onClick={() => setKeywordsTruncated(false)}
@@ -141,7 +143,7 @@ const Providers = ({ result, Inner = Id, topic }) => {
         >
           <CircleIcon
             fontSize="small"
-            sx={{ fontSize: "10px", color: "#2B498C" }}
+            sx={{ fontSize: "10px", color: palette + "topicColor" }}
           />
           {CATEGORIES.find((t) => t.id === topic).text}
         </Typography>
@@ -156,7 +158,7 @@ const Providers = ({ result, Inner = Id, topic }) => {
             >
               <CircleIcon
                 fontSize="small"
-                sx={{ fontSize: "10px", color: "#40AAD3" }}
+                sx={{ fontSize: "10px", color: palette + "providerColor" }}
               />
               <Box sx={{ fontSize: "10px", gap: 1 }}>{cutWithDots(r, 20)}</Box>
             </Typography>

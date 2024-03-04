@@ -11,13 +11,14 @@ import Button from "@mui/material/Button";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useAppTranslation } from "context/context/AppTranslation";
 import Alert from "@mui/material/Alert";
-import { CATEGORIES } from "portability/configuration";
+import { CATEGORIES, PROMOTED_REGIONS } from "portability/configuration";
 import Divider from "@mui/material/Divider";
 import { fieldTitleFromName, useSearchParam } from "utilities/generalUtility";
 import { dataServiceUrl } from "config/environment";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { useNavigate } from "react-router-dom";
+import PublicIcon from "@mui/icons-material/Public";
 
 const AdvancedSearch = (props) => {
   const { setSearchQuery, searchQuery, facets } = props;
@@ -25,10 +26,12 @@ const AdvancedSearch = (props) => {
   const translationState = useAppTranslation();
   const [facetsToShow, setFacetsToShow] = useState(facets);
   const [alertMessage, setAlertMessage] = useState("");
+  const [sort, setSort] = useSearchParam("sort");
   const [searchAdvancedQuery, setSearchAdvancedQuery] = useState({
     0: {
       category: "Topic",
       value: "Documents",
+      region: "Global",
     },
     1: [
       {
@@ -82,6 +85,8 @@ const AdvancedSearch = (props) => {
     const idTabName = CATEGORIES.find(
       (c) => c.text === searchAdvancedQuery[0].value
     ).id;
+
+    const regionValue = searchAdvancedQuery[0].region;
     searchQueryBuild +=
       ' (Topic IS "' + searchAdvancedQuery[0].value + '") AND (';
     /** @type {{id: number, category: string, value: string, operator: string, textfield: string}[][]} */
@@ -155,26 +160,30 @@ const AdvancedSearch = (props) => {
     const hrefFor = (region, query) =>
       `/results/${idTabName}?${new URLSearchParams({
         ...(query ? { fq: query } : {}),
+        ...(sort ? { sort: sort } : {}),
         ...(region && region.toUpperCase() !== "GLOBAL" ? { region } : {}),
       })}`;
-    navigate(hrefFor(region, facetQuery));
+    navigate(hrefFor(regionValue, facetQuery));
   };
 
   return (
     <>
-      <Grid item container gap={1}>
-        <Grid item xs={12} lg={7}>
-          <Typography
-            variant="body2"
-            alignItems={"start"}
-            display={{ xs: "none", lg: "flex" }}
-            sx={{ color: palette + "colorTextProTip" }}
-          >
-            <LightbulbOutlinedIcon sx={{ color: palette + "iconProtip" }} />
-            {translationState.translation["Pro Tip"]}
-          </Typography>
+      <Grid item container gap={1} sx={{ mt: 2 }}>
+        <Grid item xs={12} lg={8}>
+          <Box sx={{ background: "#E8EDF23F", padding: "10px" }}>
+            <Typography
+              variant="body1"
+              alignItems={"start"}
+              sx={{
+                color: "#BDC7DB",
+                fontWeight: 700,
+                fontSize: "14px",
+              }}
+            >
+              {translationState.translation["AndOR"]}
+            </Typography>
+          </Box>
         </Grid>
-        <Grid item lg={12} />
         <Grid
           item
           lg={12}
@@ -183,6 +192,7 @@ const AdvancedSearch = (props) => {
             alignItems: "center",
             gap: "20px",
             marginBottom: 1,
+            flexWrap: "wrap",
           }}
         >
           <Typography
@@ -196,41 +206,81 @@ const AdvancedSearch = (props) => {
           >
             Search for:
           </Typography>
-          <Select
-            defaultValue="Documents"
-            sx={{
-              color: palette + "colorTypography",
-              fontWeight: 600,
-              borderRadius: 1,
-              height: "30px",
-              maxWidth: "9.5rem",
-              minWidth: "9.5rem",
-            }}
-            onChange={(e) => {
-              const resetObj = {
-                0: {
-                  category: "Topic",
-                  value: e.target.value,
-                },
-                1: [
-                  {
-                    id: 0,
-                    category: "Provider",
-                    operator: "Contains",
-                    textfield: "",
+          <Box sx={{ display: "flex", gap: "20px" }}>
+            <Select
+              defaultValue="Documents"
+              sx={{
+                color: palette + "colorTypography",
+                fontWeight: 600,
+                borderRadius: 1,
+                height: "30px",
+                maxWidth: "9.5rem",
+                minWidth: "9.5rem",
+              }}
+              onChange={(e) => {
+                const resetObj = {
+                  0: {
+                    category: "Topic",
+                    value: e.target.value,
                   },
-                ],
-              };
-              changeTopic(e.target.value);
-              setSearchAdvancedQuery(resetObj);
-            }}
-          >
-            {CATEGORIES.map((c, index) => (
-              <MenuItem key={index} value={c.text}>
-                {translationState.translation[c.text]}
-              </MenuItem>
-            ))}
-          </Select>
+                  1: [
+                    {
+                      id: 0,
+                      category: "Provider",
+                      operator: "Contains",
+                      textfield: "",
+                    },
+                  ],
+                };
+                changeTopic(e.target.value);
+                setSearchAdvancedQuery(resetObj);
+              }}
+            >
+              {CATEGORIES.map((c, index) => (
+                <MenuItem key={index} value={c.text}>
+                  {translationState.translation[c.text]}
+                </MenuItem>
+              ))}
+            </Select>
+            <Select
+              startAdornment={
+                <PublicIcon
+                  sx={{
+                    marginRight: 1,
+                    fontSize: "14px",
+                  }}
+                />
+              }
+              defaultValue={region.charAt(0).toUpperCase() + region.slice(1)}
+              name="searchRegion"
+              onChange={(e) => {
+                const updatedSearchAdvancedQuery = {
+                  ...searchAdvancedQuery,
+                  0: {
+                    ...searchAdvancedQuery[0],
+                    region: e.target.value,
+                  },
+                };
+                setSearchAdvancedQuery(updatedSearchAdvancedQuery);
+              }}
+              sx={{
+                color: palette + "colorTypography",
+                fontWeight: 600,
+                borderRadius: 1,
+                height: "30px",
+                maxWidth: "9.5rem",
+                minWidth: "9.5rem",
+              }}
+            >
+              {Object.entries(PROMOTED_REGIONS).map(([region, title]) => {
+                return (
+                  <MenuItem key={region} value={region}>
+                    {translationState.translation[region]}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </Box>
         </Grid>
         <Grid
           item
@@ -310,6 +360,7 @@ const AdvancedSearch = (props) => {
                                   borderColor: palette + "borderColor",
                                   color: palette + "colorTypography",
                                   width: "50px",
+                                  whiteSpace: "nowrap",
                                 }}
                                 onClick={() => {
                                   const lastID =
@@ -334,7 +385,7 @@ const AdvancedSearch = (props) => {
                                   });
                                 }}
                               >
-                                OR
+                                {"+ OR"}
                               </Button>
                               <Button
                                 variant={"outlined"}
@@ -347,6 +398,7 @@ const AdvancedSearch = (props) => {
                                   borderColor: palette + "borderColor",
                                   color: palette + "colorTypography",
                                   width: "50px",
+                                  whiteSpace: "nowrap",
                                 }}
                                 onClick={() => {
                                   const keys = Object.keys(searchAdvancedQuery);
@@ -373,7 +425,7 @@ const AdvancedSearch = (props) => {
                                   setSearchAdvancedQuery(obj);
                                 }}
                               >
-                                AND
+                                {"+ AND"}
                               </Button>
                               {(searchAdvancedQuery[id].length > 1 ||
                                 index >= 2) && (
@@ -706,6 +758,7 @@ const AdvancedSearch = (props) => {
                                 borderColor: palette + "borderColor",
                                 color: palette + "colorTypography",
                                 width: "50px",
+                                whiteSpace: "nowrap",
                               }}
                               onClick={() => {
                                 const lastID =
@@ -730,7 +783,7 @@ const AdvancedSearch = (props) => {
                                 });
                               }}
                             >
-                              OR
+                              {"+ OR"}
                             </Button>
                             <Button
                               variant={"outlined"}
@@ -743,6 +796,7 @@ const AdvancedSearch = (props) => {
                                 borderColor: palette + "borderColor",
                                 color: palette + "colorTypography",
                                 width: "50px",
+                                whiteSpace: "nowrap",
                               }}
                               onClick={() => {
                                 const keys = Object.keys(searchAdvancedQuery);
@@ -769,7 +823,7 @@ const AdvancedSearch = (props) => {
                                 setSearchAdvancedQuery(obj);
                               }}
                             >
-                              AND
+                              {"+ AND"}
                             </Button>
 
                             {(searchAdvancedQuery[id].length > 1 ||
@@ -892,7 +946,7 @@ const AdvancedSearch = (props) => {
             xs={12}
             display={"flex"}
             flexDirection={{ xs: "column", lg: "row" }}
-            sx={{ width: "100%", mb: { xs: 2, lg: "unset" } }}
+            sx={{ width: "100%", mb: { xs: 2, lg: "unset" }, mt: 2 }}
           >
             <Button
               variant="contained"

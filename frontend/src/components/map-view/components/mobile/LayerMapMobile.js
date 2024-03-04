@@ -26,6 +26,10 @@ const LayerMapMobile = (props) => {
     changeBaseLayer,
     baseLayer,
   } = props;
+
+  const palette = "custom.mapView.mobile.layerMap.";
+
+  const translationState = useAppTranslation();
   return (
     <Box
       sx={{
@@ -37,20 +41,20 @@ const LayerMapMobile = (props) => {
     >
       <IconButton
         sx={{
-          backgroundColor: "#FFFFFF",
+          backgroundColor: palette + "bgButton",
           borderRadius: 2,
           width: "45px",
           "&:hover": {
-            background: "#13213F",
+            backgroundColor: palette + "iconColor",
             "& .MuiSvgIcon-root": {
-              color: "#FFFFFF",
+              color: palette + "bgButton",
             },
           },
           boxShadow: 0,
         }}
         onClick={() => setOpenLayerDrawer(true)}
       >
-        <LayersIcon sx={{ color: "#13213F" }} />
+        <LayersIcon sx={{ color: palette + "iconColor" }} />
       </IconButton>
       <ButtonGroup
         orientation="vertical"
@@ -63,10 +67,10 @@ const LayerMapMobile = (props) => {
         }}
       >
         <IconButton onClick={() => applyZoom("in")}>
-          <AddIcon sx={{ color: "#13213F" }} />
+          <AddIcon sx={{ color: palette + "iconColor" }} />
         </IconButton>
         <IconButton onClick={() => applyZoom("out")}>
-          <RemoveIcon sx={{ color: "#13213F" }} />
+          <RemoveIcon sx={{ color: palette + "iconColor" }} />
         </IconButton>
       </ButtonGroup>
       <Drawer
@@ -91,12 +95,16 @@ const LayerMapMobile = (props) => {
           >
             <Typography
               variant="body2"
-              sx={{ fontWeight: 700, color: "#0F1A31", fontSize: "14px" }}
+              sx={{
+                fontWeight: 700,
+                color: palette + "colorCloseIconTypo",
+                fontSize: "14px",
+              }}
             >
-              Map Layers
+              {translationState.translation["Map Layers"]}
             </Typography>
             <IconButton
-              sx={{ color: "#0F1A31" }}
+              sx={{ color: palette + "colorCloseIconTypo" }}
               onClick={() => setOpenLayerDrawer(false)}
             >
               <CloseIcon />
@@ -122,7 +130,8 @@ const LayerMapMobile = (props) => {
                   height: "66px",
                   borderRadius: "4px",
                   ...(baseLayer === EMODNET && {
-                    border: "3px solid #40AAD3",
+                    border: "3px solid",
+                    borderColor: palette + "colorSelectedLayer",
                   }),
                 }}
                 onClick={() => changeBaseLayer(EMODNET)}
@@ -133,10 +142,10 @@ const LayerMapMobile = (props) => {
                 variant="body2"
                 sx={{
                   fontWeight: 700,
-                  color: "#0F1A31",
+                  color: palette + "colorCloseIconTypo",
                   fontSize: "14px",
                   ...(baseLayer === EMODNET && {
-                    color: "#40AAD3",
+                    color: palette + "colorSelectedLayer",
                   }),
                 }}
               >
@@ -156,7 +165,8 @@ const LayerMapMobile = (props) => {
                   height: "66px",
                   borderRadius: "4px",
                   ...(baseLayer === ARCGIS && {
-                    border: "3px solid #40AAD3",
+                    border: "3px solid",
+                    borderColor: palette + "colorSelectedLayer",
                   }),
                 }}
                 onClick={() => changeBaseLayer(ARCGIS)}
@@ -167,10 +177,10 @@ const LayerMapMobile = (props) => {
                 variant="body2"
                 sx={{
                   fontWeight: 700,
-                  color: "#0F1A31",
+                  color: palette + "colorCloseIconTypo",
                   fontSize: "14px",
                   ...(baseLayer === ARCGIS && {
-                    color: "#40AAD3",
+                    color: palette + "colorSelectedLayer",
                   }),
                 }}
               >
@@ -190,7 +200,8 @@ const LayerMapMobile = (props) => {
                   height: "66px",
                   borderRadius: "4px",
                   ...(baseLayer === USGS && {
-                    border: "3px solid #40AAD3",
+                    border: "3px solid",
+                    borderColor: palette + "colorSelectedLayer",
                   }),
                 }}
                 onClick={() => changeBaseLayer(USGS)}
@@ -201,10 +212,10 @@ const LayerMapMobile = (props) => {
                 variant="body2"
                 sx={{
                   fontWeight: 700,
-                  color: "#0F1A31",
+                  color: palette + "colorCloseIconTypo",
                   fontSize: "14px",
                   ...(baseLayer === USGS && {
-                    color: "#40AAD3",
+                    color: palette + "colorSelectedLayer",
                   }),
                 }}
               >
@@ -219,10 +230,10 @@ const LayerMapMobile = (props) => {
               sx={{
                 fontSize: "14px",
                 fontWeight: 700,
-                color: "#1A2C54",
+                color: palette + "colorTypography",
               }}
             >
-              Opacity layer
+              {translationState.translation["Opacity layer"]}
             </Typography>
             <Slider
               defaultValue={50}

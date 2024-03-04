@@ -42,21 +42,16 @@ const DesktopMapView = (props) => {
     region,
   } = props;
 
+  const palette = "custom.mapView.desktop.";
   return (
     <>
       <Box display={"flex"} alignItems={"center"}>
         <Drawer
           sx={{
-            width:
-              window.innerWidth < 1600 && window.innerWidth > 1400
-                ? "20%"
-                : "30%",
+            width: window.innerWidth < 1400 ? "40%" : "30%",
             flexShrink: 0,
             "& .MuiDrawer-paper": {
-              width:
-                window.innerWidth < 1600 && window.innerWidth > 1400
-                  ? "20%"
-                  : "30%",
+              width: window.innerWidth < 1400 ? "40%" : "30%",
               boxSizing: "border-box",
             },
           }}
@@ -84,18 +79,15 @@ const DesktopMapView = (props) => {
             sx={{
               position: "absolute",
               bottom: "70%",
-              left:
-                window.innerWidth < 1600 && window.innerWidth > 1400
-                  ? "20%"
-                  : "30%",
-              background: "white",
+              left: window.innerWidth < 1400 ? "40%" : "30%",
+              backgroundColor: palette + "bgIconHandleDrawer",
               borderRadius: "0 10px 10px 0",
               paddingLeft: 0,
               paddingRight: 0,
               "&:hover": {
-                background: "#2B498C",
+                backgroundColor: palette + "bgIconHandleDrawerHover",
                 "& .MuiSvgIcon-root": {
-                  color: "#FFFFFF",
+                  color: palette + "colorIconHandleDrawerHover",
                 },
               },
             }}
@@ -109,14 +101,14 @@ const DesktopMapView = (props) => {
               position: "absolute",
               bottom: "70%",
               left: "0%",
-              background: "white",
+              backgroundColor: palette + "bgIconHandleDrawer",
               borderRadius: "0 10px 10px 0",
               paddingLeft: 0,
               paddingRight: 0,
               "&:hover": {
-                background: "#2B498C",
+                backgroundColor: palette + "bgIconHandleDrawerHover",
                 "& .MuiSvgIcon-root": {
-                  color: "#FFFFFF",
+                  color: palette + "colorIconHandleDrawerHover",
                 },
               },
             }}
@@ -134,10 +126,7 @@ const DesktopMapView = (props) => {
             position: "absolute",
             zIndex: -1,
             right: 0,
-            width:
-              window.innerWidth < 1600 && window.innerWidth > 1400
-                ? "80%"
-                : "70%",
+            width: window.innerWidth < 1400 ? "60%" : "70%",
           }),
         }}
       >

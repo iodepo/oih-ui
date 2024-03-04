@@ -55,6 +55,7 @@ export default function Search(props) {
   const [region, setRegion] = useSearchParam("region", "global");
   const location = useLocation();
   const isResults = location.pathname.startsWith("/results");
+  const [sort, setSort] = useSearchParam("sort");
 
   const translationState = useAppTranslation();
 
@@ -68,6 +69,7 @@ export default function Search(props) {
   const hrefFor = (region, query) =>
     `/results/${tabName}?${new URLSearchParams({
       ...(query ? { search_text: query } : {}),
+      ...(sort ? { sort: sort } : {}),
       ...(region && region.toUpperCase() !== "GLOBAL" ? { region } : {}),
     })}`;
 
@@ -213,7 +215,10 @@ const SearchHome = (props) => {
                       <PublicIcon
                         sx={{
                           marginRight: 1,
-                          color: { xs: "#FFFFFF", lg: palette + "iconsColor" },
+                          color: {
+                            xs: palette + "bgColorSelectMobile",
+                            lg: palette + "iconsColor",
+                          },
                         }}
                       />
                     }
@@ -227,7 +232,10 @@ const SearchHome = (props) => {
                         xs: "transparent",
                         lg: palette + "bgColor",
                       },
-                      color: { xs: "#FFFFFF", lg: palette + "iconsColor" },
+                      color: {
+                        xs: palette + "bgColorSelectMobile",
+                        lg: palette + "iconsColor",
+                      },
                       fontWeight: 600,
                       borderBottomRightRadius: 0,
                       borderTopRightRadius: 0,
@@ -275,7 +283,7 @@ const SearchHome = (props) => {
                   <InputAdornment position="end">
                     <SearchIcon
                       sx={{
-                        color: { xs: "#7B8FB7", lg: palette + "searchIcon" },
+                        color: palette + "searchIcon",
                       }}
                     />
                   </InputAdornment>
@@ -620,7 +628,7 @@ const SearchResult = (props) => {
                   />
                 </Box>
 
-                <Typography
+                {/* <Typography
                   variant="body2"
                   alignItems={"start"}
                   display={{ xs: "flex", lg: "none" }}
@@ -630,7 +638,7 @@ const SearchResult = (props) => {
                     sx={{ color: palette + "iconProtip" }}
                   />
                   {translationState.translation["Pro Tip"]}
-                </Typography>
+                </Typography> */}
                 <Button
                   variant="contained"
                   disableElevation
@@ -702,7 +710,7 @@ const SearchResult = (props) => {
               lg={4}
               display={"flex"}
               alignItems={"center"}
-              justifyContent={{ xs: "space-between" }}
+              justifyContent={{ xs: "space-between", lg: "flex-end" }}
               sx={{ gap: 1 }}
             >
               <Tooltip
@@ -811,6 +819,17 @@ const SearchResult = (props) => {
               </Box>
             </Grid>
           </Grid>
+          {/* <Grid item xs={0} lg={7} display={{ xs: "none", lg: "block" }}>
+            <Typography
+              variant="body2"
+              alignItems={"start"}
+              display={{ xs: "none", lg: "flex" }}
+              sx={{ color: palette + "colorTextProTip", mt: 1 }}
+            >
+              <LightbulbOutlinedIcon sx={{ color: palette + "iconProtip" }} />
+              {translationState.translation["Pro Tip"]}
+            </Typography>
+          </Grid> */}
           <Grid item xs={0} lg={12} display={{ xs: "none", lg: "block" }}>
             <Accordion
               expanded={openAdvancedSearch}
@@ -836,90 +855,3 @@ const SearchResult = (props) => {
     </>
   );
 };
-
-/* Old Version */
-{
-  /* <div
-        className={
-          "search__container " + (url === " results" ? " searchbg-alt" : "")
-        }
-      >
-        <div className="container">
-          <div className="row">
-            <div className="col-12 col-md-2 col-sm-12 me-4 mb-4"></div>
-            <div className="col-12 col-md-9 col-sm-11">
-              <form
-                id="searchBarForm"
-                className={
-                  "d-flex flex-justify-start align-self pt-2" +
-                  (url == "results" ? "result-search" : "")
-                }
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSubmit();
-                }}
-              >
-                <select
-                  className="form-select w-50 rounded-0"
-                  value={region}
-                  name="searchRegion"
-                  onChange={(e) => setRegion(e.target.value)}
-                >
-                  {Object.entries(PROMOTED_REGIONS).map(([region, title]) => {
-                    return (
-                      <option key={region} value={region}>
-                        {translationState.translation[region]}
-                      </option>
-                    );
-                  })}
-                </select>
-                <input
-                  className="flex-fill form-control rounded-0"
-                  type="text"
-                  placeholder={placeholder()}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  name="search"
-                />
-                <Button
-                  className="btn-lg btn-info rounded-0 text-dark"
-                  type="submit"
-                  onClick={sendMatomoEvent}
-                >
-                  <span className="h6">
-                    {translationState.translation["Search"]}
-                  </span>
-                </Button>
-              </form>
-               {!isResults && (
-              <div className="text-light text-start mt-3">
-                <span className="p-2 h5">
-                  {translationState.translation["Try"]}:
-                </span>
-                {currentSampleQueries.map((query, ix) => (
-                  <Link
-                    key={ix}
-                    // Touch up the internal state to match the navigation
-                    onClick={(e) => setSearchQuery(query)}
-                    // do the navigation
-                    to={hrefFor(region, query)}
-                    className="text-info text-light h6 p-2"
-                  >
-                    {translationState.translation[query]}
-                  </Link>
-                ))}
-              </div>
-            )}
-            {!isResults && (
-              <div className="text-light text-end ">
-                <a href="#bbc" className="text-light">
-                  {translationState.translation["Browse"]}
-                </a>
-              </div>
-            )} 
-            </div>
-          </div>
-        </div>
-      </div> 
-  */
-}

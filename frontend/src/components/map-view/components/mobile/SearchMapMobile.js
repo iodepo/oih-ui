@@ -4,13 +4,16 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 import Button from "@mui/material/Button";
+import { useAppTranslation } from "context/context/AppTranslation";
 
 const SearchMapMobile = (props) => {
   const { searchText, setSearchText, handleSubmit } = props;
+  const palette = "custom.mapView.mobile.searchMap.";
+  const translationState = useAppTranslation();
   return (
     <Box
       sx={{
-        backgroundColor: "#FFFFFF",
+        backgroundColor: palette + "bgBox",
         padding: "6px",
         borderRadius: "8px",
         boxShadow: 3,
@@ -21,7 +24,7 @@ const SearchMapMobile = (props) => {
       <TextField
         fullWidth
         sx={{
-          color: "#7B8FB7",
+          color: palette + "colorTextfield",
           backgroundColor: "#E8EDF266",
           borderRadius: "4px",
           ".MuiInputBase-root": {
@@ -36,13 +39,13 @@ const SearchMapMobile = (props) => {
           },
         }}
         value={searchText}
-        placeholder={"Search"}
+        placeholder={translationState.translation["Search"]}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
               <SearchIcon
                 sx={{
-                  color: "#7B8FB7",
+                  color: palette + "colorTextfield",
                 }}
               />
             </InputAdornment>
@@ -62,7 +65,7 @@ const SearchMapMobile = (props) => {
         variant="contained"
         disableElevation
         sx={{
-          backgroundColor: "#40AAD3",
+          backgroundColor: palette + "bgButton",
           height: "32px",
           borderRadius: 2,
           width: "auto",
@@ -72,7 +75,7 @@ const SearchMapMobile = (props) => {
           handleSubmit();
         }}
       >
-        Search
+        {translationState.translation["Search"]}
       </Button>
     </Box>
   );
