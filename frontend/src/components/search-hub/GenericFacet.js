@@ -25,7 +25,6 @@ const GenericFacet = (props) => {
     facet,
     i,
     title,
-    setValue,
     facetSearch,
     clear,
     setFilterChosenMobile,
@@ -169,7 +168,7 @@ const GenericFacet = (props) => {
           size="small"
           value={searchInput}
           sx={{
-            backgroundColor: "#ffffff",
+            backgroundColor: palette + "bgTextfield",
             "& .MuiFormLabel-root": {
               fontSize: "12px",
               color: palette + "categoryColor",
@@ -224,7 +223,6 @@ const GenericFacet = (props) => {
                             f.filter((d) => d.type !== title.toLowerCase())
                           );
                         } else {
-                          setValue(i, facetCount.name);
                           facetSearch(facet.name, facetCount.name);
                           const isGenericFilterSet = filterChosenMobile.find(
                             (f) => f.type === facetCount.name

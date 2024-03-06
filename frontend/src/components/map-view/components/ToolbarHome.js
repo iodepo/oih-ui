@@ -16,7 +16,7 @@ const ToolbarHome = (props) => {
   };
 
   const navigate = useNavigate();
-
+  const palette = "custom.mapView.toolbarHome.";
   const goToMap = () => {
     navigate(`/map-viewer?lng=${center[0]}&lat=${center[1]}`);
   };
@@ -33,8 +33,8 @@ const ToolbarHome = (props) => {
           variant="contained"
           sx={{
             ".MuiButton-root": {
-              background: "#FFFFFF",
-              color: "#2B498C",
+              backgroundColor: palette + "bgButton",
+              color: palette + "colorLayerButton",
               padding: "6px",
               borderRight: 0,
               fontSize: "12px",
@@ -42,7 +42,7 @@ const ToolbarHome = (props) => {
             },
 
             ".MuiButton-root:hover": {
-              background: "#DEE2ED",
+              backgroundColor: palette + "bgLayerButtonHover",
             },
           }}
           disableElevation
@@ -51,7 +51,7 @@ const ToolbarHome = (props) => {
             <Box
               sx={{
                 ...(selectedLayer === EMODNET && {
-                  background: "#DEE2ED",
+                  backgroundColor: palette + "bgLayerButtonHover",
                 }),
                 paddingLeft: "6px",
                 paddingRight: "6px",
@@ -65,7 +65,7 @@ const ToolbarHome = (props) => {
             <Box
               sx={{
                 ...(selectedLayer === ARCGIS && {
-                  background: "#DEE2ED",
+                  backgroundColor: palette + "bgLayerButtonHover",
                 }),
                 paddingLeft: "6px",
                 paddingRight: "6px",
@@ -79,7 +79,7 @@ const ToolbarHome = (props) => {
             <Box
               sx={{
                 ...(selectedLayer === USGS && {
-                  background: "#DEE2ED",
+                  backgroundColor: palette + "bgLayerButtonHover",
                 }),
                 paddingLeft: "6px",
                 paddingRight: "6px",
@@ -94,19 +94,18 @@ const ToolbarHome = (props) => {
       <Box sx={{ position: "absolute", bottom: 10, right: 12 }}>
         <IconButton
           sx={{
-            color: "white",
-            background: "#FFFFFF",
+            backgroundColor: palette + "bgButton",
             borderRadius: "3px",
             "&:hover": {
-              background: "#2B498C",
+              backgroundColor: palette + "bgGoToMapHover",
               "& .MuiSvgIcon-root": {
-                color: "#FFFFFF",
+                color: palette + "colorIconGoToHover",
               },
             },
           }}
           onClick={() => goToMap()}
         >
-          <OpenInFullIcon sx={{ color: "#2B498C" }} />
+          <OpenInFullIcon sx={{ color: palette + "colorIconGoTo" }} />
         </IconButton>
       </Box>
     </>

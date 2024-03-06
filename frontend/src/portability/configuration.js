@@ -6,6 +6,7 @@ import spatial from "../resources/svg/spatial.svg";
 import vessels from "../resources/svg/vessels.svg";
 import projects from "../resources/svg/projects.svg";
 import datasets from "../resources/svg/datasets.svg";
+import examplePartner from "../resources/partners/example.png";
 /* import ReactGA from "react-ga4";
 
 ReactGA.initialize([
@@ -33,6 +34,23 @@ const fieldNameMap = {
   areaserved: "Area",
   startyear: "Starting Between",
   endyear: "Ending Between",
+};
+
+const idFacets = {
+  keywords: "txt_keywords",
+  provider: "txt_provider",
+  "variable measured": "txt_variableMeasured",
+  type: "type",
+  "within directory": "txt_memberOf",
+  language: "txt_knowsLanguage",
+  "job title": "txt_jobTitle",
+  "knows about": "txt_knowsAbout",
+  affiliation: "txt_affiliation",
+  contributor: "txt_contributor",
+  author: "txt_author",
+  "credential awarded": "txt_educationalCredentialAwarded",
+  "vehicle usage": "txt_vehicleSpecialUsage",
+  area: "txt_areaServed",
 };
 
 /* Name: title mapping of the regions that show up in the search bar.
@@ -111,6 +129,25 @@ const CATEGORIES = [
 ];
 //  --  END CATEGORIES REGION --
 
+// -- START PARTNERS REGION --
+
+const PARTNERS = [
+  [
+    { icon: examplePartner, url: "#" },
+    { icon: examplePartner, url: "#" },
+    { icon: examplePartner, url: "#" },
+    { icon: examplePartner, url: "#" },
+  ],
+  [
+    { icon: examplePartner, url: "#" },
+    { icon: examplePartner, url: "#" },
+    { icon: examplePartner, url: "#" },
+    { icon: examplePartner, url: "#" },
+  ],
+];
+
+// -- END PARTNERS REGION --
+
 // -- START REGION PALETTE --
 
 // COLORS
@@ -163,11 +200,16 @@ const primaryPalette = {
       colorTypography: colors.neutral.main,
       buttonBgColor: colors.accentColor.main,
     },
+    carouselPortals: {
+      colorTypography: colors.neutral.main,
+      colorArrows: colors.neutral.main,
+    },
   },
   resultPage: {
     searchBar: {
       iconsColor: colors.primaryColor.dark2,
       bgColorSelectDesktop: colors.neutral.main,
+      bgColorSelectMobile: colors.neutral.main,
       bgColorTextfieldMobile: colors.primaryColor.light,
       colorTextfield: colors.primaryColor.main,
       searchIcon: colors.primaryColor.darker3,
@@ -198,12 +240,102 @@ const primaryPalette = {
       colorButtonMobile: colors.primaryColor.light,
       colorButtonDesktop: colors.accentColor.main,
       borderColorFilterMobile: colors.primaryColor.light2,
+      bgTextfield: colors.neutral.main,
+    },
+    resultsDetails: {
+      chipBorder: colors.primaryColor.darker3,
+      keywordsColor: colors.primaryColor.darker3,
+      keywordsBorderColor: colors.primaryColor.light2,
+      topicColor: colors.primaryColor.main,
+      providerColor: colors.accentColor.main,
+      colorChipVerified: "#1A7F37",
+      colorVerifiedAvatar: "#2DA44E",
+      colorTypography: colors.primaryColor.darker,
+      completenessColor: "#42526E",
+      contributorColor: "#42526E",
+      bgContributor: "#DFE1E6",
+      bgViewJson: "#EAEDF4",
+      colorViewJson: colors.primaryColor.dark2,
+    },
+    support: {
+      bgIconSupport: colors.primaryColor.main,
+      colorIconSupport: colors.neutral.main,
+      iconColor: colors.primaryColor.dark2,
+      colorTypography: colors.primaryColor.dark2,
+      colorSubTypography: colors.primaryColor.light2,
+    },
+    pagination: {
+      colorItem: colors.primaryColor.main,
+    },
+    recordMetadata: {
+      colorTypography: colors.primaryColor.light2,
     },
   },
-  map: {
-    container: {
-      openBgArrow: colors.neutral.main,
-      openBgArrowHover: colors.primaryColor.main,
+  mapView: {
+    toolbarHome: {
+      bgButton: colors.neutral.main,
+      colorLayerButton: colors.primaryColor.main,
+      bgLayerButtonHover: colors.primaryColor.light,
+      bgGoToMapHover: colors.primaryColor.main,
+      colorIconGoTo: colors.primaryColor.main,
+      colorIconGoToHover: colors.neutral.main,
+    },
+    desktop: {
+      bgIconHandleDrawer: colors.neutral.main,
+      bgIconHandleDrawerHover: colors.primaryColor.main,
+      colorIconHandleDrawerHover: colors.neutral.main,
+      drawer: {
+        bgLanguage: colors.neutral.main,
+        colorLanguage: colors.primaryColor.dark2,
+        borderColorLanguage: colors.primaryColor.light2,
+        colorSelectedFilter: colors.primaryColor.dark2,
+        bgSelectedFilter: "#F6F8FA",
+        colorIcon: colors.primaryColor.darker3,
+        colorDivider: colors.primaryColor.dark2,
+        bgButton: colors.accentColor.main,
+        bgTextfield: "#E8EDF266",
+        bgHeaderTable: "#F8FAFB",
+      },
+      toolbar: {
+        bgButton: colors.neutral.main,
+        colorButton: colors.primaryColor.dark2,
+        colorIcon: colors.primaryColor.dark2,
+        colorBox: colors.neutral.main,
+        bgBox: colors.primaryColor.dark2,
+        bgBox2: colors.neutral.main,
+        borderColor: colors.primaryColor.light,
+        checkedSliderColor: colors.primaryColor.main,
+        colorTypography: colors.primaryColor.dark2,
+      },
+    },
+    mobile: {
+      filterMap: {
+        bgButton: colors.neutral.main,
+        colorButton: colors.primaryColor.dark2,
+        iconColor: colors.primaryColor.dark2,
+        colorBox: colors.neutral.main,
+        bgBox: colors.primaryColor.dark2,
+        colorTypography: colors.primaryColor.dark2,
+      },
+      layerMap: {
+        bgButton: colors.neutral.main,
+        iconColor: colors.primaryColor.dark2,
+        colorCloseIconTypo: colors.primaryColor.darker,
+        colorSelectedLayer: colors.accentColor.main,
+        colorTypography: colors.primaryColor.dark2,
+      },
+      resultsMap: {
+        colorTypography: colors.primaryColor.darker,
+        bgButton: "#F6F8FA",
+        colorButton: colors.primaryColor.dark2,
+        colorButtonClear: colors.accentColor.main,
+        colorProvider: colors.accentColor.main,
+      },
+      searchMap: {
+        bgBox: colors.neutral.main,
+        colorTextfield: colors.primaryColor.darker3,
+        bgButton: colors.accentColor.main,
+      },
     },
   },
 };
@@ -251,4 +383,6 @@ export {
   PROMOTED_REGIONS,
   fieldNameMap,
   SAMPLE_QUERIES,
+  idFacets,
+  PARTNERS,
 };

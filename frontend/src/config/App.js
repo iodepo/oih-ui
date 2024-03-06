@@ -5,6 +5,7 @@ import Results from "../components/search-hub/Results";
 import { AppContainer } from "../components/AppContainer";
 import { Routes } from "react-router";
 import MapContainer from "components/map-view/MapContainer";
+import RecordMetadata from "components/search-hub/RecordMetadata";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             path="/map-viewer/:searchType"
             element={<MapContainer isHome={false} />}
           />
+          <Route path="/record/:jsonld" element={<RecordMetadata />} />
           <Route path="/" element={<TypesCount />}></Route>
         </Routes>
       </AppContainer>

@@ -14,6 +14,7 @@ export default function Pagination({
     setPage(value - 1);
   };
 
+  const palette = "custom.resultPage.pagination.";
   return (
     <PaginationMUI
       key={`${searchType}-${pageCount}`}
@@ -28,9 +29,9 @@ export default function Pagination({
         justifyContent: "center",
         my: 2,
         "& .MuiPaginationItem-root": {
-          color: "#2B498C",
+          color: palette + "colorItem",
           "&.Mui-selected": {
-            background: "#2B498C",
+            backgroundColor: palette + "colorItem",
             color: "white",
           },
         },

@@ -30,10 +30,10 @@ import MenuItem from "@mui/material/MenuItem";
 import Avatar from "@mui/material/Avatar";
 import useCookies from "context/useCookies";
 import { SupportedLangugesEnum } from "context/AppTranslationProvider";
-import FrenchFlag from "../../../resources/svg/FrenchFlag.svg";
-import RussianFlag from "../../../resources/svg/RussianFlag.svg";
-import EnglishFlag from "../../../resources/svg/EnglishFlag.svg";
-import SpanishFlag from "../../../resources/svg/SpanishFlag.svg";
+import FrenchFlag from "../../../../resources/svg/FrenchFlag.svg";
+import RussianFlag from "../../../../resources/svg/RussianFlag.svg";
+import EnglishFlag from "../../../../resources/svg/EnglishFlag.svg";
+import SpanishFlag from "../../../../resources/svg/SpanishFlag.svg";
 import { useAppTranslation } from "context/context/AppTranslation";
 import ResultValue from "components/search-hub/ResultValue";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
@@ -77,12 +77,15 @@ const DrawerContent = (props) => {
     getDataSpatialSearch,
     isLoading,
     handleSubmit,
+    setSelectedFacets,
+    selectedFacets,
+    facetSearch,
+    clear,
   } = props;
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("");
   const [dataTable, setDataTable] = useState([]);
   const [page, setPage] = useState(1);
-  const translationState = useAppTranslation();
   const mainBoxRef = useRef(null);
   const [mainBoxHeight, setMainBoxHeight] = useState(0);
   const [languageIcon, setLanguageIcon] = useState(EnglishFlag);
@@ -160,6 +163,9 @@ const DrawerContent = (props) => {
 
     return () => mainBoxObserver.unobserve(mainBox);
   }, [selectedResult]);
+
+  const translationState = useAppTranslation();
+  const palette = "custom.mapView.desktop.drawer.";
   return (
     <Box sx={{ height: "100%" }}>
       {selectedResult === undefined && (
@@ -183,11 +189,8 @@ const DrawerContent = (props) => {
               name="languageChoice"
               onChange={(e) => changeTranslation(e.target.value)}
               sx={{
-                backgroundColor: {
-                  xs: "transparent",
-                  lg: "#FFFFFF",
-                },
-                color: "#1A2C54",
+                backgroundColor: palette + "bgLanguage",
+                color: palette + "colorLanguage",
                 fontWeight: 600,
                 borderRadius: 1,
                 height: "34px",
@@ -196,13 +199,13 @@ const DrawerContent = (props) => {
                   textOverflow: "initial !important",
                 },
                 ".MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#BDC7DB",
+                  borderColor: palette + "borderColorLanguage",
                   borderRight: 0,
                 },
                 borderTopRightRadius: 0,
                 borderBottomRightRadius: 0,
                 ".MuiSelect-icon": {
-                  color: "#1A2C54",
+                  color: palette + "colorLanguage",
                 },
               }}
             >
@@ -235,7 +238,7 @@ const DrawerContent = (props) => {
               sx={{
                 width: "30px",
                 border: "1px solid",
-                borderColor: "#BDC7DB",
+                borderColor: palette + "borderColorLanguage",
                 borderTopRightRadius: 3,
                 borderBottomRightRadius: 3,
                 display: "flex",
@@ -246,31 +249,77 @@ const DrawerContent = (props) => {
               <Avatar src={languageIcon} sx={{ width: 20, height: 20 }} />
             </Box>
           </Box>
-          <Box p={"12px 22px 42px 22px"}>
+          <Box p={"10px 20px 40px 20px"}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                <Stack direction={"row"} spacing={1}>
-                  <Button
-                    variant="outlined"
-                    sx={{ height: "18px", fontSize: "12px" }}
-                    endIcon={<CloseIcon sx={{ fontSize: "16px" }} />}
-                  >
-                    Send
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    sx={{ height: "18px", fontSize: "12px" }}
-                    endIcon={<CloseIcon sx={{ fontSize: "16px" }} />}
-                  >
-                    Send
-                  </Button>
-                  <Divider orientation="vertical" flexItem />
-                  <Button
-                    variant="text"
-                    sx={{ height: "18px", fontSize: "12px" }}
-                  >
-                    Send
-                  </Button>
+                <Stack direction={"row"} spacing={1} useFlexGap flexWrap="wrap">
+                  {selectedFacets.length > 0 &&
+                    selectedFacets.map((s, index) => {
+                      return (
+                        <Button
+                          key={index}
+                          variant="contained"
+                          sx={{
+                            height: "18px",
+                            fontSize: "12px",
+                            minWidth: 0,
+                            boxShadow: 0,
+                            flex: "0 0 auto",
+                            backgroundColor: palette + "bgSelectedFilter",
+                            color: palette + "colorSelectedFilter",
+                            textTransform: "none",
+                            "&:hover": {
+                              color: palette + "bgSelectedFilter",
+                              backgroundColor: palette + "colorSelectedFilter",
+                            },
+                          }}
+                          endIcon={
+                            <CloseIcon
+                              sx={{
+                                fontSize: "16px",
+                                color: palette + "colorIcon",
+                              }}
+                            />
+                          }
+                          onClick={() => {
+                            setSelectedFacets(
+                              selectedFacets.filter(
+                                (x) => x.name !== s.name && x.value !== s.value
+                              )
+                            );
+                            facetSearch(s.name, s.value, false);
+                          }}
+                        >
+                          {cutWithDots(s.value, 10)}
+                        </Button>
+                      );
+                    })}
+
+                  {selectedFacets.length > 0 && (
+                    <Divider
+                      orientation="vertical"
+                      flexItem
+                      sx={{
+                        borderColor: palette + "colorDivider",
+                        borderWidth: 1,
+                      }}
+                    />
+                  )}
+                  {selectedFacets.length > 0 && (
+                    <Button
+                      variant="text"
+                      sx={{
+                        height: "18px",
+                        fontSize: "14px",
+                        color: palette + "bgButton",
+                        fontWeight: 700,
+                        textTransform: "none",
+                      }}
+                      onClick={() => clear()}
+                    >
+                      {translationState.translation["Clear filters"]}
+                    </Button>
+                  )}
                 </Stack>
               </Grid>
               <Grid item xs={9}>
@@ -278,7 +327,7 @@ const DrawerContent = (props) => {
                   fullWidth
                   sx={{
                     color: "#7B8FB7",
-                    backgroundColor: "#E8EDF266",
+                    backgroundColor: palette + "bgTextfield",
                     borderRadius: "4px",
                     ".MuiInputBase-root": {
                       height: "30px",
@@ -292,13 +341,13 @@ const DrawerContent = (props) => {
                     },
                   }}
                   value={searchText}
-                  placeholder={"Search"}
+                  placeholder={translationState.translation["Search"]}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
                         <SearchIcon
                           sx={{
-                            color: "#7B8FB7",
+                            color: palette + "colorIcon",
                           }}
                         />
                       </InputAdornment>
@@ -320,7 +369,7 @@ const DrawerContent = (props) => {
                   variant="contained"
                   disableElevation
                   sx={{
-                    backgroundColor: "#40AAD3",
+                    backgroundColor: palette + "bgButton",
                     height: "30px",
                     borderRadius: { xs: 2, lg: 1 },
                     width: { xs: "100%", lg: "auto" },
@@ -330,7 +379,7 @@ const DrawerContent = (props) => {
                     handleSubmit();
                   }}
                 >
-                  Search
+                  {translationState.translation["Search"]}
                 </Button>
               </Grid>
             </Grid>
@@ -339,7 +388,7 @@ const DrawerContent = (props) => {
           <Box sx={{ height: "inherit" }} ref={mainBoxRef}>
             <TableContainer
               component={Paper}
-              sx={{ boxShadow: 0, height: mainBoxHeight }}
+              sx={{ boxShadow: 0, height: mainBoxHeight - 20 }}
             >
               {isLoading && (
                 <CircularProgress sx={{ display: "flex", margin: "0 auto" }} />
@@ -350,7 +399,7 @@ const DrawerContent = (props) => {
                   next={() => {
                     setPage(page + 1);
                   }}
-                  height={mainBoxHeight}
+                  height={mainBoxHeight - 20}
                   hasMore={ITEMS_PER_PAGE * page < parseInt(resultsCount)}
                   loader={<h4></h4>}
                   endMessage={<p>No more items</p>}
@@ -359,7 +408,7 @@ const DrawerContent = (props) => {
                     <TableHead>
                       <TableRow
                         sx={{
-                          background: "#F8FAFB",
+                          backgroundColor: palette + "bgHeaderTable",
                           ".MuiTableCell-root": {
                             border: 0,
                           },
@@ -447,7 +496,7 @@ const DrawerContent = (props) => {
                                               fontSize="small"
                                               sx={{
                                                 fontSize: "10px",
-                                                color: "#40AAD3",
+                                                color: palette + "bgButton",
                                               }}
                                             />
                                             <Box
@@ -489,7 +538,9 @@ const DrawerContent = (props) => {
               variant="subtitle"
               sx={{ color: "#0F1A31", fontSize: "14px", fontWeight: 700 }}
             >
-              {resultsCount + " results"}
+              {resultsCount +
+                " " +
+                translationState.translation["Results"].toLowerCase()}
             </Typography>
           </Box>
         </Stack>
