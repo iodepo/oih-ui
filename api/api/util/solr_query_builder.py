@@ -1,8 +1,12 @@
-DEFAULT_FACET_FIELDS = ['txt_knowsAbout', 'name', 'txt_knowsLanguage', 'txt_nationality', 'txt_jobTitle',
-                        'txt_contributor', 'txt_keywords', 'txt_memberOf', 'txt_parentOrganization', 'id_provider',
-                        'has_geom',
-                        'id_includedInDataCatalog', 'id_identifier', 'id', 'keys', 'type'
-                        ]
+import json
+from pathlib import Path
+
+with open(str(Path(__file__).resolve().parent.parent) + '/config.json') as f:
+    config_json = f.read()
+
+config = json.loads(config_json)
+
+DEFAULT_FACET_FIELDS = config.get('default_facet_fields', {})
 
 
 class SolrQueryBuilder:

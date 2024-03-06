@@ -1,5 +1,7 @@
 import json
 import os
+from pathlib import Path
+
 import requests
 import re
 
@@ -19,35 +21,25 @@ log.setLevel(logging.DEBUG)
 
 SOLR_URL = os.path.join(os.environ.get('SOLR_URL', 'http://solr'), 'select')
 
-AVAILABLE_FACETS = ['txt_knowsAbout', 'txt_knowsLanguage', 'txt_nationality', 'txt_jobTitle', 'txt_contributor',
-                    'txt_keywords',
-                    'txt_memberOf', 'txt_parentOrganization', 'id_provider', 'id_includedInDataCatalog']
+with open(str(Path(__file__).resolve().parent) + '/config.json') as f:
+    config_json = f.read()
 
-facet_intervals = ["[*,1800)","[1800,1900)","[1900,1950)"]
+config = json.loads(config_json)
+
+AVAILABLE_FACETS = config.get('available_facets', [])
+
+facet_intervals = config.get('facet_intervals_numeric', [])
 facet_intervals.extend("[%d,%d)" %(x,x+10) for x in range(1950,2010,10))
 facet_intervals.extend("[%d,%d)" %(x,x+2) for x in range(2010,2030,2))
 
 
-FACET_FIELDS = {
-    'Spatial': [ 'txt_keywords', 'txt_provider', 'txt_variableMeasured', 'type'],
-    'Person':  [ 'txt_memberOf', 'txt_knowsLanguage', 'txt_jobTitle', 'txt_knowsAbout', 'txt_affiliation', 'txt_provider'],
-    'Organization':  [ 'txt_memberOf', 'txt_provider'],
-    'Dataset': [ 'txt_keywords', 'txt_provider', 'txt_variableMeasured'],
-    'CreativeWork': ['txt_keywords', 'txt_provider', 'txt_contributor'],
-    'Course': ['txt_keywords', 'txt_provider', 'txt_author', 'txt_educationalCredentialAwarded'],
-    'Vehicle': ['txt_keywords', 'txt_provider', 'txt_vehicleSpecialUsage'],
-    'ResearchProject':  [ 'txt_keywords',  'txt_provider', 'txt_areaServed'],
-   }
+FACET_FIELDS = config.get('facet_fields', {})
 
-FACET_INTERVALS = {
-    'Dataset': [ 'n_startYear', 'n_endYear'],
-    'Course':  [ 'n_startYear', 'n_endYear'],
-    'Spatial': [ 'n_startYear', 'n_endYear'],
-}
+FACET_INTERVALS = config.get('facet_intervals', {})
 
-GEOJSON_FIELDS = { 'id', 'geom_length' }
-GEOJSON_ROWS = 10000
-DEFAULT_GEOMETRY = "[-90,-180 TO 90,180]"
+GEOJSON_FIELDS = config.get('geojson_fields', ['id', 'geom_length'])
+GEOJSON_ROWS = config.get('geojson_rows', 1000)
+DEFAULT_GEOMETRY = config.get('default_geometry')
 COMBINED_TYPES = {
     'Experts': ['Person', 'Organization']
 }
@@ -55,7 +47,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*']
+    allow_origins=config.get('server_cors_allow_origins', []),
 )
 
 @app.get("/search")
