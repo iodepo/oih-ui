@@ -21,6 +21,12 @@ import {
   HEATMAP_POINTS_LAYER,
   REGIONS_LAYER,
   REGIONS_SOURCE,
+  ID_EMODNET,
+  ID_ARCGIS,
+  ID_USGS,
+  EMODNET,
+  ARCGIS,
+  USGS,
 } from "../utils/constants";
 
 export function calculateH3Resolution(currentZoom) {
@@ -108,35 +114,72 @@ export function polygonsToH3(polygon_polygon_data, layer) {
   return layer;
 }
 
+function getIdLayer(baseLayer) {
+  let idLayer;
+  switch (baseLayer) {
+    case EMODNET:
+      idLayer = ID_EMODNET;
+      break;
+    case ARCGIS:
+      idLayer = ID_ARCGIS;
+      break;
+    case USGS:
+      idLayer = ID_USGS;
+      break;
+  }
+  return idLayer;
+}
+
+export function manageChangeOpacity(map, baseOpacity, baseLayer) {
+  if (map) {
+    let idLayer = getIdLayer(baseLayer);
+    if (map.getStyle()) {
+      var layers = map.getStyle().layers;
+
+      layers.forEach((l) => {
+        if (l.id === idLayer) {
+          map.setPaintProperty(l.id, "raster-opacity", baseOpacity);
+        }
+      });
+    }
+  }
+}
+
 export function manageLayers(
   map,
   clustering,
   hexOpacity,
+  heatOpacity,
   showPoints,
-  showRegions
+  showRegions,
+  h3Resolution,
+  geoJson
 ) {
-  var polygon_data = data["features"].filter(
-    (shape) => shape["geometry"]["type"] == "Polygon"
-  );
-  var point_polygon_data = data["features"].filter(
-    (shape) => shape["geometry"]["type"] == "Point"
-  );
+  debugger;
+  if (geoJson) {
+    var polygon_data = geoJson["features"].filter(
+      (shape) => shape["geometry"]["type"] == "Polygon"
+    );
+    var point_polygon_data = geoJson["features"].filter(
+      (shape) => shape["geometry"]["type"] == "Point"
+    );
 
-  // latLngToCell(37.3615593, -122.0553238, 7);
+    // latLngToCell(37.3615593, -122.0553238, 7);
 
-  // console.log(polygon_data.length)
-  // console.log(point_polygon_data)
+    // console.log(polygon_data.length)
+    // console.log(point_polygon_data)
 
-  if (showRegions) {
-    draw_regions(map, polygon_data);
-  } else {
-    remove_regions(map);
-  }
+    if (showRegions) {
+      draw_regions(map, polygon_data);
+    } else {
+      remove_regions(map);
+    }
 
-  if (showPoints) {
-    draw_points(map, point_polygon_data);
-  } else {
-    remove_points(map);
+    if (showPoints) {
+      draw_points(map, point_polygon_data);
+    } else {
+      remove_points(map);
+    }
   }
 
   if (clustering == HEXAGON) {
@@ -144,6 +187,12 @@ export function manageLayers(
       map.removeLayer(HEATMAP_POINTS_LAYER);
       if (map.getSource(HEATMAP_POINTS_SOURCE)) {
         map.removeSource(HEATMAP_POINTS_SOURCE);
+      }
+    }
+    if (map.getLayer(HEATMAP_REGIONS_LAYER)) {
+      map.removeLayer(HEATMAP_REGIONS_LAYER);
+      if (map.getSource(HEATMAP_REGIONS_SOURCE)) {
+        map.removeSource(HEATMAP_REGIONS_SOURCE);
       }
     }
     if (!map.getSource(HEXAGON_SOURCE)) {
@@ -192,6 +241,8 @@ export function manageLayers(
         HEATMAP_REGIONS_SOURCE,
         HEATMAP_REGIONS_LAYER
       );
+    } else {
+      map.setPaintProperty(HEATMAP_REGIONS_LAYER, "fill-opacity", heatOpacity);
     }
   } else {
     if (map.getLayer(HEXAGON_LAYER)) {

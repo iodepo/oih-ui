@@ -21,7 +21,8 @@ const MapContainer = (props) => {
     baseLayer: EMODNET,
     clustering: NO_CLUSTER,
     hexOpacity: 0.4,
-    baseOpacity: 0.4,
+    baseOpacity: 1,
+    heatOpacity: 0.4,
     showPoints: false,
     showRegions: false,
     zoom: 0,
@@ -42,12 +43,13 @@ const MapContainer = (props) => {
     params.has("search_text") ? params.get("search_text") : ""
   );
   const [resultsCount, setResultsCount] = useState(0);
-  const [mapBounds, setMapBounds] = useState(false);
+  const [mapBounds, setMapBounds] = useState();
   const [open, setOpen] = useState(true);
   const [facets, setFacets] = useState([]);
   const [facetQuery, setFacetQuery] = useSearchParam("facet_query");
   const [selectedFacets, setSelectedFacets] = useState([]);
   const [initCenter, setInitCenter] = useState([65.468754, 44.57875]);
+  const [geoJson, setGeoJson] = useState();
   const mapRef = useRef(null);
 
   useEffect(() => {
@@ -72,7 +74,24 @@ const MapContainer = (props) => {
   const changeBaseLayer = (layer) => {
     dispatch({ type: "setBaseLayer", baseLayer: layer });
   };
-
+  const changeBaseOpacity = (opacity) => {
+    dispatch({ type: "setBaseOpacity", baseOpacity: opacity });
+  };
+  const changeClustering = (cluster) => {
+    dispatch({ type: "setClustering", clustering: cluster });
+  };
+  const setShowPoints = (showPoints) => {
+    dispatch({ type: "setShowPoints", showPoints: showPoints });
+  };
+  const setShowRegions = (showRegions) => {
+    dispatch({ type: "setShowRegions", showRegions: showRegions });
+  };
+  const changeHexOpacity = (hexOpacity) => {
+    dispatch({ type: "setHexOpacity", hexOpacity: hexOpacity });
+  };
+  const changeHeatOpacity = (heatOpacity) => {
+    dispatch({ type: "setHeatOpacity", heatOpacity: heatOpacity });
+  };
   const applyZoom = (zoomType) => {
     let value;
     if (zoomType === "out") {
@@ -125,7 +144,28 @@ const MapContainer = (props) => {
 
   useEffect(() => {
     getDataSpatialSearch();
-  }, [navigate, params]);
+  }, [navigate, params, mapBounds]);
+
+  const getGeoJSON = () => {
+    debugger;
+    let geoJsonUrl = `${dataServiceUrl}/spatial.geojson?`;
+    const params = new URLSearchParams({
+      /* ...(searchType !== "SpatialData" ? { document_type: searchType } : {}), */
+      search_text: searchText,
+      facetType: "the_geom",
+      facetName: mapLibreBounds_toQuery(mapBounds, region),
+    });
+    if (region !== "" && region.toUpperCase() !== "GLOBAL") {
+      params.append("region", region);
+    }
+    geoJsonUrl += [params.toString(), facetQuery].filter((e) => e).join("&");
+
+    fetch(geoJsonUrl)
+      .then((response) => response.json())
+      .then((json) => {
+        setGeoJson(json);
+      });
+  };
 
   const getDataSpatialSearch = throttle((page = 1) => {
     page === 1 && setLoading(true);
@@ -153,6 +193,8 @@ const MapContainer = (props) => {
         setFacets(json.facets.filter((facet) => facet.counts.length > 0));
         page === 1 && setLoading(false);
       });
+
+    getGeoJSON();
   }, 1000);
 
   const clear = () => {
@@ -180,6 +222,9 @@ const MapContainer = (props) => {
           isHome={isHome}
           setCenter={setCenter}
           initCenter={initCenter}
+          heatOpacity={state.heatOpacity}
+          setMapBounds={setMapBounds}
+          geoJson={geoJson}
         />
       )}
 
@@ -216,6 +261,16 @@ const MapContainer = (props) => {
             zoom={state.zoom}
             setCenter={setCenter}
             initCenter={initCenter}
+            changeBaseLayer={changeBaseLayer}
+            changeBaseOpacity={changeBaseOpacity}
+            changeClustering={changeClustering}
+            changeHexOpacity={changeHexOpacity}
+            setShowPoints={setShowPoints}
+            setShowRegions={setShowRegions}
+            heatOpacity={state.heatOpacity}
+            changeHeatOpacity={changeHeatOpacity}
+            setMapBounds={setMapBounds}
+            geoJson={geoJson}
           />
         </Box>
       )}
@@ -254,6 +309,13 @@ const MapContainer = (props) => {
             setCenter={setCenter}
             initCenter={initCenter}
             changeBaseLayer={changeBaseLayer}
+            changeBaseOpacity={changeBaseOpacity}
+            changeClustering={changeClustering}
+            changeHexOpacity={changeHexOpacity}
+            setShowPoints={setShowPoints}
+            setShowRegions={setShowRegions}
+            setMapBounds={setMapBounds}
+            geoJson={geoJson}
           />
         </Box>
       )}

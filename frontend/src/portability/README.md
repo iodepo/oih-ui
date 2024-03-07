@@ -1,7 +1,5 @@
 # Change Site Palette
 
-Difficulty level: ⭐
-
 To customize the site palette, follow these steps:
 
 1. Open the `configuration.js` file in your project.
@@ -45,9 +43,51 @@ const primaryPalette = {
 // -- END REGION PALETTE --
 ```
 
-# Modify Tab Icons on Homepage
+# Modifying Site Labels in Various Languages
 
-Difficulty level: ⭐⭐
+To modify the labels of the site in different languages, follow these steps:
+
+1. Search through the project files for a folder named "context".
+
+2. Inside this folder, you'll find another folder named "stores" containing four JSON files, one for each language used on the site.
+
+3. Starting with "en.json", you can easily locate the labels you're looking for along with their associated keys, which remain the same for every language.
+
+4. Example:
+   Let's say I'm searching for the label "Search". In the file en.json, I find:
+   `"Search": "Search"`,
+   In this case, the first string indicates the key, and the second one indicates its value.
+
+So, if I want to change the translation of "Search" to Spanish, I would go to the file es.json, find the key "Search", and then change its value.
+
+# Modifying the Homepage Carousel
+
+To modify the carousel on the homepage, follow these simple steps:
+
+1. Open the `configuration.js` file.
+
+2. Look for the beginning of the section "-- START PARTNERS REGION --".
+
+3. Under this comment, you will find an array like this:
+   ```javascript
+   [
+     [
+       { icon: examplePartner, url: "#" },
+       { icon: examplePartner, url: "#" },
+       { icon: examplePartner, url: "#" },
+       { icon: examplePartner, url: "#" },
+     ],
+     [
+       { icon: examplePartner, url: "#" },
+       { icon: examplePartner, url: "#" },
+       { icon: examplePartner, url: "#" },
+       { icon: examplePartner, url: "#" },
+     ],
+   ];
+   ```
+4. Each array within the main array is a group of icons that will be displayed in the carousel. From here, you can modify, remove, and add groups or elements as desired. The important thing is to maintain the structure, meaning it should always remain as an array of arrays of objects.
+
+# Modify Tab Icons on Homepage
 
 To customize the icons associated with the tabs on the homepage, follow these steps:
 
@@ -81,8 +121,6 @@ All icon URLs are located at the beginning of the file. If you want to use diffe
 ```
 
 # Adding a New Search Tab:
-
-Difficulty level: ⭐⭐⭐
 
 1. Open the configuration.js file and locate the section marked -- START CATEGORIES REGION --. Below this section, you'll find an object containing the categories for each tab. Add the desired new tab by providing all the necessary data, following the pattern used for other categories.Remember to set a unique ID that will be used by the application to identify the new tab:
 

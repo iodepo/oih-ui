@@ -1,7 +1,11 @@
 import React, { useRef, useEffect } from "react";
 import Box from "@mui/material/Box";
 import { initMap } from "../utils/initMap";
-import { calculateH3Resolution, manageLayers } from "../functions/mapFunctions";
+import {
+  calculateH3Resolution,
+  manageChangeOpacity,
+  manageLayers,
+} from "../functions/mapFunctions";
 
 const MapView = (props) => {
   const {
@@ -16,6 +20,9 @@ const MapView = (props) => {
     zoom,
     setCenter,
     initCenter,
+    heatOpacity,
+    setMapBounds,
+    geoJson,
   } = props;
   const mapInitRef = useRef(null);
   var h3Resolution = 2;
@@ -27,8 +34,11 @@ const MapView = (props) => {
           mapInitRef.current,
           clustering,
           hexOpacity,
+          heatOpacity,
           showPoints,
-          showRegions
+          showRegions,
+          h3Resolution,
+          geoJson
         );
     }
   }, [clustering, hexOpacity, showPoints, showRegions]);
@@ -40,6 +50,11 @@ const MapView = (props) => {
       mapInitRef.current.zoomOut();
     }
   }, [zoom]);
+
+  useEffect(() => {
+    manageChangeOpacity(mapInitRef.current, baseOpacity, baseLayer);
+  }, [baseOpacity]);
+
   useEffect(() => {
     if (container.current) {
       container.current.innerHTML = "";
@@ -61,9 +76,14 @@ const MapView = (props) => {
             mapInitRef.current,
             clustering,
             hexOpacity,
+            heatOpacity,
             showPoints,
-            showRegions
+            showRegions,
+            h3Resolution,
+            geoJson
           );
+        mapInitRef.current &&
+          manageChangeOpacity(mapInitRef.current, baseOpacity, baseLayer);
       });
 
       mapInitRef.current.on("moveend", function () {
@@ -72,10 +92,12 @@ const MapView = (props) => {
             mapInitRef.current.getCenter().lng,
             mapInitRef.current.getCenter().lat,
           ]);
+          console.log(mapInitRef.current.getBounds());
+          setMapBounds(mapInitRef.current.getBounds());
         }
       });
     }
-  }, [baseLayer, baseOpacity, initCenter]);
+  }, [baseLayer, initCenter]);
 
   useEffect(() => {
     mapInitRef.current &&
@@ -90,11 +112,15 @@ const MapView = (props) => {
               mapInitRef.current,
               clustering,
               hexOpacity,
-              showPoints
+              heatOpacity,
+              showPoints,
+              showRegions,
+              h3Resolution,
+              geoJson
             );
         }
       });
-  }, []);
+  }, [clustering, hexOpacity, showPoints, showRegions]);
 
   return (
     <Box

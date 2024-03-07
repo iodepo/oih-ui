@@ -55,7 +55,7 @@
   "Apply": "Appliquer",
   "Provider": "Fournisseur",
   "Affiliation": "Affiliation",
-  "Add more": "Ajouter plus",
+  "Show more": "Afficher plus",
   "Sort by": "Trier par",
   "Recently updated": "Récemment mis à jour",
   "View JSONLD source": "Voir la source JSONLD",
@@ -78,5 +78,7 @@
   "Heatmap": "Carte de chaleur",
   "H3 Layer": "Couche H3",
   "Opacity layer": "Couche d'opacité",
-  "Map Layers": "Couches de carte"
+  "Map Layers": "Couches de carte",
+  "Show Points": "Afficher les points",
+  "Show Geometries": "Afficher les géométries"
 }

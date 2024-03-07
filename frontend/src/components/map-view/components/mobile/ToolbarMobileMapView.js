@@ -27,6 +27,16 @@ const ToolbarMobileMapView = (props) => {
     isLoading,
     results,
     getDataSpatialSearch,
+    changeBaseOpacity,
+    baseOpacity,
+    changeClustering,
+    clustering,
+    changeHexOpacity,
+    hexOpacity,
+    setShowPoints,
+    setShowRegions,
+    showPoints,
+    showRegions,
   } = props;
   const translationState = useAppTranslation();
 
@@ -36,6 +46,7 @@ const ToolbarMobileMapView = (props) => {
 
   const [openSwipeDrawer, setOpenSwipeDrawer] = useState(false);
   const [openLayerDrawer, setOpenLayerDrawer] = useState(false);
+  const [openSettingsDrawer, setOpenSettingsDrawer] = useState(false);
 
   useEffect(() => {
     handleSubmit();
@@ -121,6 +132,18 @@ const ToolbarMobileMapView = (props) => {
             openLayerDrawer={openLayerDrawer}
             changeBaseLayer={changeBaseLayer}
             baseLayer={baseLayer}
+            setOpenSettingsDrawer={setOpenSettingsDrawer}
+            openSettingsDrawer={openSettingsDrawer}
+            changeBaseOpacity={changeBaseOpacity}
+            baseOpacity={baseOpacity}
+            changeClustering={changeClustering}
+            clustering={clustering}
+            hexOpacity={hexOpacity}
+            changeHexOpacity={changeHexOpacity}
+            setShowPoints={setShowPoints}
+            setShowRegions={setShowRegions}
+            showPoints={showPoints}
+            showRegions={showRegions}
           />
 
           <ResultsMapMobile

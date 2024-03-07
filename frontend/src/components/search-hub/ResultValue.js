@@ -23,13 +23,12 @@ import SearchIcon from "@mui/icons-material/Search";
 import { trackingMatomoClickResults } from "utilities/trackingUtility";
 
 const ResultValue = (props) => {
-  const { result, completeValue } = props;
+  const { result, completeValue, onlyVerified } = props;
 
   const translationState = useAppTranslation();
   const [iconLD, setIconLD] = useState(<CodeOutlinedIcon />);
   var CryptoJS = require("crypto-js");
   function isVerified(id) {
-    debugger;
     const hash = CryptoJS.SHA256(id).toString();
     const fifthChar = hash.charAt(4);
     const fifthNumber = parseInt(fifthChar, 16);
@@ -116,188 +115,192 @@ const ResultValue = (props) => {
   };
 
   const palette = "custom.resultPage.resultsDetails.";
-  return (
-    <Card
-      key={result["id"]}
-      sx={{
-        borderRadius: 1,
-        border: 1,
-        borderColor: "rgba(0, 0, 0, 0.12)",
+  if ((onlyVerified && isVerified(result["id"])) || !onlyVerified) {
+    return (
+      <Card
+        key={result["id"]}
+        sx={{
+          borderRadius: 1,
+          border: 1,
+          borderColor: "rgba(0, 0, 0, 0.12)",
 
-        minHeight: { xs: "225px", lg: "200px" },
-      }}
-      elevation={0}
-    >
-      {isVerified(result["id"]) && (
-        <CardHeader
-          avatar={
-            <Chip
-              avatar={
-                <CheckCircleOutlineIcon
-                  color="success"
-                  sx={{ color: "green" }}
-                />
-              }
-              label="Verified"
-              variant="outlined"
-              color="success"
-              sx={{
-                color: palette + "colorChipVerified",
-                ".MuiChip-avatar": {
-                  color: palette + "colorVerifiedAvatar",
-                },
-              }}
-            />
-          }
-        />
-      )}
-
-      <CardContent>
-        <Stack spacing={1}>
-          <Link
-            href={url === "" ? `/record/${jsonLdParams}` : url}
-            underline="hover"
-            target="_blank"
-            onClick={() => trackingMatomoClickResults(url)}
-            onAuxClick={() => trackingMatomoClickResults(url)}
-          >
-            <Typography
-              sx={{ fontSize: 21, color: palette + "colorTypography" }}
-              gutterBottom
-            >
-              {result["name"]}
-            </Typography>
-          </Link>
-
-          <Component result={result} />
-          {"description" in result && result["type"] !== "Person" && (
-            <Typography
-              sx={{
-                fontSize: "16px",
-                ...(truncate && {
-                  display: "-webkit-box",
-                  maxWidth: "100%",
-                  WebkitLineClamp: 4,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                }),
-              }}
-              onClick={() => setTruncate(false)}
-            >
-              {result["description"]}
-            </Typography>
-          )}
-
-          <Typography
-            sx={{ fontSize: "12px", color: "#42526E" }}
-            display={"flex"}
-            alignItems={"center"}
-          >
-            <Icon sx={{ padding: 0 }}>
-              <img
-                alt=""
-                src={
-                  getCompleteness(result["id"]) === 50
-                    ? completed50
-                    : getCompleteness(result["id"]) === 75
-                    ? completed75
-                    : completed100
+          minHeight: { xs: "225px", lg: "200px" },
+        }}
+        elevation={0}
+      >
+        {isVerified(result["id"]) && (
+          <CardHeader
+            avatar={
+              <Chip
+                avatar={
+                  <CheckCircleOutlineIcon
+                    color="success"
+                    sx={{ color: "green" }}
+                  />
                 }
-                height={20}
-                width={20}
+                label="Verified"
+                variant="outlined"
+                color="success"
+                sx={{
+                  color: palette + "colorChipVerified",
+                  ".MuiChip-avatar": {
+                    color: palette + "colorVerifiedAvatar",
+                  },
+                }}
               />
-            </Icon>
-            Data completeness{" "}
-            {getCompleteness(result["id"]) === 50
-              ? 50
-              : getCompleteness(result["id"]) === 75
-              ? 75
-              : 100}
-            %
-            <InfoOutlinedIcon
-              sx={{
-                marginLeft: 1,
-                fontSize: "14px",
-                color: palette + "completenessColor",
-              }}
-            />
-          </Typography>
+            }
+          />
+        )}
 
-          <Box
-            display={"flex"}
-            justifyContent={"space-between"}
-            flexDirection={{ xs: "column", lg: "row" }}
-            gap={{ xs: 2, lg: 0 }}
-          >
+        <CardContent>
+          <Stack spacing={1}>
+            <Link
+              href={url === "" ? `/record/${jsonLdParams}` : url}
+              underline="hover"
+              target="_blank"
+              onClick={() => trackingMatomoClickResults(url)}
+              onAuxClick={() => trackingMatomoClickResults(url)}
+            >
+              <Typography
+                sx={{ fontSize: 21, color: palette + "colorTypography" }}
+                gutterBottom
+              >
+                {result["name"]}
+              </Typography>
+            </Link>
+
+            <Component result={result} />
+            {"description" in result && result["type"] !== "Person" && (
+              <Typography
+                sx={{
+                  fontSize: "16px",
+                  ...(truncate && {
+                    display: "-webkit-box",
+                    maxWidth: "100%",
+                    WebkitLineClamp: 4,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }),
+                }}
+                onClick={() => setTruncate(false)}
+              >
+                {result["description"]}
+              </Typography>
+            )}
+
             <Typography
-              component={"span"}
-              sx={{
-                fontSize: { xs: "10px", md: "12px" },
-                color: palette + "contributorColor",
-              }}
+              sx={{ fontSize: "12px", color: "#42526E" }}
               display={"flex"}
               alignItems={"center"}
-              gap={2}
             >
-              {"txt_contributor" in result && (
-                <Box display={"flex"} gap={1}>
-                  <Typography
-                    sx={{
-                      fontSize: "12px",
-                      color: palette + "contributorColor",
-                    }}
-                  >
-                    Contributor(s):
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontSize: "12px",
-                      color: palette + "contributorColor",
-                      backgroundColor: palette + "bgContributor",
-                      fontWeight: 700,
-                      padding: "0 4px",
-                      borderRadius: 1,
-                    }}
-                  >
-                    {result["txt_contributor"].join(", ")}
-                  </Typography>
-                </Box>
-              )}
-              {"indexed_ts" in result && (
-                <>
-                  {translationState.translation["Indexed through ODIS"] +
-                    " " +
-                    formatDate(result["indexed_ts"])}
-                </>
-              )}
+              <Icon sx={{ padding: 0 }}>
+                <img
+                  alt=""
+                  src={
+                    getCompleteness(result["id"]) === 50
+                      ? completed50
+                      : getCompleteness(result["id"]) === 75
+                      ? completed75
+                      : completed100
+                  }
+                  height={20}
+                  width={20}
+                />
+              </Icon>
+              Data completeness{" "}
+              {getCompleteness(result["id"]) === 50
+                ? 50
+                : getCompleteness(result["id"]) === 75
+                ? 75
+                : 100}
+              %
+              <InfoOutlinedIcon
+                sx={{
+                  marginLeft: 1,
+                  fontSize: "14px",
+                  color: palette + "completenessColor",
+                }}
+              />
             </Typography>
-            <Button
-              startIcon={iconLD}
-              variant="contained"
-              disableElevation
-              sx={{
-                borderRadius: 2,
-                fontWeight: 700,
-                backgroundColor: palette + "bgViewJson",
-                textTransform: "none",
-                color: palette + "colorViewJson",
-                "&:hover": {
-                  color: "#ffffff",
-                },
-              }}
-              href={`${dataServiceUrl}/source?${jsonLdParams}`}
-              target="_blank"
-              rel="noreferrer noopener"
-              onMouseEnter={() => setIconLD(<SearchIcon />)}
-              onMouseLeave={() => setIconLD(<CodeOutlinedIcon />)}
+
+            <Box
+              display={"flex"}
+              justifyContent={"space-between"}
+              flexDirection={{ xs: "column", lg: "row" }}
+              gap={{ xs: 2, lg: 0 }}
             >
-              {translationState.translation["View JSONLD source"]}
-            </Button>
-          </Box>
-        </Stack>
-      </CardContent>
-    </Card>
-  );
+              <Typography
+                component={"span"}
+                sx={{
+                  fontSize: { xs: "10px", md: "12px" },
+                  color: palette + "contributorColor",
+                }}
+                display={"flex"}
+                alignItems={"center"}
+                gap={2}
+              >
+                {"txt_contributor" in result && (
+                  <Box display={"flex"} gap={1}>
+                    <Typography
+                      sx={{
+                        fontSize: "12px",
+                        color: palette + "contributorColor",
+                      }}
+                    >
+                      Contributor(s):
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: "12px",
+                        color: palette + "contributorColor",
+                        backgroundColor: palette + "bgContributor",
+                        fontWeight: 700,
+                        padding: "0 4px",
+                        borderRadius: 1,
+                      }}
+                    >
+                      {result["txt_contributor"].join(", ")}
+                    </Typography>
+                  </Box>
+                )}
+                {"indexed_ts" in result && (
+                  <>
+                    {translationState.translation["Indexed through ODIS"] +
+                      " " +
+                      formatDate(result["indexed_ts"])}
+                  </>
+                )}
+              </Typography>
+              <Button
+                startIcon={iconLD}
+                variant="contained"
+                disableElevation
+                sx={{
+                  borderRadius: 2,
+                  fontWeight: 700,
+                  backgroundColor: palette + "bgViewJson",
+                  textTransform: "none",
+                  color: palette + "colorViewJson",
+                  "&:hover": {
+                    color: "#ffffff",
+                  },
+                }}
+                href={`${dataServiceUrl}/source?${jsonLdParams}`}
+                target="_blank"
+                rel="noreferrer noopener"
+                onMouseEnter={() => setIconLD(<SearchIcon />)}
+                onMouseLeave={() => setIconLD(<CodeOutlinedIcon />)}
+              >
+                {translationState.translation["View JSONLD source"]}
+              </Button>
+            </Box>
+          </Stack>
+        </CardContent>
+      </Card>
+    );
+  } else {
+    return <></>;
+  }
 };
 
 export default ResultValue;

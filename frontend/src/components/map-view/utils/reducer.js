@@ -15,6 +15,11 @@ export const reducer = (state, action) => {
         ...state,
         hexOpacity: action.hexOpacity,
       };
+    case "setHeatOpacity":
+      return {
+        ...state,
+        heatOpacity: action.heatOpacity,
+      };
     case "setBaseOpacity":
       return {
         ...state,

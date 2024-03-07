@@ -51,11 +51,12 @@ const mapLibreBounds_toQuery = (mb, region = null) => {
   /* convert '{"_sw":{"lng":17.841823484137535,"lat":-59.72391567923438},"_ne":{"lng":179.1301535622635,"lat":49.99895151432449}}'
       to [_sw.lat,_sw.lng TO _ne.lat,_ne.lng] ([-90,-180 TO 90,180])
     */
-  const { _sw, _ne } = mb;
-  if (!_sw) {
+  if (mb) {
+    const { _sw, _ne } = mb;
+    return `[${_sw.lat},${_sw.lng} TO ${_ne.lat},${_ne.lng}]`;
+  } else {
     return get_region_bounds(region);
   }
-  return `[${_sw.lat},${_sw.lng} TO ${_ne.lat},${_ne.lng}]`;
 };
 export {
   boundsToQuery,

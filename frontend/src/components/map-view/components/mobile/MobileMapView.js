@@ -36,6 +36,13 @@ const MobileMapView = (props) => {
     clustering,
     region,
     changeBaseLayer,
+    changeBaseOpacity,
+    changeClustering,
+    changeHexOpacity,
+    setShowPoints,
+    setShowRegions,
+    geoJson,
+    setMapBounds,
   } = props;
   return (
     <>
@@ -64,6 +71,16 @@ const MobileMapView = (props) => {
           results={results}
           isLoading={isLoading}
           getDataSpatialSearch={getDataSpatialSearch}
+          changeBaseOpacity={changeBaseOpacity}
+          baseOpacity={baseOpacity}
+          changeClustering={changeClustering}
+          clustering={clustering}
+          hexOpacity={hexOpacity}
+          changeHexOpacity={changeHexOpacity}
+          setShowPoints={setShowPoints}
+          setShowRegions={setShowRegions}
+          showPoints={showPoints}
+          showRegions={showRegions}
         />
         <MapView
           container={container}
@@ -77,6 +94,8 @@ const MobileMapView = (props) => {
           zoom={zoom}
           setCenter={setCenter}
           initCenter={initCenter}
+          geoJson={geoJson}
+          setMapBounds={setMapBounds}
         />
       </Box>
     </>

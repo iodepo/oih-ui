@@ -1,9 +1,9 @@
-export const DEMO_TILES = "DEMO_TILES";
-export const NATURAL_EARTH_TILES = "NATURAL_EARTH_TILES";
-export const OPENSTREETMAP = "OPENSTREETMAP";
 export const ARCGIS = "ARCGIS";
+export const ID_ARCGIS = "ArcGIS World Imagery";
 export const EMODNET = "EMODNET";
+export const ID_EMODNET = "emodnet";
 export const USGS = "USGS";
+export const ID_USGS = "usgs";
 
 export const HEXAGON = "HEXAGON";
 export const HEATMAP_POINTS = "HEATMAP_POINTS";
@@ -24,3 +24,11 @@ export const HEATMAP_POINTS_LAYER = "HEATMAP_POINTS_LAYER";
 
 export const HEATMAP_REGIONS_SOURCE = "HEATMAP_REGIONS_SOURCE";
 export const HEATMAP_REGIONS_LAYER = "HEATMAP_REGIONS_LAYER";
+
+export const HEXAGON_LEGENDA = [
+  [25, "rgba(255, 255, 255, 0);"],
+  [50, "#49958b"],
+  [75, "#40857c"],
+  [100, "#38756e"],
+  [200, "#30635d"],
+];

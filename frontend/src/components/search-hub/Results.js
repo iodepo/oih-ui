@@ -36,7 +36,8 @@ import DialogContent from "@mui/material/DialogContent";
 import ResultValue from "./ResultValue";
 import { cutWithDots } from "components/results/ResultDetails";
 import Support from "./Support";
-import SortIcon from "@mui/icons-material/Sort";
+import Chip from "@mui/material/Chip";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
 export default function Results() {
   const [results, setResults] = useState([]);
@@ -49,6 +50,8 @@ export default function Results() {
   const [filterChosenMobile, setFilterChosenMobile] = useState([]);
   const [selectedProvider, setSelectedProvider] = useState("");
   const [currentURI, setCurrentURI] = useState("");
+
+  const [onlyVerified, setOnlyVerified] = useState(false);
 
   const navigate = useNavigate();
   const { searchType = "CreativeWork" } = useParams();
@@ -106,6 +109,7 @@ export default function Results() {
       if (region.toUpperCase() !== "GLOBAL") {
         params.append("region", region);
       }
+
       URI += [
         params.toString(),
         facetQuery,
@@ -154,7 +158,6 @@ export default function Results() {
     let match = regex.exec(text);
     /* (txt_provider:*AAAA* OR -txt_keywords:*VVVV*) AND (txt_contributor:UNESCO) */
     if (match) {
-      /* debugger; */
       let andGroup = match[1].trim().toLowerCase().split("and");
       andGroup.forEach((ag) => {
         if (ag.toLowerCase().includes(" or ")) {
@@ -361,7 +364,22 @@ export default function Results() {
                 </DialogContent>
               </Dialog>
             </Box>
-            <Box>
+            <Box display="flex" sx={{ gap: 2 }}>
+              <Chip
+                avatar={<CheckCircleOutlineIcon sx={{ color: "#1A2C54" }} />}
+                label="Verified"
+                variant="outlined"
+                onClick={() => setOnlyVerified(!onlyVerified)}
+                sx={{
+                  borderRadius: "8px",
+                  color: "#1A2C54",
+                  height: "35px",
+                  ".MuiChip-avatar": {
+                    color: "#1A2C54",
+                  },
+                  backgroundColor: onlyVerified && "#DEE2ED",
+                }}
+              />
               <Select
                 defaultValue={sort ? sort : "indexed_ts desc"}
                 startAdornment={
@@ -379,8 +397,9 @@ export default function Results() {
                   color: "black",
                   fontWeight: 600,
                   fontSize: "12px",
-                  borderRadius: 0,
+                  borderRadius: 2,
                   height: "35px",
+                  width: { xs: "135px", md: "unset" },
                 }}
                 onChange={(e) => setSort(e.target.value)}
               >
@@ -454,7 +473,24 @@ export default function Results() {
                   <b>{resultCount || 0}</b>{" "}
                   {translationState.translation["Total results found"]}{" "}
                 </Typography>
-                <Box>
+                <Box sx={{ display: "flex", gap: 2 }}>
+                  <Chip
+                    avatar={
+                      <CheckCircleOutlineIcon sx={{ color: "#1A2C54" }} />
+                    }
+                    label="Verified"
+                    onClick={() => setOnlyVerified(!onlyVerified)}
+                    variant="outlined"
+                    sx={{
+                      borderRadius: "8px",
+                      color: "#1A2C54",
+                      height: "35px",
+                      ".MuiChip-avatar": {
+                        color: "#1A2C54",
+                      },
+                      backgroundColor: onlyVerified && "#DEE2ED",
+                    }}
+                  />
                   <Select
                     defaultValue={sort ? sort : "indexed_ts desc"}
                     startAdornment={
@@ -472,7 +508,7 @@ export default function Results() {
                       color: "black",
                       fontWeight: 600,
                       fontSize: "12px",
-                      borderRadius: 0,
+                      borderRadius: 2,
                       height: "35px",
                     }}
                     onChange={(e) => setSort(e.target.value)}
@@ -504,6 +540,7 @@ export default function Results() {
                   result={result}
                   completeValue={100}
                   key={result["id"]}
+                  onlyVerified={onlyVerified}
                 />
               ))}
             </Stack>

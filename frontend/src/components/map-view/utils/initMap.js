@@ -1,68 +1,6 @@
 import maplibregl from "maplibre-gl";
 
 export const layers = {
-  DEMO_TILES: "https://demotiles.maplibre.org/style.json",
-  NATURAL_EARTH_TILES: {
-    version: 8,
-    metadata: "Made with liquid💦: RobLabs.com/xyz",
-    name: "Natural Earth Tiles",
-    bearing: 0,
-    pitch: 0,
-    zoom: 2,
-    center: [-117.3, 32.6, 2],
-    sources: {
-      imagery: {
-        tilejson: "3.0.0",
-        version: "1.0.0",
-        name: "Natural Earth Tiles",
-        description: "",
-        attribution: "",
-        bounds: [-180, -85.051129, 180, 85.051129],
-        center: [-117.3, 32.6, 2],
-        minzoom: 0,
-        maxzoom: 24,
-        scheme: "xyz",
-        volatile: false,
-        type: "raster",
-        tileSize: 256,
-        tiles: [
-          "https://naturalearthtiles.roblabs.com/tiles/natural_earth_cross_blended_hypso_shaded_relief.raster/{z}/{x}/{y}.png",
-        ],
-      },
-    },
-    id: "Natural Earth Tiles",
-    layers: [
-      {
-        metadata: "",
-        id: "Natural Earth Tiles",
-        source: "imagery",
-        minzoom: 0,
-        maxzoom: 24,
-        type: "raster",
-        "raster-opacity": 1,
-        layout: { visibility: "visible" },
-      },
-    ],
-  },
-  OPENSTREETMAP: {
-    version: 8,
-    sources: {
-      osm: {
-        type: "raster",
-        tiles: ["https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"],
-        tileSize: 256,
-        attribution: "&copy; OpenStreetMap Contributors",
-        maxzoom: 19,
-      },
-    },
-    layers: [
-      {
-        id: "osm",
-        type: "raster",
-        source: "osm", // This must match the source key above
-      },
-    ],
-  },
   ARCGIS: {
     version: 8,
     metadata: "Made with liquid💦: RobLabs.com/xyz",
@@ -100,7 +38,9 @@ export const layers = {
         minzoom: 0,
         maxzoom: 24,
         type: "raster",
-        "raster-opacity": 1,
+        paint: {
+          "raster-opacity": 1,
+        },
         layout: { visibility: "visible" },
       },
     ],
@@ -123,6 +63,9 @@ export const layers = {
         id: "emodnet",
         type: "raster",
         source: "emodnet", // This must match the source key above
+        paint: {
+          "raster-opacity": 1,
+        },
       },
     ],
   },
@@ -145,6 +88,9 @@ export const layers = {
         id: "usgs",
         type: "raster",
         source: "usgs", // This must match the source key above
+        paint: {
+          "raster-opacity": 1,
+        },
       },
     ],
   },
@@ -157,6 +103,7 @@ export const initMap = (container, coords, baseLayer, baseOpacity, zoom) => {
     center: coords, // starting position [lng, lat]
     zoom: zoom, // starting zoom
   });
+
   return map;
 };
 

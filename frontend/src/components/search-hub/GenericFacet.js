@@ -10,7 +10,7 @@ import TextField from "@mui/material/TextField";
 import Toolbar from "@mui/material/Toolbar";
 import SearchIcon from "@mui/icons-material/Search";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
 import React, { useState, useEffect } from "react";
 import IconButton from "@mui/material/IconButton";
 import Chip from "@mui/material/Chip";
@@ -278,13 +278,13 @@ const GenericFacet = (props) => {
           }}
         >
           <IconButton onClick={handleShowMoreClick}>
-            <AddCircleOutlineOutlinedIcon
+            <ArrowCircleDownIcon
               sx={{
                 color: palette + "categoryColor",
               }}
             />
           </IconButton>
-          {translationState.translation["Add more"]}
+          {translationState.translation["Show more"]}
         </Toolbar>
       )}
     </>

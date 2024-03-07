@@ -2,18 +2,12 @@ import React, { useEffect, useState } from "react";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
-import Select from "@mui/material/Select";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import MenuItem from "@mui/material/MenuItem";
 import ButtonGroup from "@mui/material/ButtonGroup";
-import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
-import PublicIcon from "@mui/icons-material/Public";
 import RemoveIcon from "@mui/icons-material/Remove";
-import { fieldTitleFromName } from "utilities/generalUtility";
-import { PROMOTED_REGIONS, backgroundImage } from "portability/configuration";
 import { useAppTranslation } from "context/context/AppTranslation";
 import LayersIcon from "@mui/icons-material/Layers";
+import SettingsIcon from "@mui/icons-material/Settings";
 import Fade from "@mui/material/Fade";
 import Typography from "@mui/material/Typography";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -21,14 +15,10 @@ import Switch from "@mui/material/Switch";
 import Checkbox from "@mui/material/Checkbox";
 import Divider from "@mui/material/Divider";
 import Slider from "@mui/material/Slider";
-import Popover from "@mui/material/Popover";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import TextField from "@mui/material/TextField";
-import InputAdornment from "@mui/material/InputAdornment";
-import SearchIcon from "@mui/icons-material/Search";
-import { cutWithDots } from "components/results/ResultDetails";
-import Tooltip from "@mui/material/Tooltip";
-import Badge from "@mui/material/Badge";
+import FilterMapDesktop from "./FilterMapDesktop";
+import SettingsMapDesktop from "./SettingsMapDesktop";
+import LayerMapDesktop from "./LayerMapDesktop";
+import { HEXAGON_LEGENDA } from "components/map-view/utils/constants";
 
 const ToolbarDesktopMapView = (props) => {
   const {
@@ -41,11 +31,26 @@ const ToolbarDesktopMapView = (props) => {
     facetQuery,
     selectedFacets,
     setSelectedFacets,
+    baseLayer,
+    changeBaseLayer,
+    changeBaseOpacity,
+    baseOpacity,
+    changeClustering,
+    clustering,
+    changeHexOpacity,
+    hexOpacity,
+    setShowPoints,
+    setShowRegions,
+    showPoints,
+    showRegions,
+    heatOpacity,
+    changeHeatOpacity,
   } = props;
   const [filteredFacets, setFilteredFacets] = useState(facets);
 
   const [openPopoverFilter, setOpenPopoverFilter] = useState(null);
   const [openFilterMap, setOpenFilterMap] = useState(false);
+  const [openLayerMap, setOpenLayerMap] = useState(false);
 
   useEffect(() => {
     handleSubmit();
@@ -111,237 +116,17 @@ const ToolbarDesktopMapView = (props) => {
         }}
       >
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Box
-            sx={{
-              display: "flex",
-              gap: 2,
-              flexWrap: window.innerWidth < 1400 ? "wrap" : "nowrap",
-            }}
-          >
-            <Select
-              startAdornment={
-                <PublicIcon
-                  sx={{
-                    marginRight: 1,
-                    fontSize: "14px",
-                  }}
-                />
-              }
-              defaultValue={region.charAt(0).toUpperCase() + region.slice(1)}
-              name="searchRegion"
-              onChange={(e) => {
-                setRegion(e.target.value);
-              }}
-              sx={{
-                height: "24px",
-                fontSize: "14px",
-                backgroundColor: palette + "bgButton",
-                maxWidth: "140px",
-                ".MuiOutlinedInput-notchedOutline": {
-                  borderWidth: 0,
-                },
-              }}
-            >
-              {Object.entries(PROMOTED_REGIONS).map(([region, title]) => {
-                return (
-                  <MenuItem key={region} value={region}>
-                    {translationState.translation[region]}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-            {filteredFacets.length > 0 &&
-              filteredFacets.map((f, index) => {
-                const title = fieldTitleFromName(f.name);
-
-                const counter = selectedFacets.filter(
-                  (s) => s.name === f.name
-                ).length;
-                return (
-                  <>
-                    <Button
-                      key={index}
-                      variant="contained"
-                      sx={{
-                        height: "24px",
-                        fontSize: "14px",
-                        backgroundColor: palette + "bgButton",
-                        maxWidth: "135px",
-                        color: palette + "colorButton",
-                        textTransform: "none",
-                        boxShadow: "none",
-                        ".MuiButton-startIcon": { marginRight: "2px" },
-                        ".MuiButton-endIcon": { marginLeft: 0 },
-                        "&:hover": {
-                          backgroundColor: palette + "colorButton",
-                          color: palette + "bgButton",
-                          ".MuiSvgIcon-root": {
-                            color: palette + "bgButton",
-                          },
-                        },
-                      }}
-                      startIcon={
-                        <>
-                          {counter === 0 && (
-                            <HelpOutlineIcon
-                              sx={{
-                                fontSize: "14px",
-                                color: palette + "colorIcon",
-                              }}
-                            />
-                          )}
-                          {counter > 0 && (
-                            <Box
-                              sx={{
-                                color: palette + "colorBox",
-                                fontSize: "12px !important",
-                                width: "20px",
-                                height: "20px",
-                                borderRadius: "12px",
-                                backgroundColor: palette + "bgBox",
-                              }}
-                            >
-                              {counter}
-                            </Box>
-                          )}
-                        </>
-                      }
-                      endIcon={
-                        <KeyboardArrowDownIcon
-                          sx={{
-                            fontSize: "14px",
-                            color: palette + "colorIcon",
-                          }}
-                        />
-                      }
-                      onClick={(e) =>
-                        setOpenPopoverFilter({
-                          id: title,
-                          target: e.currentTarget,
-                        })
-                      }
-                    >
-                      {
-                        translationState.translation[
-                          title.replace(" Between", "").replace(" Measured", "")
-                        ]
-                      }
-                    </Button>
-                    <Popover
-                      /* id={id} */
-                      elevation={0}
-                      open={
-                        openPopoverFilter
-                          ? openPopoverFilter.id == title
-                          : false
-                      }
-                      anchorEl={
-                        openPopoverFilter ? openPopoverFilter.target : null
-                      }
-                      onClose={() => setOpenPopoverFilter(null)}
-                      anchorOrigin={{
-                        vertical: "bottom",
-                        horizontal: "left",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          padding: 1,
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 1,
-                        }}
-                      >
-                        <TextField
-                          fullWidth
-                          size="small"
-                          /* value={searchInput} */
-                          sx={{
-                            backgroundColor: palette + "bgButton",
-                            "& .MuiFormLabel-root": {
-                              fontSize: "12px",
-                            },
-                            borderRadius: 1,
-                          }}
-                          onChange={(e) =>
-                            handleInputChange(e.target.value, f.name)
-                          }
-                          InputProps={{
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <SearchIcon />
-                              </InputAdornment>
-                            ),
-                            style: {
-                              borderRadius: 0,
-                            },
-                          }}
-                          label={
-                            translationState.translation["Search"] +
-                            " " +
-                            title +
-                            "..."
-                          }
-                        />
-                        <Box
-                          sx={{
-                            maxHeight: "300px",
-                            overflowY: "scroll",
-                          }}
-                        >
-                          <Stack>
-                            {f.counts.map((c, index2) => {
-                              return (
-                                <Tooltip
-                                  arrow
-                                  placement="right"
-                                  title={c.name}
-                                  sx={{
-                                    display:
-                                      c.name.length < 30 ? "none" : "flex",
-                                  }}
-                                >
-                                  <FormControlLabel
-                                    key={index2}
-                                    control={<Checkbox size="small" />}
-                                    checked={isChecked(f.name, c.name)}
-                                    onClick={(e) => {
-                                      const checked = e.target.checked;
-                                      if (checked) {
-                                        setSelectedFacets([
-                                          ...selectedFacets,
-                                          { name: f.name, value: c.name },
-                                        ]);
-                                      } else {
-                                        setSelectedFacets((prevState) =>
-                                          prevState.filter(
-                                            (p) =>
-                                              p.name !== f.name &&
-                                              p.value !== c.name
-                                          )
-                                        );
-                                      }
-                                      facetSearch(f.name, c.name, checked);
-                                    }}
-                                    label={cutWithDots(c.name, 30)}
-                                    sx={{
-                                      ".MuiTypography-root": {
-                                        fontSize: "12px",
-                                        color: palette + "colorTypography",
-                                      },
-                                    }}
-                                  />
-                                </Tooltip>
-                              );
-                            })}
-                          </Stack>
-                        </Box>
-                      </Box>
-                    </Popover>
-                  </>
-                );
-              })}
-          </Box>
+          <FilterMapDesktop
+            region={region}
+            filteredFacets={filteredFacets}
+            selectedFacets={selectedFacets}
+            setSelectedFacets={setSelectedFacets}
+            setOpenPopoverFilter={setOpenPopoverFilter}
+            openPopoverFilter={openPopoverFilter}
+            handleInputChange={handleInputChange}
+            isChecked={isChecked}
+            setRegion={setRegion}
+          />
         </Box>
       </Box>
       <Stack
@@ -351,11 +136,19 @@ const ToolbarDesktopMapView = (props) => {
           bottom: 30,
           paddingLeft: "8px",
           paddingRight: "8px",
+          display: "flex",
+          justifyContent: "space-between",
         }}
         direction={"row"}
         spacing={2}
       >
-        <Box sx={{ width: "25%", height: "191px" }}>
+        <Box
+          sx={{
+            width: "25%",
+            height: "250px",
+            display: openLayerMap && "none",
+          }}
+        >
           <Fade in={openFilterMap} mountOnEnter unmountOnExit>
             <Box
               sx={{
@@ -366,155 +159,66 @@ const ToolbarDesktopMapView = (props) => {
                 padding: "12px",
               }}
             >
-              <Stack spacing={0.5}>
+              <Stack spacing={2}>
                 <Typography variant="body2">
                   COLOR - POINTS PER HEXAGON
                 </Typography>
+                {HEXAGON_LEGENDA.map((h, index) => {
+                  const [value, color] = h;
+                  return (
+                    <Box
+                      key={index}
+                      sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                    >
+                      <Box
+                        sx={{
+                          width: `15px`,
+                          height: `15px`,
+                          backgroundColor: color,
+                          position: "relative",
+                          clipPath:
+                            "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
+                        }}
+                      />
+                      <Typography variant="body2">{value}</Typography>
+                    </Box>
+                  );
+                })}
               </Stack>
             </Box>
           </Fade>
         </Box>
 
-        <Box sx={{ width: "70%", height: "191px" }}>
-          <Fade in={openFilterMap} mountOnEnter unmountOnExit>
-            <Box
-              sx={{
-                backgroundColor: palette + "bgBox2",
-                height: "100%",
-                borderRadius: "6px",
-                padding: "12px",
-              }}
-            >
-              <Stack spacing={0.5}>
-                <Typography variant="body2">COMPONENTS</Typography>
-                <Stack spacing={2} direction={"row"}>
-                  <Box
-                    sx={{
-                      height: "139px",
-                      width: "50%",
-                      border: "1px solid #DEE2ED",
-                      borderRadius: "6px",
-                      padding: "12px",
-                    }}
-                  >
-                    <Stack spacing={0.5}>
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            size={"small"}
-                            sx={{
-                              ".Mui-checked": { color: "#2B498C !important" },
-                            }}
-                          />
-                        }
-                        sx={{
-                          ".MuiTypography-root": {
-                            fontSize: "12px",
-                            fontWeight: 700,
-                            color: "#1A2C54",
-                          },
-                        }}
-                        label={translationState.translation["Show Clustering"]}
-                      />
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <FormControlLabel
-                          control={<Checkbox size="small" />}
-                          label={translationState.translation["Heatmap"]}
-                          sx={{
-                            ".MuiTypography-root": {
-                              fontSize: "12px",
-                              color: palette + "colorTypography",
-                            },
-                          }}
-                        />
-                        <FormControlLabel
-                          control={<Checkbox size="small" />}
-                          label={translationState.translation["H3 Layer"]}
-                          sx={{
-                            ".MuiTypography-root": {
-                              fontSize: "12px",
-                              color: palette + "colorTypography",
-                            },
-                          }}
-                        />
-                      </Box>
-                      <Divider variant="middle" />
-
-                      <Box>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontSize: "12px",
-                            fontWeight: 700,
-                            color: palette + "colorTypography",
-                          }}
-                        >
-                          {translationState.translation["Opacity layer"]}
-                        </Typography>
-                        <Slider
-                          defaultValue={50}
-                          valueLabelDisplay="auto"
-                          sx={{ color: "#2B498C !important" }}
-                        />
-                      </Box>
-                    </Stack>
-                  </Box>
-                  <Box
-                    sx={{
-                      height: "139px",
-                      width: "50%",
-                      border: "1px solid",
-                      borderColor: palette + "borderColor",
-                      borderRadius: "6px",
-                      padding: "12px",
-                    }}
-                  >
-                    <Stack spacing={1}>
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            sx={{
-                              ".Mui-checked": { color: "#2B498C !important" },
-                            }}
-                          />
-                        }
-                        sx={{
-                          ".MuiTypography-root": {
-                            fontSize: "12px",
-                            fontWeight: 700,
-                            color: palette + "colorTypography",
-                          },
-                        }}
-                        label={translationState.translation["Show Clustering"]}
-                      />
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            sx={{
-                              ".Mui-checked": { color: "#2B498C !important" },
-                            }}
-                          />
-                        }
-                        sx={{
-                          ".MuiTypography-root": {
-                            fontSize: "12px",
-                            fontWeight: 700,
-                            color: palette + "colorTypography",
-                          },
-                        }}
-                        label={translationState.translation["Show Clustering"]}
-                      />
-                    </Stack>
-                  </Box>
-                </Stack>
-              </Stack>
-            </Box>
-          </Fade>
+        <Box
+          sx={{
+            width: openFilterMap && !openLayerMap ? "70%" : "unset",
+            height: "250px",
+          }}
+        >
+          {openFilterMap && !openLayerMap && (
+            <SettingsMapDesktop
+              openFilterMap={openFilterMap}
+              changeClustering={changeClustering}
+              clustering={clustering}
+              hexOpacity={hexOpacity}
+              changeHexOpacity={changeHexOpacity}
+              setShowPoints={setShowPoints}
+              setShowRegions={setShowRegions}
+              showPoints={showPoints}
+              showRegions={showRegions}
+              heatOpacity={heatOpacity}
+              changeHeatOpacity={changeHeatOpacity}
+            />
+          )}
+          {openLayerMap && !openFilterMap && (
+            <LayerMapDesktop
+              openLayerMap={openLayerMap}
+              baseLayer={baseLayer}
+              changeBaseLayer={changeBaseLayer}
+              baseOpacity={baseOpacity}
+              changeBaseOpacity={changeBaseOpacity}
+            />
+          )}
         </Box>
 
         <Box
@@ -537,7 +241,29 @@ const ToolbarDesktopMapView = (props) => {
                 },
               },
             }}
-            onClick={() => setOpenFilterMap(!openFilterMap)}
+            onClick={() => {
+              setOpenFilterMap(!openFilterMap);
+              setOpenLayerMap(false);
+            }}
+          >
+            <SettingsIcon sx={{ color: palette + "colorIcon" }} />
+          </IconButton>
+          <IconButton
+            sx={{
+              backgroundColor: palette + "bgButton",
+              borderRadius: 2,
+              width: "45px",
+              "&:hover": {
+                backgroundColor: palette + "colorIcon",
+                "& .MuiSvgIcon-root": {
+                  color: palette + "bgButton",
+                },
+              },
+            }}
+            onClick={() => {
+              setOpenFilterMap(false);
+              setOpenLayerMap(!openLayerMap);
+            }}
           >
             <LayersIcon sx={{ color: palette + "colorIcon" }} />
           </IconButton>

@@ -306,6 +306,8 @@ const primaryPalette = {
         borderColor: colors.primaryColor.light,
         checkedSliderColor: colors.primaryColor.main,
         colorTypography: colors.primaryColor.dark2,
+        colorTypographyLayer: colors.primaryColor.darker,
+        colorSelectedLayer: colors.accentColor.main,
       },
     },
     mobile: {

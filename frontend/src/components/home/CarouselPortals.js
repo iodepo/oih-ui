@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import SwipeableViews from "react-swipeable-views";
 import { autoPlay } from "react-swipeable-views-utils";
 import Card from "@mui/material/Card";
@@ -22,13 +22,13 @@ const CarouselPortals = () => {
     setIndex(index);
   };
 
-  const handleNextSlide = () => {
+  const handleNextSlide = useCallback(() => {
     setIndex((prevIndex) => (prevIndex + 1) % PARTNERS.length);
-  };
+  }, [setIndex]);
 
-  const handlePrevSlide = () => {
+  const handlePrevSlide = useCallback(() => {
     setIndex((prevIndex) => (prevIndex - 1 + 3) % PARTNERS.length);
-  };
+  }, [setIndex]);
 
   const palette = "custom.homepage.carouselPortals.";
   return (
@@ -53,18 +53,20 @@ const CarouselPortals = () => {
             index={index}
             onChangeIndex={handleSlideChange}
           >
-            {PARTNERS.map((g) => {
+            {PARTNERS.map((g, i) => {
               return (
                 <Box
+                  key={i}
                   sx={{
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
                   }}
                 >
-                  {g.map((p) => {
+                  {g.map((p, k) => {
                     return (
                       <Card
+                        key={k}
                         sx={{
                           background: "transparent",
                         }}

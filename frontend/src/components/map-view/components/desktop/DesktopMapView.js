@@ -6,7 +6,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import Drawer from "@mui/material/Drawer";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
-import DrawerContent from "./DrawerContent";
+import DrawerContainer from "./drawer/DrawerContainer";
 
 const DesktopMapView = (props) => {
   const {
@@ -40,6 +40,16 @@ const DesktopMapView = (props) => {
     initCenter,
     clustering,
     region,
+    changeBaseLayer,
+    changeBaseOpacity,
+    changeClustering,
+    changeHexOpacity,
+    setShowPoints,
+    setShowRegions,
+    heatOpacity,
+    changeHeatOpacity,
+    setMapBounds,
+    geoJson,
   } = props;
 
   const palette = "custom.mapView.desktop.";
@@ -59,7 +69,7 @@ const DesktopMapView = (props) => {
           anchor="left"
           open={open}
         >
-          <DrawerContent
+          <DrawerContainer
             results={results}
             setSearchText={setSearchText}
             searchText={searchText}
@@ -140,6 +150,20 @@ const DesktopMapView = (props) => {
           facetQuery={facetQuery}
           setSelectedFacets={setSelectedFacets}
           selectedFacets={selectedFacets}
+          baseLayer={baseLayer}
+          changeBaseLayer={changeBaseLayer}
+          changeBaseOpacity={changeBaseOpacity}
+          baseOpacity={baseOpacity}
+          changeClustering={changeClustering}
+          clustering={clustering}
+          hexOpacity={hexOpacity}
+          changeHexOpacity={changeHexOpacity}
+          setShowPoints={setShowPoints}
+          setShowRegions={setShowRegions}
+          showPoints={showPoints}
+          showRegions={showRegions}
+          heatOpacity={heatOpacity}
+          changeHeatOpacity={changeHeatOpacity}
         />
         <MapView
           container={container}
@@ -153,6 +177,8 @@ const DesktopMapView = (props) => {
           zoom={zoom}
           setCenter={setCenter}
           initCenter={initCenter}
+          setMapBounds={setMapBounds}
+          geoJson={geoJson}
         />
       </Box>
     </>

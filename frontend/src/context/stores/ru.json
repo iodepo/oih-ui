@@ -55,7 +55,7 @@
   "Apply": "Применить",
   "Provider": "Поставщик",
   "Affiliation": "Аффилиация",
-  "Add more": "Добавить еще",
+  "Show more": "Показать больше",
   "Sort by": "Сортировать по",
   "Recently updated": "Недавно обновлено",
   "View JSONLD source": "Просмотр исходного кода JSONLD",
@@ -78,5 +78,7 @@
   "Heatmap": "Тепловая карта",
   "H3 Layer": "Слой H3",
   "Opacity layer": "Прозрачный слой",
-  "Map Layers": "Слои карты"
+  "Map Layers": "Слои карты",
+  "Show Points": "Показать точки",
+  "Show Geometries": "Показать геометрии"
 }
