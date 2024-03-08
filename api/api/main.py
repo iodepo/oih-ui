@@ -37,7 +37,7 @@ FACET_FIELDS = config.get('facet_fields', {})
 
 FACET_INTERVALS = config.get('facet_intervals', {})
 
-GEOJSON_FIELDS = config.get('geojson_fields', ['id', 'geom_length'])
+GEOJSON_FIELDS = set(config.get('geojson_fields', ['id', 'geom_length']))
 GEOJSON_ROWS = config.get('geojson_rows', 1000)
 DEFAULT_GEOMETRY = config.get('default_geometry')
 COMBINED_TYPES = {
