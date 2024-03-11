@@ -28,9 +28,9 @@ const MapContainer = (props) => {
     zoom: 0,
     isLoading: false,
     center: [65.468754, 44.57875],
+    showSearchArea: false,
+    selectedElem: undefined,
   });
-
-  //Maybe move inside useReducer? Discuss
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -43,7 +43,7 @@ const MapContainer = (props) => {
     params.has("search_text") ? params.get("search_text") : ""
   );
   const [resultsCount, setResultsCount] = useState(0);
-  const [mapBounds, setMapBounds] = useState();
+  const [mapBounds, setMapBounds] = useState(false);
   const [open, setOpen] = useState(true);
   const [facets, setFacets] = useState([]);
   const [facetQuery, setFacetQuery] = useSearchParam("facet_query");
@@ -92,6 +92,18 @@ const MapContainer = (props) => {
   const changeHeatOpacity = (heatOpacity) => {
     dispatch({ type: "setHeatOpacity", heatOpacity: heatOpacity });
   };
+  const changeShowSearchArea = (showSearchArea) => {
+    dispatch({ type: "setShowSearchArea", showSearchArea: showSearchArea });
+  };
+  const changeSelectedElem = (selectedElem) => {
+    dispatch({ type: "setSelectedElem", selectedElem: selectedElem });
+  };
+
+  const searchThisArea = () => {
+    getDataSpatialSearch();
+    changeShowSearchArea(false);
+  };
+
   const applyZoom = (zoomType) => {
     let value;
     if (zoomType === "out") {
@@ -144,10 +156,9 @@ const MapContainer = (props) => {
 
   useEffect(() => {
     getDataSpatialSearch();
-  }, [navigate, params, mapBounds]);
+  }, [navigate, params]);
 
   const getGeoJSON = () => {
-    debugger;
     let geoJsonUrl = `${dataServiceUrl}/spatial.geojson?`;
     const params = new URLSearchParams({
       /* ...(searchType !== "SpatialData" ? { document_type: searchType } : {}), */
@@ -271,6 +282,11 @@ const MapContainer = (props) => {
             changeHeatOpacity={changeHeatOpacity}
             setMapBounds={setMapBounds}
             geoJson={geoJson}
+            showSearchArea={state.showSearchArea}
+            changeSelectedElem={changeSelectedElem}
+            selectedElem={state.selectedElem}
+            changeShowSearchArea={changeShowSearchArea}
+            searchThisArea={searchThisArea}
           />
         </Box>
       )}
@@ -316,6 +332,11 @@ const MapContainer = (props) => {
             setShowRegions={setShowRegions}
             setMapBounds={setMapBounds}
             geoJson={geoJson}
+            showSearchArea={state.showSearchArea}
+            changeSelectedElem={changeSelectedElem}
+            selectedElem={state.selectedElem}
+            changeShowSearchArea={changeShowSearchArea}
+            searchThisArea={searchThisArea}
           />
         </Box>
       )}

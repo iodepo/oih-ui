@@ -12,8 +12,8 @@ import { fieldTitleFromName, useSearchParam } from "utilities/generalUtility";
 import { dataServiceUrl } from "config/environment";
 import { useNavigate } from "react-router-dom";
 import PublicIcon from "@mui/icons-material/Public";
-import MobileAS from "./advancedSearch/MobileAS";
-import DesktopAS from "./advancedSearch/DesktopAS";
+import MobileAS from "./MobileAS";
+import DesktopAS from "./DesktopAS";
 
 const AdvancedSearch = (props) => {
   const { setSearchQuery, searchQuery, facets } = props;

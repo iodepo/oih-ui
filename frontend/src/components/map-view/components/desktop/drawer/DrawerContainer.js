@@ -1,22 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import Paper from "@mui/material/Paper";
-import { visuallyHidden } from "@mui/utils";
-import CircleIcon from "@mui/icons-material/Circle";
-import Tooltip from "@mui/material/Tooltip";
-import { cutWithDots } from "components/results/ResultDetails";
-import InfiniteScroll from "react-infinite-scroll-component";
-import { ITEMS_PER_PAGE } from "portability/configuration";
 import { Export } from "components/search-hub/Export";
-import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
@@ -76,6 +61,8 @@ const DrawerContainer = (props) => {
     selectedFacets,
     facetSearch,
     clear,
+    changeSelectedElem,
+    selectedElem,
   } = props;
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("");
@@ -89,6 +76,10 @@ const DrawerContainer = (props) => {
   useEffect(() => {
     changeLanguageIcon(translationState.getTranslationKey());
   }, []);
+
+  useEffect(() => {
+    setSelectedResult(selectedElem);
+  }, [selectedElem]);
 
   const changeLanguageIcon = (languageCode) => {
     switch (languageCode) {
@@ -194,6 +185,7 @@ const DrawerContainer = (props) => {
               display: "flex",
               justifyContent: "space-between",
               padding: "12px",
+              alignItems: "center",
             }}
           >
             <Export
@@ -219,6 +211,7 @@ const DrawerContainer = (props) => {
           setSelectedResult={setSelectedResult}
           changeTranslation={changeTranslation}
           languageIcon={languageIcon}
+          changeSelectedElem={changeSelectedElem}
         />
       )}
     </Box>
@@ -226,7 +219,13 @@ const DrawerContainer = (props) => {
 };
 
 const ResultDetails = (props) => {
-  const { result, setSelectedResult, changeTranslation, languageIcon } = props;
+  const {
+    result,
+    setSelectedResult,
+    changeTranslation,
+    languageIcon,
+    changeSelectedElem,
+  } = props;
 
   return (
     <Stack sx={{ height: "100%", ".MuiPaper-root": { border: 0 } }}>
@@ -239,7 +238,10 @@ const ResultDetails = (props) => {
       >
         <IconButton
           aria-label="goBack"
-          onClick={() => setSelectedResult(undefined)}
+          onClick={() => {
+            changeSelectedElem(undefined);
+            setSelectedResult(undefined);
+          }}
         >
           <KeyboardBackspaceIcon
             sx={{

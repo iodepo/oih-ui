@@ -31,7 +31,7 @@ import Accordion from "@mui/material/Accordion";
 import IconButton from "@mui/material/IconButton";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
-import AdvancedSearch from "./AdvancedSearch";
+import AdvancedSearch from "./advancedSearch/AdvancedSearch";
 import { Export } from "../search-hub/Export";
 import Avatar from "@mui/material/Avatar";
 import FrenchFlag from "../../resources/svg/FrenchFlag.svg";

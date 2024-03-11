@@ -23,12 +23,14 @@ const MapView = (props) => {
     heatOpacity,
     setMapBounds,
     geoJson,
+    changeSelectedElem,
+    changeShowSearchArea,
   } = props;
   const mapInitRef = useRef(null);
   var h3Resolution = 2;
 
   useEffect(() => {
-    if (container.current) {
+    if (container.current && !isHome) {
       mapInitRef.current &&
         manageLayers(
           mapInitRef.current,
@@ -38,7 +40,8 @@ const MapView = (props) => {
           showPoints,
           showRegions,
           h3Resolution,
-          geoJson
+          geoJson,
+          changeSelectedElem
         );
     }
   }, [clustering, hexOpacity, showPoints, showRegions]);
@@ -59,7 +62,7 @@ const MapView = (props) => {
     if (container.current) {
       container.current.innerHTML = "";
       let zoom = 4;
-      if (mapInitRef.current) {
+      if (mapInitRef.current && !isHome) {
         zoom = mapInitRef.current.getZoom();
       }
       mapInitRef.current = initMap(
@@ -72,6 +75,7 @@ const MapView = (props) => {
 
       mapInitRef.current.on("load", function () {
         mapInitRef.current &&
+          !isHome &&
           manageLayers(
             mapInitRef.current,
             clustering,
@@ -80,19 +84,22 @@ const MapView = (props) => {
             showPoints,
             showRegions,
             h3Resolution,
-            geoJson
+            geoJson,
+            changeSelectedElem
           );
         mapInitRef.current &&
           manageChangeOpacity(mapInitRef.current, baseOpacity, baseLayer);
       });
 
       mapInitRef.current.on("moveend", function () {
-        if (mapInitRef.current) {
+        if (mapInitRef.current && !isHome) {
           setCenter([
             mapInitRef.current.getCenter().lng,
             mapInitRef.current.getCenter().lat,
           ]);
-          console.log(mapInitRef.current.getBounds());
+
+          changeShowSearchArea(true);
+
           setMapBounds(mapInitRef.current.getBounds());
         }
       });
@@ -108,6 +115,7 @@ const MapView = (props) => {
         if (h3ResNew != h3Resolution) {
           h3Resolution = h3ResNew;
           mapInitRef.current &&
+            !isHome &&
             manageLayers(
               mapInitRef.current,
               clustering,
@@ -116,7 +124,8 @@ const MapView = (props) => {
               showPoints,
               showRegions,
               h3Resolution,
-              geoJson
+              geoJson,
+              changeSelectedElem
             );
         }
       });

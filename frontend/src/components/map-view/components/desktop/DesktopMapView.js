@@ -50,6 +50,11 @@ const DesktopMapView = (props) => {
     changeHeatOpacity,
     setMapBounds,
     geoJson,
+    changeShowSearchArea,
+    showSearchArea,
+    changeSelectedElem,
+    selectedElem,
+    searchThisArea,
   } = props;
 
   const palette = "custom.mapView.desktop.";
@@ -82,6 +87,8 @@ const DesktopMapView = (props) => {
             selectedFacets={selectedFacets}
             facetSearch={facetSearch}
             clear={clear}
+            changeSelectedElem={changeSelectedElem}
+            selectedElem={selectedElem}
           />
         </Drawer>
         {open ? (
@@ -164,6 +171,8 @@ const DesktopMapView = (props) => {
           showRegions={showRegions}
           heatOpacity={heatOpacity}
           changeHeatOpacity={changeHeatOpacity}
+          showSearchArea={showSearchArea}
+          searchThisArea={searchThisArea}
         />
         <MapView
           container={container}
@@ -179,6 +188,9 @@ const DesktopMapView = (props) => {
           initCenter={initCenter}
           setMapBounds={setMapBounds}
           geoJson={geoJson}
+          changeShowSearchArea={changeShowSearchArea}
+          showSearchArea={showSearchArea}
+          changeSelectedElem={changeSelectedElem}
         />
       </Box>
     </>

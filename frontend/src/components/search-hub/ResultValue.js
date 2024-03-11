@@ -113,6 +113,18 @@ const ResultValue = (props) => {
 
          */
   };
+  const sendMatomoEvent = () => {
+    const stringResult = `${url}|index_result=${counterResult}|page=${
+      parseInt(page) + 1
+    }|totalPagesNumber=${totalPageNumber}|queryString=${queryString}`;
+    console.log(stringResult);
+
+    const cd1 = `${counterResult}`;
+    const cd2 = `${parseInt(page) + 1}`;
+    const cd3 = `${totalPageNumber}`;
+
+    trackingMatomoClickResults(stringResult, cd1, cd2, cd3);
+  };
 
   const palette = "custom.resultPage.resultsDetails.";
   if ((onlyVerified && isVerified(result["id"])) || !onlyVerified) {
@@ -158,8 +170,8 @@ const ResultValue = (props) => {
               href={url === "" ? `/record/${jsonLdParams}` : url}
               underline="hover"
               target="_blank"
-              onClick={() => trackingMatomoClickResults(url)}
-              onAuxClick={() => trackingMatomoClickResults(url)}
+              onClick={() => sendMatomoEvent()}
+              onAuxClick={() => sendMatomoEvent()}
             >
               <Typography
                 sx={{ fontSize: 21, color: palette + "colorTypography" }}

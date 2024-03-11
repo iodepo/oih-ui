@@ -43,6 +43,11 @@ const MobileMapView = (props) => {
     setShowRegions,
     geoJson,
     setMapBounds,
+    changeSelectedElem,
+    selectedElem,
+    searchThisArea,
+    showSearchArea,
+    changeShowSearchArea,
   } = props;
   return (
     <>
@@ -81,6 +86,10 @@ const MobileMapView = (props) => {
           setShowRegions={setShowRegions}
           showPoints={showPoints}
           showRegions={showRegions}
+          selectedElem={selectedElem}
+          changeSelectedElem={changeSelectedElem}
+          searchThisArea={searchThisArea}
+          showSearchArea={showSearchArea}
         />
         <MapView
           container={container}
@@ -96,6 +105,8 @@ const MobileMapView = (props) => {
           initCenter={initCenter}
           geoJson={geoJson}
           setMapBounds={setMapBounds}
+          changeSelectedElem={changeSelectedElem}
+          changeShowSearchArea={changeShowSearchArea}
         />
       </Box>
     </>

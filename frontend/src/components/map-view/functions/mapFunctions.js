@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { initMap } from "../utils/initMap";
 
 import data from "../data/spatial.geojson.json";
-
+import maplibregl from "maplibre-gl";
 import polygonH3_2 from "../data/poligonToH3_2.json";
 import polygonH3_3 from "../data/poligonToH3_3.json";
 import geojson2h3 from "geojson2h3";
@@ -28,6 +28,7 @@ import {
   ARCGIS,
   USGS,
 } from "../utils/constants";
+import { fetchDetail } from "utilities/generalUtility";
 
 export function calculateH3Resolution(currentZoom) {
   if (currentZoom < 6) {
@@ -95,7 +96,7 @@ export function pointsToH2(point_polygon_data, layer) {
   return layer;
 }
 
-export function polygonsToH3(polygon_polygon_data, layer) {
+export function polygonsToH3(polygon_polygon_data, layer, h3Resolution) {
   polygon_polygon_data.forEach((polygon) => {
     var hexagons = geojson2h3.featureToH3Set(polygon, h3Resolution);
     hexagons.forEach((h3Index) => {
@@ -153,9 +154,9 @@ export function manageLayers(
   showPoints,
   showRegions,
   h3Resolution,
-  geoJson
+  geoJson,
+  changeSelectedElem
 ) {
-  debugger;
   if (geoJson) {
     var polygon_data = geoJson["features"].filter(
       (shape) => shape["geometry"]["type"] == "Polygon"
@@ -170,13 +171,13 @@ export function manageLayers(
     // console.log(point_polygon_data)
 
     if (showRegions) {
-      draw_regions(map, polygon_data);
+      draw_regions(map, polygon_data, changeSelectedElem);
     } else {
       remove_regions(map);
     }
 
     if (showPoints) {
-      draw_points(map, point_polygon_data);
+      draw_points(map, point_polygon_data, changeSelectedElem);
     } else {
       remove_points(map);
     }
@@ -196,7 +197,7 @@ export function manageLayers(
       }
     }
     if (!map.getSource(HEXAGON_SOURCE)) {
-      hexagon_clustering(h3Resolution, map, point_polygon_data, hexOpacity);
+      hexagon_clustering(h3Resolution, map, polygon_data, hexOpacity);
     } else {
       map.setPaintProperty(HEXAGON_LAYER, "fill-opacity", hexOpacity);
     }
@@ -242,7 +243,7 @@ export function manageLayers(
         HEATMAP_REGIONS_LAYER
       );
     } else {
-      map.setPaintProperty(HEATMAP_REGIONS_LAYER, "fill-opacity", heatOpacity);
+      //map.setPaintProperty(HEATMAP_REGIONS_LAYER, "fill-opacity", heatOpacity);
     }
   } else {
     if (map.getLayer(HEXAGON_LAYER)) {
@@ -335,7 +336,7 @@ export function remove_points(map) {
   }
 }
 
-export function draw_regions(map, polygon_data) {
+export function draw_regions(map, polygon_data, changeSelectedElem) {
   if (!map.getSource(REGIONS_SOURCE) && !map.getLayer(REGIONS_LAYER)) {
     map.addSource(REGIONS_SOURCE, {
       type: "geojson",
@@ -396,10 +397,38 @@ export function draw_regions(map, polygon_data) {
         ],
       },
     });
+
+    const popup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+    });
+
+    map.on("mouseenter", REGIONS_LAYER, async (e) => {
+      map.getCanvas().style.cursor = "pointer";
+
+      const coordinates = e.lngLat;
+      const id = e.features[0].properties.id;
+
+      const details = await fetchDetail(id).then((d) => d);
+      popup.setLngLat(coordinates).setHTML(details.name).addTo(map);
+    });
+
+    map.on("mouseleave", REGIONS_LAYER, () => {
+      map.getCanvas().style.cursor = "";
+      popup.remove();
+    });
+
+    map.on("click", REGIONS_LAYER, async (e) => {
+      const id = e.features[0].properties.id;
+
+      const details = await fetchDetail(id).then((d) => d);
+
+      changeSelectedElem(details);
+    });
   }
 }
 
-export function draw_points(map, point_polygon_data) {
+export function draw_points(map, point_polygon_data, changeSelectedElem) {
   if (!map.getSource(POINTS_SOURCE) && !map.getLayer(POINTS_LAYER)) {
     map.addSource(POINTS_SOURCE, {
       type: "geojson",
@@ -408,14 +437,50 @@ export function draw_points(map, point_polygon_data) {
         features: point_polygon_data,
       },
     });
+
     map.addLayer({
       id: POINTS_LAYER,
-      type: "circle",
+      type: "symbol", // Change layer type to symbol for using icons
       source: POINTS_SOURCE,
-      paint: {
-        "circle-color": "#4264fb",
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 2, 10, 4],
+      layout: {
+        "icon-image": "custom-marker", // Use the custom SVG icon as the marker
+        "icon-size": 0.2, // Adjust icon size if necessary
+        "icon-anchor": "center",
+        // Adjust icon anchor if necessary
       },
+    });
+
+    const popup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+    });
+
+    map.on("mouseenter", POINTS_LAYER, async (e) => {
+      map.getCanvas().style.cursor = "pointer";
+
+      const coordinates = e.features[0].geometry.coordinates.slice();
+      const id = e.features[0].properties.id;
+
+      const details = await fetchDetail(id).then((d) => d);
+
+      while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+      }
+
+      popup.setLngLat(coordinates).setHTML(details.name).addTo(map);
+    });
+
+    map.on("mouseleave", POINTS_LAYER, () => {
+      map.getCanvas().style.cursor = "";
+      popup.remove();
+    });
+
+    map.on("click", POINTS_LAYER, async (e) => {
+      const id = e.features[0].properties.id;
+
+      const details = await fetchDetail(id).then((d) => d);
+
+      changeSelectedElem(details);
     });
   }
 }
@@ -427,13 +492,13 @@ export function hexagon_clustering(
   hexOpacity
 ) {
   var layer = {};
-  //layer = polygonsToH3(polygon_data, layer)
-  if (h3Resolution == 2) {
+  layer = polygonsToH3(point_polygon_data, layer, h3Resolution);
+  /*  if (h3Resolution == 2) {
     layer = polygonH3_2;
   } else {
     layer = polygonH3_3;
   }
-
+ */
   console.log(layer);
 
   const geojson = geojson2h3.h3SetToFeatureCollection(

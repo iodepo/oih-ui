@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
@@ -10,11 +11,7 @@ import LayersIcon from "@mui/icons-material/Layers";
 import SettingsIcon from "@mui/icons-material/Settings";
 import Fade from "@mui/material/Fade";
 import Typography from "@mui/material/Typography";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
-import Checkbox from "@mui/material/Checkbox";
-import Divider from "@mui/material/Divider";
-import Slider from "@mui/material/Slider";
+import SearchIcon from "@mui/icons-material/Search";
 import FilterMapDesktop from "./FilterMapDesktop";
 import SettingsMapDesktop from "./SettingsMapDesktop";
 import LayerMapDesktop from "./LayerMapDesktop";
@@ -45,6 +42,8 @@ const ToolbarDesktopMapView = (props) => {
     showRegions,
     heatOpacity,
     changeHeatOpacity,
+    showSearchArea,
+    searchThisArea,
   } = props;
   const [filteredFacets, setFilteredFacets] = useState(facets);
 
@@ -113,6 +112,7 @@ const ToolbarDesktopMapView = (props) => {
           width: "100%",
           paddingLeft: "8px",
           paddingRight: "8px",
+          zIndex: 2,
         }}
       >
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -126,9 +126,37 @@ const ToolbarDesktopMapView = (props) => {
             handleInputChange={handleInputChange}
             isChecked={isChecked}
             setRegion={setRegion}
+            facetSearch={facetSearch}
           />
         </Box>
       </Box>
+      {showSearchArea && (
+        <Box
+          sx={{ zIndex: 2, position: "absolute", right: "45%", top: "100px" }}
+        >
+          <Button
+            variant="contained"
+            sx={{
+              textTransform: "unset",
+              backgroundColor: "white",
+              borderRadius: 8,
+              color: "#1A2C54",
+              "&:hover": {
+                color: "white",
+                backgroundColor: "#1A2C54",
+                ".MuiSvgIcon-root": {
+                  color: "white",
+                },
+              },
+            }}
+            onClick={() => searchThisArea()}
+            startIcon={<SearchIcon sx={{ color: "#1A2C54" }} />}
+          >
+            Search this area
+          </Button>
+        </Box>
+      )}
+
       <Stack
         sx={{
           width: "100%",
@@ -138,6 +166,7 @@ const ToolbarDesktopMapView = (props) => {
           paddingRight: "8px",
           display: "flex",
           justifyContent: "space-between",
+          zIndex: 2,
         }}
         direction={"row"}
         spacing={2}

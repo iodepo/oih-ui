@@ -6,6 +6,8 @@ import SearchMapMobile from "./SearchMapMobile";
 import FilterMapMobile from "./FilterMapMobile";
 import LayerMapMobile from "./LayerMapMobile";
 import ResultsMapMobile from "./ResultsMapMobile";
+import SearchIcon from "@mui/icons-material/Search";
+import Button from "@mui/material/Button";
 
 const ToolbarMobileMapView = (props) => {
   const {
@@ -37,6 +39,10 @@ const ToolbarMobileMapView = (props) => {
     setShowRegions,
     showPoints,
     showRegions,
+    selectedElem,
+    changeSelectedElem,
+    searchThisArea,
+    showSearchArea,
   } = props;
   const translationState = useAppTranslation();
 
@@ -106,6 +112,7 @@ const ToolbarMobileMapView = (props) => {
           width: "100%",
           paddingLeft: "8px",
           paddingRight: "8px",
+          zIndex: 2,
         }}
       >
         <Stack spacing={2}>
@@ -126,6 +133,41 @@ const ToolbarMobileMapView = (props) => {
             selectedFacets={selectedFacets}
             facetSearch={facetSearch}
           />
+          {showSearchArea && (
+            <Box
+              sx={{
+                zIndex: 2,
+                position: "absolute",
+                right: "32%",
+                top: "100px",
+              }}
+            >
+              <Button
+                variant="contained"
+                sx={{
+                  textTransform: "unset",
+                  backgroundColor: "white",
+                  borderRadius: 8,
+                  color: "#1A2C54",
+                  "&:hover": {
+                    color: "white",
+                    backgroundColor: "#1A2C54",
+                    ".MuiSvgIcon-root": {
+                      color: "white",
+                    },
+                  },
+                }}
+                onClick={() => {
+                  searchThisArea();
+                  setOpenSwipeDrawer(true);
+                }}
+                startIcon={<SearchIcon sx={{ color: "#1A2C54" }} />}
+              >
+                Search this area
+              </Button>
+            </Box>
+          )}
+
           <LayerMapMobile
             setOpenLayerDrawer={setOpenLayerDrawer}
             applyZoom={applyZoom}
@@ -157,6 +199,8 @@ const ToolbarMobileMapView = (props) => {
             results={results}
             isLoading={isLoading}
             getDataSpatialSearch={getDataSpatialSearch}
+            selectedElem={selectedElem}
+            changeSelectedElem={changeSelectedElem}
           />
         </Stack>
       </Box>

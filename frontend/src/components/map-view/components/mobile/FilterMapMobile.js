@@ -78,9 +78,8 @@ const FilterMapMobile = (props) => {
             (s) => s.name === f.name
           ).length;
           return (
-            <>
+            <Box key={index}>
               <Button
-                key={index}
                 variant="contained"
                 sx={{
                   height: "30px",
@@ -250,7 +249,7 @@ const FilterMapMobile = (props) => {
                   </Box>
                 </Box>
               </Popover>
-            </>
+            </Box>
           );
         })}
     </Box>

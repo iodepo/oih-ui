@@ -38,6 +38,8 @@ import { cutWithDots } from "components/results/ResultDetails";
 import Support from "./Support";
 import Chip from "@mui/material/Chip";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import Fade from "@mui/material/Fade";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function Results() {
   const [results, setResults] = useState([]);
@@ -48,7 +50,6 @@ export default function Results() {
 
   const [showMorePages, setShowMorePages] = useState(0);
   const [filterChosenMobile, setFilterChosenMobile] = useState([]);
-  const [selectedProvider, setSelectedProvider] = useState("");
   const [currentURI, setCurrentURI] = useState("");
 
   const [onlyVerified, setOnlyVerified] = useState(false);
@@ -61,6 +62,7 @@ export default function Results() {
   const [fq, setFq] = useSearchParam("fq");
   const [sort, setSort] = useSearchParam("sort");
   const [page, setPage] = useSearchParam("page", 0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [openDialog, setOpenDialog] = useState(false);
   const translationState = useAppTranslation();
@@ -95,6 +97,7 @@ export default function Results() {
       /*  if (showMap) {
       mapSearch(mapBounds, page);
     } else { */
+      setIsLoading(true);
       let URI = `${dataServiceUrl}/search?`;
       const params = new URLSearchParams({
         document_type: searchType,
@@ -128,6 +131,7 @@ export default function Results() {
           setResultCount(count);
           setCounts((prev) => ({ ...prev, [searchType]: count }));
           setFacets(json.facets.filter((facet) => facet.counts.length > 0));
+          setIsLoading(false);
         });
     },
     /*  } */ [
@@ -211,12 +215,29 @@ export default function Results() {
     }
   };
 
-  const facetSearch = (name, value) => {
+  const facetSearch = (name, value, checked) => {
     const clickedFacetQuery = new URLSearchParams({
       facetType: name,
       facetName: value,
     }).toString();
-    setFacetQuery([facetQuery, clickedFacetQuery].filter((e) => e).join("&"));
+
+    if (checked) {
+      setFacetQuery([facetQuery, clickedFacetQuery].filter((e) => e).join("&"));
+    } else {
+      const filteredQuery = facetQuery.replace(clickedFacetQuery, "");
+      let cleanedQuery = filteredQuery.endsWith("&")
+        ? filteredQuery.slice(0, -1)
+        : filteredQuery;
+      cleanedQuery = cleanedQuery.startsWith("&")
+        ? cleanedQuery.slice(1)
+        : cleanedQuery;
+      cleanedQuery = cleanedQuery.replace("&&", "&");
+      setFacetQuery(cleanedQuery);
+    }
+  };
+
+  const facetSearchMobile = (query) => {
+    setFacetQuery([facetQuery, query].filter((e) => e).join("&"));
   };
 
   const resetDefaultSearchUrl = (type) => {
@@ -261,45 +282,54 @@ export default function Results() {
         <Support />
         <Grid container mt={{ xs: 4, lg: 0 }} gap={{ xs: 1, lg: 0 }}>
           <Grid item lg={3} display={{ xs: "none", lg: "block" }}>
-            <Accordion
-              defaultExpanded
-              sx={{ width: "17.5rem", flexShrink: 0 }}
-              elevation={0}
+            <Fade
+              in={facets.length > 0}
+              timeout={1000}
+              mountOnEnter
+              unmountOnExit
             >
-              <AccordionSummary
-                expandIcon={
-                  <ViewSidebarOutlinedIcon
-                    sx={{ color: paletteFilter + "textFilter" }}
-                  />
-                }
-                sx={{ paddingLeft: 0 }}
-                aria-controls="panel1a-content"
-                id="panel1a-header"
+              <Accordion
+                defaultExpanded
+                sx={{ width: "17.5rem", flexShrink: 0 }}
+                elevation={0}
               >
-                <Typography
-                  sx={{ color: paletteFilter + "textFilter", fontWeight: 700 }}
+                <AccordionSummary
+                  expandIcon={
+                    <ViewSidebarOutlinedIcon
+                      sx={{ color: paletteFilter + "textFilter" }}
+                    />
+                  }
+                  sx={{ paddingLeft: 0 }}
+                  aria-controls="panel1a-content"
+                  id="panel1a-header"
                 >
-                  {translationState.translation["Filter by"]}
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails sx={{ paddingLeft: 0 }}>
-                <FilterBy
-                  selectedProvider={selectedProvider}
-                  setSelectedProvider={setSelectedProvider}
-                  setFilterChosenMobile={setFilterChosenMobile}
-                  filterChosenMobile={filterChosenMobile}
-                  counts={counts}
-                  tabList={CATEGORIES}
-                  searchType={searchType}
-                  resetDefaultSearchUrl={resetDefaultSearchUrl}
-                  clearFacetQuery={clearFacetQuery}
-                  facetSearch={facetSearch}
-                  facets={facets}
-                  facetQuery={facetQuery}
-                  clear={clear}
-                />
-              </AccordionDetails>
-            </Accordion>
+                  <Typography
+                    sx={{
+                      color: paletteFilter + "textFilter",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {translationState.translation["Filter by"]}
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails sx={{ paddingLeft: 0 }}>
+                  <FilterBy
+                    setFilterChosenMobile={setFilterChosenMobile}
+                    filterChosenMobile={filterChosenMobile}
+                    counts={counts}
+                    tabList={CATEGORIES}
+                    searchType={searchType}
+                    resetDefaultSearchUrl={resetDefaultSearchUrl}
+                    clearFacetQuery={clearFacetQuery}
+                    facetSearch={facetSearch}
+                    facets={facets}
+                    facetQuery={facetQuery}
+                    clear={clear}
+                    facetSearchMobile={facetSearchMobile}
+                  />
+                </AccordionDetails>
+              </Accordion>
+            </Fade>
           </Grid>
           <Grid
             item
@@ -348,8 +378,6 @@ export default function Results() {
                 </DialogTitle>
                 <DialogContent>
                   <FilterBy
-                    selectedProvider={selectedProvider}
-                    setSelectedProvider={setSelectedProvider}
                     setFilterChosenMobile={setFilterChosenMobile}
                     filterChosenMobile={filterChosenMobile}
                     counts={counts}
@@ -360,6 +388,7 @@ export default function Results() {
                     facetSearch={facetSearch}
                     facets={facets}
                     facetQuery={facetQuery}
+                    facetSearchMobile={facetSearchMobile}
                   />
                 </DialogContent>
               </Dialog>
@@ -446,10 +475,11 @@ export default function Results() {
                     minWidth: 0,
                   }}
                   onClick={() => {
-                    if (item.type === "provider") setSelectedProvider("");
                     clear();
                     setFilterChosenMobile((f) =>
-                      f.filter((d) => d.type !== item.type)
+                      f.filter(
+                        (d) => d.type !== item.type && d.text !== item.text
+                      )
                     );
                   }}
                 >
@@ -459,115 +489,137 @@ export default function Results() {
               );
             })}
           </Box>
-          <Grid item lg={9} xs={12} columnSpacing={2}>
-            <Stack spacing={2}>
-              <Box
-                display={{ xs: "none", lg: "flex" }}
-                justifyContent={"space-between"}
-                alignItems={"center"}
+          {isLoading ? (
+            <Grid item lg={9} xs={12}>
+              <CircularProgress sx={{ display: "flex", margin: "0 auto" }} />
+            </Grid>
+          ) : (
+            <Grid item lg={9} xs={12}>
+              <Fade
+                in={results.length >= 0}
+                timeout={1000}
+                mountOnEnter
+                unmountOnExit
               >
-                <Typography
-                  variant="subtitle2"
-                  sx={{ color: paletteFilter + "categoryColor" }}
-                >
-                  <b>{resultCount || 0}</b>{" "}
-                  {translationState.translation["Total results found"]}{" "}
-                </Typography>
-                <Box sx={{ display: "flex", gap: 2 }}>
-                  <Chip
-                    avatar={
-                      <CheckCircleOutlineIcon sx={{ color: "#1A2C54" }} />
-                    }
-                    label="Verified"
-                    onClick={() => setOnlyVerified(!onlyVerified)}
-                    variant="outlined"
-                    sx={{
-                      borderRadius: "8px",
-                      color: "#1A2C54",
-                      height: "35px",
-                      ".MuiChip-avatar": {
-                        color: "#1A2C54",
-                      },
-                      backgroundColor: onlyVerified && "#DEE2ED",
-                    }}
-                  />
-                  <Select
-                    defaultValue={sort ? sort : "indexed_ts desc"}
-                    startAdornment={
-                      <InputAdornment position="start">
-                        <Typography
-                          variant="subtitle2"
-                          sx={{ color: paletteFilter + "categoryColor" }}
+                <Box sx={{ display: "flex", gap: 2, flexDirection: "column" }}>
+                  <Stack spacing={2}>
+                    <Box
+                      display={{ xs: "none", lg: "flex" }}
+                      justifyContent={"space-between"}
+                      alignItems={"center"}
+                    >
+                      <Typography
+                        variant="subtitle2"
+                        sx={{ color: paletteFilter + "categoryColor" }}
+                      >
+                        <b>{resultCount || 0}</b>{" "}
+                        {translationState.translation["Total results found"]}{" "}
+                      </Typography>
+                      <Box sx={{ display: "flex", gap: 2 }}>
+                        <Chip
+                          avatar={
+                            <CheckCircleOutlineIcon sx={{ color: "#1A2C54" }} />
+                          }
+                          label="Verified"
+                          onClick={() => setOnlyVerified(!onlyVerified)}
+                          variant="outlined"
+                          disabled={results.length === 0}
+                          sx={{
+                            borderRadius: "8px",
+                            color: "#1A2C54",
+                            height: "35px",
+                            ".MuiChip-avatar": {
+                              color: "#1A2C54",
+                            },
+                            backgroundColor: onlyVerified && "#DEE2ED",
+                          }}
+                        />
+                        <Select
+                          defaultValue={sort ? sort : "indexed_ts desc"}
+                          disabled={results.length === 0}
+                          startAdornment={
+                            <InputAdornment position="start">
+                              <Typography
+                                variant="subtitle2"
+                                sx={{ color: paletteFilter + "categoryColor" }}
+                              >
+                                {translationState.translation["Sort by"]}:
+                              </Typography>
+                            </InputAdornment>
+                          }
+                          fullWidth
+                          sx={{
+                            color: "black",
+                            fontWeight: 600,
+                            fontSize: "12px",
+                            borderRadius: 2,
+                            height: "35px",
+                          }}
+                          onChange={(e) => setSort(e.target.value)}
                         >
-                          {translationState.translation["Sort by"]}:
-                        </Typography>
-                      </InputAdornment>
-                    }
-                    fullWidth
-                    sx={{
-                      color: "black",
-                      fontWeight: 600,
-                      fontSize: "12px",
-                      borderRadius: 2,
-                      height: "35px",
-                    }}
-                    onChange={(e) => setSort(e.target.value)}
-                  >
-                    <MenuItem value="indexed_ts desc">
-                      {translationState.translation["Recently updated"]}
-                    </MenuItem>
-                    <MenuItem value="indexed_ts asc">Last updated</MenuItem>
+                          <MenuItem value="indexed_ts desc">
+                            {translationState.translation["Recently updated"]}
+                          </MenuItem>
+                          <MenuItem value="indexed_ts asc">
+                            Last updated
+                          </MenuItem>
 
-                    {facets.map((f) => {
-                      const title = fieldTitleFromName(f.name);
-                      return [
-                        <MenuItem key={`${f.name}-asc`} value={`${f.name} asc`}>
-                          {title} ↑
-                        </MenuItem>,
-                        <MenuItem
-                          key={`${f.name}-desc`}
-                          value={`${f.name} desc`}
-                        >
-                          {title} ↓
-                        </MenuItem>,
-                      ];
-                    })}
-                  </Select>
+                          {facets.map((f) => {
+                            const title = fieldTitleFromName(f.name);
+                            return [
+                              <MenuItem
+                                key={`${f.name}-asc`}
+                                value={`${f.name} asc`}
+                              >
+                                {title} ↑
+                              </MenuItem>,
+                              <MenuItem
+                                key={`${f.name}-desc`}
+                                value={`${f.name} desc`}
+                              >
+                                {title} ↓
+                              </MenuItem>,
+                            ];
+                          })}
+                        </Select>
+                      </Box>
+                    </Box>
+                    {results.map((result) => (
+                      <ResultValue
+                        result={result}
+                        completeValue={100}
+                        key={result["id"]}
+                        onlyVerified={onlyVerified}
+                      />
+                    ))}
+                  </Stack>
+                  <Button
+                    variant="outlined"
+                    disableElevation
+                    sx={{
+                      display: { xs: "block", lg: "none" },
+                      borderRadius: 1,
+                      fontWeight: 700,
+                      textTransform: "none",
+                      color: "black",
+                      width: "100%",
+                      marginTop: 2,
+                    }}
+                    onClick={() => setShowMorePages((prev) => prev + 5)}
+                  >
+                    Show more
+                  </Button>
+                  <Pagination
+                    showMorePages={showMorePages}
+                    searchType={searchType}
+                    resultCount={resultCount}
+                    setPage={setPage}
+                    page={page}
+                  />
                 </Box>
-              </Box>
-              {results.map((result) => (
-                <ResultValue
-                  result={result}
-                  completeValue={100}
-                  key={result["id"]}
-                  onlyVerified={onlyVerified}
-                />
-              ))}
-            </Stack>
-            <Button
-              variant="outlined"
-              disableElevation
-              sx={{
-                display: { xs: "block", lg: "none" },
-                borderRadius: 1,
-                fontWeight: 700,
-                textTransform: "none",
-                color: "black",
-                width: "100%",
-                marginTop: 2,
-              }}
-              onClick={() => setShowMorePages((prev) => prev + 5)}
-            >
-              Show more
-            </Button>
-            <Pagination
-              showMorePages={showMorePages}
-              searchType={searchType}
-              resultCount={resultCount}
-              setPage={setPage}
-              page={page}
-            />
-          </Grid>
+              </Fade>
+            </Grid>
+          )}
         </Grid>
       </Container>
     </>

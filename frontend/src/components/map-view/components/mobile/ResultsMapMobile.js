@@ -23,6 +23,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import ResultValue from "components/search-hub/ResultValue";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
+import { Export } from "components/search-hub/Export";
 
 const StyledBox = styled("div")(() => ({
   backgroundColor: "white",
@@ -51,12 +52,20 @@ const ResultsMapMobile = (props) => {
     isLoading,
     results,
     getDataSpatialSearch,
+    selectedElem,
+    changeSelectedElem,
   } = props;
 
   const [page, setPage] = useState(1);
 
   const [selectedResult, setSelectedResult] = useState(undefined);
 
+  useEffect(() => {
+    if (selectedElem) {
+      setSelectedResult(selectedElem);
+      setOpenSwipeDrawer(true);
+    }
+  }, [selectedElem]);
   useEffect(() => {
     getDataSpatialSearch(page);
   }, [page]);
@@ -76,6 +85,7 @@ const ResultsMapMobile = (props) => {
           height: `calc(60% - ${56}px)`,
           overflow: "visible",
         },
+        zIndex: 2,
       }}
     >
       <StyledBox
@@ -203,7 +213,7 @@ const ResultsMapMobile = (props) => {
             <Box sx={{ zIndex: 1, height: "inherit" }}>
               <TableContainer
                 component={Paper}
-                sx={{ boxShadow: 0, height: 300 }}
+                sx={{ boxShadow: 0, height: 280 }}
               >
                 {isLoading && (
                   <CircularProgress
@@ -216,7 +226,7 @@ const ResultsMapMobile = (props) => {
                     next={() => {
                       setPage(page + 1);
                     }}
-                    height={300}
+                    height={280}
                     hasMore={ITEMS_PER_PAGE * page < parseInt(resultsCount)}
                     loader={<h4></h4>}
                     endMessage={<p>No more items</p>}
@@ -259,34 +269,32 @@ const ResultsMapMobile = (props) => {
                                   >
                                     {row.txt_provider.map((r) => {
                                       return (
-                                        <>
-                                          <Tooltip key={r} title={r} arrow>
-                                            <Typography
-                                              variant="body2"
-                                              component="span"
-                                              display={"flex"}
-                                              alignItems={"center"}
-                                              sx={{ fontSize: "10px", gap: 1 }}
+                                        <Tooltip key={r} title={r} arrow>
+                                          <Typography
+                                            variant="body2"
+                                            component="span"
+                                            display={"flex"}
+                                            alignItems={"center"}
+                                            sx={{ fontSize: "10px", gap: 1 }}
+                                          >
+                                            <CircleIcon
+                                              fontSize="small"
+                                              sx={{
+                                                fontSize: "10px",
+                                                color:
+                                                  palette + "colorProvider",
+                                              }}
+                                            />
+                                            <Box
+                                              sx={{
+                                                fontSize: "10px",
+                                                gap: 1,
+                                              }}
                                             >
-                                              <CircleIcon
-                                                fontSize="small"
-                                                sx={{
-                                                  fontSize: "10px",
-                                                  color:
-                                                    palette + "colorProvider",
-                                                }}
-                                              />
-                                              <Box
-                                                sx={{
-                                                  fontSize: "10px",
-                                                  gap: 1,
-                                                }}
-                                              >
-                                                {cutWithDots(r, 20)}
-                                              </Box>
-                                            </Typography>
-                                          </Tooltip>
-                                        </>
+                                              {cutWithDots(r, 20)}
+                                            </Box>
+                                          </Typography>
+                                        </Tooltip>
                                       );
                                     })}
                                   </Box>
@@ -301,12 +309,21 @@ const ResultsMapMobile = (props) => {
                 )}
               </TableContainer>
             </Box>
+            <Box sx={{ display: "flex", justifyContent: "end" }}>
+              <Export
+                palette={"custom.resultPage.searchBar."}
+                uri={"uri"}
+                searchType={""}
+                resultCount={resultsCount}
+              />
+            </Box>
           </Stack>
         )}
         {selectedResult && (
           <ResultDetails
             result={selectedResult}
             setSelectedResult={setSelectedResult}
+            changeSelectedElem={changeSelectedElem}
           />
         )}
       </StyledBox>
@@ -315,7 +332,7 @@ const ResultsMapMobile = (props) => {
 };
 
 const ResultDetails = (props) => {
-  const { result, setSelectedResult } = props;
+  const { result, setSelectedResult, changeSelectedElem } = props;
   const palette = "custom.mapView.mobile.resultsMap.";
   return (
     <Stack
@@ -333,7 +350,10 @@ const ResultDetails = (props) => {
       >
         <IconButton
           aria-label="goBack"
-          onClick={() => setSelectedResult(undefined)}
+          onClick={() => {
+            changeSelectedElem(undefined);
+            setSelectedResult(undefined);
+          }}
         >
           <KeyboardBackspaceIcon
             sx={{

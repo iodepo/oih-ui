@@ -19,6 +19,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { useAppTranslation } from "context/context/AppTranslation";
 import { fieldTitleFromName } from "utilities/generalUtility";
+import { useMediaQuery, useTheme } from "@mui/material";
 
 const GenericFacet = (props) => {
   const {
@@ -32,11 +33,12 @@ const GenericFacet = (props) => {
     isClearAll,
     setIsClearAll,
     facetQuery,
+    addQueryMobile,
+    setSelectedFacetsMobile,
   } = props;
   const [searchInput, setSearchInput] = useState("");
   const [filteredFacet, setFilteredFacet] = useState(facet.counts);
   const [numberToShow, setNumberToShow] = useState(5);
-  const [checkedItems, setCheckedItems] = useState([]);
   const [selectedFacets, setSelectedFacets] = useState([]);
 
   const [selectedOrder, setSelectedOrder] = useState("Counts DESC");
@@ -129,6 +131,8 @@ const GenericFacet = (props) => {
   }, [facetQuery]);
   const translationState = useAppTranslation();
   const palette = "custom.resultPage.filters.";
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   return (
     <>
       <Toolbar
@@ -210,6 +214,7 @@ const GenericFacet = (props) => {
                       tabIndex={-1}
                       checked={isChecked(facetCount.name)}
                       onChange={(e) => {
+                        const checked = e.target.checked;
                         const updatedCheckedItems = e.target.checked
                           ? [...selectedFacets, facetCount.name]
                           : selectedFacets.filter(
@@ -217,24 +222,34 @@ const GenericFacet = (props) => {
                             );
 
                         setSelectedFacets(updatedCheckedItems);
-                        if (!e.target.checked) {
-                          clear();
+                        facetSearch(facet.name, facetCount.name, checked);
+                        if (!checked) {
                           setFilterChosenMobile((f) =>
                             f.filter((d) => d.type !== title.toLowerCase())
                           );
                         } else {
-                          facetSearch(facet.name, facetCount.name);
-                          const isGenericFilterSet = filterChosenMobile.find(
-                            (f) => f.type === facetCount.name
-                          );
-                          if (isGenericFilterSet ?? true)
-                            setFilterChosenMobile((prev) => [
+                          if (isMobile) {
+                            addQueryMobile(facet.name, facetCount.name);
+                            setSelectedFacetsMobile((prev) => [
                               ...prev,
                               {
-                                type: facetCount.name,
+                                type: facet.name,
                                 text: facetCount.name,
                               },
                             ]);
+                          } else {
+                            const isGenericFilterSet = filterChosenMobile.find(
+                              (f) => f.type === facetCount.name
+                            );
+                            if (isGenericFilterSet ?? true)
+                              setFilterChosenMobile((prev) => [
+                                ...prev,
+                                {
+                                  type: facet.name,
+                                  text: facetCount.name,
+                                },
+                              ]);
+                          }
                         }
                       }}
                       disableRipple

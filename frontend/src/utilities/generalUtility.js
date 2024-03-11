@@ -1,6 +1,7 @@
 import { SAMPLE_QUERIES, fieldNameMap } from "portability/configuration";
 import { useSearchParams } from "react-router-dom";
 import { useCallback } from "react";
+import { dataServiceUrl } from "config";
 
 const randomSampleQueries = (n) =>
   SAMPLE_QUERIES.map((e) => [Math.random(), e])
@@ -36,4 +37,7 @@ function useSearchParam(param, def = undefined) {
   return [params.has(param) ? params.get(param) : def, setParam];
 }
 
-export { randomSampleQueries, fieldTitleFromName, useSearchParam };
+const fetchDetail = (id) =>
+  fetch(`${dataServiceUrl}/detail?id=${id}`).then((r) => r.json());
+
+export { randomSampleQueries, fieldTitleFromName, useSearchParam, fetchDetail };

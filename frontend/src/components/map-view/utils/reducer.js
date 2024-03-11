@@ -50,5 +50,16 @@ export const reducer = (state, action) => {
         ...state,
         center: action.center,
       };
+    case "setShowSearchArea":
+      return {
+        ...state,
+        showSearchArea: action.showSearchArea,
+      };
+
+    case "setSelectedElem":
+      return {
+        ...state,
+        selectedElem: action.selectedElem,
+      };
   }
 };

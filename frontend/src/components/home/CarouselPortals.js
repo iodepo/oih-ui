@@ -13,6 +13,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Link } from "react-router-dom";
 import { PARTNERS } from "portability/configuration";
+import { useAppTranslation } from "context/context/AppTranslation";
 
 const AutoPlaySwipeableViews = autoPlay(SwipeableViews);
 const CarouselPortals = () => {
@@ -31,6 +32,7 @@ const CarouselPortals = () => {
   }, [setIndex]);
 
   const palette = "custom.homepage.carouselPortals.";
+  const translationState = useAppTranslation();
   return (
     <Container
       maxWidth="xl"
@@ -45,7 +47,7 @@ const CarouselPortals = () => {
             sx={{ fontSize: "36px", color: palette + "colorTypography" }}
             gutterBottom
           >
-            Partners
+            {translationState.translation["Portals"]}
           </Typography>
         </Grid>
         <Grid item xs={5} lg={12} sx={{ position: "relative", mt: 4 }}>
