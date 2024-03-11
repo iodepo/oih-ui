@@ -43,6 +43,7 @@ const ToolbarMobileMapView = (props) => {
     changeSelectedElem,
     searchThisArea,
     showSearchArea,
+    currentURI,
   } = props;
   const translationState = useAppTranslation();
 
@@ -201,6 +202,7 @@ const ToolbarMobileMapView = (props) => {
             getDataSpatialSearch={getDataSpatialSearch}
             selectedElem={selectedElem}
             changeSelectedElem={changeSelectedElem}
+            currentURI={currentURI}
           />
         </Stack>
       </Box>

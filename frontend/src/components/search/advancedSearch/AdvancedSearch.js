@@ -231,11 +231,14 @@ const AdvancedSearch = (props) => {
                 setSearchAdvancedQuery(resetObj);
               }}
             >
-              {CATEGORIES.map((c, index) => (
-                <MenuItem key={index} value={c.text}>
-                  {translationState.translation[c.text]}
-                </MenuItem>
-              ))}
+              {CATEGORIES.map(
+                (c, index) =>
+                  c.text !== "Spatial Search" && (
+                    <MenuItem key={index} value={c.text}>
+                      {translationState.translation[c.text]}
+                    </MenuItem>
+                  )
+              )}
             </Select>
             <Select
               startAdornment={

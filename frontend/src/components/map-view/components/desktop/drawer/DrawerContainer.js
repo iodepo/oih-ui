@@ -63,6 +63,7 @@ const DrawerContainer = (props) => {
     clear,
     changeSelectedElem,
     selectedElem,
+    currentURI,
   } = props;
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("");
@@ -163,6 +164,8 @@ const DrawerContainer = (props) => {
             searchText={searchText}
             setSearchText={setSearchText}
             handleSubmit={handleSubmit}
+            setSelectedFacets={setSelectedFacets}
+            clear={clear}
           />
           <Box sx={{ height: "inherit" }} ref={mainBoxRef}>
             <TableDrawer
@@ -190,8 +193,8 @@ const DrawerContainer = (props) => {
           >
             <Export
               palette={"custom.resultPage.searchBar."}
-              uri={"uri"}
-              searchType={""}
+              uri={currentURI}
+              searchType={"SpatialData"}
               resultCount={resultsCount}
             />
             <Typography

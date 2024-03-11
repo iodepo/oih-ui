@@ -46,6 +46,7 @@ const MapContainer = (props) => {
   const [mapBounds, setMapBounds] = useState(false);
   const [open, setOpen] = useState(true);
   const [facets, setFacets] = useState([]);
+  const [currentURI, setCurrentURI] = useState("");
   const [facetQuery, setFacetQuery] = useSearchParam("facet_query");
   const [selectedFacets, setSelectedFacets] = useState([]);
   const [initCenter, setInitCenter] = useState([65.468754, 44.57875]);
@@ -194,7 +195,7 @@ const MapContainer = (props) => {
       params.append("region", region);
     }
     URI += [params.toString(), facetQuery].filter((e) => e).join("&");
-
+    setCurrentURI(URI);
     fetch(URI)
       .then((response) => response.json())
       .then((json) => {
@@ -287,6 +288,7 @@ const MapContainer = (props) => {
             selectedElem={state.selectedElem}
             changeShowSearchArea={changeShowSearchArea}
             searchThisArea={searchThisArea}
+            currentURI={currentURI}
           />
         </Box>
       )}
@@ -337,6 +339,7 @@ const MapContainer = (props) => {
             selectedElem={state.selectedElem}
             changeShowSearchArea={changeShowSearchArea}
             searchThisArea={searchThisArea}
+            currentURI={currentURI}
           />
         </Box>
       )}

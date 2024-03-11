@@ -111,6 +111,7 @@ const GenericFacet = (props) => {
   }, [isClearAll]);
 
   useEffect(() => {
+    setSelectedFacets([]);
     if (facetQuery) {
       const pairs = facetQuery.split("&");
 

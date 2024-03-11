@@ -37,7 +37,7 @@ const CarouselPortals = () => {
     <Container
       maxWidth="xl"
       sx={{
-        my: 6,
+        my: 12,
       }}
     >
       <Grid container>

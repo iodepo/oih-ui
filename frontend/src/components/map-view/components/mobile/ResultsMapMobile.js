@@ -54,6 +54,7 @@ const ResultsMapMobile = (props) => {
     getDataSpatialSearch,
     selectedElem,
     changeSelectedElem,
+    currentURI,
   } = props;
 
   const [page, setPage] = useState(1);
@@ -312,8 +313,8 @@ const ResultsMapMobile = (props) => {
             <Box sx={{ display: "flex", justifyContent: "end" }}>
               <Export
                 palette={"custom.resultPage.searchBar."}
-                uri={"uri"}
-                searchType={""}
+                uri={currentURI}
+                searchType={"SpatialData"}
                 resultCount={resultsCount}
               />
             </Box>

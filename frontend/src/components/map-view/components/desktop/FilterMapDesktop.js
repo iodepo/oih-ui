@@ -86,10 +86,10 @@ const FilterMapDesktop = (props) => {
                 variant="contained"
                 sx={{
                   height: "24px",
-                  fontSize: "14px",
+                  fontSize: "13px",
                   backgroundColor: palette + "bgButton",
-                  maxWidth: "135px",
-                  width: "115px",
+                  maxWidth: "160px",
+                  whiteSpace: "noWrap",
                   color: palette + "colorButton",
                   textTransform: "none",
                   boxShadow: "none",

@@ -55,6 +55,7 @@ const DesktopMapView = (props) => {
     changeSelectedElem,
     selectedElem,
     searchThisArea,
+    currentURI,
   } = props;
 
   const palette = "custom.mapView.desktop.";
@@ -89,6 +90,7 @@ const DesktopMapView = (props) => {
             clear={clear}
             changeSelectedElem={changeSelectedElem}
             selectedElem={selectedElem}
+            currentURI={currentURI}
           />
         </Drawer>
         {open ? (

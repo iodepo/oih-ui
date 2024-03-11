@@ -49,7 +49,7 @@ const TableDrawer = (props) => {
               setPage(page + 1);
             }}
             height={mainBoxHeight - 20}
-            hasMore={ITEMS_PER_PAGE * page < parseInt(resultsCount)}
+            hasMore={(ITEMS_PER_PAGE + 5) * page < parseInt(resultsCount)}
             loader={<h4></h4>}
             endMessage={<p>No more items</p>}
           >

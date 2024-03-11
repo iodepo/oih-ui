@@ -48,6 +48,7 @@ const MobileMapView = (props) => {
     searchThisArea,
     showSearchArea,
     changeShowSearchArea,
+    currentURI,
   } = props;
   return (
     <>
@@ -90,6 +91,7 @@ const MobileMapView = (props) => {
           changeSelectedElem={changeSelectedElem}
           searchThisArea={searchThisArea}
           showSearchArea={showSearchArea}
+          currentURI={currentURI}
         />
         <MapView
           container={container}
