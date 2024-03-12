@@ -73,6 +73,7 @@ const AdvancedSearch = (props) => {
   }, []);
 
   const createSearchQuery = () => {
+    debugger;
     let searchQueryBuild = "{{";
     // Build SOLR facet query
     let facetQuery = "";
@@ -97,6 +98,7 @@ const AdvancedSearch = (props) => {
       if (operator.endsWith("Contains")) {
         return `*${text}*`;
       }
+
       return text;
     }
 
@@ -152,6 +154,7 @@ const AdvancedSearch = (props) => {
     }
     searchQueryBuild += " }}";
     setSearchQuery(searchQueryBuild);
+    console.log(searchAdvancedQuery);
     const hrefFor = (region, query) =>
       `/results/${idTabName}?${new URLSearchParams({
         ...(query ? { fq: query } : {}),

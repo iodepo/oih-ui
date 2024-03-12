@@ -146,72 +146,74 @@ export default function Results() {
     ]
   );
 
-  const destructuringSearchTextAdvanced = (text) => {
-    function valueMapper(text, operator) {
-      if (operator.endsWith("Contains")) {
-        return `*${text}*`;
-      }
-      return text;
-    }
-    let resultQuery = "";
-    let idTopic = "";
-    console.log(facets);
-    let regex = /{{(.*?)}}/;
-    var regexCondition =
-      /\((\w+)\s*(not\s*contains|not\s*equals|contains|equals|is)\s*"([^"]*)"\)/i;
-    let match = regex.exec(text);
-    /* (txt_provider:*AAAA* OR -txt_keywords:*VVVV*) AND (txt_contributor:UNESCO) */
-    if (match) {
-      let andGroup = match[1].trim().toLowerCase().split("and");
-      andGroup.forEach((ag) => {
-        if (ag.toLowerCase().includes(" or ")) {
-          let orGroup = ag.trim().split(" or ");
-          orGroup.forEach((og) => {
-            var matchCondition = og.trim().match(regexCondition);
-            if (matchCondition) {
-              var category = matchCondition[1];
-              var operator = matchCondition[2];
-              var value = matchCondition[3];
-              if (category === "topic") {
-                idTopic = CATEGORIES.find(
-                  (c) => c.text.toLowerCase() === value
-                ).id;
-              } else {
-                resultQuery +=
-                  "(" +
-                  idFacets[category] +
-                  ":" +
-                  valueMapper(value, operator) +
-                  ")";
+  const destructuringSearchTextAdvanced = (query) => {
+    // {{ (Topic IS "Documents") AND (( Provider CONTAINS "AAAA" ) OR ( Provider CONTAINS "BBB AAA" )) AND (Provider CONTAINS "CCCC") }}
+
+    // {{ (Topic IS "Documents") AND (Provider CONTAINS "AAAA") AND (Provider NOT CONTAINS "BBB d") AND (( Provider EQUALS "AquaDocs" ) OR ( Provider NOT EQUALS "Better Biomolecular Ocean Practices (BeBOP) as part of Ocean Biomolecular Observing Network (OBON)" ) OR ( Provider CONTAINS "CCC" )) }}
+
+    const trimmedQuery = query.replace(/"/g, "'").trim();
+
+    if (trimmedQuery.startsWith("{{") && trimmedQuery.endsWith("}}")) {
+      const cleanedQuery = trimmedQuery.slice(2, -2).trim();
+
+      const subQueries = cleanedQuery
+        .split(new RegExp("\\b" + "AND" + "\\b", "i"))
+        .map((subQuery) => subQuery.trim());
+
+      const parsedObject = {};
+
+      subQueries.forEach((subQuery, index) => {
+        if (subQuery.startsWith("(") && subQuery.endsWith(")")) {
+          const cleanedSubQuery = subQuery.slice(1, -1).trim();
+
+          if (new RegExp("\\b" + "OR" + "\\b", "i").test(cleanedSubQuery)) {
+            const subQueriesOR = cleanedSubQuery
+              .split(new RegExp("\\b" + "OR" + "\\b", "i"))
+              .map((subQuery) => subQuery.trim());
+
+            subQueriesOR.forEach((subQueryOR, index2) => {
+              if (subQueryOR.startsWith("(") && subQueryOR.endsWith(")")) {
+                const x = subQueryOR.slice(1, -1).trim();
+                const [category, operator, value] = x.match(
+                  /'(?:[^']|'[^']*')*'|[^ ]+/g
+                );
+                if (!parsedObject[index]) {
+                  parsedObject[index] = [];
+                }
+
+                parsedObject[index].push({
+                  id: index2,
+                  category: category.trim(),
+                  operator: operator.trim(),
+                  textfield: value.replace(/'/g, ""),
+                });
               }
-            }
-            resultQuery += " OR ";
-          });
-          resultQuery += " AND ";
-        } else {
-          var matchCondition = ag.trim().match(regexCondition);
-          if (matchCondition) {
-            var category = matchCondition[1];
-            var operator = matchCondition[2];
-            var value = matchCondition[3];
-            if (category === "topic") {
-              idTopic = CATEGORIES.find(
-                (c) => c.text.toLowerCase() === value
-              ).id;
+            });
+          } else {
+            const [category, operator, value] = cleanedSubQuery.match(
+              /'(?:[^']|'[^']*')*'|[^ ]+/g
+            );
+            if (index === 0) {
+              parsedObject[index] = {
+                category: category.trim(),
+                value: value.replace(/'/g, ""),
+                region: "Global",
+              };
             } else {
-              resultQuery +=
-                "(" +
-                idFacets[category] +
-                ":" +
-                valueMapper(value, operator) +
-                ")";
-              resultQuery += " AND ";
+              parsedObject[index] = [
+                {
+                  id: 0,
+                  category: category.trim(),
+                  operator: operator.trim(),
+                  textfield: value.replace(/'/g, ""),
+                },
+              ];
             }
           }
         }
       });
-    } else {
-      return text;
+
+      console.log(parsedObject);
     }
   };
 

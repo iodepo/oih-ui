@@ -1,6 +1,5 @@
-import React, { useState, useCallback } from "react";
-import SwipeableViews from "react-swipeable-views";
-import { autoPlay } from "react-swipeable-views-utils";
+import React, { useState, useCallback, useRef } from "react";
+import { SwipeableViews } from "react-swipeable-views-v18";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
@@ -15,21 +14,16 @@ import { Link } from "react-router-dom";
 import { PARTNERS } from "portability/configuration";
 import { useAppTranslation } from "context/context/AppTranslation";
 
-const AutoPlaySwipeableViews = autoPlay(SwipeableViews);
 const CarouselPortals = () => {
-  const [index, setIndex] = useState(0);
+  const swipeableViewsRef = useRef(null);
 
-  const handleSlideChange = (index) => {
-    setIndex(index);
+  const handleSwipeForward = () => {
+    swipeableViewsRef.current.swipeForward();
   };
 
-  const handleNextSlide = useCallback(() => {
-    setIndex((prevIndex) => (prevIndex + 1) % PARTNERS.length);
-  }, [setIndex]);
-
-  const handlePrevSlide = useCallback(() => {
-    setIndex((prevIndex) => (prevIndex - 1 + 3) % PARTNERS.length);
-  }, [setIndex]);
+  const handleSwipeBackward = () => {
+    swipeableViewsRef.current.swipeBackward();
+  };
 
   const palette = "custom.homepage.carouselPortals.";
   const translationState = useAppTranslation();
@@ -51,10 +45,7 @@ const CarouselPortals = () => {
           </Typography>
         </Grid>
         <Grid item xs={5} lg={12} sx={{ position: "relative", mt: 4 }}>
-          <AutoPlaySwipeableViews
-            index={index}
-            onChangeIndex={handleSlideChange}
-          >
+          <SwipeableViews autoSwipe={true} ref={swipeableViewsRef}>
             {PARTNERS.map((g, i) => {
               return (
                 <Box
@@ -92,7 +83,7 @@ const CarouselPortals = () => {
                 </Box>
               );
             })}
-          </AutoPlaySwipeableViews>
+          </SwipeableViews>
           <Box
             sx={{
               position: "absolute",
@@ -102,10 +93,10 @@ const CarouselPortals = () => {
               right: 14,
             }}
           >
-            <IconButton onClick={handlePrevSlide}>
+            <IconButton onClick={handleSwipeBackward}>
               <ArrowBackIcon sx={{ color: palette + "colorArrows" }} />
             </IconButton>
-            <IconButton onClick={handleNextSlide}>
+            <IconButton onClick={handleSwipeForward}>
               <ArrowForwardIcon sx={{ color: palette + "colorArrows" }} />
             </IconButton>
           </Box>

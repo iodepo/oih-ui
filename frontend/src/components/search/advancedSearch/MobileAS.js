@@ -44,8 +44,8 @@ const MobileAS = (props) => {
         )}
         {searchAdvancedQuery[id].map((v, k) => {
           return (
-            <>
-              <Grid key={k} item xs={7}>
+            <Box key={k}>
+              <Grid item xs={7}>
                 <Select
                   defaultValue={"Provider"}
                   sx={{
@@ -294,7 +294,7 @@ const MobileAS = (props) => {
                     </Typography>
                   </Grid>
                 )}
-            </>
+            </Box>
           );
         })}
         {index !== Object.keys(searchAdvancedQuery).length - 1 &&

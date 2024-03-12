@@ -288,10 +288,10 @@ const Export = (props) => {
           <Text style={styles.title}>{namePdf} Data:</Text>
 
           <View style={styles.section}>
-            {data.map((d) => {
+            {data.map((d, index) => {
               const keys = Object.keys(d);
               return (
-                <>
+                <Box key={index}>
                   {keys.map((k) => (
                     <>
                       {d[k] && k === "name" && (
@@ -301,7 +301,7 @@ const Export = (props) => {
                       <Text>{"\n"}</Text>
                     </>
                   ))}
-                </>
+                </Box>
               );
             })}
           </View>
