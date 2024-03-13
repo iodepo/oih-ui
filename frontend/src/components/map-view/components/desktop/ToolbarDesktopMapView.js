@@ -15,7 +15,13 @@ import SearchIcon from "@mui/icons-material/Search";
 import FilterMapDesktop from "./FilterMapDesktop";
 import SettingsMapDesktop from "./SettingsMapDesktop";
 import LayerMapDesktop from "./LayerMapDesktop";
-import { HEXAGON_LEGENDA } from "components/map-view/utils/constants";
+import {
+  HEATMAP_LEGENDA,
+  HEATMAP_REGIONS,
+  HEXAGON,
+  HEXAGON_LEGENDA,
+  NO_CLUSTER,
+} from "components/map-view/utils/constants";
 
 const ToolbarDesktopMapView = (props) => {
   const {
@@ -161,7 +167,7 @@ const ToolbarDesktopMapView = (props) => {
         sx={{
           width: "100%",
           position: "absolute",
-          bottom: 30,
+          bottom: 40,
           paddingLeft: "8px",
           paddingRight: "8px",
           display: "flex",
@@ -173,7 +179,7 @@ const ToolbarDesktopMapView = (props) => {
       >
         <Box
           sx={{
-            width: "25%",
+            width: "20%",
             height: "250px",
             display: openLayerMap && "none",
           }}
@@ -181,46 +187,74 @@ const ToolbarDesktopMapView = (props) => {
           <Fade in={openFilterMap} mountOnEnter unmountOnExit>
             <Box
               sx={{
-                backgroundColor: palette + "bgBox2",
+                backgroundColor:
+                  clustering === NO_CLUSTER
+                    ? "transparent"
+                    : palette + "bgBox2",
                 height: "100%",
                 borderRadius: "6px",
 
                 padding: "12px",
               }}
             >
-              <Stack spacing={2}>
-                <Typography variant="body2">
-                  COLOR - POINTS PER HEXAGON
-                </Typography>
-                {HEXAGON_LEGENDA.map((h, index) => {
-                  const [value, color] = h;
-                  return (
-                    <Box
-                      key={index}
-                      sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                    >
-                      <Box
-                        sx={{
-                          width: `15px`,
-                          height: `15px`,
-                          backgroundColor: color,
-                          position: "relative",
-                          clipPath:
-                            "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
-                        }}
-                      />
-                      <Typography variant="body2">{value}</Typography>
-                    </Box>
-                  );
-                })}
-              </Stack>
+              {clustering !== NO_CLUSTER && (
+                <Stack spacing={1}>
+                  <Typography variant="body2">
+                    COLOR - POINTS PER{" "}
+                    {clustering === HEXAGON ? "HEXAGON" : "HEATMAP"}
+                  </Typography>
+                  {clustering === HEXAGON &&
+                    HEXAGON_LEGENDA.map((h, index) => {
+                      const [value, color] = h;
+                      return (
+                        <Box
+                          key={index}
+                          sx={{ display: "flex", alignItems: "center", gap: 2 }}
+                        >
+                          <Box
+                            sx={{
+                              width: `15px`,
+                              height: `15px`,
+                              backgroundColor: color,
+                              position: "relative",
+                              clipPath:
+                                "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
+                            }}
+                          />
+                          <Typography variant="body2">{value}</Typography>
+                        </Box>
+                      );
+                    })}
+
+                  {clustering === HEATMAP_REGIONS &&
+                    HEATMAP_LEGENDA.map((h, index) => {
+                      const [value, color] = h;
+                      return (
+                        <Box
+                          key={index}
+                          sx={{ display: "flex", alignItems: "center", gap: 2 }}
+                        >
+                          <Box
+                            sx={{
+                              width: `15px`,
+                              height: `15px`,
+                              backgroundColor: color,
+                              borderRadius: "50%",
+                            }}
+                          />
+                          <Typography variant="body2">{value}</Typography>
+                        </Box>
+                      );
+                    })}
+                </Stack>
+              )}
             </Box>
           </Fade>
         </Box>
 
         <Box
           sx={{
-            width: openFilterMap && !openLayerMap ? "70%" : "unset",
+            width: openFilterMap && !openLayerMap ? "75%" : "unset",
             height: "250px",
           }}
         >

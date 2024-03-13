@@ -135,6 +135,8 @@ const Export = (props) => {
         a.click();
         window.URL.revokeObjectURL(url);
         break;
+      default:
+        break;
     }
     setIsLoading(false);
   };
@@ -291,17 +293,17 @@ const Export = (props) => {
             {data.map((d, index) => {
               const keys = Object.keys(d);
               return (
-                <Box key={index}>
-                  {keys.map((k) => (
-                    <>
+                <div key={index}>
+                  {keys.map((k, index2) => (
+                    <div key={index2}>
                       {d[k] && k === "name" && (
                         <Text style={styles.boldTitle}>{d.name}</Text>
                       )}
                       {d[k] && k !== "name" && drawText(d[k], k)}
                       <Text>{"\n"}</Text>
-                    </>
+                    </div>
                   ))}
-                </Box>
+                </div>
               );
             })}
           </View>

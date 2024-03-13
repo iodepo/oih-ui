@@ -193,6 +193,7 @@ const DesktopMapView = (props) => {
           changeShowSearchArea={changeShowSearchArea}
           showSearchArea={showSearchArea}
           changeSelectedElem={changeSelectedElem}
+          selectedElem={selectedElem}
         />
       </Box>
     </>

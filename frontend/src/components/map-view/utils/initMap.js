@@ -1,5 +1,6 @@
 import maplibregl from "maplibre-gl";
 import markerMap from "../../../resources/svg/markerMap.svg";
+import markerMapSelected from "../../../resources/svg/markerMapSelected.svg";
 
 export const layers = {
   ARCGIS: {
@@ -112,6 +113,13 @@ export const initMap = (container, coords, baseLayer, baseOpacity, zoom) => {
     map.addImage("custom-marker", marker);
   };
   marker.src = markerMap;
+
+  const markerSelected = new Image();
+  markerSelected.onload = function () {
+    map.addImage("custom-marker-selected", markerSelected);
+  };
+  markerSelected.src = markerMapSelected;
+
   return map;
 };
 

@@ -109,6 +109,7 @@ const MobileMapView = (props) => {
           setMapBounds={setMapBounds}
           changeSelectedElem={changeSelectedElem}
           changeShowSearchArea={changeShowSearchArea}
+          selectedElem={selectedElem}
         />
       </Box>
     </>

@@ -141,8 +141,9 @@ const AdvancedSearch = (props) => {
         facetQuery +=
           (value.operator.startsWith("Not") ? "-" : "") +
           categories[value.category] +
-          ":" +
-          valueMapper(value.textfield, value.operator);
+          ':"' +
+          valueMapper(value.textfield, value.operator) +
+          '"';
 
         if (index < group.length - 1) {
           facetQuery += " OR ";

@@ -5,9 +5,9 @@ import Fade from "@mui/material/Fade";
 import Typography from "@mui/material/Typography";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
-import Checkbox from "@mui/material/Checkbox";
 import Divider from "@mui/material/Divider";
 import Slider from "@mui/material/Slider";
+import Radio from "@mui/material/Radio";
 import { useAppTranslation } from "context/context/AppTranslation";
 import {
   HEATMAP_POINTS,
@@ -33,7 +33,7 @@ const SettingsMapDesktop = (props) => {
   const translationState = useAppTranslation();
   const palette = "custom.mapView.desktop.toolbar.";
 
-  const [showClusters, setShowClusters] = useState(true);
+  const [showClusters, setShowClusters] = useState(false);
   return (
     <Fade in={openFilterMap} mountOnEnter unmountOnExit>
       <Box
@@ -66,6 +66,7 @@ const SettingsMapDesktop = (props) => {
                         const checked = e.target.checked;
                         if (checked) {
                           setShowClusters(true);
+                          changeClustering(HEXAGON);
                         } else {
                           setShowClusters(false);
                           changeClustering(NO_CLUSTER);
@@ -93,31 +94,7 @@ const SettingsMapDesktop = (props) => {
                 >
                   <FormControlLabel
                     control={
-                      <Checkbox
-                        disabled={!showClusters}
-                        checked={clustering === HEATMAP_REGIONS}
-                        onChange={(e) => {
-                          const checked = e.target.checked;
-                          if (checked) {
-                            changeClustering(HEATMAP_REGIONS);
-                          } else {
-                            changeClustering(NO_CLUSTER);
-                          }
-                        }}
-                        size="small"
-                      />
-                    }
-                    label={translationState.translation["Heatmap"]}
-                    sx={{
-                      ".MuiTypography-root": {
-                        fontSize: "12px",
-                        color: palette + "colorTypography",
-                      },
-                    }}
-                  />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
+                      <Radio
                         disabled={!showClusters}
                         checked={clustering === HEXAGON}
                         onChange={(e) => {
@@ -132,6 +109,30 @@ const SettingsMapDesktop = (props) => {
                       />
                     }
                     label={translationState.translation["H3 Layer"]}
+                    sx={{
+                      ".MuiTypography-root": {
+                        fontSize: "12px",
+                        color: palette + "colorTypography",
+                      },
+                    }}
+                  />
+                  <FormControlLabel
+                    control={
+                      <Radio
+                        disabled={!showClusters}
+                        checked={clustering === HEATMAP_REGIONS}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          if (checked) {
+                            changeClustering(HEATMAP_REGIONS);
+                          } else {
+                            changeClustering(NO_CLUSTER);
+                          }
+                        }}
+                        size="small"
+                      />
+                    }
+                    label={translationState.translation["Heatmap"]}
                     sx={{
                       ".MuiTypography-root": {
                         fontSize: "12px",

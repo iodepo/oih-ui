@@ -45,7 +45,12 @@ const CarouselPortals = () => {
           </Typography>
         </Grid>
         <Grid item xs={5} lg={12} sx={{ position: "relative", mt: 4 }}>
-          <SwipeableViews autoSwipe={true} ref={swipeableViewsRef}>
+          <SwipeableViews
+            autoSwipe={true}
+            autoSwipeInterval={2000}
+            ref={swipeableViewsRef}
+            loop={true}
+          >
             {PARTNERS.map((g, i) => {
               return (
                 <Box

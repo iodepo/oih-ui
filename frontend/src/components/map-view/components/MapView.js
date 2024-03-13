@@ -25,6 +25,7 @@ const MapView = (props) => {
     geoJson,
     changeSelectedElem,
     changeShowSearchArea,
+    selectedElem,
   } = props;
   const mapInitRef = useRef(null);
   var h3Resolution = 2;
@@ -44,7 +45,7 @@ const MapView = (props) => {
           changeSelectedElem
         );
     }
-  }, [clustering, hexOpacity, showPoints, showRegions]);
+  }, [clustering, hexOpacity, showPoints, showRegions, geoJson]);
 
   useEffect(() => {
     if (zoom > 0) {
@@ -53,6 +54,15 @@ const MapView = (props) => {
       mapInitRef.current.zoomOut();
     }
   }, [zoom]);
+
+  useEffect(() => {
+    if (!selectedElem && mapInitRef.current) {
+      if (mapInitRef.current.getLayer("selected-point")) {
+        mapInitRef.current.removeLayer("selected-point");
+        mapInitRef.current.removeSource("selected-point");
+      }
+    }
+  }, [selectedElem, mapInitRef]);
 
   useEffect(() => {
     manageChangeOpacity(mapInitRef.current, baseOpacity, baseLayer);
@@ -112,7 +122,7 @@ const MapView = (props) => {
         const currentZoom = mapInitRef.current && mapInitRef.current.getZoom();
         let h3ResNew = calculateH3Resolution(currentZoom);
 
-        if (h3ResNew != h3Resolution) {
+        if (h3ResNew !== h3Resolution) {
           h3Resolution = h3ResNew;
           mapInitRef.current &&
             !isHome &&
@@ -129,7 +139,7 @@ const MapView = (props) => {
             );
         }
       });
-  }, [clustering, hexOpacity, showPoints, showRegions]);
+  }, [clustering, hexOpacity, showPoints, showRegions, geoJson]);
 
   return (
     <Box
