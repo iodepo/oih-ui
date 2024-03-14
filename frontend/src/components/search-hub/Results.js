@@ -2,7 +2,11 @@
 
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { fieldTitleFromName, useSearchParam } from "utilities/generalUtility";
+import {
+  fieldTitleFromName,
+  searchAdvanced,
+  useSearchParam,
+} from "utilities/generalUtility";
 import { dataServiceUrl } from "../../config/environment";
 import {
   CATEGORIES,
@@ -105,22 +109,35 @@ export default function Results() {
         rows: ITEMS_PER_PAGE + showMorePages,
       });
 
-      if (searchText !== "") {
-        destructuringSearchTextAdvanced(searchText);
-        params.append("search_text", searchText);
-      }
       if (region.toUpperCase() !== "GLOBAL") {
         params.append("region", region);
       }
+      debugger;
+      const facetQueryAdvanced = destructuringSearchTextAdvanced(searchText);
+      if (facetQueryAdvanced) {
+        URI += [
+          params.toString(),
+          facetQuery,
+          facetQueryAdvanced ? "fq=" + facetQueryAdvanced : "",
+          sort ? "sort=" + sort : "",
+        ]
+          .filter((e) => e)
+          .join("&");
+      } else {
+        if (searchText !== "") {
+          params.append("search_text", searchText);
+        }
 
-      URI += [
-        params.toString(),
-        facetQuery,
-        fq ? "fq=" + fq : "",
-        sort ? "sort=" + sort : "",
-      ]
-        .filter((e) => e)
-        .join("&");
+        URI += [
+          params.toString(),
+          facetQuery,
+          fq ? "fq=" + fq : "",
+          sort ? "sort=" + sort : "",
+        ]
+          .filter((e) => e)
+          .join("&");
+      }
+
       setCurrentURI(URI);
 
       fetch(URI)
@@ -147,12 +164,8 @@ export default function Results() {
   );
 
   const destructuringSearchTextAdvanced = (query) => {
-    // {{ (Topic IS "Documents") AND (( Provider CONTAINS "AAAA" ) OR ( Provider CONTAINS "BBB AAA" )) AND (Provider CONTAINS "CCCC") }}
-
-    // {{ (Topic IS "Documents") AND (Provider CONTAINS "AAAA") AND (Provider NOT CONTAINS "BBB d") AND (( Provider EQUALS "AquaDocs" ) OR ( Provider NOT EQUALS "Better Biomolecular Ocean Practices (BeBOP) as part of Ocean Biomolecular Observing Network (OBON)" ) OR ( Provider CONTAINS "CCC" )) }}
-
     const trimmedQuery = query.replace(/"/g, "'").trim();
-
+    const regex = /'([^']*)' (\S+) '([^']*)'/;
     if (trimmedQuery.startsWith("{{") && trimmedQuery.endsWith("}}")) {
       const cleanedQuery = trimmedQuery.slice(2, -2).trim();
 
@@ -174,47 +187,54 @@ export default function Results() {
             subQueriesOR.forEach((subQueryOR, index2) => {
               if (subQueryOR.startsWith("(") && subQueryOR.endsWith(")")) {
                 const x = subQueryOR.slice(1, -1).trim();
-                const [category, operator, value] = x.match(
-                  /'(?:[^']|'[^']*')*'|[^ ]+/g
-                );
-                if (!parsedObject[index]) {
-                  parsedObject[index] = [];
-                }
+                const matches = x.match(regex);
 
-                parsedObject[index].push({
-                  id: index2,
-                  category: category.trim(),
-                  operator: operator.trim(),
-                  textfield: value.replace(/'/g, ""),
-                });
+                if (matches && matches.length === 4) {
+                  const [_, category, operator, value] = matches;
+                  if (!parsedObject[index]) {
+                    parsedObject[index] = [];
+                  }
+
+                  parsedObject[index].push({
+                    id: index2,
+                    category: category.trim(),
+                    operator: operator.trim(),
+                    textfield: value.replace(/'/g, ""),
+                  });
+                }
               }
             });
           } else {
-            const [category, operator, value] = cleanedSubQuery.match(
-              /'(?:[^']|'[^']*')*'|[^ ]+/g
-            );
-            if (index === 0) {
-              parsedObject[index] = {
-                category: category.trim(),
-                value: value.replace(/'/g, ""),
-                region: "Global",
-              };
-            } else {
-              parsedObject[index] = [
-                {
-                  id: 0,
+            const matches = cleanedSubQuery.match(regex);
+
+            if (matches && matches.length === 4) {
+              const [_, category, operator, value] = matches;
+
+              if (index === 0) {
+                parsedObject[index] = {
                   category: category.trim(),
-                  operator: operator.trim(),
-                  textfield: value.replace(/'/g, ""),
-                },
-              ];
+                  value: value.replace(/'/g, ""),
+                  region: "Global",
+                };
+              } else {
+                parsedObject[index] = [
+                  {
+                    id: 0,
+                    category: category.trim(),
+                    operator: operator.trim(),
+                    textfield: value.replace(/'/g, ""),
+                  },
+                ];
+              }
             }
           }
         }
       });
 
-      console.log(parsedObject);
+      const [searchQueryBuild, facetQuery] = searchAdvanced(parsedObject);
+      return facetQuery;
     }
+    return undefined;
   };
 
   const facetSearch = (name, value, checked) => {
@@ -285,7 +305,7 @@ export default function Results() {
         <Grid container mt={{ xs: 4, lg: 0 }} gap={{ xs: 1, lg: 0 }}>
           <Grid item lg={3} display={{ xs: "none", lg: "block" }}>
             <Fade
-              in={facets.length > 0}
+              in={facets.length >= 0}
               timeout={1000}
               mountOnEnter
               unmountOnExit

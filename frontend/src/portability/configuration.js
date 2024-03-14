@@ -7,6 +7,7 @@ import vessels from "../resources/svg/vessels.svg";
 import projects from "../resources/svg/projects.svg";
 import datasets from "../resources/svg/datasets.svg";
 import examplePartner from "../resources/partners/example.png";
+import backgroundImageUrl from "../resources/landing-bg_1400.jpeg";
 /* import ReactGA from "react-ga4";
 
 ReactGA.initialize([
@@ -346,7 +347,7 @@ const primaryPalette = {
 // -- START REGION BACKGROUND IMAGE --
 
 // Just change the relative path of the image
-import backgroundImageUrl from "../resources/landing-bg_1400.jpeg";
+
 const backgroundImage = `
   #home {
     flex-direction: column;

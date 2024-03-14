@@ -109,12 +109,16 @@ export const initMap = (container, coords, baseLayer, baseOpacity, zoom) => {
   map.addControl(new maplibregl.AttributionControl(), "bottom-left");
 
   const marker = new Image();
+  marker.width = 100;
+  marker.height = 150;
   marker.onload = function () {
     map.addImage("custom-marker", marker);
   };
   marker.src = markerMap;
 
   const markerSelected = new Image();
+  markerSelected.width = 100;
+  markerSelected.height = 150;
   markerSelected.onload = function () {
     map.addImage("custom-marker-selected", markerSelected);
   };

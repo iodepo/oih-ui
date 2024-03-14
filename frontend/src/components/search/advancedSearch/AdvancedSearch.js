@@ -7,8 +7,16 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { useAppTranslation } from "context/context/AppTranslation";
 import Alert from "@mui/material/Alert";
-import { CATEGORIES, PROMOTED_REGIONS } from "portability/configuration";
-import { fieldTitleFromName, useSearchParam } from "utilities/generalUtility";
+import {
+  CATEGORIES,
+  PROMOTED_REGIONS,
+  idFacets,
+} from "portability/configuration";
+import {
+  fieldTitleFromName,
+  searchAdvanced,
+  useSearchParam,
+} from "utilities/generalUtility";
 import { dataServiceUrl } from "config/environment";
 import { useNavigate } from "react-router-dom";
 import PublicIcon from "@mui/icons-material/Public";
@@ -73,87 +81,14 @@ const AdvancedSearch = (props) => {
   }, []);
 
   const createSearchQuery = () => {
-    debugger;
-    let searchQueryBuild = "{{";
-    // Build SOLR facet query
-    let facetQuery = "";
+    const [searchQueryBuild, facetQuery] = searchAdvanced(searchAdvancedQuery);
 
     const idTabName = CATEGORIES.find(
       (c) => c.text === searchAdvancedQuery[0].value
     ).id;
 
     const regionValue = searchAdvancedQuery[0].region;
-    searchQueryBuild +=
-      ' (Topic IS "' + searchAdvancedQuery[0].value + '") AND (';
-    /** @type {{id: number, category: string, value: string, operator: string, textfield: string}[][]} */
-    const groups = Object.values(searchAdvancedQuery).toSpliced(0, 1);
 
-    const categories = facetsToShow.reduce((acc, f) => {
-      const t = fieldTitleFromName(f.name);
-      acc[t] = f.name;
-      return acc;
-    }, {});
-
-    function valueMapper(text, operator) {
-      if (operator.endsWith("Contains")) {
-        return `*${text}*`;
-      }
-
-      return text;
-    }
-
-    let firstGroup = true;
-    for (const group of groups) {
-      if (firstGroup) {
-        facetQuery += "(";
-        firstGroup = false;
-      } else {
-        facetQuery += " AND (";
-        searchQueryBuild += " AND (";
-      }
-
-      for (const [index, value] of group.entries()) {
-        if (!value.textfield) {
-          setAlertMessage(
-            "Please kindly fill in all fields or, if not applicable, feel free to remove them"
-          );
-        }
-
-        if (group.length > 1) {
-          searchQueryBuild +=
-            "( " +
-            value.category +
-            " " +
-            value.operator.replace(/([a-z])([A-Z])/g, "$1 $2").toUpperCase() +
-            ' "' +
-            value.textfield +
-            '" )';
-        } else {
-          searchQueryBuild +=
-            value.category +
-            " " +
-            value.operator.replace(/([a-z])([A-Z])/g, "$1 $2").toUpperCase() +
-            ' "' +
-            value.textfield +
-            '"';
-        }
-
-        facetQuery +=
-          (value.operator.startsWith("Not") ? "-" : "") +
-          categories[value.category] +
-          ':"' +
-          valueMapper(value.textfield, value.operator) +
-          '"';
-
-        if (index < group.length - 1) {
-          facetQuery += " OR ";
-          searchQueryBuild += " OR ";
-        }
-      }
-      searchQueryBuild += ")";
-      facetQuery += ")";
-    }
-    searchQueryBuild += " }}";
     setSearchQuery(searchQueryBuild);
     console.log(searchAdvancedQuery);
     const hrefFor = (region, query) =>
