@@ -21,11 +21,12 @@ const MapView = (props) => {
     setCenter,
     initCenter,
     heatOpacity,
-    setMapBounds,
+    changeMapBounds,
     geoJson,
     changeSelectedElem,
     changeShowSearchArea,
     selectedElem,
+    setInitMapBounds,
   } = props;
   const mapInitRef = useRef(null);
   var h3Resolution = 2;
@@ -48,10 +49,11 @@ const MapView = (props) => {
   }, [clustering, hexOpacity, showPoints, showRegions, geoJson]);
 
   useEffect(() => {
-    if (zoom > 0) {
-      mapInitRef.current.zoomIn();
-    } else if (zoom < 0) {
-      mapInitRef.current.zoomOut();
+    if (mapInitRef.current && zoom) {
+      const currentZoom = mapInitRef.current.getZoom();
+      if (currentZoom !== zoom) {
+        mapInitRef.current.zoomTo(zoom);
+      }
     }
   }, [zoom]);
 
@@ -61,6 +63,17 @@ const MapView = (props) => {
         mapInitRef.current.removeLayer("selected-point");
         mapInitRef.current.removeSource("selected-point");
       }
+      manageLayers(
+        mapInitRef.current,
+        clustering,
+        hexOpacity,
+        heatOpacity,
+        showPoints,
+        showRegions,
+        h3Resolution,
+        geoJson,
+        changeSelectedElem
+      );
     }
   }, [selectedElem, mapInitRef]);
 
@@ -71,35 +84,19 @@ const MapView = (props) => {
   useEffect(() => {
     if (container.current) {
       container.current.innerHTML = "";
-      let zoom = 4;
+      let initZoom = zoom;
       if (mapInitRef.current && !isHome) {
-        zoom = mapInitRef.current.getZoom();
+        initZoom = mapInitRef.current.getZoom();
       }
       mapInitRef.current = initMap(
         container.current,
         initCenter,
         baseLayer,
         baseOpacity,
-        zoom
+        initZoom
       );
-
-      mapInitRef.current.on("load", function () {
-        mapInitRef.current &&
-          !isHome &&
-          manageLayers(
-            mapInitRef.current,
-            clustering,
-            hexOpacity,
-            heatOpacity,
-            showPoints,
-            showRegions,
-            h3Resolution,
-            geoJson,
-            changeSelectedElem
-          );
-        mapInitRef.current &&
-          manageChangeOpacity(mapInitRef.current, baseOpacity, baseLayer);
-      });
+      changeMapBounds(mapInitRef.current.getBounds());
+      manageChangeOpacity(mapInitRef.current, baseOpacity, baseLayer);
 
       mapInitRef.current.on("moveend", function () {
         if (mapInitRef.current && !isHome) {
@@ -107,10 +104,8 @@ const MapView = (props) => {
             mapInitRef.current.getCenter().lng,
             mapInitRef.current.getCenter().lat,
           ]);
-
           changeShowSearchArea(true);
-
-          setMapBounds(mapInitRef.current.getBounds());
+          changeMapBounds(mapInitRef.current.getBounds());
         }
       });
     }

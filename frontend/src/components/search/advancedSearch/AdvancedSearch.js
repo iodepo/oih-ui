@@ -7,11 +7,7 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { useAppTranslation } from "context/context/AppTranslation";
 import Alert from "@mui/material/Alert";
-import {
-  CATEGORIES,
-  PROMOTED_REGIONS,
-  idFacets,
-} from "portability/configuration";
+import { CATEGORIES, PROMOTED_REGIONS } from "portability/configuration";
 import {
   fieldTitleFromName,
   searchAdvanced,
@@ -23,6 +19,22 @@ import PublicIcon from "@mui/icons-material/Public";
 import MobileAS from "./MobileAS";
 import DesktopAS from "./DesktopAS";
 
+const initialState = {
+  0: {
+    category: "Topic",
+    value: "Documents",
+    region: "Global",
+  },
+  1: [
+    {
+      id: 0,
+      category: "Provider",
+      operator: "Contains",
+      textfield: "",
+    },
+  ],
+};
+
 const AdvancedSearch = (props) => {
   const { setSearchQuery, searchQuery, facets } = props;
   const palette = "custom.resultPage.searchBar.advancedSearch.";
@@ -30,23 +42,17 @@ const AdvancedSearch = (props) => {
   const [facetsToShow, setFacetsToShow] = useState(facets);
   const [alertMessage, setAlertMessage] = useState("");
   const [sort, setSort] = useSearchParam("sort");
-  const [searchAdvancedQuery, setSearchAdvancedQuery] = useState({
-    0: {
-      category: "Topic",
-      value: "Documents",
-      region: "Global",
-    },
-    1: [
-      {
-        id: 0,
-        category: "Provider",
-        operator: "Contains",
-        textfield: "",
-      },
-    ],
-  });
+  const [isClear, setIsClear] = useState(false);
+  const [searchAdvancedQuery, setSearchAdvancedQuery] = useState(initialState);
   const navigate = useNavigate();
   const [region, setRegion] = useSearchParam("region", "global");
+
+  useEffect(() => {
+    if (isClear) {
+      setSearchAdvancedQuery(initialState);
+      setIsClear(false);
+    }
+  }, [isClear]);
 
   const changeTopic = (topic) => {
     const idTopic = CATEGORIES.find((c) => c.text === topic).id;
@@ -82,7 +88,7 @@ const AdvancedSearch = (props) => {
 
   const createSearchQuery = () => {
     const [searchQueryBuild, facetQuery] = searchAdvanced(searchAdvancedQuery);
-
+    console.log(facetQuery);
     const idTabName = CATEGORIES.find(
       (c) => c.text === searchAdvancedQuery[0].value
     ).id;
@@ -279,23 +285,7 @@ const AdvancedSearch = (props) => {
             <Button
               variant="text"
               disableElevation
-              onClick={() =>
-                setSearchAdvancedQuery({
-                  0: {
-                    category: "Topic",
-                    value: "Documents",
-                  },
-                  1: [
-                    {
-                      id: 0,
-                      category: "Provider",
-
-                      operator: "Contains",
-                      textfield: "",
-                    },
-                  ],
-                })
-              }
+              onClick={() => setIsClear(true)}
               sx={{
                 color: palette + "clearButtonColor",
                 textTransform: "none",

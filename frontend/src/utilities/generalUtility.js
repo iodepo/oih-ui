@@ -1,5 +1,4 @@
 import {
-  CATEGORIES,
   SAMPLE_QUERIES,
   fieldNameMap,
   idFacets,

@@ -323,6 +323,10 @@ export function remove_regions(map) {
 }
 
 export function remove_points(map) {
+  if (map.getLayer("selected-point")) {
+    map.removeLayer("selected-point");
+    map.removeSource("selected-point");
+  }
   if (map.getLayer(POINTS_LAYER)) {
     map.removeLayer(POINTS_LAYER);
     if (map.getSource(POINTS_SOURCE)) {
@@ -419,6 +423,13 @@ export function draw_regions(map, polygon_data, changeSelectedElem) {
 
       const details = await fetchDetail(id).then((d) => d);
 
+      map.setPaintProperty(REGIONS_LAYER, "fill-color", [
+        "case",
+        ["==", ["get", "id"], id],
+        "rgba(0,225,0,.5)",
+        "rgba(0,0,225,.1)",
+      ]);
+
       changeSelectedElem(details);
     });
   }
@@ -464,6 +475,10 @@ export function draw_points(map, point_polygon_data, changeSelectedElem) {
       }
 
       popup.setLngLat(coordinates).setHTML(details.name).addTo(map);
+
+      setTimeout(() => {
+        popup.remove();
+      }, 4000);
     });
 
     map.on("mouseleave", POINTS_LAYER, () => {

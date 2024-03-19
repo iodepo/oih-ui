@@ -53,7 +53,6 @@ const DrawerContainer = (props) => {
     setSearchText,
     searchText,
     resultsCount,
-    mapBounds,
     getDataSpatialSearch,
     isLoading,
     handleSubmit,
@@ -64,6 +63,7 @@ const DrawerContainer = (props) => {
     changeSelectedElem,
     selectedElem,
     currentURI,
+    mapBounds,
   } = props;
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("");
@@ -95,6 +95,8 @@ const DrawerContainer = (props) => {
         break;
       case SupportedLangugesEnum.Ru:
         setLanguageIcon(RussianFlag);
+        break;
+      default:
         break;
     }
   };
@@ -131,7 +133,7 @@ const DrawerContainer = (props) => {
   };
 
   useEffect(() => {
-    getDataSpatialSearch(page);
+    page !== 1 && getDataSpatialSearch(page, mapBounds);
   }, [page]);
 
   useEffect(() => {

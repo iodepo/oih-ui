@@ -131,6 +131,8 @@ export default function Search(props) {
       case SupportedLangugesEnum.Ru:
         setLanguageIcon(RussianFlag);
         break;
+      default:
+        break;
     }
   };
   return isResults ? (

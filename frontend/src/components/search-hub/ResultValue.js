@@ -23,7 +23,15 @@ import SearchIcon from "@mui/icons-material/Search";
 import { trackingMatomoClickResults } from "utilities/trackingUtility";
 
 const ResultValue = (props) => {
-  const { result, completeValue, onlyVerified } = props;
+  const {
+    result,
+    completeValue,
+    onlyVerified,
+    page,
+    counterResult,
+    queryString,
+    totalPageNumber,
+  } = props;
 
   const translationState = useAppTranslation();
   const [iconLD, setIconLD] = useState(<CodeOutlinedIcon />);
@@ -79,10 +87,8 @@ const ResultValue = (props) => {
     return formattedDate;
   }
 
-  var url =
-    result["type"] === "Person" || result["type"] === "Organization"
-      ? resolveAsUrl(result["id"])
-      : result["txt_url"] || resolveAsUrl(result["id"]);
+  var url = result["txt_url"] || "";
+
   const { Component } = TypesMap[result["type"]];
   const [truncate, setTruncate] = useState(true);
   const jsonLdParams = new URLSearchParams({ id: result["id"] }).toString();

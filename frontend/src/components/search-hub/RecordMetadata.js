@@ -36,7 +36,7 @@ const RecordMetadata = () => {
                 fontSize: "22px",
               }}
             >
-              No webpage is provided for that record, but its metadata is:
+              This is a metadata only record
             </Typography>
           </Box>
           <Box

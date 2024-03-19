@@ -5,7 +5,7 @@ import { EMODNET, NO_CLUSTER } from "./utils/constants";
 import { reducer } from "./utils/reducer";
 import MapView from "./components/MapView";
 import Box from "@mui/material/Box";
-import { ITEMS_PER_PAGE } from "portability/configuration";
+import { ITEMS_PER_PAGE, centerMap, initZoom } from "portability/configuration";
 import { dataServiceUrl } from "config/environment";
 import { mapLibreBounds_toQuery } from "utilities/mapUtility";
 import { throttle } from "lodash";
@@ -25,11 +25,12 @@ const MapContainer = (props) => {
     heatOpacity: 0.4,
     showPoints: false,
     showRegions: false,
-    zoom: 0,
+    zoom: initZoom,
     isLoading: false,
-    center: [65.468754, 44.57875],
+    center: centerMap,
     showSearchArea: false,
     selectedElem: undefined,
+    mapBounds: false,
   });
 
   const navigate = useNavigate();
@@ -43,13 +44,13 @@ const MapContainer = (props) => {
     params.has("search_text") ? params.get("search_text") : ""
   );
   const [resultsCount, setResultsCount] = useState(0);
-  const [mapBounds, setMapBounds] = useState(false);
+  const [initMapBounds, setInitMapBounds] = useState(false);
   const [open, setOpen] = useState(true);
   const [facets, setFacets] = useState([]);
   const [currentURI, setCurrentURI] = useState("");
-  const [facetQuery, setFacetQuery] = useSearchParam("facet_query");
+  const [facetQuery, setFacetQuery] = useSearchParam("fq");
   const [selectedFacets, setSelectedFacets] = useState([]);
-  const [initCenter, setInitCenter] = useState([65.468754, 44.57875]);
+  const [initCenter, setInitCenter] = useState(centerMap);
   const [geoJson, setGeoJson] = useState();
   const mapRef = useRef(null);
 
@@ -64,13 +65,13 @@ const MapContainer = (props) => {
   const hrefFor = (region, query, facetQuery) =>
     `/map-viewer?${new URLSearchParams({
       ...(query ? { search_text: query } : {}),
-      ...(facetQuery ? { facet_query: facetQuery } : {}),
+      ...(facetQuery ? { fq: facetQuery } : {}),
       ...(region && region.toUpperCase() !== "GLOBAL" ? { region } : {}),
     })}`;
 
   const handleSubmit = useCallback(
     () => navigate(hrefFor(region, searchText, facetQuery)),
-    [navigate, searchText, region]
+    [navigate, searchText, region, facetQuery]
   );
   const changeBaseLayer = (layer) => {
     dispatch({ type: "setBaseLayer", baseLayer: layer });
@@ -99,24 +100,22 @@ const MapContainer = (props) => {
   const changeSelectedElem = (selectedElem) => {
     dispatch({ type: "setSelectedElem", selectedElem: selectedElem });
   };
+  const changeMapBounds = (mapBounds) => {
+    dispatch({ type: "setMapBounds", mapBounds: mapBounds });
+  };
 
   const searchThisArea = () => {
-    getDataSpatialSearch();
-    changeShowSearchArea(false);
+    getDataSpatialSearch(state.mapBounds);
   };
 
   const applyZoom = (zoomType) => {
     let value;
     if (zoomType === "out") {
-      if (state.zoom >= 0) {
-        value = -1;
-      } else if (state.zoom < 0) {
+      if (state.zoom > 0) {
         value = state.zoom - 1;
       }
     } else if (zoomType === "in") {
-      if (state.zoom <= 0) {
-        value = 1;
-      } else if (state.zoom > 0) {
+      if (state.zoom > 0) {
         value = state.zoom + 1;
       }
     }
@@ -136,36 +135,26 @@ const MapContainer = (props) => {
   };
 
   const facetSearch = (name, value, checked) => {
-    const clickedFacetQuery = new URLSearchParams({
-      facetType: name,
-      facetName: value,
-    }).toString();
+    let facet = name + ":" + '"' + value + '"';
+    let newQuery = facetQuery ? facetQuery.replace(/^\(|\)$/g, "") : "";
+
     if (checked) {
-      setFacetQuery([facetQuery, clickedFacetQuery].filter((e) => e).join("&"));
+      newQuery = "(" + [newQuery, facet].filter((e) => e).join(" OR ") + ")";
+      setFacetQuery(newQuery);
     } else {
-      const filteredQuery = facetQuery.replace(clickedFacetQuery, "");
-      let cleanedQuery = filteredQuery.endsWith("&")
-        ? filteredQuery.slice(0, -1)
-        : filteredQuery;
-      cleanedQuery = cleanedQuery.startsWith("&")
-        ? cleanedQuery.slice(1)
-        : cleanedQuery;
-      cleanedQuery = cleanedQuery.replace("&&", "&");
-      setFacetQuery(cleanedQuery);
+      const facetsDefined = newQuery.split(" OR ").filter((n) => n !== facet);
+      newQuery = "(" + facetsDefined.filter((e) => e).join(" OR ") + ")";
+      setFacetQuery(newQuery);
     }
   };
 
-  useEffect(() => {
-    getDataSpatialSearch();
-  }, [navigate, params]);
-
-  const getGeoJSON = () => {
+  const getGeoJSON = (bounds) => {
     let geoJsonUrl = `${dataServiceUrl}/spatial.geojson?`;
     const params = new URLSearchParams({
       /* ...(searchType !== "SpatialData" ? { document_type: searchType } : {}), */
       search_text: searchText,
       facetType: "the_geom",
-      facetName: mapLibreBounds_toQuery(mapBounds, region),
+      facetName: mapLibreBounds_toQuery(bounds, region),
     });
     if (region !== "" && region.toUpperCase() !== "GLOBAL") {
       params.append("region", region);
@@ -179,13 +168,13 @@ const MapContainer = (props) => {
       });
   };
 
-  const getDataSpatialSearch = throttle((page = 1) => {
+  const getDataSpatialSearch = throttle((bounds, page = 1) => {
     page === 1 && setLoading(true);
     let URI = `${dataServiceUrl}/search?`;
     const params = new URLSearchParams({
       facetType: "the_geom",
-      facetName: mapLibreBounds_toQuery(mapBounds, region),
-      rows: ITEMS_PER_PAGE * page,
+      facetName: mapLibreBounds_toQuery(bounds, region),
+      rows: ITEMS_PER_PAGE + 20 * page,
       start: 0,
     });
     if (searchText !== "") {
@@ -204,10 +193,15 @@ const MapContainer = (props) => {
         setResultsCount(count);
         setFacets(json.facets.filter((facet) => facet.counts.length > 0));
         page === 1 && setLoading(false);
+        changeShowSearchArea(false);
       });
 
-    getGeoJSON();
+    getGeoJSON(bounds);
   }, 1000);
+
+  useEffect(() => {
+    getDataSpatialSearch(state.mapBounds);
+  }, [navigate, params, facetQuery]);
 
   const clear = () => {
     setSelectedFacets([]);
@@ -235,8 +229,9 @@ const MapContainer = (props) => {
           setCenter={setCenter}
           initCenter={initCenter}
           heatOpacity={state.heatOpacity}
-          setMapBounds={setMapBounds}
+          changeMapBounds={changeMapBounds}
           geoJson={geoJson}
+          setInitMapBounds={setInitMapBounds}
         />
       )}
 
@@ -247,8 +242,8 @@ const MapContainer = (props) => {
             setSearchText={setSearchText}
             searchText={searchText}
             resultsCount={resultsCount}
-            mapBounds={mapBounds}
             isLoading={state.loading}
+            mapBounds={state.mapBounds}
             getDataSpatialSearch={getDataSpatialSearch}
             handleSubmit={handleSubmit}
             setSelectedFacets={setSelectedFacets}
@@ -281,7 +276,7 @@ const MapContainer = (props) => {
             setShowRegions={setShowRegions}
             heatOpacity={state.heatOpacity}
             changeHeatOpacity={changeHeatOpacity}
-            setMapBounds={setMapBounds}
+            changeMapBounds={changeMapBounds}
             geoJson={geoJson}
             showSearchArea={state.showSearchArea}
             changeSelectedElem={changeSelectedElem}
@@ -289,6 +284,7 @@ const MapContainer = (props) => {
             changeShowSearchArea={changeShowSearchArea}
             searchThisArea={searchThisArea}
             currentURI={currentURI}
+            setInitMapBounds={setInitMapBounds}
           />
         </Box>
       )}
@@ -300,8 +296,8 @@ const MapContainer = (props) => {
             setSearchText={setSearchText}
             searchText={searchText}
             resultsCount={resultsCount}
-            mapBounds={mapBounds}
             isLoading={state.loading}
+            mapBounds={state.mapBounds}
             getDataSpatialSearch={getDataSpatialSearch}
             handleSubmit={handleSubmit}
             setSelectedFacets={setSelectedFacets}
@@ -332,7 +328,7 @@ const MapContainer = (props) => {
             changeHexOpacity={changeHexOpacity}
             setShowPoints={setShowPoints}
             setShowRegions={setShowRegions}
-            setMapBounds={setMapBounds}
+            changeMapBounds={changeMapBounds}
             geoJson={geoJson}
             showSearchArea={state.showSearchArea}
             changeSelectedElem={changeSelectedElem}
@@ -340,6 +336,7 @@ const MapContainer = (props) => {
             changeShowSearchArea={changeShowSearchArea}
             searchThisArea={searchThisArea}
             currentURI={currentURI}
+            setInitMapBounds={setInitMapBounds}
           />
         </Box>
       )}

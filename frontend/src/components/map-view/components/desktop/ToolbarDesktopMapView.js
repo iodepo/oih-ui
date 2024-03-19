@@ -73,22 +73,20 @@ const ToolbarDesktopMapView = (props) => {
 
   useEffect(() => {
     if (facetQuery) {
-      const pairs = facetQuery.split("&");
+      const pairs = facetQuery.replace(/^\(|\)$/g, "").split(" OR ");
 
       const extractedPairs = [];
 
-      for (let i = 0; i < pairs.length; i += 2) {
-        const facetType = pairs[i].split("=")[1];
-        const facetName = decodeURIComponent(
-          pairs[i + 1].split("=")[1].replaceAll("+", " ")
-        );
-
+      for (let i = 0; i < pairs.length; i++) {
+        const splitted = pairs[i].split(":");
+        const facetType = splitted[0];
+        const facetName = splitted[1].replace(/"/g, "");
         extractedPairs.push({ name: facetType, value: facetName });
       }
 
       setSelectedFacets(extractedPairs);
     }
-  }, [facetQuery]);
+  }, [facetQuery, setSelectedFacets]);
 
   const handleInputChange = (value, name) => {
     setFilteredFacets(() => {
@@ -198,8 +196,8 @@ const ToolbarDesktopMapView = (props) => {
               }}
             >
               {clustering !== NO_CLUSTER && (
-                <Stack spacing={1}>
-                  <Typography variant="body2">
+                <Stack spacing={1.5} sx={{ padding: 2 }}>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
                     COLOR - POINTS PER{" "}
                     {clustering === HEXAGON ? "HEXAGON" : "HEATMAP"}
                   </Typography>

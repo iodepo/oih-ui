@@ -50,7 +50,7 @@ const Export = (props) => {
     setIsLoading(true);
     let URI = uri;
     if (URI !== "" && resultCount !== 0) {
-      if (value === "all") {
+      /* if (value === "all") {
         const requests = [];
         const CHUNK_SIZE = 1000;
         for (let i = 0; i < resultCount; i += CHUNK_SIZE) {
@@ -75,21 +75,21 @@ const Export = (props) => {
           .catch((error) => {
             console.error("Error: ", error);
           });
-      } else {
-        URI = URI.replace(/rows=\d+/, "rows=" + value);
-        fetch(URI)
-          .then((response) => response.json())
-          .then((json) => {
-            const docs = json.docs;
+      } else { */
+      URI = URI.replace(/rows=\d+/, "rows=" + value);
+      fetch(URI)
+        .then((response) => response.json())
+        .then((json) => {
+          const docs = json.docs;
 
-            const newJson = createObjectExport(docs, searchType);
+          const newJson = createObjectExport(docs, searchType);
 
-            download(format, newJson, searchType);
-          })
-          .catch((error) => {
-            console.error("Error: ", error);
-          });
-      }
+          download(format, newJson, searchType);
+        })
+        .catch((error) => {
+          console.error("Error: ", error);
+        });
+      /*  } */
     }
   };
 
@@ -370,10 +370,10 @@ const Export = (props) => {
             size="small"
             exclusive
           >
-            <ToggleButton value="all">All</ToggleButton>
             <ToggleButton value="10">10</ToggleButton>
             <ToggleButton value="20">20</ToggleButton>
-            <ToggleButton value="30">30</ToggleButton>
+            <ToggleButton value="50">50</ToggleButton>
+            <ToggleButton value="100">100</ToggleButton>
           </ToggleButtonGroup>
           <Typography
             variant="body2"

@@ -44,6 +44,7 @@ const ToolbarMobileMapView = (props) => {
     searchThisArea,
     showSearchArea,
     currentURI,
+    mapBounds,
   } = props;
   const translationState = useAppTranslation();
 
@@ -71,22 +72,20 @@ const ToolbarMobileMapView = (props) => {
 
   useEffect(() => {
     if (facetQuery) {
-      const pairs = facetQuery.split("&");
+      const pairs = facetQuery.replace(/^\(|\)$/g, "").split(" OR ");
 
       const extractedPairs = [];
 
-      for (let i = 0; i < pairs.length; i += 2) {
-        const facetType = pairs[i].split("=")[1];
-        const facetName = decodeURIComponent(
-          pairs[i + 1].split("=")[1].replaceAll("+", " ")
-        );
-
+      for (let i = 0; i < pairs.length; i++) {
+        const splitted = pairs[i].split(":");
+        const facetType = splitted[0];
+        const facetName = splitted[1].replace(/"/g, "");
         extractedPairs.push({ name: facetType, value: facetName });
       }
 
       setSelectedFacets(extractedPairs);
     }
-  }, [facetQuery]);
+  }, [facetQuery, setSelectedFacets]);
 
   const handleInputChange = (value, name) => {
     setFilteredFacets(() => {
@@ -203,6 +202,7 @@ const ToolbarMobileMapView = (props) => {
             selectedElem={selectedElem}
             changeSelectedElem={changeSelectedElem}
             currentURI={currentURI}
+            mapBounds={mapBounds}
           />
         </Stack>
       </Box>

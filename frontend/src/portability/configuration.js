@@ -381,6 +381,11 @@ const backgroundImage = `
 `;
 // -- END REGION BACKGROUND IMAGE --
 
+// -- START REGION MAP CONFIG --
+
+const centerMap = [65.468754, 44.57875];
+const initZoom = 4;
+// -- END REGION MAP CONFIG --
 export {
   CATEGORIES,
   primaryPalette,
@@ -390,4 +395,6 @@ export {
   SAMPLE_QUERIES,
   idFacets,
   PARTNERS,
+  centerMap,
+  initZoom,
 };

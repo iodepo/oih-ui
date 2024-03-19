@@ -61,5 +61,12 @@ export const reducer = (state, action) => {
         ...state,
         selectedElem: action.selectedElem,
       };
+    case "setMapBounds":
+      return {
+        ...state,
+        mapBounds: action.mapBounds,
+      };
+    default:
+      break;
   }
 };

@@ -145,7 +145,9 @@ const FilterMapDesktop = (props) => {
               <Popover
                 /* id={id} */
                 elevation={0}
-                open={openPopoverFilter ? openPopoverFilter.id == title : false}
+                open={
+                  openPopoverFilter ? openPopoverFilter.id === title : false
+                }
                 anchorEl={openPopoverFilter ? openPopoverFilter.target : null}
                 onClose={() => setOpenPopoverFilter(null)}
                 anchorOrigin={{

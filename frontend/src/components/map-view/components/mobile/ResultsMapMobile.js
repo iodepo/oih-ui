@@ -55,6 +55,7 @@ const ResultsMapMobile = (props) => {
     selectedElem,
     changeSelectedElem,
     currentURI,
+    mapBounds,
   } = props;
 
   const [page, setPage] = useState(1);
@@ -68,7 +69,7 @@ const ResultsMapMobile = (props) => {
     }
   }, [selectedElem]);
   useEffect(() => {
-    getDataSpatialSearch(page);
+    page !== 1 && getDataSpatialSearch(page, mapBounds);
   }, [page]);
   const translationState = useAppTranslation();
   const palette = "custom.mapView.mobile.resultsMap.";

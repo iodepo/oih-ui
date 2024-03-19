@@ -14,7 +14,6 @@ const DesktopMapView = (props) => {
     setSearchText,
     searchText,
     resultsCount,
-    mapBounds,
     getDataSpatialSearch,
     isLoading,
     handleSubmit,
@@ -48,7 +47,7 @@ const DesktopMapView = (props) => {
     setShowRegions,
     heatOpacity,
     changeHeatOpacity,
-    setMapBounds,
+    changeMapBounds,
     geoJson,
     changeShowSearchArea,
     showSearchArea,
@@ -56,6 +55,8 @@ const DesktopMapView = (props) => {
     selectedElem,
     searchThisArea,
     currentURI,
+    setInitMapBounds,
+    mapBounds,
   } = props;
 
   const palette = "custom.mapView.desktop.";
@@ -80,7 +81,6 @@ const DesktopMapView = (props) => {
             setSearchText={setSearchText}
             searchText={searchText}
             resultsCount={resultsCount}
-            mapBounds={mapBounds}
             isLoading={isLoading}
             getDataSpatialSearch={getDataSpatialSearch}
             handleSubmit={handleSubmit}
@@ -91,6 +91,7 @@ const DesktopMapView = (props) => {
             changeSelectedElem={changeSelectedElem}
             selectedElem={selectedElem}
             currentURI={currentURI}
+            mapBounds={mapBounds}
           />
         </Drawer>
         {open ? (
@@ -188,12 +189,13 @@ const DesktopMapView = (props) => {
           zoom={zoom}
           setCenter={setCenter}
           initCenter={initCenter}
-          setMapBounds={setMapBounds}
+          changeMapBounds={changeMapBounds}
           geoJson={geoJson}
           changeShowSearchArea={changeShowSearchArea}
           showSearchArea={showSearchArea}
           changeSelectedElem={changeSelectedElem}
           selectedElem={selectedElem}
+          setInitMapBounds={setInitMapBounds}
         />
       </Box>
     </>

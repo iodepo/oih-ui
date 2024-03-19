@@ -28,13 +28,13 @@ const GenericFacet = (props) => {
     title,
     facetSearch,
     clear,
-    setFilterChosenMobile,
-    filterChosenMobile,
+    setMobileAppliedFilters,
+    mobileAppliedFilters,
     isClearAll,
     setIsClearAll,
     facetQuery,
     addQueryMobile,
-    setSelectedFacetsMobile,
+    setMobileSelectedFiltersTemp,
   } = props;
   const [searchInput, setSearchInput] = useState("");
   const [filteredFacet, setFilteredFacet] = useState(facet.counts);
@@ -113,23 +113,21 @@ const GenericFacet = (props) => {
   useEffect(() => {
     setSelectedFacets([]);
     if (facetQuery) {
-      const pairs = facetQuery.split("&");
+      const pairs = facetQuery.replace(/^\(|\)$/g, "").split(" OR ");
 
       const extractedPairs = [];
 
-      for (let i = 0; i < pairs.length; i += 2) {
-        const facetType = pairs[i].split("=")[1];
+      for (let i = 0; i < pairs.length; i++) {
+        const splitted = pairs[i].split(":");
+        const facetType = splitted[0];
         if (fieldTitleFromName(facetType) === title) {
-          const facetName = decodeURIComponent(
-            pairs[i + 1].split("=")[1].replaceAll("+", " ")
-          );
-
+          const facetName = splitted[1].replace(/"/g, "");
           extractedPairs.push(facetName);
         }
       }
       setSelectedFacets(extractedPairs);
     }
-  }, [facetQuery]);
+  }, [facetQuery, title]);
   const translationState = useAppTranslation();
   const palette = "custom.resultPage.filters.";
   const theme = useTheme();
@@ -223,15 +221,16 @@ const GenericFacet = (props) => {
                             );
 
                         setSelectedFacets(updatedCheckedItems);
-                        facetSearch(facet.name, facetCount.name, checked);
+                        !isMobile &&
+                          facetSearch(facet.name, facetCount.name, checked);
                         if (!checked) {
-                          setFilterChosenMobile((f) =>
+                          setMobileAppliedFilters((f) =>
                             f.filter((d) => d.type !== title.toLowerCase())
                           );
                         } else {
                           if (isMobile) {
                             addQueryMobile(facet.name, facetCount.name);
-                            setSelectedFacetsMobile((prev) => [
+                            setMobileSelectedFiltersTemp((prev) => [
                               ...prev,
                               {
                                 type: facet.name,
@@ -239,11 +238,12 @@ const GenericFacet = (props) => {
                               },
                             ]);
                           } else {
-                            const isGenericFilterSet = filterChosenMobile.find(
-                              (f) => f.type === facetCount.name
-                            );
+                            const isGenericFilterSet =
+                              mobileAppliedFilters.find(
+                                (f) => f.type === facetCount.name
+                              );
                             if (isGenericFilterSet ?? true)
-                              setFilterChosenMobile((prev) => [
+                              setMobileAppliedFilters((prev) => [
                                 ...prev,
                                 {
                                   type: facet.name,

@@ -1,3 +1,4 @@
+/* eslint-disable */
 const trackingMatomoSearch = (searchValue, regionValue, resultCount) => {
   console.log(
     "Search performed.\nSearch: " + searchValue + " \nRegion: " + regionValue
@@ -27,4 +28,26 @@ const trackingMatomoClickResults = (url, cd1, cd2, cd3) => {
   ]);
 };
 
-export { trackingMatomoSearch, trackingMatomoClickResults };
+const trackingMatomo = (action, category, searchTerm, region) => {
+  switch (action) {
+    case "simple_search":
+      break;
+    case "advanced_search":
+      break;
+    case "sorted_search":
+      break;
+    case "refined_search":
+      break;
+    case "change_result_page":
+      break;
+    case "click_on_result":
+      break;
+    case "click_on_jsonld":
+      break;
+    case "page_refresh":
+      break;
+  }
+};
+
+export { trackingMatomoSearch, trackingMatomoClickResults, trackingMatomo };
+/* eslint-enable */

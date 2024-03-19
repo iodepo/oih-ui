@@ -8,11 +8,7 @@ import {
   useSearchParam,
 } from "utilities/generalUtility";
 import { dataServiceUrl } from "../../config/environment";
-import {
-  CATEGORIES,
-  ITEMS_PER_PAGE,
-  idFacets,
-} from "../../portability/configuration";
+import { CATEGORIES, ITEMS_PER_PAGE } from "../../portability/configuration";
 import Pagination from "./Pagination";
 import { useAppTranslation } from "context/context/AppTranslation";
 import Search from "components/search/Search";
@@ -44,6 +40,7 @@ import Chip from "@mui/material/Chip";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import Fade from "@mui/material/Fade";
 import CircularProgress from "@mui/material/CircularProgress";
+import { trackingMatomo } from "utilities/trackingUtility";
 
 export default function Results() {
   const [results, setResults] = useState([]);
@@ -53,8 +50,9 @@ export default function Results() {
   const [params] = useSearchParams();
 
   const [showMorePages, setShowMorePages] = useState(0);
-  const [filterChosenMobile, setFilterChosenMobile] = useState([]);
+  const [mobileAppliedFilters, setMobileAppliedFilters] = useState([]);
   const [currentURI, setCurrentURI] = useState("");
+  const [queryString, setQueryString] = useState("");
 
   const [onlyVerified, setOnlyVerified] = useState(false);
 
@@ -62,7 +60,7 @@ export default function Results() {
   const { searchType = "CreativeWork" } = useParams();
   const [searchText, setSearchText] = useSearchParam("search_text", "");
   const [region, setRegion] = useSearchParam("region", "global");
-  const [facetQuery, setFacetQuery] = useSearchParam("facet_query");
+  const [facetQuery, setFacetQuery] = useSearchParam("fq");
   const [fq, setFq] = useSearchParam("fq");
   const [sort, setSort] = useSearchParam("sort");
   const [page, setPage] = useSearchParam("page", 0);
@@ -71,10 +69,12 @@ export default function Results() {
   const [openDialog, setOpenDialog] = useState(false);
   const translationState = useAppTranslation();
 
+  let counterResult = 0;
+
   useEffect(() => {
     const category = CATEGORIES.find((category) => category.id === searchType);
 
-    setFilterChosenMobile([{ type: "searchType", text: category.text }]);
+    setMobileAppliedFilters([{ type: "searchType", text: category.text }]);
   }, []);
 
   useEffect(() => {
@@ -96,6 +96,34 @@ export default function Results() {
       );
   }, [region, searchText, searchType]);
 
+  const getDefaultFacets = useCallback(
+    (searchType) => {
+      let URI = `${dataServiceUrl}/search?`;
+      const params = new URLSearchParams({
+        document_type: searchType,
+        start: page * (ITEMS_PER_PAGE + showMorePages),
+        rows: ITEMS_PER_PAGE + showMorePages,
+      });
+
+      if (region.toUpperCase() !== "GLOBAL") {
+        params.append("region", region);
+      }
+
+      URI += [params.toString()].filter((e) => e).join("&");
+
+      fetch(URI)
+        .then((response) => response.json())
+        .then((json) => {
+          setFacets(json.facets.filter((facet) => facet.counts.length > 0));
+        });
+    },
+    [page, region, showMorePages]
+  );
+
+  useEffect(() => {
+    getDefaultFacets(searchType);
+  }, [searchType, getDefaultFacets]);
+
   useEffect(
     () => {
       /*  if (showMap) {
@@ -112,7 +140,7 @@ export default function Results() {
       if (region.toUpperCase() !== "GLOBAL") {
         params.append("region", region);
       }
-      debugger;
+
       const facetQueryAdvanced = destructuringSearchTextAdvanced(searchText);
       if (facetQueryAdvanced) {
         URI += [
@@ -139,6 +167,16 @@ export default function Results() {
       }
 
       setCurrentURI(URI);
+      let string = "";
+      string += [
+        params.toString(),
+        facetQuery,
+        facetQueryAdvanced ? "fq=" + facetQueryAdvanced : "",
+        sort ? "sort=" + sort : "",
+      ]
+        .filter((e) => e)
+        .join("&");
+      setQueryString(string);
 
       fetch(URI)
         .then((response) => response.json())
@@ -147,8 +185,12 @@ export default function Results() {
           const count = json.count;
           setResultCount(count);
           setCounts((prev) => ({ ...prev, [searchType]: count }));
-          setFacets(json.facets.filter((facet) => facet.counts.length > 0));
+          /* setFacets(json.facets.filter((facet) => facet.counts.length > 0)); */
           setIsLoading(false);
+
+          /*  if(!fq && !facetQuery && !sort){
+            trackingMatomo("simple_search", "search", searchText ,region)
+          } */
         });
     },
     /*  } */ [
@@ -231,50 +273,48 @@ export default function Results() {
         }
       });
 
-      const [searchQueryBuild, facetQuery] = searchAdvanced(parsedObject);
-      return facetQuery;
+      const [searchQueryBuild, facetQueryAdvanced] =
+        searchAdvanced(parsedObject);
+      return facetQueryAdvanced;
     }
     return undefined;
   };
 
   const facetSearch = (name, value, checked) => {
-    const clickedFacetQuery = new URLSearchParams({
-      facetType: name,
-      facetName: value,
-    }).toString();
+    let facet = name + ":" + '"' + value + '"';
+    let newQuery = facetQuery ? facetQuery.replace(/^\(|\)$/g, "") : "";
 
     if (checked) {
-      setFacetQuery([facetQuery, clickedFacetQuery].filter((e) => e).join("&"));
+      newQuery = "(" + [newQuery, facet].filter((e) => e).join(" OR ") + ")";
+      setFacetQuery(newQuery);
     } else {
-      const filteredQuery = facetQuery.replace(clickedFacetQuery, "");
-      let cleanedQuery = filteredQuery.endsWith("&")
-        ? filteredQuery.slice(0, -1)
-        : filteredQuery;
-      cleanedQuery = cleanedQuery.startsWith("&")
-        ? cleanedQuery.slice(1)
-        : cleanedQuery;
-      cleanedQuery = cleanedQuery.replace("&&", "&");
-      setFacetQuery(cleanedQuery);
+      const facetsDefined = newQuery.split(" OR ").filter((n) => n !== facet);
+      newQuery = "(" + facetsDefined.filter((e) => e).join(" OR ") + ")";
+      setFacetQuery(newQuery);
     }
   };
 
   const facetSearchMobile = (query) => {
-    setFacetQuery([facetQuery, query].filter((e) => e).join("&"));
+    let newQuery = facetQuery ? facetQuery.replace(/^\(|\)$/g, "") : "";
+    setFacetQuery("(" + [newQuery, query].filter((e) => e).join(" OR ") + ")");
   };
 
-  const resetDefaultSearchUrl = (type) => {
-    navigate(
-      `/results/${type}?${new URLSearchParams({
-        ...(searchText ? { search_text: searchText } : {}),
-        ...(sort ? { sort: sort } : {}),
-        ...(region.toUpperCase() !== "GLOBAL" ? { region } : {}),
-      })}`
-    );
-  };
+  const resetDefaultSearchUrl = useCallback(
+    (type) => {
+      navigate(
+        `/results/${type}?${new URLSearchParams({
+          ...(searchText ? { search_text: searchText } : {}),
+          ...(sort ? { sort: sort } : {}),
+          ...(region.toUpperCase() !== "GLOBAL" ? { region } : {}),
+        })}`
+      );
+    },
+    [navigate, region, searchText, sort]
+  );
 
-  const clearFacetQuery = () => {
+  const clearFacetQuery = useCallback(() => {
     resetDefaultSearchUrl(searchType);
-  };
+  }, [resetDefaultSearchUrl, searchType]);
 
   const clear = useCallback(
     (e) => {
@@ -336,8 +376,8 @@ export default function Results() {
                 </AccordionSummary>
                 <AccordionDetails sx={{ paddingLeft: 0 }}>
                   <FilterBy
-                    setFilterChosenMobile={setFilterChosenMobile}
-                    filterChosenMobile={filterChosenMobile}
+                    setMobileAppliedFilters={setMobileAppliedFilters}
+                    mobileAppliedFilters={mobileAppliedFilters}
                     counts={counts}
                     tabList={CATEGORIES}
                     searchType={searchType}
@@ -400,8 +440,8 @@ export default function Results() {
                 </DialogTitle>
                 <DialogContent>
                   <FilterBy
-                    setFilterChosenMobile={setFilterChosenMobile}
-                    filterChosenMobile={filterChosenMobile}
+                    setMobileAppliedFilters={setMobileAppliedFilters}
+                    mobileAppliedFilters={mobileAppliedFilters}
                     counts={counts}
                     tabList={CATEGORIES}
                     searchType={searchType}
@@ -480,7 +520,7 @@ export default function Results() {
               gap: 1,
             }}
           >
-            {filterChosenMobile.map((item, index) => {
+            {mobileAppliedFilters.map((item, index) => {
               return (
                 <Button
                   key={index}
@@ -498,7 +538,7 @@ export default function Results() {
                   }}
                   onClick={() => {
                     clear();
-                    setFilterChosenMobile((f) =>
+                    setMobileAppliedFilters((f) =>
                       f.filter(
                         (d) => d.type !== item.type && d.text !== item.text
                       )
@@ -606,14 +646,24 @@ export default function Results() {
                         </Select>
                       </Box>
                     </Box>
-                    {results.map((result) => (
-                      <ResultValue
-                        result={result}
-                        completeValue={100}
-                        key={result["id"]}
-                        onlyVerified={onlyVerified}
-                      />
-                    ))}
+                    {results.map((result) => {
+                      counterResult =
+                        counterResult > 10 ? 1 : counterResult + 1;
+                      return (
+                        <ResultValue
+                          totalPageNumber={Math.ceil(
+                            resultCount / (ITEMS_PER_PAGE + showMorePages)
+                          )}
+                          counterResult={counterResult}
+                          page={page}
+                          queryString={queryString}
+                          result={result}
+                          completeValue={100}
+                          key={result["id"]}
+                          onlyVerified={onlyVerified}
+                        />
+                      );
+                    })}
                   </Stack>
                   <Button
                     variant="outlined"

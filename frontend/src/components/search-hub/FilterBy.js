@@ -23,8 +23,8 @@ const FilterBy = (props) => {
     clearFacetQuery,
     facets,
     facetSearch,
-    setFilterChosenMobile,
-    filterChosenMobile,
+    setMobileAppliedFilters,
+    mobileAppliedFilters,
     facetQuery,
     clear,
     facetSearchMobile,
@@ -36,11 +36,8 @@ const FilterBy = (props) => {
   };
 
   const addQueryMobile = (name, value) => {
-    const clickedFacetQuery = new URLSearchParams({
-      facetType: name,
-      facetName: value,
-    }).toString();
-    setQueryMobile([queryMobile, clickedFacetQuery].filter((e) => e).join("&"));
+    let facet = name + ":" + '"' + value + '"';
+    setQueryMobile([queryMobile, facet].filter((e) => e).join(" OR "));
   };
 
   const drawFacets = (facet, i) => {
@@ -48,8 +45,8 @@ const FilterBy = (props) => {
     if (title) {
       return (
         <GenericFacet
-          setFilterChosenMobile={setFilterChosenMobile}
-          filterChosenMobile={filterChosenMobile}
+          setMobileAppliedFilters={setMobileAppliedFilters}
+          mobileAppliedFilters={mobileAppliedFilters}
           facet={facet}
           i={i}
           title={title}
@@ -59,15 +56,18 @@ const FilterBy = (props) => {
           setIsClearAll={setIsClearAll}
           facetQuery={facetQuery}
           addQueryMobile={addQueryMobile}
-          selectedFacetsMobile={selectedFacetsMobile}
-          setSelectedFacetsMobile={setSelectedFacetsMobile}
+          mobileSelectedFiltersTemp={mobileSelectedFiltersTemp}
+          setMobileSelectedFiltersTemp={setMobileSelectedFiltersTemp}
         />
       );
     }
   };
 
   const applyFiltersMobile = () => {
-    setFilterChosenMobile([...filterChosenMobile, ...selectedFacetsMobile]);
+    setMobileAppliedFilters([
+      ...mobileAppliedFilters,
+      ...mobileSelectedFiltersTemp,
+    ]);
     facetSearchMobile(queryMobile);
   };
   const translationState = useAppTranslation();
@@ -75,28 +75,29 @@ const FilterBy = (props) => {
   const [isClearAll, setIsClearAll] = useState(false);
   const [queryMobile, setQueryMobile] = useState("");
 
-  const [selectedFacetsMobile, setSelectedFacetsMobile] = useState([]);
+  const [mobileSelectedFiltersTemp, setMobileSelectedFiltersTemp] = useState(
+    []
+  );
 
   useEffect(() => {
-    if (filterChosenMobile.length > 0 && facetQuery) {
-      const pairs = facetQuery.split("&");
+    if (mobileAppliedFilters.length > 0 && facetQuery) {
+      const pairs = facetQuery.replace(/^\(|\)$/g, "").split(" OR ");
 
       const extractedPairs = [];
 
-      for (let i = 0; i < pairs.length; i += 2) {
-        const facetType = pairs[i].split("=")[1];
-        const facetName = decodeURIComponent(
-          pairs[i + 1].split("=")[1].replaceAll("+", " ")
-        );
-        const find = filterChosenMobile.find(
+      for (let i = 0; i < pairs.length; i++) {
+        const splitted = pairs[i].split(":");
+        const facetType = splitted[0];
+        const facetName = splitted[1].replace(/"/g, "");
+        const find = mobileAppliedFilters.find(
           (f) => f.type === facetType && f.text === facetName
         );
         if (!find) extractedPairs.push({ type: facetType, text: facetName });
       }
       if (extractedPairs.length > 0)
-        setFilterChosenMobile([...filterChosenMobile, ...extractedPairs]);
+        setMobileAppliedFilters([...mobileAppliedFilters, ...extractedPairs]);
     }
-  }, [filterChosenMobile]);
+  }, [mobileAppliedFilters, facetQuery, setMobileAppliedFilters]);
 
   return (
     <>
@@ -131,7 +132,7 @@ const FilterBy = (props) => {
                   }}
                   onClick={() => {
                     changeSearchType(tab.id);
-                    const updatedItems = filterChosenMobile.map((f) => {
+                    const updatedItems = mobileAppliedFilters.map((f) => {
                       if (f.type === "searchType") {
                         return {
                           ...f,
@@ -141,7 +142,7 @@ const FilterBy = (props) => {
                       return f;
                     });
 
-                    setFilterChosenMobile(updatedItems);
+                    setMobileAppliedFilters(updatedItems);
                   }}
                 >
                   <ListItemText
