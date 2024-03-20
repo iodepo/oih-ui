@@ -282,21 +282,55 @@ export default function Results() {
 
   const facetSearch = (name, value, checked) => {
     let facet = name + ":" + '"' + value + '"';
-    let newQuery = facetQuery ? facetQuery.replace(/^\(|\)$/g, "") : "";
+    let isKeyContained = false;
+    let queryResult = "";
 
     if (checked) {
-      newQuery = "(" + [newQuery, facet].filter((e) => e).join(" OR ") + ")";
-      setFacetQuery(newQuery);
+      if (facetQuery) {
+        const pairs = facetQuery.split(" AND ");
+        pairs.forEach((p) => {
+          if (p.includes(name)) {
+            isKeyContained = true;
+            let temp =
+              "(" +
+              [p.replace(/^\(|\)$/g, ""), facet].filter((e) => e).join(" OR ") +
+              ")";
+            queryResult = [queryResult, temp].filter((e) => e).join(" AND ");
+          } else {
+            queryResult = [queryResult, p].filter((e) => e).join(" AND ");
+          }
+        });
+        if (!isKeyContained)
+          queryResult = [queryResult, "(" + facet + ")"]
+            .filter((e) => e)
+            .join(" AND ");
+      } else {
+        queryResult =
+          "(" + [queryResult, facet].filter((e) => e).join(" OR ") + ")";
+      }
     } else {
-      const facetsDefined = newQuery.split(" OR ").filter((n) => n !== facet);
-      newQuery = "(" + facetsDefined.filter((e) => e).join(" OR ") + ")";
-      setFacetQuery(newQuery);
+      const pairs = facetQuery.split(" AND ");
+      pairs.forEach((p) => {
+        if (p.includes(name)) {
+          const temp = p
+            .replace(/^\(|\)$/g, "")
+            .split(" OR ")
+            .filter((f) => f !== facet)
+            .join(" OR ");
+
+          queryResult = [queryResult, temp === "" ? temp : "(" + temp + ")"]
+            .filter((e) => e)
+            .join(" AND ");
+        } else {
+          queryResult = [queryResult, p].filter((e) => e).join(" AND ");
+        }
+      });
     }
+    setFacetQuery(queryResult);
   };
 
   const facetSearchMobile = (query) => {
-    let newQuery = facetQuery ? facetQuery.replace(/^\(|\)$/g, "") : "";
-    setFacetQuery("(" + [newQuery, query].filter((e) => e).join(" OR ") + ")");
+    setFacetQuery(query);
   };
 
   const resetDefaultSearchUrl = useCallback(

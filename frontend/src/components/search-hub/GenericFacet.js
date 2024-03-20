@@ -73,6 +73,8 @@ const GenericFacet = (props) => {
         );
         setSelectedOrder("Name DESC");
         break;
+      default:
+        break;
     }
   };
 
@@ -112,19 +114,24 @@ const GenericFacet = (props) => {
 
   useEffect(() => {
     setSelectedFacets([]);
-    if (facetQuery) {
-      const pairs = facetQuery.replace(/^\(|\)$/g, "").split(" OR ");
 
+    if (facetQuery) {
+      const pairs = facetQuery.split(" AND ");
       const extractedPairs = [];
 
-      for (let i = 0; i < pairs.length; i++) {
-        const splitted = pairs[i].split(":");
-        const facetType = splitted[0];
-        if (fieldTitleFromName(facetType) === title) {
-          const facetName = splitted[1].replace(/"/g, "");
-          extractedPairs.push(facetName);
-        }
-      }
+      pairs.forEach((p) => {
+        const temp = p.replace(/^\(|\)$/g, "");
+        const tempPairs = temp.split(" OR ");
+        tempPairs.forEach((t) => {
+          const splitted = t.split(":");
+          const facetType = splitted[0];
+          if (fieldTitleFromName(facetType) === title) {
+            const facetName = splitted[1].replace(/"/g, "");
+            extractedPairs.push(facetName);
+          }
+        });
+      });
+
       setSelectedFacets(extractedPairs);
     }
   }, [facetQuery, title]);

@@ -72,16 +72,19 @@ const ToolbarMobileMapView = (props) => {
 
   useEffect(() => {
     if (facetQuery) {
-      const pairs = facetQuery.replace(/^\(|\)$/g, "").split(" OR ");
-
+      const pairs = facetQuery.split(" AND ");
       const extractedPairs = [];
 
-      for (let i = 0; i < pairs.length; i++) {
-        const splitted = pairs[i].split(":");
-        const facetType = splitted[0];
-        const facetName = splitted[1].replace(/"/g, "");
-        extractedPairs.push({ name: facetType, value: facetName });
-      }
+      pairs.forEach((p) => {
+        const temp = p.replace(/^\(|\)$/g, "");
+        const tempPairs = temp.split(" OR ");
+        tempPairs.forEach((t) => {
+          const splitted = t.split(":");
+          const facetType = splitted[0];
+          const facetName = splitted[1].replace(/"/g, "");
+          extractedPairs.push({ name: facetType, value: facetName });
+        });
+      });
 
       setSelectedFacets(extractedPairs);
     }

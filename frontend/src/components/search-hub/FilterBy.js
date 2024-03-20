@@ -36,8 +36,34 @@ const FilterBy = (props) => {
   };
 
   const addQueryMobile = (name, value) => {
+    debugger;
     let facet = name + ":" + '"' + value + '"';
-    setQueryMobile([queryMobile, facet].filter((e) => e).join(" OR "));
+    let queryResult = "";
+    let isKeyContained = false;
+    if (queryMobile !== "") {
+      const pairs = queryMobile.split(" AND ");
+      pairs.forEach((p) => {
+        if (p.includes(name)) {
+          isKeyContained = true;
+          let temp =
+            "(" +
+            [p.replace(/^\(|\)$/g, ""), facet].filter((e) => e).join(" OR ") +
+            ")";
+          queryResult = [queryResult, temp].filter((e) => e).join(" AND ");
+        } else {
+          queryResult = [queryResult, p].filter((e) => e).join(" AND ");
+        }
+      });
+      if (!isKeyContained)
+        queryResult = [queryResult, "(" + facet + ")"]
+          .filter((e) => e)
+          .join(" AND ");
+    } else {
+      queryResult = [queryMobile, "(" + facet + ")"]
+        .filter((e) => e)
+        .join(" OR ");
+    }
+    setQueryMobile(queryResult);
   };
 
   const drawFacets = (facet, i) => {
@@ -81,19 +107,22 @@ const FilterBy = (props) => {
 
   useEffect(() => {
     if (mobileAppliedFilters.length > 0 && facetQuery) {
-      const pairs = facetQuery.replace(/^\(|\)$/g, "").split(" OR ");
-
+      const pairs = facetQuery.split(" AND ");
       const extractedPairs = [];
 
-      for (let i = 0; i < pairs.length; i++) {
-        const splitted = pairs[i].split(":");
-        const facetType = splitted[0];
-        const facetName = splitted[1].replace(/"/g, "");
-        const find = mobileAppliedFilters.find(
-          (f) => f.type === facetType && f.text === facetName
-        );
-        if (!find) extractedPairs.push({ type: facetType, text: facetName });
-      }
+      pairs.forEach((p) => {
+        const temp = p.replace(/^\(|\)$/g, "");
+        const tempPairs = temp.split(" OR ");
+        tempPairs.forEach((t) => {
+          const splitted = t.split(":");
+          const facetType = splitted[0];
+          const facetName = splitted[1].replace(/"/g, "");
+          const find = mobileAppliedFilters.find(
+            (f) => f.type === facetType && f.text === facetName
+          );
+          if (!find) extractedPairs.push({ type: facetType, text: facetName });
+        });
+      });
       if (extractedPairs.length > 0)
         setMobileAppliedFilters([...mobileAppliedFilters, ...extractedPairs]);
     }
