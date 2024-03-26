@@ -21,6 +21,8 @@ import { dataServiceUrl } from "../../config/environment";
 import { useAppTranslation } from "context/context/AppTranslation";
 import SearchIcon from "@mui/icons-material/Search";
 import { trackingMatomoClickResults } from "utilities/trackingUtility";
+import Tooltip from "@mui/material/Tooltip";
+import { cutWithDots } from "components/results/ResultDetails";
 
 const ResultValue = (props) => {
   const {
@@ -267,18 +269,20 @@ const ResultValue = (props) => {
                     >
                       Contributor(s):
                     </Typography>
-                    <Typography
-                      sx={{
-                        fontSize: "12px",
-                        color: palette + "contributorColor",
-                        backgroundColor: palette + "bgContributor",
-                        fontWeight: 700,
-                        padding: "0 4px",
-                        borderRadius: 1,
-                      }}
-                    >
-                      {result["txt_contributor"].join(", ")}
-                    </Typography>
+                    <Tooltip title={result["txt_contributor"].join(", ")} arrow>
+                      <Typography
+                        sx={{
+                          fontSize: "12px",
+                          color: palette + "contributorColor",
+                          backgroundColor: palette + "bgContributor",
+                          fontWeight: 700,
+                          padding: "0 4px",
+                          borderRadius: 1,
+                        }}
+                      >
+                        {cutWithDots(result["txt_contributor"].join(", "), 25)}
+                      </Typography>
+                    </Tooltip>
                   </Box>
                 )}
                 {"indexed_ts" in result && (

@@ -6,6 +6,8 @@ import { AppContainer } from "../components/AppContainer";
 import { Routes } from "react-router";
 import MapContainer from "components/map-view/MapContainer";
 import RecordMetadata from "components/search-hub/RecordMetadata";
+import OfferForm from "components/matchmaking/offer/OfferForm";
+import DemandForm from "components/matchmaking/demand/DemandForm";
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
             element={<MapContainer isHome={false} />}
           />
           <Route path="/record/:jsonld" element={<RecordMetadata />} />
+          <Route path="/matchmaking/demand" element={<DemandForm />} />
+          <Route path="/matchmaking/offer" element={<OfferForm />} />
           <Route path="/" element={<TypesCount />}></Route>
         </Routes>
       </AppContainer>

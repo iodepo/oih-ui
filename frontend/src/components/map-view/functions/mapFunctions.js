@@ -410,6 +410,10 @@ export function draw_regions(map, polygon_data, changeSelectedElem) {
 
       const details = await fetchDetail(id).then((d) => d);
       popup.setLngLat(coordinates).setHTML(details.name).addTo(map);
+
+      setTimeout(() => {
+        popup.remove();
+      }, 4000);
     });
 
     map.on("mouseleave", REGIONS_LAYER, () => {

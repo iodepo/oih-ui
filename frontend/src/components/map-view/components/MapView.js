@@ -95,7 +95,7 @@ const MapView = (props) => {
         baseOpacity,
         initZoom
       );
-      changeMapBounds(mapInitRef.current.getBounds());
+      setInitMapBounds(mapInitRef.current.getBounds());
       manageChangeOpacity(mapInitRef.current, baseOpacity, baseLayer);
 
       mapInitRef.current.on("moveend", function () {

@@ -205,39 +205,44 @@ const MapContainer = (props) => {
 
   const getDataSpatialSearch = throttle((bounds, page = 1) => {
     page === 1 && setLoading(true);
-    let URI = `${dataServiceUrl}/search?`;
-    const params = new URLSearchParams({
-      facetType: "the_geom",
-      facetName: mapLibreBounds_toQuery(bounds, region),
-      rows: ITEMS_PER_PAGE + 20 * page,
-      start: 0,
-    });
-    if (searchText !== "") {
-      params.append("search_text", searchText);
-    }
-    if (region && region.toUpperCase() !== "GLOBAL") {
-      params.append("region", region);
-    }
-    URI += [params.toString(), facetQuery].filter((e) => e).join("&");
-    setCurrentURI(URI);
-    fetch(URI)
-      .then((response) => response.json())
-      .then((json) => {
-        setResults(json.docs);
-        const count = json.count;
-        setResultsCount(count);
-        setFacets(json.facets.filter((facet) => facet.counts.length > 0));
-        page === 1 && setLoading(false);
-        changeShowSearchArea(false);
+    if (bounds) {
+      let URI = `${dataServiceUrl}/search?`;
+      const params = new URLSearchParams({
+        facetType: "the_geom",
+        facetName: mapLibreBounds_toQuery(bounds, region),
+        rows: ITEMS_PER_PAGE + 20 * page,
+        start: 0,
       });
+      if (searchText !== "") {
+        params.append("search_text", searchText);
+      }
+      if (region && region.toUpperCase() !== "GLOBAL") {
+        params.append("region", region);
+      }
+      URI += [params.toString(), facetQuery].filter((e) => e).join("&");
+      setCurrentURI(URI);
+      fetch(URI)
+        .then((response) => response.json())
+        .then((json) => {
+          setResults(json.docs);
+          const count = json.count;
+          setResultsCount(count);
+          setFacets(json.facets.filter((facet) => facet.counts.length > 0));
+          page === 1 && setLoading(false);
+          changeShowSearchArea(false);
+        });
 
-    getGeoJSON(bounds);
+      getGeoJSON(bounds);
+    }
   }, 1000);
 
   useEffect(() => {
     getDataSpatialSearch(state.mapBounds);
   }, [navigate, params, facetQuery]);
 
+  useEffect(() => {
+    getDataSpatialSearch(initMapBounds);
+  }, [initMapBounds]);
   const clear = () => {
     setSelectedFacets([]);
     setFacetQuery("");
