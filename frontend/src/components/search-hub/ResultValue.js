@@ -20,7 +20,7 @@ import Link from "@mui/material/Link";
 import { dataServiceUrl } from "../../config/environment";
 import { useAppTranslation } from "context/context/AppTranslation";
 import SearchIcon from "@mui/icons-material/Search";
-import { trackingMatomoClickResults } from "utilities/trackingUtility";
+import { trackingMatomo } from "utilities/trackingUtility";
 import Tooltip from "@mui/material/Tooltip";
 import { cutWithDots } from "components/results/ResultDetails";
 
@@ -94,44 +94,13 @@ const ResultValue = (props) => {
   const { Component } = TypesMap[result["type"]];
   const [truncate, setTruncate] = useState(true);
   const jsonLdParams = new URLSearchParams({ id: result["id"] }).toString();
-  const sendGoogleEvent = () => {
-    /*gtag("config", "G-MQDK6BB0YQ");
-    gtag("event", "click_on_result", {
-      oih_result_target: url,
-    });*/
-    /*
-        //GA4 debug code
-        const measurement_id = `G-MQDK6BB0YQ`;
-        const api_secret = `dtIVKr8XQHSKJ0FrI4EkDQ`;
 
-        fetch(`https://www.google-analytics.com/mp/collect?measurement_id=${measurement_id}&api_secret=${api_secret}`, {
-            method: "POST",
-            body: JSON.stringify({
-                client_id: 'arno.clientId',
-                events: [
-                    {
-                        name: 'click_on_result_fetch',
-                        params: {
-                            'target': url
-                        },
-                    }
-                ]
-            })
-        });
-
-         */
-  };
-  const sendMatomoEvent = () => {
-    const stringResult = `${url}|index_result=${counterResult}|page=${
+  const sendMatomoEvent = (action, link) => {
+    const stringResult = `${link}|index_result=${counterResult}|page=${
       parseInt(page) + 1
     }|totalPagesNumber=${totalPageNumber}|queryString=${queryString}`;
-    console.log(stringResult);
 
-    const cd1 = `${counterResult}`;
-    const cd2 = `${parseInt(page) + 1}`;
-    const cd3 = `${totalPageNumber}`;
-
-    trackingMatomoClickResults(stringResult, cd1, cd2, cd3);
+    trackingMatomo(action, "click", stringResult);
   };
 
   const palette = "custom.resultPage.resultsDetails.";
@@ -178,8 +147,8 @@ const ResultValue = (props) => {
               href={url === "" ? `/record/${jsonLdParams}` : url}
               underline="hover"
               target="_blank"
-              onClick={() => sendMatomoEvent()}
-              onAuxClick={() => sendMatomoEvent()}
+              onClick={() => sendMatomoEvent("click_on_result", url)}
+              onAuxClick={() => sendMatomoEvent("click_on_result", url)}
             >
               <Typography
                 sx={{ fontSize: 21, color: palette + "colorTypography" }}
@@ -308,6 +277,18 @@ const ResultValue = (props) => {
                   },
                 }}
                 href={`${dataServiceUrl}/source?${jsonLdParams}`}
+                onClick={() =>
+                  sendMatomoEvent(
+                    "click_on_jsonld",
+                    `${dataServiceUrl}/source?${jsonLdParams}`
+                  )
+                }
+                onAuxClick={() =>
+                  sendMatomoEvent(
+                    "click_on_jsonld",
+                    `${dataServiceUrl}/source?${jsonLdParams}`
+                  )
+                }
                 target="_blank"
                 rel="noreferrer noopener"
                 onMouseEnter={() => setIconLD(<SearchIcon />)}

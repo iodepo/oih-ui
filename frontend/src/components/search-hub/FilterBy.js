@@ -36,7 +36,6 @@ const FilterBy = (props) => {
   };
 
   const addQueryMobile = (name, value) => {
-    debugger;
     let facet = name + ":" + '"' + value + '"';
     let queryResult = "";
     let isKeyContained = false;
@@ -160,6 +159,7 @@ const FilterBy = (props) => {
                     },
                   }}
                   onClick={() => {
+                    localStorage.setItem("lastOperationUser", "topic");
                     changeSearchType(tab.id);
                     const updatedItems = mobileAppliedFilters.map((f) => {
                       if (f.type === "searchType") {

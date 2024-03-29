@@ -194,7 +194,9 @@ const MapContainer = (props) => {
     if (region !== "" && region.toUpperCase() !== "GLOBAL") {
       params.append("region", region);
     }
-    geoJsonUrl += [params.toString(), facetQuery].filter((e) => e).join("&");
+    geoJsonUrl += [params.toString(), facetQuery ? "fq=" + facetQuery : ""]
+      .filter((e) => e)
+      .join("&");
 
     fetch(geoJsonUrl)
       .then((response) => response.json())
@@ -204,8 +206,8 @@ const MapContainer = (props) => {
   };
 
   const getDataSpatialSearch = throttle((bounds, page = 1) => {
-    page === 1 && setLoading(true);
     if (bounds) {
+      page === 1 && setLoading(true);
       let URI = `${dataServiceUrl}/search?`;
       const params = new URLSearchParams({
         facetType: "the_geom",
@@ -219,7 +221,9 @@ const MapContainer = (props) => {
       if (region && region.toUpperCase() !== "GLOBAL") {
         params.append("region", region);
       }
-      URI += [params.toString(), facetQuery].filter((e) => e).join("&");
+      URI += [params.toString(), facetQuery ? "fq=" + facetQuery : ""]
+        .filter((e) => e)
+        .join("&");
       setCurrentURI(URI);
       fetch(URI)
         .then((response) => response.json())
@@ -237,7 +241,7 @@ const MapContainer = (props) => {
   }, 1000);
 
   useEffect(() => {
-    getDataSpatialSearch(state.mapBounds);
+    getDataSpatialSearch(state.mapBounds || initMapBounds);
   }, [navigate, params, facetQuery]);
 
   useEffect(() => {

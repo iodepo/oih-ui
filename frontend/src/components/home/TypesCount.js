@@ -67,8 +67,10 @@ export default function TypesCount() {
       ); */
   }, [region]);
 
-  const searchByType = (type) => (event) =>
+  const searchByType = (type) => () => {
+    localStorage.setItem("lastOperationUser", "topic");
     navigate(`/results/${type}?${region ? "region=" + region : ""}`);
+  };
 
   const palette = "custom.homepage.tabs.";
   return (

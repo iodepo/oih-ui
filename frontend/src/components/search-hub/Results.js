@@ -1,7 +1,12 @@
 /* global URLSearchParams */
 
 import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  useNavigate,
+  useParams,
+  useSearchParams,
+  useLocation,
+} from "react-router-dom";
 import {
   fieldTitleFromName,
   searchAdvanced,
@@ -53,7 +58,7 @@ export default function Results() {
   const [mobileAppliedFilters, setMobileAppliedFilters] = useState([]);
   const [currentURI, setCurrentURI] = useState("");
   const [queryString, setQueryString] = useState("");
-
+  const location = useLocation();
   const [onlyVerified, setOnlyVerified] = useState(false);
 
   const navigate = useNavigate();
@@ -61,10 +66,18 @@ export default function Results() {
   const [searchText, setSearchText] = useSearchParam("search_text", "");
   const [region, setRegion] = useSearchParam("region", "global");
   const [facetQuery, setFacetQuery] = useSearchParam("fq");
-  const [fq, setFq] = useSearchParam("fq");
+  /* const [fq, setFq] = useSearchParam("fq"); */
   const [sort, setSort] = useSearchParam("sort");
   const [page, setPage] = useSearchParam("page", 0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSearchEnd, setIsSearchEnd] = useState(false);
+  const [previousParams, setPreviousParams] = useState({
+    sort: "",
+    facets: "",
+    page: "",
+    oldTypeOfSearch: "simple",
+    region: "global",
+  });
 
   const [openDialog, setOpenDialog] = useState(false);
   const translationState = useAppTranslation();
@@ -124,161 +137,194 @@ export default function Results() {
     getDefaultFacets(searchType);
   }, [searchType, getDefaultFacets]);
 
-  useEffect(
-    () => {
-      /*  if (showMap) {
-      mapSearch(mapBounds, page);
-    } else { */
-      setIsLoading(true);
-      let URI = `${dataServiceUrl}/search?`;
-      const params = new URLSearchParams({
-        document_type: searchType,
-        start: page * (ITEMS_PER_PAGE + showMorePages),
-        rows: ITEMS_PER_PAGE + showMorePages,
-      });
-
-      if (region.toUpperCase() !== "GLOBAL") {
-        params.append("region", region);
-      }
-
-      const facetQueryAdvanced = destructuringSearchTextAdvanced(searchText);
-      if (facetQueryAdvanced) {
-        URI += [
-          params.toString(),
-          facetQuery,
-          facetQueryAdvanced ? "fq=" + facetQueryAdvanced : "",
-          sort ? "sort=" + sort : "",
-        ]
-          .filter((e) => e)
-          .join("&");
-      } else {
-        if (searchText !== "") {
-          params.append("search_text", searchText);
-        }
-
-        URI += [
-          params.toString(),
-          facetQuery,
-          fq ? "fq=" + fq : "",
-          sort ? "sort=" + sort : "",
-        ]
-          .filter((e) => e)
-          .join("&");
-      }
-
-      setCurrentURI(URI);
-      let string = "";
-      string += [
-        params.toString(),
-        facetQuery,
-        facetQueryAdvanced ? "fq=" + facetQueryAdvanced : "",
-        sort ? "sort=" + sort : "",
-      ]
-        .filter((e) => e)
-        .join("&");
-      setQueryString(string);
-
-      fetch(URI)
-        .then((response) => response.json())
-        .then((json) => {
-          setResults(json.docs);
-          const count = json.count;
-          setResultCount(count);
-          setCounts((prev) => ({ ...prev, [searchType]: count }));
-          /* setFacets(json.facets.filter((facet) => facet.counts.length > 0)); */
-          setIsLoading(false);
-
-          /*  if(!fq && !facetQuery && !sort){
-            trackingMatomo("simple_search", "search", searchText ,region)
-          } */
-        });
-    },
-    /*  } */ [
+  useEffect(() => {
+    console.log(
       searchText,
       searchType,
       facetQuery,
       region,
       page,
       showMorePages,
-      fq,
-      sort,
+      sort
+    );
+    setIsLoading(true);
+    let URI = `${dataServiceUrl}/search?`;
+    const params = new URLSearchParams({
+      document_type: searchType,
+      start: page * (ITEMS_PER_PAGE + showMorePages),
+      rows: ITEMS_PER_PAGE + showMorePages,
+    });
+
+    if (region.toUpperCase() !== "GLOBAL") {
+      params.append("region", region);
+    }
+
+    if (searchText !== "") {
+      params.append("search_text", searchText);
+    }
+
+    URI += [
+      params.toString(),
+      facetQuery ? "fq=" + facetQuery : "",
+      sort ? "sort=" + sort : "",
     ]
-  );
+      .filter((e) => e)
+      .join("&");
 
-  const destructuringSearchTextAdvanced = (query) => {
-    const trimmedQuery = query.replace(/"/g, "'").trim();
-    const regex = /'([^']*)' (\S+) '([^']*)'/;
-    if (trimmedQuery.startsWith("{{") && trimmedQuery.endsWith("}}")) {
-      const cleanedQuery = trimmedQuery.slice(2, -2).trim();
+    setCurrentURI(URI);
+    let string = "";
+    string += [
+      params.toString(),
+      facetQuery ? "fq=" + facetQuery : "",
+      sort ? "sort=" + sort : "",
+    ]
+      .filter((e) => e)
+      .join("&");
+    setQueryString(string);
 
-      const subQueries = cleanedQuery
-        .split(new RegExp("\\b" + "AND" + "\\b", "i"))
-        .map((subQuery) => subQuery.trim());
+    fetch(URI)
+      .then((response) => response.json())
+      .then((json) => {
+        setResults(json.docs);
+        const count = json.count;
+        setResultCount(count);
+        setCounts((prev) => ({ ...prev, [searchType]: count }));
+        setIsLoading(false);
+        setIsSearchEnd(true);
+      });
+  }, [searchText, searchType, facetQuery, region, page, showMorePages, sort]);
 
-      const parsedObject = {};
+  const manageMatomoEvent = useCallback(() => {
+    if (results.length > 0 && !isLoading) {
+      const url = window.location.toString();
+      let matomoParams = `${checkVariable(searchText)}|${checkVariable(
+        region
+      )}|`;
+      const oldUrl = localStorage.getItem("oldUrl");
+      if (oldUrl && oldUrl === url) {
+        //refresh event
+        trackingMatomo("page_refresh", "misc", url);
+      } else {
+        localStorage.setItem("oldUrl", url);
+        const searchParams = new URLSearchParams(location.search);
+        const isExternalLink = searchParams.get("externalLink");
+        if (isExternalLink === "true") {
+          searchParams.delete("externalLink");
+          const newUrl = `${location.pathname}?${searchParams.toString()}${
+            location.hash
+          }`;
 
-      subQueries.forEach((subQuery, index) => {
-        if (subQuery.startsWith("(") && subQuery.endsWith(")")) {
-          const cleanedSubQuery = subQuery.slice(1, -1).trim();
+          window.history.replaceState(null, "", newUrl);
 
-          if (new RegExp("\\b" + "OR" + "\\b", "i").test(cleanedSubQuery)) {
-            const subQueriesOR = cleanedSubQuery
-              .split(new RegExp("\\b" + "OR" + "\\b", "i"))
-              .map((subQuery) => subQuery.trim());
+          //referrer event
+          matomoParams += `${checkVariable(facetQuery)}`;
+          trackingMatomo("landing_on_results", "search", matomoParams);
+        } else {
+          const lastOperationUser = localStorage.getItem("lastOperationUser");
+          const isFromAdvancedSearch =
+            searchParams.get("advancedSearch") === "true";
+          if (isFromAdvancedSearch) {
+            searchParams.delete("advancedSearch");
+            const newUrl = `${location.pathname}?${searchParams.toString()}${
+              location.hash
+            }`;
 
-            subQueriesOR.forEach((subQueryOR, index2) => {
-              if (subQueryOR.startsWith("(") && subQueryOR.endsWith(")")) {
-                const x = subQueryOR.slice(1, -1).trim();
-                const matches = x.match(regex);
+            window.history.replaceState(null, "", newUrl);
+          }
 
-                if (matches && matches.length === 4) {
-                  const [_, category, operator, value] = matches;
-                  if (!parsedObject[index]) {
-                    parsedObject[index] = [];
-                  }
+          switch (lastOperationUser) {
+            case "simpleSearch":
+              trackingMatomo("simple_search", "search", matomoParams);
+              break;
+            case "topic":
+              trackingMatomo("search_by_topic", "search", searchType);
+              break;
+            case "sort":
+              matomoParams += `${checkVariable(
+                previousParams.oldTypeOfSearch
+              )}|${checkVariable(previousParams.sort)}|${checkVariable(
+                sort
+              )}|${checkVariable(facetQuery)}`;
+              trackingMatomo("sorted_search", "search", matomoParams);
+              break;
+            case "advancedSearch":
+              matomoParams += `${checkVariable(facetQuery)}`;
+              trackingMatomo("advanced_search", "search", matomoParams);
+              break;
+            case "changePage":
+              matomoParams += `${checkVariable(
+                previousParams.oldTypeOfSearch
+              )}|${checkVariable(previousParams.page)}|${checkVariable(
+                page
+              )}|${checkVariable(facetQuery)}`;
+              trackingMatomo(
+                "change_result_page",
+                "search",
+                searchText,
+                region
+              );
+              break;
+            case "refinedSearch":
+              matomoParams += `${checkVariable(
+                previousParams.oldTypeOfSearch
+              )}|${checkVariable(previousParams.facets)}|${checkVariable(
+                facetQuery
+              )}`;
+              trackingMatomo("refined_search", "search", matomoParams);
+              break;
+            case "region":
+              matomoParams = `${previousParams.region}|${region}`;
+              trackingMatomo("change_region", "search", matomoParams);
+              break;
+            default:
+              break;
+          }
 
-                  parsedObject[index].push({
-                    id: index2,
-                    category: category.trim(),
-                    operator: operator.trim(),
-                    textfield: value.replace(/'/g, ""),
-                  });
-                }
-              }
+          if (isFromAdvancedSearch) {
+            setPreviousParams({
+              ...previousParams,
+              oldTypeOfSearch: "advanced",
+            });
+          } else if (!facetQuery) {
+            setPreviousParams({
+              ...previousParams,
+              oldTypeOfSearch: "simple",
             });
           } else {
-            const matches = cleanedSubQuery.match(regex);
-
-            if (matches && matches.length === 4) {
-              const [_, category, operator, value] = matches;
-
-              if (index === 0) {
-                parsedObject[index] = {
-                  category: category.trim(),
-                  value: value.replace(/'/g, ""),
-                  region: "Global",
-                };
-              } else {
-                parsedObject[index] = [
-                  {
-                    id: 0,
-                    category: category.trim(),
-                    operator: operator.trim(),
-                    textfield: value.replace(/'/g, ""),
-                  },
-                ];
-              }
-            }
+            setPreviousParams({
+              ...previousParams,
+              oldTypeOfSearch: "refined",
+            });
           }
         }
-      });
-
-      const [searchQueryBuild, facetQueryAdvanced] =
-        searchAdvanced(parsedObject);
-      return facetQueryAdvanced;
+      }
     }
-    return undefined;
+  }, [
+    previousParams,
+    facetQuery,
+    region,
+    searchText,
+    page,
+    sort,
+    location.hash,
+    location.pathname,
+    location.search,
+    searchType,
+    results,
+    isLoading,
+  ]);
+
+  const checkVariable = (value) => {
+    if (!value || value === "") return "(none)";
+
+    return value;
   };
+  useEffect(() => {
+    if (results.length > 0 && isSearchEnd) {
+      manageMatomoEvent();
+      setIsSearchEnd(false);
+    }
+  }, [results, isSearchEnd, manageMatomoEvent]);
 
   const facetSearch = (name, value, checked) => {
     let facet = name + ":" + '"' + value + '"';
@@ -326,11 +372,15 @@ export default function Results() {
         }
       });
     }
+    setPreviousParams({ ...previousParams, facets: facetQuery });
     setFacetQuery(queryResult);
+    localStorage.setItem("lastOperationUser", "refinedSearch");
   };
 
   const facetSearchMobile = (query) => {
+    setPreviousParams({ ...previousParams, facets: facetQuery });
     setFacetQuery(query);
+    localStorage.setItem("lastOperationUser", "refinedSearch");
   };
 
   const resetDefaultSearchUrl = useCallback(
@@ -366,6 +416,7 @@ export default function Results() {
         searchType={searchType}
         resultCount={resultCount}
         facets={facets}
+        setPreviousParams={setPreviousParams}
       />
       <Divider
         sx={{
@@ -526,7 +577,11 @@ export default function Results() {
                   height: "35px",
                   width: { xs: "135px", md: "unset" },
                 }}
-                onChange={(e) => setSort(e.target.value)}
+                onChange={(e) => {
+                  setPreviousParams({ ...previousParams, sort: sort });
+                  setSort(e.target.value);
+                  localStorage.setItem("lastOperationUser", "sort");
+                }}
               >
                 <MenuItem value="indexed_ts desc">
                   {translationState.translation["Recently updated"]}
@@ -651,7 +706,14 @@ export default function Results() {
                             borderRadius: 2,
                             height: "35px",
                           }}
-                          onChange={(e) => setSort(e.target.value)}
+                          onChange={(e) => {
+                            setPreviousParams({
+                              ...previousParams,
+                              sort: sort,
+                            });
+                            setSort(e.target.value);
+                            localStorage.setItem("lastOperationUser", "sort");
+                          }}
                         >
                           <MenuItem value="indexed_ts desc">
                             {translationState.translation["Recently updated"]}
@@ -721,6 +783,7 @@ export default function Results() {
                     resultCount={resultCount}
                     setPage={setPage}
                     page={page}
+                    setPreviousParams={setPreviousParams}
                   />
                 </Box>
               </Fade>

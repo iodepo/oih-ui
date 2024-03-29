@@ -102,7 +102,8 @@ const AdvancedSearch = (props) => {
         ...(query ? { fq: query } : {}),
         ...(sort ? { sort: sort } : {}),
         ...(region && region.toUpperCase() !== "GLOBAL" ? { region } : {}),
-      })}`;
+      })}&advancedSearch=true`;
+    localStorage.setItem("lastOperationUser", "advancedSearch");
     navigate(hrefFor(regionValue, facetQuery));
   };
 
