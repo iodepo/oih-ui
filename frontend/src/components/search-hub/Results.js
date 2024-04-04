@@ -72,11 +72,11 @@ export default function Results() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSearchEnd, setIsSearchEnd] = useState(false);
   const [previousParams, setPreviousParams] = useState({
-    sort: "",
-    facets: "",
-    page: "",
+    sort: "indexed_ts desc",
+    facets: facetQuery,
+    page: page,
     oldTypeOfSearch: "simple",
-    region: "global",
+    region: region,
   });
   const fetchRef = useRef(null);
   const [openDialog, setOpenDialog] = useState(false);
@@ -85,7 +85,6 @@ export default function Results() {
   let counterResult = 0;
 
   useEffect(() => {
-    debugger;
     const category = CATEGORIES.find((category) => category.id === searchType);
 
     setMobileAppliedFilters([{ type: "searchType", text: category.text }]);
@@ -198,7 +197,7 @@ export default function Results() {
   }, [searchText, searchType, facetQuery, region, page, showMorePages, sort]);
 
   const manageMatomoEvent = useCallback(() => {
-    if (results.length > 0 && !isLoading) {
+    if (!isLoading) {
       const url = window.location.toString();
       let matomoParams = `${checkVariable(searchText)}|${checkVariable(
         region
@@ -257,15 +256,12 @@ export default function Results() {
             case "changePage":
               matomoParams += `${checkVariable(
                 previousParams.oldTypeOfSearch
-              )}|${checkVariable(previousParams.page)}|${checkVariable(
-                page
-              )}|${checkVariable(facetQuery)}`;
-              trackingMatomo(
-                "change_result_page",
-                "search",
-                searchText,
-                region
-              );
+              )}|${checkVariable(
+                parseInt(previousParams.page) + 1
+              )}|${checkVariable(parseInt(page) + 1)}|${checkVariable(
+                facetQuery
+              )}`;
+              trackingMatomo("change_result_page", "search", matomoParams);
               break;
             case "refinedSearch":
               matomoParams += `${checkVariable(
@@ -313,7 +309,6 @@ export default function Results() {
     location.pathname,
     location.search,
     searchType,
-    results,
     isLoading,
   ]);
 
@@ -323,7 +318,7 @@ export default function Results() {
     return value;
   };
   useEffect(() => {
-    if (results.length > 0 && isSearchEnd) {
+    if (isSearchEnd) {
       manageMatomoEvent();
       setIsSearchEnd(false);
     }

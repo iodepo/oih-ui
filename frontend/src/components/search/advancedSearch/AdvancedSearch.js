@@ -66,6 +66,23 @@ const AdvancedSearch = (props) => {
       });
   };
 
+  function checkTextfieldsValidity(data) {
+    for (const key in data) {
+      if (Array.isArray(data[key])) {
+        for (const item of data[key]) {
+          if (item.textfield === "") {
+            return false;
+          }
+        }
+      } else if (typeof data[key] === "object" && data[key] !== null) {
+        if (!checkTextfieldsValidity(data[key])) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   const showCorrectSubFacets = (category) => {
     const correctFacet = facetsToShow.filter((f) => {
       const title = fieldTitleFromName(f.name);
@@ -87,24 +104,32 @@ const AdvancedSearch = (props) => {
   }, []);
 
   const createSearchQuery = () => {
-    const [searchQueryBuild, facetQuery] = searchAdvanced(searchAdvancedQuery);
-    console.log(facetQuery);
-    const idTabName = CATEGORIES.find(
-      (c) => c.text === searchAdvancedQuery[0].value
-    ).id;
+    const isValid = checkTextfieldsValidity(searchAdvancedQuery);
 
-    const regionValue = searchAdvancedQuery[0].region;
+    if (isValid) {
+      setAlertMessage("");
+      const [searchQueryBuild, facetQuery] =
+        searchAdvanced(searchAdvancedQuery);
+      console.log(facetQuery);
+      const idTabName = CATEGORIES.find(
+        (c) => c.text === searchAdvancedQuery[0].value
+      ).id;
 
-    setSearchQuery(searchQueryBuild);
-    console.log(searchAdvancedQuery);
-    const hrefFor = (region, query) =>
-      `/results/${idTabName}?${new URLSearchParams({
-        ...(query ? { fq: query } : {}),
-        ...(sort ? { sort: sort } : {}),
-        ...(region && region.toUpperCase() !== "GLOBAL" ? { region } : {}),
-      })}&advancedSearch=true`;
-    localStorage.setItem("lastOperationUser", "advancedSearch");
-    navigate(hrefFor(regionValue, facetQuery));
+      const regionValue = searchAdvancedQuery[0].region;
+
+      setSearchQuery(searchQueryBuild);
+      console.log(searchAdvancedQuery);
+      const hrefFor = (region, query) =>
+        `/results/${idTabName}?${new URLSearchParams({
+          ...(query ? { fq: query } : {}),
+          ...(sort ? { sort: sort } : {}),
+          ...(region && region.toUpperCase() !== "GLOBAL" ? { region } : {}),
+        })}&advancedSearch=true`;
+      localStorage.setItem("lastOperationUser", "advancedSearch");
+      navigate(hrefFor(regionValue, facetQuery));
+    } else {
+      setAlertMessage("Please fill all field before starting a search");
+    }
   };
 
   return (
