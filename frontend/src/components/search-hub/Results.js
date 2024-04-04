@@ -1,6 +1,6 @@
 /* global URLSearchParams */
 
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   useNavigate,
   useParams,
@@ -78,17 +78,18 @@ export default function Results() {
     oldTypeOfSearch: "simple",
     region: "global",
   });
-
+  const fetchRef = useRef(null);
   const [openDialog, setOpenDialog] = useState(false);
   const translationState = useAppTranslation();
 
   let counterResult = 0;
 
   useEffect(() => {
+    debugger;
     const category = CATEGORIES.find((category) => category.id === searchType);
 
     setMobileAppliedFilters([{ type: "searchType", text: category.text }]);
-  }, []);
+  }, [searchType]);
 
   useEffect(() => {
     fetch(
@@ -138,6 +139,7 @@ export default function Results() {
   }, [searchType, getDefaultFacets]);
 
   useEffect(() => {
+    if (fetchRef.current) return;
     console.log(
       searchText,
       searchType,
@@ -182,7 +184,7 @@ export default function Results() {
       .join("&");
     setQueryString(string);
 
-    fetch(URI)
+    fetchRef.current = fetch(URI)
       .then((response) => response.json())
       .then((json) => {
         setResults(json.docs);
@@ -191,6 +193,7 @@ export default function Results() {
         setCounts((prev) => ({ ...prev, [searchType]: count }));
         setIsLoading(false);
         setIsSearchEnd(true);
+        fetchRef.current = null;
       });
   }, [searchText, searchType, facetQuery, region, page, showMorePages, sort]);
 
