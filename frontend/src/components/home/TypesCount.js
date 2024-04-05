@@ -68,7 +68,13 @@ export default function TypesCount() {
   }, [region]);
 
   const searchByType = (type) => () => {
-    localStorage.setItem("lastOperationUser", "topic");
+    localStorage.setItem(
+      "lastOperationUser",
+      localStorage.getItem("operationUser")
+        ? localStorage.getItem("operationUser")
+        : ""
+    );
+    localStorage.setItem("operationUser", "topic");
     navigate(`/results/${type}?${region ? "region=" + region : ""}`);
   };
 

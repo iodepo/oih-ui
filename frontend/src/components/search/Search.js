@@ -187,7 +187,13 @@ export default function Search(props) {
     [region, useCookies.getCookie("language")]
   );
   const setLastOperation = (operation) => {
-    localStorage.setItem("lastOperationUser", operation);
+    localStorage.setItem(
+      "lastOperationUser",
+      localStorage.getItem("operationUser")
+        ? localStorage.getItem("operationUser")
+        : ""
+    );
+    localStorage.setItem("operationUser", operation);
   };
   const searchAdvancedSearch = (type) => {
     navigate(

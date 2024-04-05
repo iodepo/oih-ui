@@ -12,7 +12,13 @@ export default function Pagination({
 }) {
   const pageCount = Math.ceil(resultCount / (ITEMS_PER_PAGE + showMorePages));
   const handlePageClick = (event, value) => {
-    localStorage.setItem("lastOperationUser", "changePage");
+    localStorage.setItem(
+      "lastOperationUser",
+      localStorage.getItem("operationUser")
+        ? localStorage.getItem("operationUser")
+        : ""
+    );
+    localStorage.setItem("operationUser", "changePage");
     setPreviousParams((prev) => {
       return { ...prev, page: page };
     });

@@ -159,7 +159,13 @@ const FilterBy = (props) => {
                     },
                   }}
                   onClick={() => {
-                    localStorage.setItem("lastOperationUser", "topic");
+                    localStorage.setItem(
+                      "lastOperationUser",
+                      localStorage.getItem("operationUser")
+                        ? localStorage.getItem("operationUser")
+                        : ""
+                    );
+                    localStorage.setItem("operationUser", "topic");
                     changeSearchType(tab.id);
                     const updatedItems = mobileAppliedFilters.map((f) => {
                       if (f.type === "searchType") {

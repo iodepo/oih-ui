@@ -13,6 +13,7 @@ import { useSearchParam } from "utilities/generalUtility";
 import DesktopMapView from "./components/desktop/DesktopMapView";
 import MobileMapView from "./components/mobile/MobileMapView";
 import { useMediaQuery, useTheme } from "@mui/material";
+import { defaultMatomoPageView } from "utilities/trackingUtility";
 
 const MapContainer = (props) => {
   const { isHome } = props;
@@ -60,6 +61,8 @@ const MapContainer = (props) => {
     const lat = searchParams.get("lat");
 
     if (lng && lat) setInitCenter([lng, lat]);
+
+    !isHome && defaultMatomoPageView();
   }, []);
 
   const hrefFor = (region, query, facetQuery) =>

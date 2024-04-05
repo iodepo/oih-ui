@@ -125,7 +125,13 @@ const AdvancedSearch = (props) => {
           ...(sort ? { sort: sort } : {}),
           ...(region && region.toUpperCase() !== "GLOBAL" ? { region } : {}),
         })}&advancedSearch=true`;
-      localStorage.setItem("lastOperationUser", "advancedSearch");
+      localStorage.setItem(
+        "lastOperationUser",
+        localStorage.getItem("operationUser")
+          ? localStorage.getItem("operationUser")
+          : ""
+      );
+      localStorage.setItem("operationUser", "advancedSearch");
       navigate(hrefFor(regionValue, facetQuery));
     } else {
       setAlertMessage("Please fill all field before starting a search");

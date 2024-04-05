@@ -45,7 +45,10 @@ import Chip from "@mui/material/Chip";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import Fade from "@mui/material/Fade";
 import CircularProgress from "@mui/material/CircularProgress";
-import { trackingMatomo } from "utilities/trackingUtility";
+import {
+  defaultMatomoPageView,
+  trackingMatomo,
+} from "utilities/trackingUtility";
 
 export default function Results() {
   const [results, setResults] = useState([]);
@@ -67,7 +70,7 @@ export default function Results() {
   const [region, setRegion] = useSearchParam("region", "global");
   const [facetQuery, setFacetQuery] = useSearchParam("fq");
   /* const [fq, setFq] = useSearchParam("fq"); */
-  const [sort, setSort] = useSearchParam("sort");
+  const [sort, setSort] = useSearchParam("sort", "indexed_ts desc");
   const [page, setPage] = useSearchParam("page", 0);
   const [isLoading, setIsLoading] = useState(false);
   const [isSearchEnd, setIsSearchEnd] = useState(false);
@@ -133,6 +136,22 @@ export default function Results() {
     [page, region, showMorePages]
   );
 
+  useEffect(() => {
+    defaultMatomoPageView();
+
+    const handleBack = () => {
+      localStorage.setItem(
+        "operationUser",
+        localStorage.getItem("lastOperationUser")
+      );
+    };
+
+    window.addEventListener("popstate", handleBack);
+
+    return () => {
+      window.removeEventListener("popstate", handleBack);
+    };
+  }, []);
   useEffect(() => {
     getDefaultFacets(searchType);
   }, [searchType, getDefaultFacets]);
@@ -222,7 +241,7 @@ export default function Results() {
           matomoParams += `${checkVariable(facetQuery)}`;
           trackingMatomo("landing_on_results", "search", matomoParams);
         } else {
-          const lastOperationUser = localStorage.getItem("lastOperationUser");
+          const operationUser = localStorage.getItem("operationUser");
           const isFromAdvancedSearch =
             searchParams.get("advancedSearch") === "true";
           if (isFromAdvancedSearch) {
@@ -234,14 +253,19 @@ export default function Results() {
             window.history.replaceState(null, "", newUrl);
           }
 
-          switch (lastOperationUser) {
+          switch (operationUser) {
             case "simpleSearch":
-              trackingMatomo("simple_search", "search", matomoParams);
+              trackingMatomo(
+                "simple_search",
+                "search",
+                matomoParams.slice(0, -1)
+              );
               break;
             case "topic":
               trackingMatomo("search_by_topic", "search", searchType);
               break;
             case "sort":
+              debugger;
               matomoParams += `${checkVariable(
                 previousParams.oldTypeOfSearch
               )}|${checkVariable(previousParams.sort)}|${checkVariable(
@@ -372,13 +396,25 @@ export default function Results() {
     }
     setPreviousParams({ ...previousParams, facets: facetQuery });
     setFacetQuery(queryResult);
-    localStorage.setItem("lastOperationUser", "refinedSearch");
+    localStorage.setItem(
+      "lastOperationUser",
+      localStorage.getItem("operationUser")
+        ? localStorage.getItem("operationUser")
+        : ""
+    );
+    localStorage.setItem("operationUser", "refinedSearch");
   };
 
   const facetSearchMobile = (query) => {
     setPreviousParams({ ...previousParams, facets: facetQuery });
     setFacetQuery(query);
-    localStorage.setItem("lastOperationUser", "refinedSearch");
+    localStorage.setItem(
+      "lastOperationUser",
+      localStorage.getItem("operationUser")
+        ? localStorage.getItem("operationUser")
+        : ""
+    );
+    localStorage.setItem("operationUser", "refinedSearch");
   };
 
   const resetDefaultSearchUrl = useCallback(
@@ -578,7 +614,13 @@ export default function Results() {
                 onChange={(e) => {
                   setPreviousParams({ ...previousParams, sort: sort });
                   setSort(e.target.value);
-                  localStorage.setItem("lastOperationUser", "sort");
+                  localStorage.setItem(
+                    "lastOperationUser",
+                    localStorage.getItem("operationUser")
+                      ? localStorage.getItem("operationUser")
+                      : ""
+                  );
+                  localStorage.setItem("operationUser", "sort");
                 }}
               >
                 <MenuItem value="indexed_ts desc">
@@ -710,7 +752,13 @@ export default function Results() {
                               sort: sort,
                             });
                             setSort(e.target.value);
-                            localStorage.setItem("lastOperationUser", "sort");
+                            localStorage.setItem(
+                              "lastOperationUser",
+                              localStorage.getItem("operationUser")
+                                ? localStorage.getItem("operationUser")
+                                : ""
+                            );
+                            localStorage.setItem("operationUser", "sort");
                           }}
                         >
                           <MenuItem value="indexed_ts desc">
