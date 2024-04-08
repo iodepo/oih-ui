@@ -57,10 +57,10 @@ const searchAdvanced = (searchAdvancedQuery) => {
 
   function valueMapper(text, operator) {
     if (operator.toLowerCase().endsWith("contains")) {
-      return `*${text}*`;
+      return `*${text.replace(/ /g, "\\ ")}*`;
     }
 
-    return text;
+    return '"' + text + '"';
   }
 
   let firstGroup = true;
@@ -97,9 +97,9 @@ const searchAdvanced = (searchAdvancedQuery) => {
       facetQuery +=
         (value.operator.startsWith("Not") ? "-" : "") +
         categories[value.category.toLowerCase()] +
-        ':"' +
+        ":" +
         valueMapper(value.textfield, value.operator) +
-        '"';
+        "";
 
       if (index < group.length - 1) {
         facetQuery += " OR ";

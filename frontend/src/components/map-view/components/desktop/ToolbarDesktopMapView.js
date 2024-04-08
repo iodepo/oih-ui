@@ -80,9 +80,12 @@ const ToolbarDesktopMapView = (props) => {
         const temp = p.replace(/^\(|\)$/g, "");
         const tempPairs = temp.split(" OR ");
         tempPairs.forEach((t) => {
-          const splitted = t.split(":");
+          let index = t.indexOf(":");
+          let facetType = t.substring(0, index);
+          let facetName = t.substring(index + 1).slice(1, -1);
+          /* const splitted = t.split(":");
           const facetType = splitted[0];
-          const facetName = splitted[1].replace(/"/g, "");
+          const facetName = splitted[1].replace(/"/g, ""); */
           extractedPairs.push({ name: facetType, value: facetName });
         });
       });

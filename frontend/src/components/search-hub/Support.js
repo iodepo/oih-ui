@@ -13,51 +13,70 @@ import Divider from "@mui/material/Divider";
 import HelpIcon from "@mui/icons-material/Help";
 import FlagIcon from "@mui/icons-material/Flag";
 import { useAppTranslation } from "context/context/AppTranslation";
+import HandshakeIcon from "@mui/icons-material/Handshake";
+import Tooltip from "@mui/material/Tooltip";
+import { useNavigate } from "react-router-dom";
 
-const Support = () => {
+const Support = (props) => {
+  const { openTooltipsSupport, setOpenTooltipSupport } = props;
   const [openSupport, setOpenSupport] = useState(false);
-
+  const navigate = useNavigate();
   const translationState = useAppTranslation();
 
   const palette = "custom.resultPage.support.";
   return (
     <>
-      <IconButton
-        aria-label="support"
-        size="large"
-        onClick={() => setOpenSupport(true)}
-        sx={{
-          backgroundColor: palette + "bgIconSupport",
-          position: "fixed",
-          bottom: 25,
-          right: 25,
-          borderRadius: "16px",
-          zIndex: 2,
-          "&:hover": {
-            transform: "scale(1.1)",
-            backgroundColor: palette + "bgIconSupport",
-          },
-          "@keyframes pulse": {
-            "0%": {
-              transform: "scale(1)",
-            },
-            "50%": {
-              transform: "scale(1.1)",
-            },
-            "100%": {
-              transform: "scale(1)",
-            },
-          },
-          "&:hover .MuiSvgIcon-root": {
-            animation: "pulse 1s infinite",
-          },
+      <Tooltip
+        PopperProps={{
+          disablePortal: true,
         }}
+        onClose={() => setOpenTooltipSupport(false)}
+        open={openTooltipsSupport}
+        disableFocusListener
+        disableHoverListener
+        disableTouchListener
+        title={<Typography variant="body1">Need help?</Typography>}
+        arrow
+        placement="left"
       >
-        <SupportIcon
-          fontSize="inherit"
-          sx={{ color: palette + "colorIconSupport" }}
-        />
-      </IconButton>
+        <IconButton
+          aria-label="support"
+          size="large"
+          onClick={() => setOpenSupport(true)}
+          sx={{
+            backgroundColor: palette + "bgIconSupport",
+            position: "fixed",
+            bottom: 25,
+            right: 25,
+            borderRadius: "16px",
+            zIndex: 2,
+            "&:hover": {
+              transform: "scale(1.1)",
+              backgroundColor: palette + "bgIconSupport",
+            },
+            "@keyframes pulse": {
+              "0%": {
+                transform: "scale(1)",
+              },
+              "50%": {
+                transform: "scale(1.1)",
+              },
+              "100%": {
+                transform: "scale(1)",
+              },
+            },
+            "&:hover .MuiSvgIcon-root": {
+              animation: "pulse 1s infinite",
+            },
+          }}
+        >
+          <SupportIcon
+            fontSize="inherit"
+            sx={{ color: palette + "colorIconSupport" }}
+          />
+        </IconButton>
+      </Tooltip>
+
       <Dialog
         onClose={() => setOpenSupport(false)}
         open={openSupport}
@@ -211,6 +230,52 @@ const Support = () => {
                         window.open("https://www.google.com", "_blank")
                       }
                     >
+                      <KeyboardArrowRightIcon
+                        sx={{ color: palette + "iconColor" }}
+                      />
+                    </IconButton>
+                  </Box>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 400,
+                      color: palette + "colorSubTypography",
+                      lineHeight: 0,
+                    }}
+                  >
+                    Lorem ipsum dolor sit amet consectetur.
+                  </Typography>
+                </Box>
+              </Box>
+              <Divider variant="middle" sx={{ mt: "20px" }} />
+            </Box>
+            <Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <HandshakeIcon sx={{ color: palette + "iconColor" }} />
+                <Box sx={{ width: "100%" }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        fontWeight: 700,
+                        color: palette + "colorTypography",
+                        lineHeight: 2.5,
+                      }}
+                    >
+                      Matchmaking
+                    </Typography>
+                    <IconButton onClick={() => navigate("/matchmaking/demand")}>
                       <KeyboardArrowRightIcon
                         sx={{ color: palette + "iconColor" }}
                       />

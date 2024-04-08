@@ -191,13 +191,17 @@ const MapContainer = (props) => {
     const params = new URLSearchParams({
       /* ...(searchType !== "SpatialData" ? { document_type: searchType } : {}), */
       search_text: searchText,
-      facetType: "the_geom",
-      facetName: mapLibreBounds_toQuery(bounds, region),
     });
+
+    let fqResult = "(the_geom:" + mapLibreBounds_toQuery(bounds, region) + ")";
+
+    if (facetQuery) {
+      fqResult += " AND " + facetQuery;
+    }
     if (region !== "" && region.toUpperCase() !== "GLOBAL") {
       params.append("region", region);
     }
-    geoJsonUrl += [params.toString(), facetQuery ? "fq=" + facetQuery : ""]
+    geoJsonUrl += [params.toString(), "fq=" + fqResult]
       .filter((e) => e)
       .join("&");
 
@@ -213,8 +217,6 @@ const MapContainer = (props) => {
       page === 1 && setLoading(true);
       let URI = `${dataServiceUrl}/search?`;
       const params = new URLSearchParams({
-        facetType: "the_geom",
-        facetName: mapLibreBounds_toQuery(bounds, region),
         rows: ITEMS_PER_PAGE + 20 * page,
         start: 0,
       });
@@ -224,9 +226,13 @@ const MapContainer = (props) => {
       if (region && region.toUpperCase() !== "GLOBAL") {
         params.append("region", region);
       }
-      URI += [params.toString(), facetQuery ? "fq=" + facetQuery : ""]
-        .filter((e) => e)
-        .join("&");
+      let fqResult =
+        "(the_geom:" + mapLibreBounds_toQuery(bounds, region) + ")";
+
+      if (facetQuery) {
+        fqResult += " AND " + facetQuery;
+      }
+      URI += [params.toString(), "fq=" + fqResult].filter((e) => e).join("&");
       setCurrentURI(URI);
       fetch(URI)
         .then((response) => response.json())
@@ -234,7 +240,7 @@ const MapContainer = (props) => {
           setResults(json.docs);
           const count = json.count;
           setResultsCount(count);
-          setFacets(json.facets.filter((facet) => facet.counts.length > 0));
+          /* setFacets(json.facets.filter((facet) => facet.counts.length > 0)); */
           page === 1 && setLoading(false);
           changeShowSearchArea(false);
         });
@@ -243,13 +249,38 @@ const MapContainer = (props) => {
     }
   }, 1000);
 
+  const getDefaultFacets = useCallback(
+    (bounds, page = 1) => {
+      let URI = `${dataServiceUrl}/search?`;
+      const params = new URLSearchParams({
+        start: 0,
+        rows: ITEMS_PER_PAGE + 20 * page,
+      });
+
+      if (region.toUpperCase() !== "GLOBAL") {
+        params.append("region", region);
+      }
+      let fqResult =
+        "(the_geom:" + mapLibreBounds_toQuery(bounds, region) + ")";
+
+      URI += [params.toString(), "fq=" + fqResult].filter((e) => e).join("&");
+
+      fetch(URI)
+        .then((response) => response.json())
+        .then((json) => {
+          setFacets(json.facets.filter((facet) => facet.counts.length > 0));
+        });
+    },
+    [region]
+  );
   useEffect(() => {
     getDataSpatialSearch(state.mapBounds || initMapBounds);
   }, [navigate, params, facetQuery]);
 
   useEffect(() => {
     getDataSpatialSearch(initMapBounds);
-  }, [initMapBounds]);
+    !isHome && initMapBounds && getDefaultFacets(initMapBounds);
+  }, [initMapBounds, getDefaultFacets, isHome]);
   const clear = () => {
     setSelectedFacets([]);
     setFacetQuery("");

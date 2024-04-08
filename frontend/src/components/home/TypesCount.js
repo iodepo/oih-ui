@@ -16,6 +16,8 @@ import Search from "../search/Search";
 import MapViewerEntrypoint from "./MapViewerEntrypoint";
 import CardTopic from "./CardTopic";
 import CarouselPortals from "./CarouselPortals";
+import Typography from "@mui/material/Typography";
+import LinkMui from "@mui/material/Link";
 
 const doc_types = [
   "CreativeWork",
@@ -126,6 +128,34 @@ export default function TypesCount() {
                           </Grid>
                         );
                     })}
+                    <Grid item lg={4} xs={12}></Grid>
+                    <Grid
+                      item
+                      lg={4}
+                      xs={12}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: { xs: "center", lg: "end" },
+                      }}
+                    >
+                      <LinkMui
+                        sx={{
+                          color: "#40AAD3",
+                          textDecoration: "none",
+                          cursor: "pointer",
+                          transition: "transform 0.3s",
+                          "&:hover": {
+                            transform: "scale(1.1)",
+                          },
+                        }}
+                        onClick={() => navigate("/matchmaking/offer")}
+                      >
+                        <Typography variant="subtitle1" noWrap>
+                          How to share your data →
+                        </Typography>
+                      </LinkMui>
+                    </Grid>
                   </Grid>
                 </Grid>
               </Grid>

@@ -161,7 +161,9 @@ const OfferForm = () => {
               columnSpacing={2}
             >
               <Grid item xs={12} lg={12}>
-                <Divider textAlign="left">IDENTIFIER</Divider>
+                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                  IDENTIFIER
+                </Divider>
               </Grid>
               <Grid item xs={12} lg={6}>
                 <TextField
@@ -196,7 +198,9 @@ const OfferForm = () => {
               columnSpacing={2}
             >
               <Grid item xs={12} lg={12}>
-                <Divider textAlign="left">ITEM REQUESTED</Divider>
+                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                  ITEM REQUESTED
+                </Divider>
               </Grid>
               <Grid item xs={12} lg={12}>
                 <RadioGroup
@@ -403,7 +407,9 @@ const OfferForm = () => {
                     sx={{ padding: "24px" }}
                   >
                     <Grid item xs={12} lg={12}>
-                      <Divider textAlign="left">IMAGE</Divider>
+                      <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                        IMAGE
+                      </Divider>
                     </Grid>
                     <Grid item xs={12} lg={6}>
                       <TextField
@@ -541,7 +547,9 @@ const OfferForm = () => {
               columnSpacing={2}
             >
               <Grid item xs={12} lg={12}>
-                <Divider textAlign="left">IMAGE</Divider>
+                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                  IMAGE
+                </Divider>
               </Grid>
               <Grid item xs={12} lg={6}>
                 <TextField
@@ -614,7 +622,9 @@ const OfferForm = () => {
               columnSpacing={2}
             >
               <Grid item xs={12} lg={12}>
-                <Divider textAlign="left">MAIN ENTITY OF THE PAGE</Divider>
+                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                  MAIN ENTITY OF THE PAGE
+                </Divider>
               </Grid>
               <Grid item xs={12} lg={6}>
                 <TextField
@@ -650,7 +660,9 @@ const OfferForm = () => {
               columnSpacing={2}
             >
               <Grid item xs={12} lg={12}>
-                <Divider textAlign="left">GTIN</Divider>
+                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                  GTIN
+                </Divider>
               </Grid>
               <Grid item xs={12} lg={6}>
                 <TextField
@@ -696,7 +708,9 @@ const OfferForm = () => {
               columnSpacing={2}
             >
               <Grid item xs={12} lg={12}>
-                <Divider textAlign="left">OFFERED BY</Divider>
+                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                  OFFERED BY
+                </Divider>
               </Grid>
               <Grid item xs={12} lg={12}>
                 <RadioGroup
@@ -808,7 +822,9 @@ const OfferForm = () => {
               columnSpacing={2}
             >
               <Grid item xs={12} lg={12}>
-                <Divider textAlign="left">AREA SERVED</Divider>
+                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                  AREA SERVED
+                </Divider>
               </Grid>
               <Grid item xs={12} lg={12}>
                 <RadioGroup
@@ -889,7 +905,9 @@ const OfferForm = () => {
               columnSpacing={2}
             >
               <Grid item xs={12} lg={12}>
-                <Divider textAlign="left">ELIGIBLE REGION</Divider>
+                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                  ELIGIBLE REGION
+                </Divider>
               </Grid>
               <Grid item xs={12} lg={4}>
                 GEO SHAPE
@@ -951,7 +969,9 @@ const OfferForm = () => {
               columnSpacing={2}
             >
               <Grid item xs={12} lg={12}>
-                <Divider textAlign="left">INELIGIBLE REGION</Divider>
+                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                  INELIGIBLE REGION
+                </Divider>
               </Grid>
               <Grid item xs={12} lg={4}>
                 GEO SHAPE
@@ -1020,7 +1040,9 @@ const OfferForm = () => {
               columnSpacing={2}
             >
               <Grid item xs={12} lg={12}>
-                <Divider textAlign="left">PRICE SPECIFICATION</Divider>
+                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                  PRICE SPECIFICATION
+                </Divider>
               </Grid>
               <Grid item xs={12} lg={3}>
                 <TextField

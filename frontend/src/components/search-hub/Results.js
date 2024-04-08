@@ -50,6 +50,8 @@ import {
   trackingMatomo,
 } from "utilities/trackingUtility";
 
+import LinkMui from "@mui/material/Link";
+
 export default function Results() {
   const [results, setResults] = useState([]);
   const [resultCount, setResultCount] = useState(0);
@@ -83,7 +85,9 @@ export default function Results() {
   });
   const fetchRef = useRef(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [openTooltipsSupport, setOpenTooltipSupport] = useState(false);
   const translationState = useAppTranslation();
+  const [searchCounter, setSearchCounter] = useState(-1);
 
   let counterResult = 0;
 
@@ -158,15 +162,7 @@ export default function Results() {
 
   useEffect(() => {
     if (fetchRef.current) return;
-    console.log(
-      searchText,
-      searchType,
-      facetQuery,
-      region,
-      page,
-      showMorePages,
-      sort
-    );
+
     setIsLoading(true);
     let URI = `${dataServiceUrl}/search?`;
     const params = new URLSearchParams({
@@ -206,6 +202,7 @@ export default function Results() {
       .then((response) => response.json())
       .then((json) => {
         setResults(json.docs);
+        setSearchCounter((prev) => prev + 1);
         const count = json.count;
         setResultCount(count);
         setCounts((prev) => ({ ...prev, [searchType]: count }));
@@ -265,7 +262,6 @@ export default function Results() {
               trackingMatomo("search_by_topic", "search", searchType);
               break;
             case "sort":
-              debugger;
               matomoParams += `${checkVariable(
                 previousParams.oldTypeOfSearch
               )}|${checkVariable(previousParams.sort)}|${checkVariable(
@@ -335,6 +331,12 @@ export default function Results() {
     searchType,
     isLoading,
   ]);
+
+  useEffect(() => {
+    if (searchCounter > 4) {
+      setOpenTooltipSupport(true);
+    }
+  }, [searchCounter]);
 
   const checkVariable = (value) => {
     if (!value || value === "") return "(none)";
@@ -460,7 +462,10 @@ export default function Results() {
         }}
       />
       <Container maxWidth="lg" sx={{ marginBottom: { xs: 5, lg: 0 } }}>
-        <Support />
+        <Support
+          openTooltipsSupport={openTooltipsSupport}
+          setOpenTooltipSupport={setOpenTooltipSupport}
+        />
         <Grid container mt={{ xs: 4, lg: 0 }} gap={{ xs: 1, lg: 0 }}>
           <Grid item lg={3} display={{ xs: "none", lg: "block" }}>
             <Fade
@@ -788,24 +793,49 @@ export default function Results() {
                         </Select>
                       </Box>
                     </Box>
-                    {results.map((result) => {
-                      counterResult =
-                        counterResult > 10 ? 1 : counterResult + 1;
-                      return (
-                        <ResultValue
-                          totalPageNumber={Math.ceil(
-                            resultCount / (ITEMS_PER_PAGE + showMorePages)
-                          )}
-                          counterResult={counterResult}
-                          page={page}
-                          queryString={queryString}
-                          result={result}
-                          completeValue={100}
-                          key={result["id"]}
-                          onlyVerified={onlyVerified}
-                        />
-                      );
-                    })}
+                    {results.length === 0 ? (
+                      <>
+                        <Typography variant="body1">
+                          Uh oh! Your search returned no results... <br />
+                          Are you looking for something specific? You can open a
+                          request in our matchmaking tool.{" "}
+                          <Typography
+                            variant="body1"
+                            component={LinkMui}
+                            sx={{
+                              color: "#40AAD3",
+                              textDecoration: "none",
+                              cursor: "pointer",
+                              "&:hover": {
+                                textDecoration: "underline",
+                              },
+                            }}
+                            onClick={() => navigate("/matchmaking/demand")}
+                          >
+                            Learn more
+                          </Typography>
+                        </Typography>
+                      </>
+                    ) : (
+                      results.map((result) => {
+                        counterResult =
+                          counterResult > 10 ? 1 : counterResult + 1;
+                        return (
+                          <ResultValue
+                            totalPageNumber={Math.ceil(
+                              resultCount / (ITEMS_PER_PAGE + showMorePages)
+                            )}
+                            counterResult={counterResult}
+                            page={page}
+                            queryString={queryString}
+                            result={result}
+                            completeValue={100}
+                            key={result["id"]}
+                            onlyVerified={onlyVerified}
+                          />
+                        );
+                      })
+                    )}
                   </Stack>
                   <Button
                     variant="outlined"
@@ -831,6 +861,23 @@ export default function Results() {
                     page={page}
                     setPreviousParams={setPreviousParams}
                   />
+
+                  <Typography
+                    variant="body2"
+                    component={LinkMui}
+                    textAlign={"center"}
+                    sx={{
+                      color: "#40AAD3",
+                      textDecoration: "none",
+                      cursor: "pointer",
+                      "&:hover": {
+                        textDecoration: "underline",
+                      },
+                    }}
+                    onClick={() => navigate("/matchmaking/offer")}
+                  >
+                    How to share your data
+                  </Typography>
                 </Box>
               </Fade>
             </Grid>
