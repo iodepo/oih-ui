@@ -12,21 +12,19 @@ import DemandForm from "components/matchmaking/demand/DemandForm";
 function App() {
   return (
     <BrowserRouter>
-      <AppContainer>
-        <Routes>
-          <Route path="results/:searchType" element={<Results />} />
-          <Route path="results/" element={<Results />} />
-          <Route path="/map-viewer" element={<MapContainer isHome={false} />} />
-          <Route
-            path="/map-viewer/:searchType"
-            element={<MapContainer isHome={false} />}
-          />
-          <Route path="/record/:jsonld" element={<RecordMetadata />} />
-          <Route path="/matchmaking/demand" element={<DemandForm />} />
-          <Route path="/matchmaking/offer" element={<OfferForm />} />
-          <Route path="/" element={<TypesCount />}></Route>
-        </Routes>
-      </AppContainer>
+      <Routes>
+        <Route path="results/:searchType" element={<Results />} />
+        <Route path="results/" element={<Results />} />
+        <Route path="/map-viewer" element={<MapContainer isHome={false} />} />
+        <Route
+          path="/map-viewer/:searchType"
+          element={<MapContainer isHome={false} />}
+        />
+        <Route path="/record/:jsonld" element={<RecordMetadata />} />
+        <Route path="/matchmaking/demand" element={<DemandForm />} />
+        <Route path="/matchmaking/offer" element={<OfferForm />} />
+        <Route path="/" element={<TypesCount />}></Route>
+      </Routes>
     </BrowserRouter>
   );
 }

@@ -16,6 +16,11 @@ const DrawPolygonMap = () => {
       zoom: 4,
     });
 
+    // Personalizzazione dei controlli di MapboxDraw
+    MapboxDraw.constants.classes.CONTROL_BASE = "maplibregl-ctrl";
+    MapboxDraw.constants.classes.CONTROL_PREFIX = "maplibregl-ctrl-";
+    MapboxDraw.constants.classes.CONTROL_GROUP = "maplibregl-ctrl-group";
+
     const draw = new MapboxDraw({
       displayControlsDefault: false,
       controls: {
