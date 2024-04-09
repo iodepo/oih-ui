@@ -19,6 +19,8 @@ import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import TextField from "@mui/material/TextField";
+import DrawPolygonMap from "../DrawPolygonMap";
+import Autocomplete from "@mui/material/Autocomplete";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -46,10 +48,15 @@ const OfferForm = () => {
   const [itemOffered, setItemOffered] = useState("creative-work");
   const [offeredBy, setOfferedBy] = useState("person");
   const [areaServed, setAreaServed] = useState("admin");
+  const [eligibleRegion, setEligibleRegion] = useState("geo");
+  const [ineligibleRegion, setInEligibleRegion] = useState("geo");
   const [imageProduct, setImageProduct] = useState(null);
   const [fileNameProduct, setFileNameProduct] = useState("");
   const [imageSection, setImageSection] = useState(null);
   const [fileNameSection, setFileNameSection] = useState("");
+  const [geoJsonAreaServed, setGeoJsonAreaServed] = useState();
+  const [geoJsonEligibleRegion, setGeoJsonEligibleRegion] = useState();
+  const [geoJsonIneligibleRegion, setGeoJsonIneligibleRegion] = useState();
   const onSubmit = (data) => console.log(data);
 
   const handleFileChangeProduct = (e) => {
@@ -894,6 +901,54 @@ const OfferForm = () => {
                   </Grid>
                 </>
               )}
+              {/* GEO SHAPE */}
+              {areaServed === "geo" && (
+                <>
+                  <Grid item xs={12} lg={12}>
+                    <DrawPolygonMap
+                      setGeoJson={setGeoJsonAreaServed}
+                      id={"area_served_map"}
+                    />
+                  </Grid>
+                </>
+              )}
+              {/* PLACE */}
+
+              {areaServed === "place" && (
+                <>
+                  <Grid item xs={12} lg={12}>
+                    <Autocomplete
+                      disablePortal
+                      options={[]}
+                      sx={{ width: 300 }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          {...register("areaServedPlace")}
+                          error={errors.areaServedPlace ? true : false}
+                          helperText={errors.areaServedPlace?.message || ""}
+                          label="Place"
+                        />
+                      )}
+                    />
+                  </Grid>
+                </>
+              )}
+
+              {areaServed === "other" && (
+                <>
+                  <Grid item xs={12} lg={12}>
+                    <TextField
+                      {...register("areaServedOther")}
+                      fullWidth
+                      error={errors.areaServedOther ? true : false}
+                      label="Other"
+                      variant="outlined"
+                      helperText={errors.areaServedOther?.message || ""}
+                    />
+                  </Grid>
+                </>
+              )}
             </Grid>
             {/* ELIGIBLE REGION */}
             <Grid
@@ -909,15 +964,81 @@ const OfferForm = () => {
                   ELIGIBLE REGION
                 </Divider>
               </Grid>
-              <Grid item xs={12} lg={4}>
-                GEO SHAPE
+              <Grid item xs={12} lg={12}>
+                <RadioGroup
+                  row
+                  name="row-radio-item-requested"
+                  sx={{ display: "flex", justifyContent: "space-between" }}
+                  value={eligibleRegion}
+                  onChange={(e) => setEligibleRegion(e.target.value)}
+                >
+                  <FormControlLabel
+                    value="geo"
+                    control={<Radio />}
+                    label="Geo Shape"
+                  />
+                  <FormControlLabel
+                    value="place"
+                    control={<Radio />}
+                    label="Place"
+                  />
+                  <FormControlLabel
+                    value="other"
+                    control={<Radio />}
+                    label="Other"
+                  />
+                </RadioGroup>
               </Grid>
-              <Grid item xs={12} lg={4}>
-                PLACE
-              </Grid>
-              <Grid item xs={12} lg={4}>
-                OTHER
-              </Grid>
+
+              {/* GEO SHAPE */}
+              {eligibleRegion === "geo" && (
+                <>
+                  <Grid item xs={12} lg={12}>
+                    <DrawPolygonMap
+                      setGeoJson={setGeoJsonEligibleRegion}
+                      id={"eligible_region_map"}
+                    />
+                  </Grid>
+                </>
+              )}
+
+              {/* PLACE */}
+
+              {eligibleRegion === "place" && (
+                <>
+                  <Grid item xs={12} lg={12}>
+                    <Autocomplete
+                      disablePortal
+                      options={[]}
+                      sx={{ width: 300 }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          {...register("eligiblePlace")}
+                          error={errors.eligiblePlace ? true : false}
+                          helperText={errors.eligiblePlace?.message || ""}
+                          label="Place"
+                        />
+                      )}
+                    />
+                  </Grid>
+                </>
+              )}
+
+              {eligibleRegion === "other" && (
+                <>
+                  <Grid item xs={12} lg={12}>
+                    <TextField
+                      {...register("eligibleOther")}
+                      fullWidth
+                      error={errors.eligibleOther ? true : false}
+                      label="Other"
+                      variant="outlined"
+                      helperText={errors.eligibleOther?.message || ""}
+                    />
+                  </Grid>
+                </>
+              )}
             </Grid>
             {/* ELIGIBLE DURATION */}
             <Grid
@@ -928,6 +1049,11 @@ const OfferForm = () => {
               rowSpacing={2}
               columnSpacing={2}
             >
+              <Grid item xs={12} lg={12}>
+                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                  ELIGIBLE DURATION
+                </Divider>
+              </Grid>
               <Grid item xs={12} lg={4}>
                 <TextField
                   {...register("durationValue")}
@@ -973,15 +1099,81 @@ const OfferForm = () => {
                   INELIGIBLE REGION
                 </Divider>
               </Grid>
-              <Grid item xs={12} lg={4}>
-                GEO SHAPE
+              <Grid item xs={12} lg={12}>
+                <RadioGroup
+                  row
+                  name="row-radio-item-requested"
+                  sx={{ display: "flex", justifyContent: "space-between" }}
+                  value={ineligibleRegion}
+                  onChange={(e) => setInEligibleRegion(e.target.value)}
+                >
+                  <FormControlLabel
+                    value="geo"
+                    control={<Radio />}
+                    label="Geo Shape"
+                  />
+                  <FormControlLabel
+                    value="place"
+                    control={<Radio />}
+                    label="Place"
+                  />
+                  <FormControlLabel
+                    value="other"
+                    control={<Radio />}
+                    label="Other"
+                  />
+                </RadioGroup>
               </Grid>
-              <Grid item xs={12} lg={4}>
-                PLACE
-              </Grid>
-              <Grid item xs={12} lg={4}>
-                OTHER
-              </Grid>
+
+              {/* GEO SHAPE */}
+              {ineligibleRegion === "geo" && (
+                <>
+                  <Grid item xs={12} lg={12}>
+                    <DrawPolygonMap
+                      setGeoJson={setGeoJsonIneligibleRegion}
+                      id={"ineligible_region_map"}
+                    />
+                  </Grid>
+                </>
+              )}
+
+              {/* PLACE */}
+
+              {ineligibleRegion === "place" && (
+                <>
+                  <Grid item xs={12} lg={12}>
+                    <Autocomplete
+                      disablePortal
+                      options={[]}
+                      sx={{ width: 300 }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          {...register("ineligiblePlace")}
+                          error={errors.ineligiblePlace ? true : false}
+                          helperText={errors.ineligiblePlace?.message || ""}
+                          label="Place"
+                        />
+                      )}
+                    />
+                  </Grid>
+                </>
+              )}
+
+              {ineligibleRegion === "other" && (
+                <>
+                  <Grid item xs={12} lg={12}>
+                    <TextField
+                      {...register("ineligibleOther")}
+                      fullWidth
+                      error={errors.ineligibleOther ? true : false}
+                      label="Other"
+                      variant="outlined"
+                      helperText={errors.ineligibleOther?.message || ""}
+                    />
+                  </Grid>
+                </>
+              )}
             </Grid>
             <Grid item xs={12}>
               <Grid item xs={12} lg={12}>

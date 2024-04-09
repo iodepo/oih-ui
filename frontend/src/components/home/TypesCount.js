@@ -18,6 +18,7 @@ import CardTopic from "./CardTopic";
 import CarouselPortals from "./CarouselPortals";
 import Typography from "@mui/material/Typography";
 import LinkMui from "@mui/material/Link";
+import { defaultMatomoPageView } from "utilities/trackingUtility";
 
 const doc_types = [
   "CreativeWork",
@@ -39,13 +40,6 @@ export default function TypesCount() {
   const [region] = useSearchParam("region");
   const translationState = useAppTranslation();
 
-  /*   const get_region_bounds = () => {
-    let bounds;
-    if (region) bounds = regionBoundsMap[region.replaceAll(" ", "_")];
-    if (bounds) return bounds;
-    else return "[-90,-180 TO 90,180]";
-  }; */
-
   useEffect(() => {
     fetch(
       `${dataServiceUrl}/search?rows=0&include_facets=false&${
@@ -54,20 +48,11 @@ export default function TypesCount() {
     )
       .then((response) => response.json())
       .then((json) => setCounts((prev) => ({ ...prev, ...json.counts })));
-
-    /*  fetch(
-      `${dataServiceUrl}/search?rows=0&include_facets=false&facetType=the_geom&facetName=${get_region_bounds()}${
-        region ? "&region=" + region : ""
-      }`
-    )
-      .then((response) => response.json())
-      .then((json) =>
-        setCounts((prev) => ({
-          ...prev,
-          SpatialData: Object.values(json.counts).reduce((x, y) => x + y, 0),
-        }))
-      ); */
   }, [region]);
+
+  useEffect(() => {
+    defaultMatomoPageView(true);
+  }, []);
 
   const searchByType = (type) => () => {
     localStorage.setItem(

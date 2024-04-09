@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
@@ -6,14 +6,17 @@ import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 import * as turf from "@turf/turf";
 import { layers } from "components/map-view/utils/initMap";
 import Box from "@mui/material/Box";
+import { centerMap, initZoom } from "portability/configuration";
 
-const DrawPolygonMap = () => {
+const DrawPolygonMap = (props) => {
+  const { setGeojson, id } = props;
+
   useEffect(() => {
     const map = new maplibregl.Map({
-      container: "map",
+      container: id,
       style: layers.ARCGIS,
-      center: [-91.874, 42.76],
-      zoom: 4,
+      center: centerMap,
+      zoom: initZoom,
     });
 
     // Personalizzazione dei controlli di MapboxDraw
@@ -36,13 +39,10 @@ const DrawPolygonMap = () => {
 
     function updateArea(e) {
       const data = draw.getAll();
-      const answer = document.getElementById("calculated-area");
       if (data.features.length > 0) {
-        const area = turf.area(data);
-        const roundedArea = Math.round(area * 100) / 100;
-        answer.innerHTML = `<p><strong>${roundedArea}</strong></p><p>square meters</p>`;
+        setGeojson(data);
       } else {
-        answer.innerHTML = "";
+        setGeojson(null);
         if (e.type !== "draw.delete")
           alert("Use the draw tools to draw a polygon!");
       }
@@ -55,13 +55,9 @@ const DrawPolygonMap = () => {
   }, []);
 
   return (
-    <>
-      <Box id="map" style={{ height: "100vh" }}></Box>
-      <Box className="calculation-box">
-        <p>Draw a polygon using the draw tools.</p>
-        <Box id="calculated-area"></Box>
-      </Box>
-    </>
+    <Box sx={{ border: "5px solid black", borderRadius: "4px" }}>
+      <Box id={id} style={{ height: "500px" }}></Box>
+    </Box>
   );
 };
 
