@@ -1,6 +1,8 @@
 /* eslint-disable */
 
 const trackingMatomo = (action, category, name) => {
+  _paq.push(["setCustomUrl", window.location.href]);
+  _paq.push(["trackPageView"]);
   _paq.push(["trackEvent", category, action, name.replace(",", "[COMMA]")]);
 };
 

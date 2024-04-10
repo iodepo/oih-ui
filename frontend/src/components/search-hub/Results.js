@@ -141,7 +141,7 @@ export default function Results() {
   );
 
   useEffect(() => {
-    defaultMatomoPageView();
+    //defaultMatomoPageView();
 
     const handleBack = () => {
       localStorage.setItem(
@@ -179,19 +179,21 @@ export default function Results() {
       params.append("search_text", searchText);
     }
 
+    const fqResult = '(type:"' + searchType + '") AND ' + facetQuery;
     URI += [
       params.toString(),
-      facetQuery ? "fq=" + facetQuery : "",
+      facetQuery ? "fq=" + fqResult : "",
       sort ? "sort=" + sort : "",
     ]
       .filter((e) => e)
       .join("&");
 
     setCurrentURI(URI);
+
     let string = "";
     string += [
       params.toString(),
-      facetQuery ? "fq=" + facetQuery : "",
+      facetQuery ? "fq=" + fqResult : "",
       sort ? "sort=" + sort : "",
     ]
       .filter((e) => e)
