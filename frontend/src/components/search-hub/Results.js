@@ -141,8 +141,6 @@ export default function Results() {
   );
 
   useEffect(() => {
-    //defaultMatomoPageView();
-
     const handleBack = () => {
       localStorage.setItem(
         "operationUser",
@@ -216,108 +214,114 @@ export default function Results() {
 
   const manageMatomoEvent = useCallback(() => {
     if (!isLoading) {
-      const url = window.location.toString();
+      const oldUrl = localStorage.getItem("oldUrl");
+      const operationUser = localStorage.getItem("operationUser");
       let matomoParams = `${checkVariable(searchText)}|${checkVariable(
         region
       )}|`;
-      const oldUrl = localStorage.getItem("oldUrl");
-      if (oldUrl && oldUrl === url) {
-        //refresh event
-        trackingMatomo("page_refresh", "misc", url);
-      } else {
-        localStorage.setItem("oldUrl", url);
-        const searchParams = new URLSearchParams(location.search);
-        const isExternalLink = searchParams.get("externalLink");
-        if (isExternalLink === "true") {
-          searchParams.delete("externalLink");
-          const newUrl = `${location.pathname}?${searchParams.toString()}${
-            location.hash
-          }`;
+      if (oldUrl || operationUser) {
+        const url = window.location.toString();
 
-          window.history.replaceState(null, "", newUrl);
-
-          //referrer event
-          matomoParams += `${checkVariable(facetQuery)}`;
-          trackingMatomo("landing_on_results", "search", matomoParams);
+        if (oldUrl && oldUrl === url) {
+          //refresh event
+          trackingMatomo("page_refresh", "misc", url);
         } else {
-          const operationUser = localStorage.getItem("operationUser");
-          const isFromAdvancedSearch =
-            searchParams.get("advancedSearch") === "true";
-          if (isFromAdvancedSearch) {
-            searchParams.delete("advancedSearch");
+          localStorage.setItem("oldUrl", url);
+          const searchParams = new URLSearchParams(location.search);
+          const isExternalLink = searchParams.get("externalLink");
+          if (isExternalLink === "true") {
+            searchParams.delete("externalLink");
             const newUrl = `${location.pathname}?${searchParams.toString()}${
               location.hash
             }`;
 
             window.history.replaceState(null, "", newUrl);
-          }
 
-          switch (operationUser) {
-            case "simpleSearch":
-              trackingMatomo(
-                "simple_search",
-                "search",
-                matomoParams.slice(0, -1)
-              );
-              break;
-            case "topic":
-              trackingMatomo("search_by_topic", "search", searchType);
-              break;
-            case "sort":
-              matomoParams += `${checkVariable(
-                previousParams.oldTypeOfSearch
-              )}|${checkVariable(previousParams.sort)}|${checkVariable(
-                sort
-              )}|${checkVariable(facetQuery)}`;
-              trackingMatomo("sorted_search", "search", matomoParams);
-              break;
-            case "advancedSearch":
-              matomoParams += `${checkVariable(facetQuery)}`;
-              trackingMatomo("advanced_search", "search", matomoParams);
-              break;
-            case "changePage":
-              matomoParams += `${checkVariable(
-                previousParams.oldTypeOfSearch
-              )}|${checkVariable(
-                parseInt(previousParams.page) + 1
-              )}|${checkVariable(parseInt(page) + 1)}|${checkVariable(
-                facetQuery
-              )}`;
-              trackingMatomo("change_result_page", "search", matomoParams);
-              break;
-            case "refinedSearch":
-              matomoParams += `${checkVariable(
-                previousParams.oldTypeOfSearch
-              )}|${checkVariable(previousParams.facets)}|${checkVariable(
-                facetQuery
-              )}`;
-              trackingMatomo("refined_search", "search", matomoParams);
-              break;
-            case "region":
-              matomoParams = `${previousParams.region}|${region}`;
-              trackingMatomo("change_region", "search", matomoParams);
-              break;
-            default:
-              break;
-          }
-
-          if (isFromAdvancedSearch) {
-            setPreviousParams({
-              ...previousParams,
-              oldTypeOfSearch: "advanced",
-            });
-          } else if (!facetQuery) {
-            setPreviousParams({
-              ...previousParams,
-              oldTypeOfSearch: "simple",
-            });
+            //referrer event
+            matomoParams += `${checkVariable(facetQuery)}`;
+            trackingMatomo("landing_on_results", "search", matomoParams);
           } else {
-            setPreviousParams({
-              ...previousParams,
-              oldTypeOfSearch: "refined",
-            });
+            const isFromAdvancedSearch =
+              searchParams.get("advancedSearch") === "true";
+            if (isFromAdvancedSearch) {
+              searchParams.delete("advancedSearch");
+              const newUrl = `${location.pathname}?${searchParams.toString()}${
+                location.hash
+              }`;
+
+              window.history.replaceState(null, "", newUrl);
+            }
+
+            switch (operationUser) {
+              case "simpleSearch":
+                trackingMatomo(
+                  "simple_search",
+                  "search",
+                  matomoParams.slice(0, -1)
+                );
+                break;
+              case "topic":
+                trackingMatomo("search_by_topic", "search", searchType);
+                break;
+              case "sort":
+                matomoParams += `${checkVariable(
+                  previousParams.oldTypeOfSearch
+                )}|${checkVariable(previousParams.sort)}|${checkVariable(
+                  sort
+                )}|${checkVariable(facetQuery)}`;
+                trackingMatomo("sorted_search", "search", matomoParams);
+                break;
+              case "advancedSearch":
+                matomoParams += `${checkVariable(facetQuery)}`;
+                trackingMatomo("advanced_search", "search", matomoParams);
+                break;
+              case "changePage":
+                matomoParams += `${checkVariable(
+                  previousParams.oldTypeOfSearch
+                )}|${checkVariable(
+                  parseInt(previousParams.page) + 1
+                )}|${checkVariable(parseInt(page) + 1)}|${checkVariable(
+                  facetQuery
+                )}`;
+                trackingMatomo("change_result_page", "search", matomoParams);
+                break;
+              case "refinedSearch":
+                matomoParams += `${checkVariable(
+                  previousParams.oldTypeOfSearch
+                )}|${checkVariable(previousParams.facets)}|${checkVariable(
+                  facetQuery
+                )}`;
+                trackingMatomo("refined_search", "search", matomoParams);
+                break;
+              case "region":
+                matomoParams = `${previousParams.region}|${region}`;
+                trackingMatomo("change_region", "search", matomoParams);
+                break;
+              default:
+                break;
+            }
+
+            if (isFromAdvancedSearch) {
+              setPreviousParams({
+                ...previousParams,
+                oldTypeOfSearch: "advanced",
+              });
+            } else if (!facetQuery) {
+              setPreviousParams({
+                ...previousParams,
+                oldTypeOfSearch: "simple",
+              });
+            } else {
+              setPreviousParams({
+                ...previousParams,
+                oldTypeOfSearch: "refined",
+              });
+            }
           }
         }
+      } else {
+        matomoParams += `${checkVariable(facetQuery)}`;
+        trackingMatomo("landing_on_results", "search", matomoParams);
       }
     }
   }, [

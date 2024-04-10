@@ -3,13 +3,12 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
-import * as turf from "@turf/turf";
 import { layers } from "components/map-view/utils/initMap";
 import Box from "@mui/material/Box";
 import { centerMap, initZoom } from "portability/configuration";
 
 const DrawPolygonMap = (props) => {
-  const { setGeojson, id } = props;
+  const { setGeoJson, id } = props;
 
   useEffect(() => {
     const map = new maplibregl.Map({
@@ -40,9 +39,10 @@ const DrawPolygonMap = (props) => {
     function updateArea(e) {
       const data = draw.getAll();
       if (data.features.length > 0) {
-        setGeojson(data);
+        setGeoJson(data);
+        console.log(id, data);
       } else {
-        setGeojson(null);
+        setGeoJson(null);
         if (e.type !== "draw.delete")
           alert("Use the draw tools to draw a polygon!");
       }
