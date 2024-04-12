@@ -35,6 +35,7 @@ jobs:
           notice: true
           message: |
             ${{ github.actor }} opened PR ${{ github.event.pull_request.html_url }}
+            ${{ github.event.pull_request.title }}
       - name: irc tag created
         uses: rectalogic/notify-irc@v2
         if: github.event_name == 'create' && github.event.ref_type == 'tag'
