@@ -525,11 +525,12 @@ export function draw_points(map, point_polygon_data, changeSelectedElem) {
 export function hexagon_clustering(
   h3Resolution,
   map,
-  point_polygon_data,
+  polygon_data,
   hexOpacity
 ) {
   var layer = {};
-  layer = polygonsToH3(point_polygon_data, layer, h3Resolution);
+  debugger;
+  layer = polygonsToH3(polygon_data, layer, h3Resolution);
   /*  if (h3Resolution == 2) {
     layer = polygonH3_2;
   } else {

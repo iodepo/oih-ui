@@ -307,6 +307,12 @@ const ToolbarDesktopMapView = (props) => {
                   color: palette + "bgButton",
                 },
               },
+              ...(openFilterMap && {
+                backgroundColor: palette + "colorIcon",
+                "& .MuiSvgIcon-root": {
+                  color: palette + "bgButton",
+                },
+              }),
             }}
             onClick={() => {
               setOpenFilterMap(!openFilterMap);
@@ -326,6 +332,12 @@ const ToolbarDesktopMapView = (props) => {
                   color: palette + "bgButton",
                 },
               },
+              ...(openLayerMap && {
+                backgroundColor: palette + "colorIcon",
+                "& .MuiSvgIcon-root": {
+                  color: palette + "bgButton",
+                },
+              }),
             }}
             onClick={() => {
               setOpenFilterMap(false);

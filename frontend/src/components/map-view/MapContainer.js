@@ -1,7 +1,7 @@
 import { useRef, useReducer, useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import ToolbarHome from "./components/ToolbarHome";
-import { EMODNET, NO_CLUSTER } from "./utils/constants";
+import { EMODNET, HEXAGON, NO_CLUSTER } from "./utils/constants";
 import { reducer } from "./utils/reducer";
 import MapView from "./components/MapView";
 import Box from "@mui/material/Box";
@@ -20,8 +20,8 @@ const MapContainer = (props) => {
   const [params] = useSearchParams();
   const [state, dispatch] = useReducer(reducer, {
     baseLayer: EMODNET,
-    clustering: NO_CLUSTER,
-    hexOpacity: 0.4,
+    clustering: HEXAGON,
+    hexOpacity: 0.6,
     baseOpacity: 1,
     heatOpacity: 0.4,
     showPoints: false,

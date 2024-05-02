@@ -383,8 +383,8 @@ const backgroundImage = `
 
 // -- START REGION MAP CONFIG --
 
-const centerMap = [65.468754, 44.57875];
-const initZoom = 4;
+const centerMap = [0, 0];
+const initZoom = 2;
 // -- END REGION MAP CONFIG --
 export {
   CATEGORIES,

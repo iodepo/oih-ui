@@ -33,7 +33,7 @@ const SettingsMapDesktop = (props) => {
   const translationState = useAppTranslation();
   const palette = "custom.mapView.desktop.toolbar.";
 
-  const [showClusters, setShowClusters] = useState(false);
+  const [showClusters, setShowClusters] = useState(true);
   return (
     <Fade in={openFilterMap} mountOnEnter unmountOnExit>
       <Box

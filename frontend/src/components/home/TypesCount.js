@@ -19,6 +19,7 @@ import CarouselPortals from "./CarouselPortals";
 import Typography from "@mui/material/Typography";
 import LinkMui from "@mui/material/Link";
 import { defaultMatomoPageView } from "utilities/trackingUtility";
+import MatchmakingModal from "./MatchmakingModal";
 
 const doc_types = [
   "CreativeWork",
@@ -124,22 +125,7 @@ export default function TypesCount() {
                         justifyContent: { xs: "center", lg: "end" },
                       }}
                     >
-                      <LinkMui
-                        sx={{
-                          color: "#40AAD3",
-                          textDecoration: "none",
-                          cursor: "pointer",
-                          transition: "transform 0.3s",
-                          "&:hover": {
-                            transform: "scale(1.1)",
-                          },
-                        }}
-                        onClick={() => navigate("/matchmaking/offer")}
-                      >
-                        <Typography variant="subtitle1" noWrap>
-                          How to share your data →
-                        </Typography>
-                      </LinkMui>
+                      <MatchmakingModal />
                     </Grid>
                   </Grid>
                 </Grid>
