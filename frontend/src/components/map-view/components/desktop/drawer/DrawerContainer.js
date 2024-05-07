@@ -64,6 +64,7 @@ const DrawerContainer = (props) => {
     selectedElem,
     currentURI,
     mapBounds,
+    initMapBounds,
   } = props;
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("");
@@ -133,7 +134,11 @@ const DrawerContainer = (props) => {
   };
 
   useEffect(() => {
-    page !== 1 && getDataSpatialSearch(page, mapBounds);
+    page !== 1 &&
+      getDataSpatialSearch(
+        mapBounds !== false ? mapBounds : initMapBounds,
+        page
+      );
   }, [page]);
 
   useEffect(() => {

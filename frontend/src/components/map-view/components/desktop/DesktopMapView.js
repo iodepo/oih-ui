@@ -57,6 +57,7 @@ const DesktopMapView = (props) => {
     currentURI,
     setInitMapBounds,
     mapBounds,
+    initMapBounds,
   } = props;
 
   const palette = "custom.mapView.desktop.";
@@ -92,6 +93,7 @@ const DesktopMapView = (props) => {
             selectedElem={selectedElem}
             currentURI={currentURI}
             mapBounds={mapBounds}
+            initMapBounds={initMapBounds}
           />
         </Drawer>
         {open ? (

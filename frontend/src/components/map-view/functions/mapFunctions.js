@@ -529,7 +529,6 @@ export function hexagon_clustering(
   hexOpacity
 ) {
   var layer = {};
-  debugger;
   layer = polygonsToH3(polygon_data, layer, h3Resolution);
   /*  if (h3Resolution == 2) {
     layer = polygonH3_2;

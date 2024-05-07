@@ -69,7 +69,7 @@ const ResultsMapMobile = (props) => {
     }
   }, [selectedElem]);
   useEffect(() => {
-    page !== 1 && getDataSpatialSearch(page, mapBounds);
+    page !== 1 && getDataSpatialSearch(mapBounds, page);
   }, [page]);
   const translationState = useAppTranslation();
   const palette = "custom.mapView.mobile.resultsMap.";

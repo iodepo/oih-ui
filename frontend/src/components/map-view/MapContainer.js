@@ -363,6 +363,7 @@ const MapContainer = (props) => {
             searchThisArea={searchThisArea}
             currentURI={currentURI}
             setInitMapBounds={setInitMapBounds}
+            initMapBounds={initMapBounds}
           />
         </Box>
       )}
@@ -415,6 +416,7 @@ const MapContainer = (props) => {
             searchThisArea={searchThisArea}
             currentURI={currentURI}
             setInitMapBounds={setInitMapBounds}
+            initMapBounds={initMapBounds}
           />
         </Box>
       )}
