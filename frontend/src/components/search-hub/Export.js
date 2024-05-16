@@ -248,7 +248,7 @@ const Export = (props) => {
   });
   Font.register({
     family: "Montserrat-Bold",
-    src: "http://fonts.gstatic.com/s/montserrat/v26/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCuM70w-Y3tcoqK5.ttf",
+    src: "https://fonts.gstatic.com/s/montserrat/v26/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCuM70w-Y3tcoqK5.ttf",
   });
 
   const createPDF = (data, namePdf) => {

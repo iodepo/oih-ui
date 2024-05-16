@@ -201,16 +201,16 @@ const GenericFacet = (props) => {
       </Box>
       <List>
         {filteredFacet.slice(0, numberToShow).map((facetCount) => {
-          const labelId = `checkbox-list-label-${facetCount.name}`;
-
+          const value = facetCount.value || facetCount.name;
+          const labelId = `checkbox-list-label-${value}`;
           return (
-            <ListItem key={facetCount.name} disablePadding>
+            <ListItem key={value} disablePadding>
               <Tooltip
                 arrow
                 placement="right"
-                title={facetCount.name}
+                title={value}
                 sx={{
-                  display: facetCount.name.length < 15 ? "none" : "flex",
+                  display: value.length < 15 ? "none" : "flex",
                 }}
               >
                 <ListItemButton sx={{ display: "flex" }} dense>
@@ -218,43 +218,40 @@ const GenericFacet = (props) => {
                     <Checkbox
                       edge="start"
                       tabIndex={-1}
-                      checked={isChecked(facetCount.name)}
+                      checked={isChecked(value)}
                       onChange={(e) => {
                         const checked = e.target.checked;
                         const updatedCheckedItems = e.target.checked
-                          ? [...selectedFacets, facetCount.name]
-                          : selectedFacets.filter(
-                              (item) => item !== facetCount.name
-                            );
+                          ? [...selectedFacets, value]
+                          : selectedFacets.filter((item) => item !== value);
 
                         setSelectedFacets(updatedCheckedItems);
-                        !isMobile &&
-                          facetSearch(facet.name, facetCount.name, checked);
+                        !isMobile && facetSearch(facet.name, value, checked);
                         if (!checked) {
                           setMobileAppliedFilters((f) =>
                             f.filter((d) => d.type !== title.toLowerCase())
                           );
                         } else {
                           if (isMobile) {
-                            addQueryMobile(facet.name, facetCount.name);
+                            addQueryMobile(facet.name, value);
                             setMobileSelectedFiltersTemp((prev) => [
                               ...prev,
                               {
                                 type: facet.name,
-                                text: facetCount.name,
+                                text: value,
                               },
                             ]);
                           } else {
                             const isGenericFilterSet =
                               mobileAppliedFilters.find(
-                                (f) => f.type === facetCount.name
+                                (f) => f.type === value
                               );
                             if (isGenericFilterSet ?? true)
                               setMobileAppliedFilters((prev) => [
                                 ...prev,
                                 {
                                   type: facet.name,
-                                  text: facetCount.name,
+                                  text: value,
                                 },
                               ]);
                           }

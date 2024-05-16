@@ -357,7 +357,10 @@ export default function Results() {
   }, [results, isSearchEnd, manageMatomoEvent]);
 
   const facetSearch = (name, value, checked) => {
-    let facet = name + ":" + '"' + value + '"';
+    let facet =
+      name === "n_startYear" || name === "n_endYear"
+        ? name + ":" + value
+        : name + ":" + '"' + value + '"';
     let isKeyContained = false;
     let queryResult = "";
 
