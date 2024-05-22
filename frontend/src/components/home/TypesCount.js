@@ -81,15 +81,15 @@ export default function TypesCount() {
           >
             <Container maxWidth="xl" sx={{ py: { xs: 2, lg: 8 } }}>
               <Grid container spacing={2}>
-                <Grid item xs={12} lg={5}>
+                {/* <Grid item xs={12} lg={5}>
                   <SearchHubEntrypoint />
-                </Grid>
+                </Grid> */}
                 <Grid
                   item
                   container
                   spacing={2}
                   xs={12}
-                  lg={7} /* sx={{ p: "24px" }} */
+                  lg={12} /* sx={{ p: "24px" }} */
                 >
                   <Grid item xs={12}>
                     <Search />

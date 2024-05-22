@@ -308,7 +308,7 @@ const SearchHome = (props) => {
                         sx={{
                           marginRight: 1,
                           color: {
-                            xs: palette + "bgColorSelectMobile",
+                            xs: palette + "bgColor",
                             lg: palette + "iconsColor",
                           },
                         }}
@@ -325,7 +325,7 @@ const SearchHome = (props) => {
                         lg: palette + "bgColor",
                       },
                       color: {
-                        xs: palette + "bgColorSelectMobile",
+                        xs: palette + "bgColor",
                         lg: palette + "iconsColor",
                       },
                       fontWeight: 600,
