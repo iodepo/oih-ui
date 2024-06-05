@@ -9,6 +9,7 @@ import {
   Vehicle,
   Dataset,
   ResearchProject,
+  Default,
 } from "./types/typesResult";
 
 const TypesMap = {
@@ -32,6 +33,9 @@ const TypesMap = {
   },
   ResearchProject: {
     Component: ResultDetails(ResearchProject),
+  },
+  default: {
+    Component: ResultDetails(Default),
   },
 };
 
@@ -88,6 +92,8 @@ const createObjectExport = (docs, searchType) => {
         }),
         title: "Institutions",
       };
+    default:
+      break;
   }
 };
 
