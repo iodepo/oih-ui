@@ -177,7 +177,7 @@ const DesktopAS = (props) => {
                   minWidth: "44px",
                   borderColor: palette + "borderColor",
                   color: palette + "colorTypography",
-                  width: "50px",
+                  width: "55px",
                   whiteSpace: "nowrap",
                 }}
                 onClick={() => {
@@ -212,7 +212,7 @@ const DesktopAS = (props) => {
                   minWidth: "44px",
                   borderColor: palette + "borderColor",
                   color: palette + "colorTypography",
-                  width: "50px",
+                  width: "55px",
                   whiteSpace: "nowrap",
                 }}
                 onClick={() => {

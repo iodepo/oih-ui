@@ -14,7 +14,6 @@ const DesktopMapView = (props) => {
     setSearchText,
     searchText,
     resultsCount,
-    mapBounds,
     getDataSpatialSearch,
     isLoading,
     handleSubmit,
@@ -48,8 +47,17 @@ const DesktopMapView = (props) => {
     setShowRegions,
     heatOpacity,
     changeHeatOpacity,
-    setMapBounds,
+    changeMapBounds,
     geoJson,
+    changeShowSearchArea,
+    showSearchArea,
+    changeSelectedElem,
+    selectedElem,
+    searchThisArea,
+    currentURI,
+    setInitMapBounds,
+    mapBounds,
+    initMapBounds,
   } = props;
 
   const palette = "custom.mapView.desktop.";
@@ -74,7 +82,6 @@ const DesktopMapView = (props) => {
             setSearchText={setSearchText}
             searchText={searchText}
             resultsCount={resultsCount}
-            mapBounds={mapBounds}
             isLoading={isLoading}
             getDataSpatialSearch={getDataSpatialSearch}
             handleSubmit={handleSubmit}
@@ -82,6 +89,11 @@ const DesktopMapView = (props) => {
             selectedFacets={selectedFacets}
             facetSearch={facetSearch}
             clear={clear}
+            changeSelectedElem={changeSelectedElem}
+            selectedElem={selectedElem}
+            currentURI={currentURI}
+            mapBounds={mapBounds}
+            initMapBounds={initMapBounds}
           />
         </Drawer>
         {open ? (
@@ -164,6 +176,8 @@ const DesktopMapView = (props) => {
           showRegions={showRegions}
           heatOpacity={heatOpacity}
           changeHeatOpacity={changeHeatOpacity}
+          showSearchArea={showSearchArea}
+          searchThisArea={searchThisArea}
         />
         <MapView
           container={container}
@@ -177,8 +191,13 @@ const DesktopMapView = (props) => {
           zoom={zoom}
           setCenter={setCenter}
           initCenter={initCenter}
-          setMapBounds={setMapBounds}
+          changeMapBounds={changeMapBounds}
           geoJson={geoJson}
+          changeShowSearchArea={changeShowSearchArea}
+          showSearchArea={showSearchArea}
+          changeSelectedElem={changeSelectedElem}
+          selectedElem={selectedElem}
+          setInitMapBounds={setInitMapBounds}
         />
       </Box>
     </>

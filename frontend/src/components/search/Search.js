@@ -6,8 +6,8 @@ import {
   useSearchParams,
   /* RouterLink, */
 } from "react-router-dom";
-import { useSearchParam } from "utilities/generalUtility";
-import { PROMOTED_REGIONS } from "../../portability/configuration";
+import { searchAdvanced, useSearchParam } from "utilities/generalUtility";
+import { CATEGORIES, PROMOTED_REGIONS } from "../../portability/configuration";
 import { randomSampleQueries } from "utilities/generalUtility";
 import { SupportedLangugesEnum } from "context/AppTranslationProvider";
 import { useAppTranslation } from "context/context/AppTranslation";
@@ -31,7 +31,7 @@ import Accordion from "@mui/material/Accordion";
 import IconButton from "@mui/material/IconButton";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
-import AdvancedSearch from "./AdvancedSearch";
+import AdvancedSearch from "./advancedSearch/AdvancedSearch";
 import { Export } from "../search-hub/Export";
 import Avatar from "@mui/material/Avatar";
 import FrenchFlag from "../../resources/svg/FrenchFlag.svg";
@@ -39,13 +39,13 @@ import RussianFlag from "../../resources/svg/RussianFlag.svg";
 import EnglishFlag from "../../resources/svg/EnglishFlag.svg";
 import SpanishFlag from "../../resources/svg/SpanishFlag.svg";
 import Tooltip from "@mui/material/Tooltip";
-import { trackingMatomoSearch } from "utilities/trackingUtility";
+import { trackingMatomo } from "utilities/trackingUtility";
 
 // Set once, will change for every load, not every key click
 const currentSampleQueries = randomSampleQueries(4);
 
 export default function Search(props) {
-  const { uri, searchType, resultCount, facets } = props;
+  const { uri, searchType, resultCount, facets, setPreviousParams } = props;
 
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -73,16 +73,110 @@ export default function Search(props) {
       ...(region && region.toUpperCase() !== "GLOBAL" ? { region } : {}),
     })}`;
 
-  const handleSubmit = useCallback(
-    () => navigate(hrefFor(region, searchQuery)),
-    [navigate, region, searchQuery, tabName]
-  );
+  const hrefForAdvanced = (region, topic, query) =>
+    `/results/${topic}?${new URLSearchParams({
+      ...(query ? { fq: query } : {}),
+      ...(sort ? { sort: sort } : {}),
+      ...(region && region.toUpperCase() !== "GLOBAL" ? { region } : {}),
+    })}&advancedSearch=true`;
+
+  const handleSubmit = useCallback(() => {
+    const [facetQueryAdvanced, topic] =
+      destructuringSearchTextAdvanced(searchQuery);
+
+    if (facetQueryAdvanced) {
+      navigate(hrefForAdvanced(region, topic, facetQueryAdvanced));
+    } else {
+      navigate(hrefFor(region, searchQuery));
+    }
+  }, [navigate, region, searchQuery, tabName]);
 
   const getPromotedRegion = (region) => {
     if (region === "Oceania" || region === "Latin America and the Caribbean") {
       return translationState.translation[region];
     }
     return translationState.translation[PROMOTED_REGIONS[region]];
+  };
+
+  const destructuringSearchTextAdvanced = (query) => {
+    const trimmedQuery = query.replace(/"/g, "'").trim();
+    const regex = /'([^']*)' (\S+) '([^']*)'/;
+    let topic = "";
+    if (trimmedQuery.startsWith("{{") && trimmedQuery.endsWith("}}")) {
+      const cleanedQuery = trimmedQuery.slice(2, -2).trim();
+
+      const subQueries = cleanedQuery
+        .split(new RegExp("\\b" + "AND" + "\\b", "i"))
+        .map((subQuery) => subQuery.trim());
+
+      const parsedObject = {};
+
+      subQueries.forEach((subQuery, index) => {
+        if (subQuery.startsWith("(") && subQuery.endsWith(")")) {
+          const cleanedSubQuery = subQuery.slice(1, -1).trim();
+
+          if (new RegExp("\\b" + "OR" + "\\b", "i").test(cleanedSubQuery)) {
+            const subQueriesOR = cleanedSubQuery
+              .split(new RegExp("\\b" + "OR" + "\\b", "i"))
+              .map((subQuery) => subQuery.trim());
+
+            subQueriesOR.forEach((subQueryOR, index2) => {
+              if (subQueryOR.startsWith("(") && subQueryOR.endsWith(")")) {
+                const x = subQueryOR.slice(1, -1).trim();
+                const matches = x.match(regex);
+
+                if (matches && matches.length === 4) {
+                  const [_, category, operator, value] = matches;
+                  if (!parsedObject[index]) {
+                    parsedObject[index] = [];
+                  }
+
+                  parsedObject[index].push({
+                    id: index2,
+                    category: category.trim(),
+                    operator: operator.trim(),
+                    textfield: value.replace(/'/g, ""),
+                  });
+                }
+              }
+            });
+          } else {
+            const matches = cleanedSubQuery.match(regex);
+
+            if (matches && matches.length === 4) {
+              const [_, category, operator, value] = matches;
+
+              if (index === 0) {
+                parsedObject[index] = {
+                  category: category.trim(),
+                  value: value.replace(/'/g, ""),
+                  region: region,
+                };
+                topic = CATEGORIES.find(
+                  (c) =>
+                    c.text.toLowerCase() ===
+                    value.replace(/'/g, "").toLowerCase()
+                ).id;
+              } else {
+                parsedObject[index] = [
+                  {
+                    id: 0,
+                    category: category.trim(),
+                    operator: operator.trim(),
+                    textfield: value.replace(/'/g, ""),
+                  },
+                ];
+              }
+            }
+          }
+        }
+      });
+
+      const [searchQueryBuild, facetQueryAdvanced] =
+        searchAdvanced(parsedObject);
+      return [facetQueryAdvanced, topic];
+    }
+    return [undefined, undefined];
   };
 
   const placeholder = useCallback(
@@ -92,19 +186,14 @@ export default function Search(props) {
       translationState.translation["Partners"],
     [region, useCookies.getCookie("language")]
   );
-  const sendMatomoEvent = (regionValue) => {
-    /*let searchElements = document.getElementsByName("search");
-    let search = searchElements[0];
-    let regionElements = document.getElementsByName("searchRegion");
-    let region = regionElements[0];*/
-
-    //console.log(element.value);
-    /*gtag("config", "G-MQDK6BB0YQ");
-    gtag("event", "click_on_search", {
-      oih_search_text: search.value,
-      oih_search_region: region.value,
-    });*/
-    trackingMatomoSearch(searchQuery, regionValue, resultCount);
+  const setLastOperation = (operation) => {
+    localStorage.setItem(
+      "lastOperationUser",
+      localStorage.getItem("operationUser")
+        ? localStorage.getItem("operationUser")
+        : ""
+    );
+    localStorage.setItem("operationUser", operation);
   };
   const searchAdvancedSearch = (type) => {
     navigate(
@@ -131,6 +220,8 @@ export default function Search(props) {
       case SupportedLangugesEnum.Ru:
         setLanguageIcon(RussianFlag);
         break;
+      default:
+        break;
     }
   };
   return isResults ? (
@@ -141,7 +232,7 @@ export default function Search(props) {
       placeholder={placeholder}
       searchQuery={searchQuery}
       setSearchQuery={setSearchQuery}
-      sendMatomoEvent={sendMatomoEvent}
+      setLastOperation={setLastOperation}
       handleSubmit={handleSubmit}
       changeTranslation={changeTranslation}
       url={url}
@@ -150,6 +241,7 @@ export default function Search(props) {
       resultCount={resultCount}
       facets={facets}
       languageIcon={languageIcon}
+      setPreviousParams={setPreviousParams}
     />
   ) : (
     <SearchHome
@@ -159,7 +251,7 @@ export default function Search(props) {
       placeholder={placeholder}
       searchQuery={searchQuery}
       setSearchQuery={setSearchQuery}
-      sendMatomoEvent={sendMatomoEvent}
+      setLastOperation={setLastOperation}
       handleSubmit={handleSubmit}
       changeTranslation={changeTranslation}
       hrefFor={hrefFor}
@@ -176,7 +268,7 @@ const SearchHome = (props) => {
     placeholder,
     searchQuery,
     setSearchQuery,
-    sendMatomoEvent,
+    setLastOperation,
     handleSubmit,
     changeTranslation,
     hrefFor,
@@ -216,7 +308,7 @@ const SearchHome = (props) => {
                         sx={{
                           marginRight: 1,
                           color: {
-                            xs: palette + "bgColorSelectMobile",
+                            xs: palette + "bgColor",
                             lg: palette + "iconsColor",
                           },
                         }}
@@ -233,7 +325,7 @@ const SearchHome = (props) => {
                         lg: palette + "bgColor",
                       },
                       color: {
-                        xs: palette + "bgColorSelectMobile",
+                        xs: palette + "bgColor",
                         lg: palette + "iconsColor",
                       },
                       fontWeight: 600,
@@ -294,9 +386,9 @@ const SearchHome = (props) => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               name="search"
-              onKeyPress={(e) => {
+              onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  sendMatomoEvent(region);
+                  setLastOperation("simpleSearch");
                   handleSubmit();
                 }
               }}
@@ -314,7 +406,7 @@ const SearchHome = (props) => {
               textTransform: "none",
             }}
             onClick={() => {
-              sendMatomoEvent(region);
+              setLastOperation("simpleSearch");
               handleSubmit();
             }}
           >
@@ -399,7 +491,7 @@ const SearchHome = (props) => {
             textTransform: "none",
           }}
           onClick={() => {
-            sendMatomoEvent(region);
+            setLastOperation("simpleSearch");
             handleSubmit();
           }}
         >
@@ -443,7 +535,7 @@ const SearchResult = (props) => {
     placeholder,
     searchQuery,
     setSearchQuery,
-    sendMatomoEvent,
+    setLastOperation,
     handleSubmit,
     changeTranslation,
     url,
@@ -452,6 +544,7 @@ const SearchResult = (props) => {
     resultCount,
     facets,
     languageIcon,
+    setPreviousParams,
   } = props;
   const [openAdvancedSearch, setOpenAdvancedSearch] = useState(false);
   const [openTooltip, setOpenTooltip] = useState(false);
@@ -462,15 +555,21 @@ const SearchResult = (props) => {
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
+
     const accordionOpenParam = searchParams.get("accordionOpen");
 
     setOpenAdvancedSearch(accordionOpenParam === "true");
 
     searchParams.delete("accordionOpen");
+    const newUrl = `${location.pathname}?${searchParams.toString()}${
+      location.hash
+    }`;
+
+    window.history.replaceState(null, "", newUrl);
   }, [location.search, navigate]);
   const handleCopyToClipboard = async () => {
     var currentUrl = window.location.href;
-    await navigator.clipboard.writeText(currentUrl);
+    await navigator.clipboard.writeText(currentUrl + "&externalLink=true");
     setOpenTooltip(true);
     setTimeout(() => {
       setOpenTooltip(false);
@@ -559,8 +658,11 @@ const SearchResult = (props) => {
                             width: { xs: "100%", lg: "132px" },
                           }}
                           onChange={(e) => {
+                            setPreviousParams((prev) => {
+                              return { ...prev, region: region };
+                            });
                             setRegion(e.target.value);
-                            sendMatomoEvent(e.target.value);
+                            setLastOperation("region");
                           }}
                         >
                           {Object.entries(PROMOTED_REGIONS).map(
@@ -619,9 +721,9 @@ const SearchResult = (props) => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     name="search"
-                    onKeyPress={(e) => {
+                    onKeyDown={(e) => {
                       if (e.key === "Enter") {
-                        sendMatomoEvent(region);
+                        setLastOperation("simpleSearch");
                         handleSubmit();
                       }
                     }}
@@ -651,7 +753,7 @@ const SearchResult = (props) => {
                     height: { xs: "40px", lg: "56px" },
                   }}
                   onClick={() => {
-                    sendMatomoEvent(region);
+                    setLastOperation("simpleSearch");
                     handleSubmit();
                   }}
                 >

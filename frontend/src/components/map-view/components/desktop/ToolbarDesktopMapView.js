@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
@@ -10,15 +11,17 @@ import LayersIcon from "@mui/icons-material/Layers";
 import SettingsIcon from "@mui/icons-material/Settings";
 import Fade from "@mui/material/Fade";
 import Typography from "@mui/material/Typography";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
-import Checkbox from "@mui/material/Checkbox";
-import Divider from "@mui/material/Divider";
-import Slider from "@mui/material/Slider";
+import SearchIcon from "@mui/icons-material/Search";
 import FilterMapDesktop from "./FilterMapDesktop";
 import SettingsMapDesktop from "./SettingsMapDesktop";
 import LayerMapDesktop from "./LayerMapDesktop";
-import { HEXAGON_LEGENDA } from "components/map-view/utils/constants";
+import {
+  HEATMAP_LEGENDA,
+  HEATMAP_REGIONS,
+  HEXAGON,
+  HEXAGON_LEGENDA,
+  NO_CLUSTER,
+} from "components/map-view/utils/constants";
 
 const ToolbarDesktopMapView = (props) => {
   const {
@@ -45,6 +48,8 @@ const ToolbarDesktopMapView = (props) => {
     showRegions,
     heatOpacity,
     changeHeatOpacity,
+    showSearchArea,
+    searchThisArea,
   } = props;
   const [filteredFacets, setFilteredFacets] = useState(facets);
 
@@ -68,22 +73,26 @@ const ToolbarDesktopMapView = (props) => {
 
   useEffect(() => {
     if (facetQuery) {
-      const pairs = facetQuery.split("&");
-
+      const pairs = facetQuery.split(" AND ");
       const extractedPairs = [];
 
-      for (let i = 0; i < pairs.length; i += 2) {
-        const facetType = pairs[i].split("=")[1];
-        const facetName = decodeURIComponent(
-          pairs[i + 1].split("=")[1].replaceAll("+", " ")
-        );
-
-        extractedPairs.push({ name: facetType, value: facetName });
-      }
+      pairs.forEach((p) => {
+        const temp = p.replace(/^\(|\)$/g, "");
+        const tempPairs = temp.split(" OR ");
+        tempPairs.forEach((t) => {
+          let index = t.indexOf(":");
+          let facetType = t.substring(0, index);
+          let facetName = t.substring(index + 1).slice(1, -1);
+          /* const splitted = t.split(":");
+          const facetType = splitted[0];
+          const facetName = splitted[1].replace(/"/g, ""); */
+          extractedPairs.push({ name: facetType, value: facetName });
+        });
+      });
 
       setSelectedFacets(extractedPairs);
     }
-  }, [facetQuery]);
+  }, [facetQuery, setSelectedFacets]);
 
   const handleInputChange = (value, name) => {
     setFilteredFacets(() => {
@@ -113,6 +122,7 @@ const ToolbarDesktopMapView = (props) => {
           width: "100%",
           paddingLeft: "8px",
           paddingRight: "8px",
+          zIndex: 2,
         }}
       >
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -126,25 +136,54 @@ const ToolbarDesktopMapView = (props) => {
             handleInputChange={handleInputChange}
             isChecked={isChecked}
             setRegion={setRegion}
+            facetSearch={facetSearch}
           />
         </Box>
       </Box>
+      {showSearchArea && (
+        <Box
+          sx={{ zIndex: 2, position: "absolute", right: "45%", top: "100px" }}
+        >
+          <Button
+            variant="contained"
+            sx={{
+              textTransform: "unset",
+              backgroundColor: "white",
+              borderRadius: 8,
+              color: "#1A2C54",
+              "&:hover": {
+                color: "white",
+                backgroundColor: "#1A2C54",
+                ".MuiSvgIcon-root": {
+                  color: "white",
+                },
+              },
+            }}
+            onClick={() => searchThisArea()}
+            startIcon={<SearchIcon sx={{ color: "#1A2C54" }} />}
+          >
+            Search this area
+          </Button>
+        </Box>
+      )}
+
       <Stack
         sx={{
           width: "100%",
           position: "absolute",
-          bottom: 30,
+          bottom: 40,
           paddingLeft: "8px",
           paddingRight: "8px",
           display: "flex",
           justifyContent: "space-between",
+          zIndex: 2,
         }}
         direction={"row"}
         spacing={2}
       >
         <Box
           sx={{
-            width: "25%",
+            width: "20%",
             height: "250px",
             display: openLayerMap && "none",
           }}
@@ -152,46 +191,74 @@ const ToolbarDesktopMapView = (props) => {
           <Fade in={openFilterMap} mountOnEnter unmountOnExit>
             <Box
               sx={{
-                backgroundColor: palette + "bgBox2",
+                backgroundColor:
+                  clustering === NO_CLUSTER
+                    ? "transparent"
+                    : palette + "bgBox2",
                 height: "100%",
                 borderRadius: "6px",
 
                 padding: "12px",
               }}
             >
-              <Stack spacing={2}>
-                <Typography variant="body2">
-                  COLOR - POINTS PER HEXAGON
-                </Typography>
-                {HEXAGON_LEGENDA.map((h, index) => {
-                  const [value, color] = h;
-                  return (
-                    <Box
-                      key={index}
-                      sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                    >
-                      <Box
-                        sx={{
-                          width: `15px`,
-                          height: `15px`,
-                          backgroundColor: color,
-                          position: "relative",
-                          clipPath:
-                            "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
-                        }}
-                      />
-                      <Typography variant="body2">{value}</Typography>
-                    </Box>
-                  );
-                })}
-              </Stack>
+              {clustering !== NO_CLUSTER && (
+                <Stack spacing={1.5} sx={{ padding: 2 }}>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    COLOR - POINTS PER{" "}
+                    {clustering === HEXAGON ? "HEXAGON" : "HEATMAP"}
+                  </Typography>
+                  {clustering === HEXAGON &&
+                    HEXAGON_LEGENDA.map((h, index) => {
+                      const [value, color] = h;
+                      return (
+                        <Box
+                          key={index}
+                          sx={{ display: "flex", alignItems: "center", gap: 2 }}
+                        >
+                          <Box
+                            sx={{
+                              width: `15px`,
+                              height: `15px`,
+                              backgroundColor: color,
+                              position: "relative",
+                              clipPath:
+                                "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
+                            }}
+                          />
+                          <Typography variant="body2">{value}</Typography>
+                        </Box>
+                      );
+                    })}
+
+                  {clustering === HEATMAP_REGIONS &&
+                    HEATMAP_LEGENDA.map((h, index) => {
+                      const [value, color] = h;
+                      return (
+                        <Box
+                          key={index}
+                          sx={{ display: "flex", alignItems: "center", gap: 2 }}
+                        >
+                          <Box
+                            sx={{
+                              width: `15px`,
+                              height: `15px`,
+                              backgroundColor: color,
+                              borderRadius: "50%",
+                            }}
+                          />
+                          <Typography variant="body2">{value}</Typography>
+                        </Box>
+                      );
+                    })}
+                </Stack>
+              )}
             </Box>
           </Fade>
         </Box>
 
         <Box
           sx={{
-            width: openFilterMap && !openLayerMap ? "70%" : "unset",
+            width: openFilterMap && !openLayerMap ? "75%" : "unset",
             height: "250px",
           }}
         >
@@ -240,6 +307,12 @@ const ToolbarDesktopMapView = (props) => {
                   color: palette + "bgButton",
                 },
               },
+              ...(openFilterMap && {
+                backgroundColor: palette + "colorIcon",
+                "& .MuiSvgIcon-root": {
+                  color: palette + "bgButton",
+                },
+              }),
             }}
             onClick={() => {
               setOpenFilterMap(!openFilterMap);
@@ -259,6 +332,12 @@ const ToolbarDesktopMapView = (props) => {
                   color: palette + "bgButton",
                 },
               },
+              ...(openLayerMap && {
+                backgroundColor: palette + "colorIcon",
+                "& .MuiSvgIcon-root": {
+                  color: palette + "bgButton",
+                },
+              }),
             }}
             onClick={() => {
               setOpenFilterMap(false);

@@ -1,23 +1,15 @@
-const trackingMatomoSearch = (searchValue, regionValue, resultCount) => {
-  console.log(
-    "Search performed.\nSearch: " + searchValue + " \nRegion: " + regionValue
-  );
-  //trackSiteSearch(keyword, [category], [resultsCount]);
-  _paq.push([
-    "trackSiteSearch",
-    // Search keyword searched for
-    searchValue,
-    // Search category selected in your search engine. If you do not need this, set to false
-    regionValue,
-    // Number of results on the Search results page. Zero indicates a 'No Result Search Keyword'. Set to false if you don't know
-    resultCount ? resultCount : "false",
-  ]);
-  _paq.push(["trackEvent", "click", "click_on_search", searchValue]);
+/* eslint-disable */
+
+const trackingMatomo = (action, category, name) => {
+  _paq.push(["setCustomUrl", window.location.href]);
+  _paq.push(["trackPageView"]);
+  _paq.push(["trackEvent", category, action, name.replace(",", "[COMMA]")]);
 };
 
-const trackingMatomoClickResults = (url) => {
-  //console.log("Click on search results performed: " + url);
-  _paq.push(["trackEvent", "click", "click_on_result", url]);
+const defaultMatomoPageView = (isHome = false) => {
+  !isHome && _paq.push(["setCustomUrl", window.location.href]);
+  _paq.push(["trackPageView"]);
 };
 
-export { trackingMatomoSearch, trackingMatomoClickResults };
+export { trackingMatomo, defaultMatomoPageView };
+/* eslint-enable */

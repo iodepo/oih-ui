@@ -1,5 +1,5 @@
 import Box from "@mui/material/Box";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import Divider from "@mui/material/Divider";
 import Toolbar from "@mui/material/Toolbar";
 import List from "@mui/material/List";
@@ -23,12 +23,11 @@ const FilterBy = (props) => {
     clearFacetQuery,
     facets,
     facetSearch,
-    setFilterChosenMobile,
-    filterChosenMobile,
-    selectedProvider,
-    setSelectedProvider,
+    setMobileAppliedFilters,
+    mobileAppliedFilters,
     facetQuery,
     clear,
+    facetSearchMobile,
   } = props;
 
   const changeSearchType = (type) => {
@@ -36,137 +35,43 @@ const FilterBy = (props) => {
     resetDefaultSearchUrl(type);
   };
 
+  const addQueryMobile = (name, value) => {
+    let facet = name + ":" + '"' + value + '"';
+    let queryResult = "";
+    let isKeyContained = false;
+    if (queryMobile !== "") {
+      const pairs = queryMobile.split(" AND ");
+      pairs.forEach((p) => {
+        if (p.includes(name)) {
+          isKeyContained = true;
+          let temp =
+            "(" +
+            [p.replace(/^\(|\)$/g, ""), facet].filter((e) => e).join(" OR ") +
+            ")";
+          queryResult = [queryResult, temp].filter((e) => e).join(" AND ");
+        } else {
+          queryResult = [queryResult, p].filter((e) => e).join(" AND ");
+        }
+      });
+      if (!isKeyContained)
+        queryResult = [queryResult, "(" + facet + ")"]
+          .filter((e) => e)
+          .join(" AND ");
+    } else {
+      queryResult = [queryMobile, "(" + facet + ")"]
+        .filter((e) => e)
+        .join(" OR ");
+    }
+    setQueryMobile(queryResult);
+  };
+
   const drawFacets = (facet, i) => {
     const title = fieldTitleFromName(facet.name);
     if (title) {
-      /* Old version PROVIDER */
-      /*  switch (title) {
-        case "Provider":
-          return (
-            <>
-              <Toolbar
-                disableGutters
-                sx={{
-                  fontWeight: 700,
-                  color: palette + "categoryColor",
-                  justifyContent: "space-between",
-                }}
-              >
-                {translationState.translation[title] || title}
-                <FilterListIcon />
-              </Toolbar>
-              <List>
-                {facet.counts.slice(0, numberToShow).map((facetCount) => (
-                  <ListItem key={facetCount.name} disablePadding>
-                    <Tooltip
-                      title={facetCount.name}
-                      sx={{
-                        display: facetCount.name.length < 15 ? "none" : "flex",
-                      }}
-                      placement="right"
-                      arrow
-                    >
-                      <ListItemButton
-                        selected={selectedProvider === facetCount.name}
-                        sx={{
-                          justifyContent: "space-between",
-                          height: "35px",
-                          "&.Mui-selected": {
-                            backgroundColor:
-                              palette + "categorySelectedBgColor",
-                            borderLeft: 4,
-                            borderColor:
-                              palette + "providerSelectedBorderColor",
-                          },
-                        }}
-                        //value={facetCount.value || facetCount.name}
-                        onClick={() => {
-                          if (selectedProvider === facetCount.name) {
-                            clear();
-                            setSelectedProvider("");
-                            setFilterChosenMobile((f) =>
-                              f.filter((d) => d.type !== "provider")
-                            );
-                          } else {
-                            facetSearch(facet.name, facetCount.name);
-                            setSelectedProvider(facetCount.name);
-                            const isProviderFilterSet = filterChosenMobile.find(
-                              (f) => f.type === "provider"
-                            );
-                            if (isProviderFilterSet ?? true)
-                              setFilterChosenMobile((prev) => [
-                                ...prev,
-                                { type: "provider", text: facetCount.name },
-                              ]);
-                          }
-                        }}
-                      >
-                        <ListItemText
-                          primaryTypographyProps={{
-                            noWrap: true,
-                            variant: "subtitle2",
-                          }}
-                          sx={{ marginRight: "10px" }}
-                          className={facet.name}
-                          primary={facetCount.name}
-                        />
-                        <Chip
-                          sx={{
-                            background: palette + "bgColorChip",
-                            height: "20px",
-                            fontSize: "12px",
-                            borderRadius: "12px",
-                            ".MuiChip-label": {
-                              padding: "5px",
-                              color: palette + "labelChipColor",
-                            },
-                          }}
-                          label={facetCount.count}
-                        />
-                      </ListItemButton>
-                    </Tooltip>
-                  </ListItem>
-                ))}
-              </List>
-              {facet.counts.length > 5 && (
-                <Toolbar
-                  disableGutters
-                  sx={{
-                    gap: 1,
-                  }}
-                >
-                  <IconButton onClick={handleShowMoreClick}>
-                    <AddCircleOutlineOutlinedIcon
-                      sx={{
-                        color: palette + "categoryColor",
-                      }}
-                    />
-                  </IconButton>
-                  {translationState.translation["Add more"]}
-                </Toolbar>
-              )}
-            </>
-          );
-
-        default:
-          return (
-            <GenericFacet
-              setFilterChosenMobile={setFilterChosenMobile}
-              filterChosenMobile={filterChosenMobile}
-              facet={facet}
-              i={i}
-              title={title}
-              facetSearch={facetSearch}
-              clear={clear}
-              isClearAll={isClearAll}
-              setIsClearAll={setIsClearAll}
-            />
-          );
-      } */
       return (
         <GenericFacet
-          setFilterChosenMobile={setFilterChosenMobile}
-          filterChosenMobile={filterChosenMobile}
+          setMobileAppliedFilters={setMobileAppliedFilters}
+          mobileAppliedFilters={mobileAppliedFilters}
           facet={facet}
           i={i}
           title={title}
@@ -175,19 +80,53 @@ const FilterBy = (props) => {
           isClearAll={isClearAll}
           setIsClearAll={setIsClearAll}
           facetQuery={facetQuery}
+          addQueryMobile={addQueryMobile}
+          mobileSelectedFiltersTemp={mobileSelectedFiltersTemp}
+          setMobileSelectedFiltersTemp={setMobileSelectedFiltersTemp}
         />
       );
     }
   };
 
+  const applyFiltersMobile = () => {
+    setMobileAppliedFilters([
+      ...mobileAppliedFilters,
+      ...mobileSelectedFiltersTemp,
+    ]);
+    facetSearchMobile(queryMobile);
+  };
   const translationState = useAppTranslation();
   const palette = "custom.resultPage.filters.";
   const [isClearAll, setIsClearAll] = useState(false);
+  const [queryMobile, setQueryMobile] = useState("");
 
-  const [numberToShow, setNumberToShow] = useState(5);
-  const handleShowMoreClick = () => {
-    setNumberToShow((prev) => prev + 5);
-  };
+  const [mobileSelectedFiltersTemp, setMobileSelectedFiltersTemp] = useState(
+    []
+  );
+
+  useEffect(() => {
+    if (mobileAppliedFilters.length > 0 && facetQuery) {
+      const pairs = facetQuery.split(" AND ");
+      const extractedPairs = [];
+
+      pairs.forEach((p) => {
+        const temp = p.replace(/^\(|\)$/g, "");
+        const tempPairs = temp.split(" OR ");
+        tempPairs.forEach((t) => {
+          const splitted = t.split(":");
+          const facetType = splitted[0];
+          const facetName = splitted[1].replace(/"/g, "");
+          const find = mobileAppliedFilters.find(
+            (f) => f.type === facetType && f.text === facetName
+          );
+          if (!find) extractedPairs.push({ type: facetType, text: facetName });
+        });
+      });
+      if (extractedPairs.length > 0)
+        setMobileAppliedFilters([...mobileAppliedFilters, ...extractedPairs]);
+    }
+  }, [mobileAppliedFilters, facetQuery, setMobileAppliedFilters]);
+
   return (
     <>
       {/* Start Topics */}
@@ -220,8 +159,15 @@ const FilterBy = (props) => {
                     },
                   }}
                   onClick={() => {
+                    localStorage.setItem(
+                      "lastOperationUser",
+                      localStorage.getItem("operationUser")
+                        ? localStorage.getItem("operationUser")
+                        : ""
+                    );
+                    localStorage.setItem("operationUser", "topic");
                     changeSearchType(tab.id);
-                    const updatedItems = filterChosenMobile.map((f) => {
+                    const updatedItems = mobileAppliedFilters.map((f) => {
                       if (f.type === "searchType") {
                         return {
                           ...f,
@@ -231,7 +177,7 @@ const FilterBy = (props) => {
                       return f;
                     });
 
-                    setFilterChosenMobile(updatedItems);
+                    setMobileAppliedFilters(updatedItems);
                   }}
                 >
                   <ListItemText
@@ -279,6 +225,7 @@ const FilterBy = (props) => {
         variant="contained"
         fullWidth
         disableElevation
+        onClick={() => applyFiltersMobile()}
         sx={{
           display: { xs: "block", lg: "none" },
           borderRadius: 1,
@@ -290,26 +237,27 @@ const FilterBy = (props) => {
         {translationState.translation["Apply"]}
       </Button>
 
-      <Button
-        variant="contained"
-        fullWidth
-        disableElevation
-        sx={{
-          display: { xs: "none", lg: "block" },
-          borderRadius: 1,
-          fontWeight: 700,
-          textTransform: "none",
-          marginTop: 1,
-          backgroundColor: palette + "colorButtonDesktop",
-        }}
-        onClick={() => {
-          clearFacetQuery();
-          setSelectedProvider("");
-          setIsClearAll(true);
-        }}
-      >
-        {translationState.translation["Clear"]}
-      </Button>
+      {facetQuery && (
+        <Button
+          variant="contained"
+          fullWidth
+          disableElevation
+          sx={{
+            display: { xs: "none", lg: "block" },
+            borderRadius: 1,
+            fontWeight: 700,
+            textTransform: "none",
+            marginTop: 1,
+            backgroundColor: palette + "colorButtonDesktop",
+          }}
+          onClick={() => {
+            clearFacetQuery();
+            setIsClearAll(true);
+          }}
+        >
+          {translationState.translation["Clear"]}
+        </Button>
+      )}
     </>
   );
 };

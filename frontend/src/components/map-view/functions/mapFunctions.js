@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { initMap } from "../utils/initMap";
 
 import data from "../data/spatial.geojson.json";
-
+import maplibregl from "maplibre-gl";
 import polygonH3_2 from "../data/poligonToH3_2.json";
 import polygonH3_3 from "../data/poligonToH3_3.json";
 import geojson2h3 from "geojson2h3";
@@ -28,6 +28,7 @@ import {
   ARCGIS,
   USGS,
 } from "../utils/constants";
+import { fetchDetail } from "utilities/generalUtility";
 
 export function calculateH3Resolution(currentZoom) {
   if (currentZoom < 6) {
@@ -62,7 +63,7 @@ export function fixTransmeridianPolygon(polygon) {
 
 export function fixTransmeridian(feature) {
   const { type } = feature;
-  if (type === "FeatureCollection") {
+  if (type == "FeatureCollection") {
     feature.features.map(fixTransmeridian);
     return;
   }
@@ -82,7 +83,7 @@ export function fixTransmeridian(feature) {
   }
 }
 
-export function pointsToH2(point_polygon_data, layer) {
+export function pointsToH2(point_polygon_data, layer, h3Resolution) {
   point_polygon_data.forEach((point) => {
     let hexagon = latLngToCell(
       point.geometry.coordinates[0],
@@ -95,7 +96,7 @@ export function pointsToH2(point_polygon_data, layer) {
   return layer;
 }
 
-export function polygonsToH3(polygon_polygon_data, layer) {
+export function polygonsToH3(polygon_polygon_data, layer, h3Resolution) {
   polygon_polygon_data.forEach((polygon) => {
     var hexagons = geojson2h3.featureToH3Set(polygon, h3Resolution);
     hexagons.forEach((h3Index) => {
@@ -126,6 +127,8 @@ function getIdLayer(baseLayer) {
     case USGS:
       idLayer = ID_USGS;
       break;
+    default:
+      break;
   }
   return idLayer;
 }
@@ -137,7 +140,7 @@ export function manageChangeOpacity(map, baseOpacity, baseLayer) {
       var layers = map.getStyle().layers;
 
       layers.forEach((l) => {
-        if (l.id === idLayer) {
+        if (l.id == idLayer) {
           map.setPaintProperty(l.id, "raster-opacity", baseOpacity);
         }
       });
@@ -153,9 +156,9 @@ export function manageLayers(
   showPoints,
   showRegions,
   h3Resolution,
-  geoJson
+  geoJson,
+  changeSelectedElem
 ) {
-  debugger;
   if (geoJson) {
     var polygon_data = geoJson["features"].filter(
       (shape) => shape["geometry"]["type"] == "Polygon"
@@ -170,100 +173,93 @@ export function manageLayers(
     // console.log(point_polygon_data)
 
     if (showRegions) {
-      draw_regions(map, polygon_data);
+      remove_regions(map);
+      draw_regions(map, polygon_data, changeSelectedElem);
     } else {
       remove_regions(map);
     }
 
     if (showPoints) {
-      draw_points(map, point_polygon_data);
+      remove_points(map);
+      draw_points(map, point_polygon_data, changeSelectedElem);
     } else {
       remove_points(map);
     }
   }
 
-  if (clustering == HEXAGON) {
-    if (map.getLayer(HEATMAP_POINTS_LAYER)) {
-      map.removeLayer(HEATMAP_POINTS_LAYER);
-      if (map.getSource(HEATMAP_POINTS_SOURCE)) {
-        map.removeSource(HEATMAP_POINTS_SOURCE);
-      }
-    }
-    if (map.getLayer(HEATMAP_REGIONS_LAYER)) {
-      map.removeLayer(HEATMAP_REGIONS_LAYER);
-      if (map.getSource(HEATMAP_REGIONS_SOURCE)) {
-        map.removeSource(HEATMAP_REGIONS_SOURCE);
-      }
-    }
-    if (!map.getSource(HEXAGON_SOURCE)) {
-      hexagon_clustering(h3Resolution, map, point_polygon_data, hexOpacity);
-    } else {
-      map.setPaintProperty(HEXAGON_LAYER, "fill-opacity", hexOpacity);
-    }
-  } else if (clustering == HEATMAP_POINTS) {
-    if (map.getLayer(HEXAGON_LAYER)) {
-      map.removeLayer(HEXAGON_LAYER);
-      if (map.getSource(HEXAGON_SOURCE)) {
-        map.removeSource(HEXAGON_SOURCE);
-      }
-    }
-    if (map.getLayer(HEATMAP_REGIONS_LAYER)) {
-      map.removeLayer(HEATMAP_REGIONS_LAYER);
-      if (map.getSource(HEATMAP_REGIONS_SOURCE)) {
-        map.removeSource(HEATMAP_REGIONS_SOURCE);
-      }
-    }
-    if (!map.getSource(HEATMAP_POINTS_SOURCE)) {
-      heatmap_clustering(
+  switch (clustering) {
+    case HEXAGON:
+      removeLayersAndSources(map, HEXAGON_LAYER, HEXAGON_SOURCE);
+      removeLayersAndSources(map, HEATMAP_POINTS_LAYER, HEATMAP_POINTS_SOURCE);
+      removeLayersAndSources(
         map,
-        point_polygon_data,
-        HEATMAP_POINTS_SOURCE,
-        HEATMAP_POINTS_LAYER
+        HEATMAP_REGIONS_LAYER,
+        HEATMAP_REGIONS_SOURCE
       );
-    }
-  } else if (clustering == HEATMAP_REGIONS) {
-    if (map.getLayer(HEXAGON_LAYER)) {
-      map.removeLayer(HEXAGON_LAYER);
-      if (map.getSource(HEXAGON_SOURCE)) {
-        map.removeSource(HEXAGON_SOURCE);
+
+      if (!map.getSource(HEXAGON_SOURCE)) {
+        hexagon_clustering(h3Resolution, map, polygon_data, hexOpacity);
+      } else {
+        map.setPaintProperty(HEXAGON_LAYER, "fill-opacity", hexOpacity);
       }
-    }
-    if (map.getLayer(HEATMAP_POINTS_LAYER)) {
-      map.removeLayer(HEATMAP_POINTS_LAYER);
-      if (map.getSource(HEATMAP_POINTS_SOURCE)) {
-        map.removeSource(HEATMAP_POINTS_SOURCE);
-      }
-    }
-    if (!map.getSource(HEATMAP_REGIONS_SOURCE)) {
-      heatmap_clustering(
+      break;
+
+    case HEATMAP_POINTS:
+      removeLayersAndSources(map, HEXAGON_LAYER, HEXAGON_SOURCE);
+      removeLayersAndSources(
         map,
-        polygon_data,
-        HEATMAP_REGIONS_SOURCE,
-        HEATMAP_REGIONS_LAYER
+        HEATMAP_REGIONS_LAYER,
+        HEATMAP_REGIONS_SOURCE
       );
-    } else {
-      map.setPaintProperty(HEATMAP_REGIONS_LAYER, "fill-opacity", heatOpacity);
-    }
-  } else {
-    if (map.getLayer(HEXAGON_LAYER)) {
-      map.removeLayer(HEXAGON_LAYER);
-      if (map.getSource(HEXAGON_SOURCE)) {
-        map.removeSource(HEXAGON_SOURCE);
+      removeLayersAndSources(map, HEATMAP_POINTS_LAYER, HEATMAP_POINTS_SOURCE);
+      if (!map.getSource(HEATMAP_POINTS_SOURCE)) {
+        heatmap_clustering(
+          map,
+          point_polygon_data,
+          HEATMAP_POINTS_SOURCE,
+          HEATMAP_POINTS_LAYER
+        );
       }
-    }
+      break;
 
-    if (map.getLayer(HEATMAP_POINTS_LAYER)) {
-      map.removeLayer(HEATMAP_POINTS_LAYER);
-      if (map.getSource(HEATMAP_POINTS_SOURCE)) {
-        map.removeSource(HEATMAP_POINTS_SOURCE);
-      }
-    }
+    case HEATMAP_REGIONS:
+      removeLayersAndSources(map, HEXAGON_LAYER, HEXAGON_SOURCE);
+      removeLayersAndSources(map, HEATMAP_POINTS_LAYER, HEATMAP_POINTS_SOURCE);
+      removeLayersAndSources(
+        map,
+        HEATMAP_REGIONS_LAYER,
+        HEATMAP_REGIONS_SOURCE
+      );
 
-    if (map.getLayer(HEATMAP_REGIONS_LAYER)) {
-      map.removeLayer(HEATMAP_REGIONS_LAYER);
-      if (map.getSource(HEATMAP_REGIONS_SOURCE)) {
-        map.removeSource(HEATMAP_REGIONS_SOURCE);
+      if (!map.getSource(HEATMAP_REGIONS_SOURCE)) {
+        heatmap_clustering(
+          map,
+          polygon_data,
+          HEATMAP_REGIONS_SOURCE,
+          HEATMAP_REGIONS_LAYER
+        );
+      } else {
+        //map.setPaintProperty(HEATMAP_REGIONS_LAYER, "fill-opacity", heatOpacity);
       }
+      break;
+
+    default:
+      removeLayersAndSources(map, HEXAGON_LAYER, HEXAGON_SOURCE);
+      removeLayersAndSources(map, HEATMAP_POINTS_LAYER, HEATMAP_POINTS_SOURCE);
+      removeLayersAndSources(
+        map,
+        HEATMAP_REGIONS_LAYER,
+        HEATMAP_REGIONS_SOURCE
+      );
+      break;
+  }
+}
+
+function removeLayersAndSources(map, layer, source) {
+  if (map.getLayer(layer)) {
+    map.removeLayer(layer);
+    if (map.getSource(source)) {
+      map.removeSource(source);
     }
   }
 }
@@ -327,6 +323,10 @@ export function remove_regions(map) {
 }
 
 export function remove_points(map) {
+  if (map.getLayer("selected-point")) {
+    map.removeLayer("selected-point");
+    map.removeSource("selected-point");
+  }
   if (map.getLayer(POINTS_LAYER)) {
     map.removeLayer(POINTS_LAYER);
     if (map.getSource(POINTS_SOURCE)) {
@@ -335,7 +335,7 @@ export function remove_points(map) {
   }
 }
 
-export function draw_regions(map, polygon_data) {
+export function draw_regions(map, polygon_data, changeSelectedElem) {
   if (!map.getSource(REGIONS_SOURCE) && !map.getLayer(REGIONS_LAYER)) {
     map.addSource(REGIONS_SOURCE, {
       type: "geojson",
@@ -396,10 +396,50 @@ export function draw_regions(map, polygon_data) {
         ],
       },
     });
+
+    const popup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+    });
+
+    map.on("mouseenter", REGIONS_LAYER, async (e) => {
+      map.getCanvas().style.cursor = "pointer";
+
+      const coordinates = e.lngLat;
+      const id = e.features[0].properties.id;
+
+      const details = await fetchDetail(id).then((d) => d);
+      popup.setLngLat(coordinates).setHTML(details.name).addTo(map);
+
+      setTimeout(() => {
+        popup.remove();
+      }, 4000);
+    });
+
+    map.on("mouseleave", REGIONS_LAYER, () => {
+      map.getCanvas().style.cursor = "";
+      popup.remove();
+    });
+
+    map.on("click", REGIONS_LAYER, async (e) => {
+      popup.remove();
+      const id = e.features[0].properties.id;
+
+      const details = await fetchDetail(id).then((d) => d);
+
+      map.setPaintProperty(REGIONS_LAYER, "fill-color", [
+        "case",
+        ["==", ["get", "id"], id],
+        "rgba(0,225,0,.5)",
+        "rgba(0,0,225,.1)",
+      ]);
+
+      changeSelectedElem(details);
+    });
   }
 }
 
-export function draw_points(map, point_polygon_data) {
+export function draw_points(map, point_polygon_data, changeSelectedElem) {
   if (!map.getSource(POINTS_SOURCE) && !map.getLayer(POINTS_LAYER)) {
     map.addSource(POINTS_SOURCE, {
       type: "geojson",
@@ -408,14 +448,76 @@ export function draw_points(map, point_polygon_data) {
         features: point_polygon_data,
       },
     });
+
     map.addLayer({
       id: POINTS_LAYER,
-      type: "circle",
+      type: "symbol", // Change layer type to symbol for using icons
       source: POINTS_SOURCE,
-      paint: {
-        "circle-color": "#4264fb",
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 2, 10, 4],
+      layout: {
+        "icon-image": "custom-marker", // Use the custom SVG icon as the marker
+        "icon-size": 0.2, // Adjust icon size if necessary
+        "icon-anchor": "center",
+        // Adjust icon anchor if necessary
       },
+    });
+
+    const popup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+    });
+
+    map.on("mouseenter", POINTS_LAYER, async (e) => {
+      map.getCanvas().style.cursor = "pointer";
+
+      const coordinates = e.features[0].geometry.coordinates.slice();
+      const id = e.features[0].properties.id;
+
+      const details = await fetchDetail(id).then((d) => d);
+
+      while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+      }
+
+      popup.setLngLat(coordinates).setHTML(details.name).addTo(map);
+
+      setTimeout(() => {
+        popup.remove();
+      }, 4000);
+    });
+
+    map.on("mouseleave", POINTS_LAYER, () => {
+      map.getCanvas().style.cursor = "";
+      popup.remove();
+    });
+
+    map.on("click", POINTS_LAYER, async (e) => {
+      popup.remove();
+      const features = e.features[0];
+      const id = features.properties.id;
+
+      const details = await fetchDetail(id).then((d) => d);
+      if (map.getLayer("selected-point")) {
+        map.removeLayer("selected-point");
+        map.removeSource("selected-point");
+      }
+      map.addLayer({
+        id: "selected-point",
+        type: "symbol",
+        source: {
+          type: "geojson",
+          data: {
+            type: "FeatureCollection",
+            features: [features],
+          },
+        },
+        layout: {
+          "icon-image": "custom-marker-selected",
+          "icon-size": 0.2,
+          "icon-anchor": "center",
+        },
+      });
+
+      changeSelectedElem(details);
     });
   }
 }
@@ -423,17 +525,17 @@ export function draw_points(map, point_polygon_data) {
 export function hexagon_clustering(
   h3Resolution,
   map,
-  point_polygon_data,
+  polygon_data,
   hexOpacity
 ) {
   var layer = {};
-  //layer = polygonsToH3(polygon_data, layer)
-  if (h3Resolution == 2) {
+  layer = polygonsToH3(polygon_data, layer, h3Resolution);
+  /*  if (h3Resolution == 2) {
     layer = polygonH3_2;
   } else {
     layer = polygonH3_3;
   }
-
+ */
   console.log(layer);
 
   const geojson = geojson2h3.h3SetToFeatureCollection(

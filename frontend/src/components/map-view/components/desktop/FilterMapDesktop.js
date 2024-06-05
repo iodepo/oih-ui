@@ -2,7 +2,6 @@ import React from "react";
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
 import Select from "@mui/material/Select";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 import PublicIcon from "@mui/icons-material/Public";
@@ -30,6 +29,7 @@ const FilterMapDesktop = (props) => {
     handleInputChange,
     isChecked,
     setRegion,
+    facetSearch,
   } = props;
   const translationState = useAppTranslation();
   const palette = "custom.mapView.desktop.toolbar.";
@@ -86,9 +86,10 @@ const FilterMapDesktop = (props) => {
                 variant="contained"
                 sx={{
                   height: "24px",
-                  fontSize: "14px",
+                  fontSize: "13px",
                   backgroundColor: palette + "bgButton",
-                  maxWidth: "135px",
+                  maxWidth: "160px",
+                  whiteSpace: "noWrap",
                   color: palette + "colorButton",
                   textTransform: "none",
                   boxShadow: "none",
@@ -104,14 +105,6 @@ const FilterMapDesktop = (props) => {
                 }}
                 startIcon={
                   <>
-                    {counter === 0 && (
-                      <HelpOutlineIcon
-                        sx={{
-                          fontSize: "14px",
-                          color: palette + "colorIcon",
-                        }}
-                      />
-                    )}
                     {counter > 0 && (
                       <Box
                         sx={{
@@ -152,7 +145,9 @@ const FilterMapDesktop = (props) => {
               <Popover
                 /* id={id} */
                 elevation={0}
-                open={openPopoverFilter ? openPopoverFilter.id == title : false}
+                open={
+                  openPopoverFilter ? openPopoverFilter.id === title : false
+                }
                 anchorEl={openPopoverFilter ? openPopoverFilter.target : null}
                 onClose={() => setOpenPopoverFilter(null)}
                 anchorOrigin={{

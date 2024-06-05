@@ -1,4 +1,6 @@
 import maplibregl from "maplibre-gl";
+import markerMap from "../../../resources/svg/markerMap.svg";
+import markerMapSelected from "../../../resources/svg/markerMapSelected.svg";
 
 export const layers = {
   ARCGIS: {
@@ -102,7 +104,25 @@ export const initMap = (container, coords, baseLayer, baseOpacity, zoom) => {
     style: layers[baseLayer],
     center: coords, // starting position [lng, lat]
     zoom: zoom, // starting zoom
+    attributionControl: false,
   });
+  map.addControl(new maplibregl.AttributionControl(), "bottom-left");
+
+  const marker = new Image();
+  marker.width = 100;
+  marker.height = 150;
+  marker.onload = function () {
+    map.addImage("custom-marker", marker);
+  };
+  marker.src = markerMap;
+
+  const markerSelected = new Image();
+  markerSelected.width = 100;
+  markerSelected.height = 150;
+  markerSelected.onload = function () {
+    map.addImage("custom-marker-selected", markerSelected);
+  };
+  markerSelected.src = markerMapSelected;
 
   return map;
 };

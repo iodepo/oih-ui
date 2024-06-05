@@ -27,6 +27,7 @@ const ToolbarHome = (props) => {
           position: "absolute",
           top: 10,
           left: 12,
+          zIndex: 2,
         }}
       >
         <ButtonGroup
@@ -91,7 +92,7 @@ const ToolbarHome = (props) => {
           </Button>
         </ButtonGroup>
       </Box>
-      <Box sx={{ position: "absolute", bottom: 10, right: 12 }}>
+      <Box sx={{ position: "absolute", bottom: 10, right: 12, zIndex: 2 }}>
         <IconButton
           sx={{
             backgroundColor: palette + "bgButton",

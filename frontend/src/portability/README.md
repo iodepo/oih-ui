@@ -142,7 +142,7 @@ const CATEGORIES = [
 2. After updating configuration.js, navigate to the types folder. Create a new object in the `typesResult.js` file similar to the others. Remember to name it with the ID name entered in the `configuration.js` file. Include in the object the fields that will be displayed in the search results on the Result Page. Be sure to export this new object.
 
 Example:
-
+const newSearchTab =
 [
   {
     "key": "txt_provider",
@@ -164,6 +164,16 @@ Example:
     "type": "keywords"
   }
 ]
+
+.....
+
+
+export {
+  ....,
+  ResearchProject,
+  Vehicle,
+  newSearchTab
+};
 ```
 
 3. In the `typesMap.js` file, add a new object to the TypesMap object at the end. Following the same logic, import the new object like related to the new tab and always use the same ID as a name.
@@ -182,7 +192,7 @@ const TypesMap = {
 
 4. In the `typesMap.js` file, you will also find another object called "createObjectExport," which is used to automate the Export functionality.
 
-Here, too, you will need to add a new object within it, following the logic of the others.
+Here, too, you will need to add a new case to the switch condition, following the logic of the others.
 
 ```javascript
 const createObjectExport = (docs, searchType) => {
@@ -195,7 +205,7 @@ const createObjectExport = (docs, searchType) => {
         }),
         title: "Institutions",
       };
-  case "NewTap":
+  case "NewTab":
       return {
         data: docs.map((d) => {
           return extractInfo(NewTabObj, d, searchType);
@@ -205,3 +215,27 @@ const createObjectExport = (docs, searchType) => {
   }
 };
 ```
+
+5. Now you need to navigate to the sub-module 'api', following this path:
+   api\api\config.json
+
+Within this JSON file, you'll find various editable configurations, such as:
+"facet_fields", where all the currently set tabs on the site and their associated facets are listed.
+
+```javascript
+ "facet_fields": {
+    "Spatial": [ "txt_keywords", "txt_provider", "txt_variableMeasured", "type"],
+    "Person":  [ "txt_memberOf", "txt_knowsLanguage", "txt_jobTitle", "txt_knowsAbout", "txt_affiliation", "txt_provider"],
+    "Organization":  [ "txt_memberOf", "txt_provider"],
+    "Dataset": [ "txt_keywords", "txt_provider", "txt_variableMeasured"],
+    "CreativeWork": ["txt_keywords", "txt_provider", "txt_contributor"],
+    "Course": ["txt_keywords", "txt_provider", "txt_author", "txt_educationalCredentialAwarded"],
+    "Vehicle": ["txt_keywords", "txt_provider", "txt_vehicleSpecialUsage"],
+    "ResearchProject":  [ "txt_keywords",  "txt_provider", "txt_areaServed"],
+    "NewSearchTab": [ "txt_keywords", "txt_provider", "txt_variableMeasured"],
+  },
+```
+
+So, just as done for point 2, you need to follow the same logic as the others and add the facets to associate with the new tab.
+
+Within this file, it's also possible to modify the facets associated with other searchTabs, as well as the available_facets.

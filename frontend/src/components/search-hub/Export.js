@@ -50,7 +50,7 @@ const Export = (props) => {
     setIsLoading(true);
     let URI = uri;
     if (URI !== "" && resultCount !== 0) {
-      if (value === "all") {
+      /* if (value === "all") {
         const requests = [];
         const CHUNK_SIZE = 1000;
         for (let i = 0; i < resultCount; i += CHUNK_SIZE) {
@@ -75,21 +75,21 @@ const Export = (props) => {
           .catch((error) => {
             console.error("Error: ", error);
           });
-      } else {
-        URI = URI.replace(/rows=\d+/, "rows=" + value);
-        fetch(URI)
-          .then((response) => response.json())
-          .then((json) => {
-            const docs = json.docs;
+      } else { */
+      URI = URI.replace(/rows=\d+/, "rows=" + value);
+      fetch(URI)
+        .then((response) => response.json())
+        .then((json) => {
+          const docs = json.docs;
 
-            const newJson = createObjectExport(docs, searchType);
+          const newJson = createObjectExport(docs, searchType);
 
-            download(format, newJson, searchType);
-          })
-          .catch((error) => {
-            console.error("Error: ", error);
-          });
-      }
+          download(format, newJson, searchType);
+        })
+        .catch((error) => {
+          console.error("Error: ", error);
+        });
+      /*  } */
     }
   };
 
@@ -134,6 +134,8 @@ const Export = (props) => {
         a.download = "data.pdf";
         a.click();
         window.URL.revokeObjectURL(url);
+        break;
+      default:
         break;
     }
     setIsLoading(false);
@@ -246,7 +248,7 @@ const Export = (props) => {
   });
   Font.register({
     family: "Montserrat-Bold",
-    src: "http://fonts.gstatic.com/s/montserrat/v26/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCuM70w-Y3tcoqK5.ttf",
+    src: "https://fonts.gstatic.com/s/montserrat/v26/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCuM70w-Y3tcoqK5.ttf",
   });
 
   const createPDF = (data, namePdf) => {
@@ -288,20 +290,20 @@ const Export = (props) => {
           <Text style={styles.title}>{namePdf} Data:</Text>
 
           <View style={styles.section}>
-            {data.map((d) => {
+            {data.map((d, index) => {
               const keys = Object.keys(d);
               return (
-                <>
-                  {keys.map((k) => (
-                    <>
+                <div key={index}>
+                  {keys.map((k, index2) => (
+                    <div key={index2}>
                       {d[k] && k === "name" && (
                         <Text style={styles.boldTitle}>{d.name}</Text>
                       )}
                       {d[k] && k !== "name" && drawText(d[k], k)}
                       <Text>{"\n"}</Text>
-                    </>
+                    </div>
                   ))}
-                </>
+                </div>
               );
             })}
           </View>
@@ -368,10 +370,10 @@ const Export = (props) => {
             size="small"
             exclusive
           >
-            <ToggleButton value="all">All</ToggleButton>
             <ToggleButton value="10">10</ToggleButton>
             <ToggleButton value="20">20</ToggleButton>
-            <ToggleButton value="30">30</ToggleButton>
+            <ToggleButton value="50">50</ToggleButton>
+            <ToggleButton value="100">100</ToggleButton>
           </ToggleButtonGroup>
           <Typography
             variant="body2"

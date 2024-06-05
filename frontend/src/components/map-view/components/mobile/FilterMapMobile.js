@@ -78,15 +78,15 @@ const FilterMapMobile = (props) => {
             (s) => s.name === f.name
           ).length;
           return (
-            <>
+            <Box key={index}>
               <Button
-                key={index}
                 variant="contained"
                 sx={{
                   height: "30px",
-                  fontSize: "14px",
+                  fontSize: "13px",
                   backgroundColor: palette + "bgButton",
-                  maxWidth: "165px",
+                  maxWidth: "160px",
+                  whiteSpace: "noWrap",
                   color: palette + "colorButton",
                   textTransform: "none",
                   boxShadow: "none",
@@ -104,14 +104,6 @@ const FilterMapMobile = (props) => {
                 }}
                 startIcon={
                   <>
-                    {counter === 0 && (
-                      <HelpOutlineIcon
-                        sx={{
-                          fontSize: "14px",
-                          color: palette + "iconColor",
-                        }}
-                      />
-                    )}
                     {counter > 0 && (
                       <Box
                         sx={{
@@ -250,7 +242,7 @@ const FilterMapMobile = (props) => {
                   </Box>
                 </Box>
               </Popover>
-            </>
+            </Box>
           );
         })}
     </Box>

@@ -1,14 +1,19 @@
 /* global URLSearchParams */
 
-import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { fieldTitleFromName, useSearchParam } from "utilities/generalUtility";
-import { dataServiceUrl } from "../../config/environment";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
-  CATEGORIES,
-  ITEMS_PER_PAGE,
-  idFacets,
-} from "../../portability/configuration";
+  useNavigate,
+  useParams,
+  useSearchParams,
+  useLocation,
+} from "react-router-dom";
+import {
+  fieldTitleFromName,
+  searchAdvanced,
+  useSearchParam,
+} from "utilities/generalUtility";
+import { dataServiceUrl } from "../../config/environment";
+import { CATEGORIES, ITEMS_PER_PAGE } from "../../portability/configuration";
 import Pagination from "./Pagination";
 import { useAppTranslation } from "context/context/AppTranslation";
 import Search from "components/search/Search";
@@ -38,6 +43,14 @@ import { cutWithDots } from "components/results/ResultDetails";
 import Support from "./Support";
 import Chip from "@mui/material/Chip";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import Fade from "@mui/material/Fade";
+import CircularProgress from "@mui/material/CircularProgress";
+import {
+  defaultMatomoPageView,
+  trackingMatomo,
+} from "utilities/trackingUtility";
+
+import LinkMui from "@mui/material/Link";
 
 export default function Results() {
   const [results, setResults] = useState([]);
@@ -47,29 +60,42 @@ export default function Results() {
   const [params] = useSearchParams();
 
   const [showMorePages, setShowMorePages] = useState(0);
-  const [filterChosenMobile, setFilterChosenMobile] = useState([]);
-  const [selectedProvider, setSelectedProvider] = useState("");
+  const [mobileAppliedFilters, setMobileAppliedFilters] = useState([]);
   const [currentURI, setCurrentURI] = useState("");
-
+  const [queryString, setQueryString] = useState("");
+  const location = useLocation();
   const [onlyVerified, setOnlyVerified] = useState(false);
 
   const navigate = useNavigate();
   const { searchType = "CreativeWork" } = useParams();
   const [searchText, setSearchText] = useSearchParam("search_text", "");
   const [region, setRegion] = useSearchParam("region", "global");
-  const [facetQuery, setFacetQuery] = useSearchParam("facet_query");
-  const [fq, setFq] = useSearchParam("fq");
-  const [sort, setSort] = useSearchParam("sort");
+  const [facetQuery, setFacetQuery] = useSearchParam("fq");
+  /* const [fq, setFq] = useSearchParam("fq"); */
+  const [sort, setSort] = useSearchParam("sort", "indexed_ts desc");
   const [page, setPage] = useSearchParam("page", 0);
-
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSearchEnd, setIsSearchEnd] = useState(false);
+  const [previousParams, setPreviousParams] = useState({
+    sort: "indexed_ts desc",
+    facets: facetQuery,
+    page: page,
+    oldTypeOfSearch: "simple",
+    region: region,
+  });
+  const fetchRef = useRef(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [openTooltipsSupport, setOpenTooltipSupport] = useState(false);
   const translationState = useAppTranslation();
+  const [searchCounter, setSearchCounter] = useState(-1);
+
+  let counterResult = 0;
 
   useEffect(() => {
     const category = CATEGORIES.find((category) => category.id === searchType);
 
-    setFilterChosenMobile([{ type: "searchType", text: category.text }]);
-  }, []);
+    setMobileAppliedFilters([{ type: "searchType", text: category.text }]);
+  }, [searchType]);
 
   useEffect(() => {
     fetch(
@@ -90,11 +116,8 @@ export default function Results() {
       );
   }, [region, searchText, searchType]);
 
-  useEffect(
-    () => {
-      /*  if (showMap) {
-      mapSearch(mapBounds, page);
-    } else { */
+  const getDefaultFacets = useCallback(
+    (searchType) => {
       let URI = `${dataServiceUrl}/search?`;
       const params = new URLSearchParams({
         document_type: searchType,
@@ -102,136 +125,325 @@ export default function Results() {
         rows: ITEMS_PER_PAGE + showMorePages,
       });
 
-      if (searchText !== "") {
-        destructuringSearchTextAdvanced(searchText);
-        params.append("search_text", searchText);
-      }
       if (region.toUpperCase() !== "GLOBAL") {
         params.append("region", region);
       }
 
-      URI += [
-        params.toString(),
-        facetQuery,
-        fq ? "fq=" + fq : "",
-        sort ? "sort=" + sort : "",
-      ]
-        .filter((e) => e)
-        .join("&");
-      setCurrentURI(URI);
+      URI += [params.toString()].filter((e) => e).join("&");
 
       fetch(URI)
         .then((response) => response.json())
         .then((json) => {
-          setResults(json.docs);
-          const count = json.count;
-          setResultCount(count);
-          setCounts((prev) => ({ ...prev, [searchType]: count }));
           setFacets(json.facets.filter((facet) => facet.counts.length > 0));
         });
     },
-    /*  } */ [
-      searchText,
-      searchType,
-      facetQuery,
-      region,
-      page,
-      showMorePages,
-      fq,
-      sort,
-    ]
+    [page, region, showMorePages]
   );
 
-  const destructuringSearchTextAdvanced = (text) => {
-    function valueMapper(text, operator) {
-      if (operator.endsWith("Contains")) {
-        return `*${text}*`;
-      }
-      return text;
+  useEffect(() => {
+    const handleBack = () => {
+      localStorage.setItem(
+        "operationUser",
+        localStorage.getItem("lastOperationUser")
+      );
+    };
+
+    window.addEventListener("popstate", handleBack);
+
+    return () => {
+      window.removeEventListener("popstate", handleBack);
+    };
+  }, []);
+  useEffect(() => {
+    getDefaultFacets(searchType);
+  }, [searchType, getDefaultFacets]);
+
+  useEffect(() => {
+    if (fetchRef.current) return;
+
+    setIsLoading(true);
+    let URI = `${dataServiceUrl}/search?`;
+    const params = new URLSearchParams({
+      document_type: searchType,
+      start: page * (ITEMS_PER_PAGE + showMorePages),
+      rows: ITEMS_PER_PAGE + showMorePages,
+    });
+
+    if (region.toUpperCase() !== "GLOBAL") {
+      params.append("region", region);
     }
-    let resultQuery = "";
-    let idTopic = "";
-    console.log(facets);
-    let regex = /{{(.*?)}}/;
-    var regexCondition =
-      /\((\w+)\s*(not\s*contains|not\s*equals|contains|equals|is)\s*"([^"]*)"\)/i;
-    let match = regex.exec(text);
-    /* (txt_provider:*AAAA* OR -txt_keywords:*VVVV*) AND (txt_contributor:UNESCO) */
-    if (match) {
-      let andGroup = match[1].trim().toLowerCase().split("and");
-      andGroup.forEach((ag) => {
-        if (ag.toLowerCase().includes(" or ")) {
-          let orGroup = ag.trim().split(" or ");
-          orGroup.forEach((og) => {
-            var matchCondition = og.trim().match(regexCondition);
-            if (matchCondition) {
-              var category = matchCondition[1];
-              var operator = matchCondition[2];
-              var value = matchCondition[3];
-              if (category === "topic") {
-                idTopic = CATEGORIES.find(
-                  (c) => c.text.toLowerCase() === value
-                ).id;
-              } else {
-                resultQuery +=
-                  "(" +
-                  idFacets[category] +
-                  ":" +
-                  valueMapper(value, operator) +
-                  ")";
-              }
-            }
-            resultQuery += " OR ";
-          });
-          resultQuery += " AND ";
+
+    if (searchText !== "") {
+      params.append("search_text", searchText);
+    }
+
+    const fqResult = '(type:"' + searchType + '") AND ' + facetQuery;
+    URI += [
+      params.toString(),
+      facetQuery ? "fq=" + fqResult : "",
+      sort ? "sort=" + sort : "",
+    ]
+      .filter((e) => e)
+      .join("&");
+
+    setCurrentURI(URI);
+
+    let string = "";
+    string += [
+      params.toString(),
+      facetQuery ? "fq=" + fqResult : "",
+      sort ? "sort=" + sort : "",
+    ]
+      .filter((e) => e)
+      .join("&");
+    setQueryString(string);
+
+    fetchRef.current = fetch(URI)
+      .then((response) => response.json())
+      .then((json) => {
+        setResults(json.docs);
+        setSearchCounter((prev) => prev + 1);
+        const count = json.count;
+        setResultCount(count);
+        setCounts((prev) => ({ ...prev, [searchType]: count }));
+        setIsLoading(false);
+        setIsSearchEnd(true);
+        fetchRef.current = null;
+      });
+  }, [searchText, searchType, facetQuery, region, page, showMorePages, sort]);
+
+  const manageMatomoEvent = useCallback(() => {
+    if (!isLoading) {
+      const oldUrl = localStorage.getItem("oldUrl");
+      const operationUser = localStorage.getItem("operationUser");
+      let matomoParams = `${checkVariable(searchText)}|${checkVariable(
+        region
+      )}|`;
+      if (oldUrl || operationUser) {
+        const url = window.location.toString();
+
+        if (oldUrl && oldUrl === url) {
+          //refresh event
+          trackingMatomo("page_refresh", "misc", url);
         } else {
-          var matchCondition = ag.trim().match(regexCondition);
-          if (matchCondition) {
-            var category = matchCondition[1];
-            var operator = matchCondition[2];
-            var value = matchCondition[3];
-            if (category === "topic") {
-              idTopic = CATEGORIES.find(
-                (c) => c.text.toLowerCase() === value
-              ).id;
+          localStorage.setItem("oldUrl", url);
+          const searchParams = new URLSearchParams(location.search);
+          const isExternalLink = searchParams.get("externalLink");
+          if (isExternalLink === "true") {
+            searchParams.delete("externalLink");
+            const newUrl = `${location.pathname}?${searchParams.toString()}${
+              location.hash
+            }`;
+
+            window.history.replaceState(null, "", newUrl);
+
+            //referrer event
+            matomoParams += `${checkVariable(facetQuery)}`;
+            trackingMatomo("landing_on_results", "search", matomoParams);
+          } else {
+            const isFromAdvancedSearch =
+              searchParams.get("advancedSearch") === "true";
+            if (isFromAdvancedSearch) {
+              searchParams.delete("advancedSearch");
+              const newUrl = `${location.pathname}?${searchParams.toString()}${
+                location.hash
+              }`;
+
+              window.history.replaceState(null, "", newUrl);
+            }
+
+            switch (operationUser) {
+              case "simpleSearch":
+                trackingMatomo(
+                  "simple_search",
+                  "search",
+                  matomoParams.slice(0, -1)
+                );
+                break;
+              case "topic":
+                trackingMatomo("search_by_topic", "search", searchType);
+                break;
+              case "sort":
+                matomoParams += `${checkVariable(
+                  previousParams.oldTypeOfSearch
+                )}|${checkVariable(previousParams.sort)}|${checkVariable(
+                  sort
+                )}|${checkVariable(facetQuery)}`;
+                trackingMatomo("sorted_search", "search", matomoParams);
+                break;
+              case "advancedSearch":
+                matomoParams += `${checkVariable(facetQuery)}`;
+                trackingMatomo("advanced_search", "search", matomoParams);
+                break;
+              case "changePage":
+                matomoParams += `${checkVariable(
+                  previousParams.oldTypeOfSearch
+                )}|${checkVariable(
+                  parseInt(previousParams.page) + 1
+                )}|${checkVariable(parseInt(page) + 1)}|${checkVariable(
+                  facetQuery
+                )}`;
+                trackingMatomo("change_result_page", "search", matomoParams);
+                break;
+              case "refinedSearch":
+                matomoParams += `${checkVariable(
+                  previousParams.oldTypeOfSearch
+                )}|${checkVariable(previousParams.facets)}|${checkVariable(
+                  facetQuery
+                )}`;
+                trackingMatomo("refined_search", "search", matomoParams);
+                break;
+              case "region":
+                matomoParams = `${previousParams.region}|${region}`;
+                trackingMatomo("change_region", "search", matomoParams);
+                break;
+              default:
+                break;
+            }
+
+            if (isFromAdvancedSearch) {
+              setPreviousParams({
+                ...previousParams,
+                oldTypeOfSearch: "advanced",
+              });
+            } else if (!facetQuery) {
+              setPreviousParams({
+                ...previousParams,
+                oldTypeOfSearch: "simple",
+              });
             } else {
-              resultQuery +=
-                "(" +
-                idFacets[category] +
-                ":" +
-                valueMapper(value, operator) +
-                ")";
-              resultQuery += " AND ";
+              setPreviousParams({
+                ...previousParams,
+                oldTypeOfSearch: "refined",
+              });
             }
           }
         }
-      });
-    } else {
-      return text;
+      } else {
+        matomoParams += `${checkVariable(facetQuery)}`;
+        trackingMatomo("landing_on_results", "search", matomoParams);
+      }
     }
-  };
+  }, [
+    previousParams,
+    facetQuery,
+    region,
+    searchText,
+    page,
+    sort,
+    location.hash,
+    location.pathname,
+    location.search,
+    searchType,
+    isLoading,
+  ]);
 
-  const facetSearch = (name, value) => {
-    const clickedFacetQuery = new URLSearchParams({
-      facetType: name,
-      facetName: value,
-    }).toString();
-    setFacetQuery([facetQuery, clickedFacetQuery].filter((e) => e).join("&"));
-  };
+  useEffect(() => {
+    if (searchCounter > 4) {
+      setOpenTooltipSupport(true);
+    }
+  }, [searchCounter]);
 
-  const resetDefaultSearchUrl = (type) => {
-    navigate(
-      `/results/${type}?${new URLSearchParams({
-        ...(searchText ? { search_text: searchText } : {}),
-        ...(sort ? { sort: sort } : {}),
-        ...(region.toUpperCase() !== "GLOBAL" ? { region } : {}),
-      })}`
+  const checkVariable = (value) => {
+    if (!value || value === "") return "(none)";
+
+    return value;
+  };
+  useEffect(() => {
+    if (isSearchEnd) {
+      manageMatomoEvent();
+      setIsSearchEnd(false);
+    }
+  }, [results, isSearchEnd, manageMatomoEvent]);
+
+  const facetSearch = (name, value, checked) => {
+    let facet =
+      name === "n_startYear" || name === "n_endYear"
+        ? name + ":" + value
+        : name + ":" + '"' + value + '"';
+    let isKeyContained = false;
+    let queryResult = "";
+
+    if (checked) {
+      if (facetQuery) {
+        const pairs = facetQuery.split(" AND ");
+        pairs.forEach((p) => {
+          if (p.includes(name)) {
+            isKeyContained = true;
+            let temp =
+              "(" +
+              [p.replace(/^\(|\)$/g, ""), facet].filter((e) => e).join(" OR ") +
+              ")";
+            queryResult = [queryResult, temp].filter((e) => e).join(" AND ");
+          } else {
+            queryResult = [queryResult, p].filter((e) => e).join(" AND ");
+          }
+        });
+        if (!isKeyContained)
+          queryResult = [queryResult, "(" + facet + ")"]
+            .filter((e) => e)
+            .join(" AND ");
+      } else {
+        queryResult =
+          "(" + [queryResult, facet].filter((e) => e).join(" OR ") + ")";
+      }
+    } else {
+      const pairs = facetQuery.split(" AND ");
+      pairs.forEach((p) => {
+        if (p.includes(name)) {
+          const temp = p
+            .replace(/^\(|\)$/g, "")
+            .split(" OR ")
+            .filter((f) => f !== facet)
+            .join(" OR ");
+
+          queryResult = [queryResult, temp === "" ? temp : "(" + temp + ")"]
+            .filter((e) => e)
+            .join(" AND ");
+        } else {
+          queryResult = [queryResult, p].filter((e) => e).join(" AND ");
+        }
+      });
+    }
+    setPreviousParams({ ...previousParams, facets: facetQuery });
+    setFacetQuery(queryResult);
+    localStorage.setItem(
+      "lastOperationUser",
+      localStorage.getItem("operationUser")
+        ? localStorage.getItem("operationUser")
+        : ""
     );
+    localStorage.setItem("operationUser", "refinedSearch");
   };
 
-  const clearFacetQuery = () => {
-    resetDefaultSearchUrl(searchType);
+  const facetSearchMobile = (query) => {
+    setPreviousParams({ ...previousParams, facets: facetQuery });
+    setFacetQuery(query);
+    localStorage.setItem(
+      "lastOperationUser",
+      localStorage.getItem("operationUser")
+        ? localStorage.getItem("operationUser")
+        : ""
+    );
+    localStorage.setItem("operationUser", "refinedSearch");
   };
+
+  const resetDefaultSearchUrl = useCallback(
+    (type) => {
+      navigate(
+        `/results/${type}?${new URLSearchParams({
+          ...(searchText ? { search_text: searchText } : {}),
+          ...(sort ? { sort: sort } : {}),
+          ...(region.toUpperCase() !== "GLOBAL" ? { region } : {}),
+        })}`
+      );
+    },
+    [navigate, region, searchText, sort]
+  );
+
+  const clearFacetQuery = useCallback(() => {
+    resetDefaultSearchUrl(searchType);
+  }, [resetDefaultSearchUrl, searchType]);
 
   const clear = useCallback(
     (e) => {
@@ -249,6 +461,7 @@ export default function Results() {
         searchType={searchType}
         resultCount={resultCount}
         facets={facets}
+        setPreviousParams={setPreviousParams}
       />
       <Divider
         sx={{
@@ -258,48 +471,60 @@ export default function Results() {
         }}
       />
       <Container maxWidth="lg" sx={{ marginBottom: { xs: 5, lg: 0 } }}>
-        <Support />
+        <Support
+          openTooltipsSupport={openTooltipsSupport}
+          setOpenTooltipSupport={setOpenTooltipSupport}
+        />
         <Grid container mt={{ xs: 4, lg: 0 }} gap={{ xs: 1, lg: 0 }}>
           <Grid item lg={3} display={{ xs: "none", lg: "block" }}>
-            <Accordion
-              defaultExpanded
-              sx={{ width: "17.5rem", flexShrink: 0 }}
-              elevation={0}
+            <Fade
+              in={facets.length >= 0}
+              timeout={1000}
+              mountOnEnter
+              unmountOnExit
             >
-              <AccordionSummary
-                expandIcon={
-                  <ViewSidebarOutlinedIcon
-                    sx={{ color: paletteFilter + "textFilter" }}
-                  />
-                }
-                sx={{ paddingLeft: 0 }}
-                aria-controls="panel1a-content"
-                id="panel1a-header"
+              <Accordion
+                defaultExpanded
+                sx={{ width: "17.5rem", flexShrink: 0 }}
+                elevation={0}
               >
-                <Typography
-                  sx={{ color: paletteFilter + "textFilter", fontWeight: 700 }}
+                <AccordionSummary
+                  expandIcon={
+                    <ViewSidebarOutlinedIcon
+                      sx={{ color: paletteFilter + "textFilter" }}
+                    />
+                  }
+                  sx={{ paddingLeft: 0 }}
+                  aria-controls="panel1a-content"
+                  id="panel1a-header"
                 >
-                  {translationState.translation["Filter by"]}
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails sx={{ paddingLeft: 0 }}>
-                <FilterBy
-                  selectedProvider={selectedProvider}
-                  setSelectedProvider={setSelectedProvider}
-                  setFilterChosenMobile={setFilterChosenMobile}
-                  filterChosenMobile={filterChosenMobile}
-                  counts={counts}
-                  tabList={CATEGORIES}
-                  searchType={searchType}
-                  resetDefaultSearchUrl={resetDefaultSearchUrl}
-                  clearFacetQuery={clearFacetQuery}
-                  facetSearch={facetSearch}
-                  facets={facets}
-                  facetQuery={facetQuery}
-                  clear={clear}
-                />
-              </AccordionDetails>
-            </Accordion>
+                  <Typography
+                    sx={{
+                      color: paletteFilter + "textFilter",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {translationState.translation["Filter by"]}
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails sx={{ paddingLeft: 0 }}>
+                  <FilterBy
+                    setMobileAppliedFilters={setMobileAppliedFilters}
+                    mobileAppliedFilters={mobileAppliedFilters}
+                    counts={counts}
+                    tabList={CATEGORIES}
+                    searchType={searchType}
+                    resetDefaultSearchUrl={resetDefaultSearchUrl}
+                    clearFacetQuery={clearFacetQuery}
+                    facetSearch={facetSearch}
+                    facets={facets}
+                    facetQuery={facetQuery}
+                    clear={clear}
+                    facetSearchMobile={facetSearchMobile}
+                  />
+                </AccordionDetails>
+              </Accordion>
+            </Fade>
           </Grid>
           <Grid
             item
@@ -348,10 +573,8 @@ export default function Results() {
                 </DialogTitle>
                 <DialogContent>
                   <FilterBy
-                    selectedProvider={selectedProvider}
-                    setSelectedProvider={setSelectedProvider}
-                    setFilterChosenMobile={setFilterChosenMobile}
-                    filterChosenMobile={filterChosenMobile}
+                    setMobileAppliedFilters={setMobileAppliedFilters}
+                    mobileAppliedFilters={mobileAppliedFilters}
                     counts={counts}
                     tabList={CATEGORIES}
                     searchType={searchType}
@@ -360,6 +583,7 @@ export default function Results() {
                     facetSearch={facetSearch}
                     facets={facets}
                     facetQuery={facetQuery}
+                    facetSearchMobile={facetSearchMobile}
                   />
                 </DialogContent>
               </Dialog>
@@ -401,7 +625,17 @@ export default function Results() {
                   height: "35px",
                   width: { xs: "135px", md: "unset" },
                 }}
-                onChange={(e) => setSort(e.target.value)}
+                onChange={(e) => {
+                  setPreviousParams({ ...previousParams, sort: sort });
+                  setSort(e.target.value);
+                  localStorage.setItem(
+                    "lastOperationUser",
+                    localStorage.getItem("operationUser")
+                      ? localStorage.getItem("operationUser")
+                      : ""
+                  );
+                  localStorage.setItem("operationUser", "sort");
+                }}
               >
                 <MenuItem value="indexed_ts desc">
                   {translationState.translation["Recently updated"]}
@@ -429,7 +663,7 @@ export default function Results() {
               gap: 1,
             }}
           >
-            {filterChosenMobile.map((item, index) => {
+            {mobileAppliedFilters.map((item, index) => {
               return (
                 <Button
                   key={index}
@@ -446,10 +680,11 @@ export default function Results() {
                     minWidth: 0,
                   }}
                   onClick={() => {
-                    if (item.type === "provider") setSelectedProvider("");
                     clear();
-                    setFilterChosenMobile((f) =>
-                      f.filter((d) => d.type !== item.type)
+                    setMobileAppliedFilters((f) =>
+                      f.filter(
+                        (d) => d.type !== item.type && d.text !== item.text
+                      )
                     );
                   }}
                 >
@@ -459,115 +694,203 @@ export default function Results() {
               );
             })}
           </Box>
-          <Grid item lg={9} xs={12} columnSpacing={2}>
-            <Stack spacing={2}>
-              <Box
-                display={{ xs: "none", lg: "flex" }}
-                justifyContent={"space-between"}
-                alignItems={"center"}
+          {isLoading ? (
+            <Grid item lg={9} xs={12}>
+              <CircularProgress sx={{ display: "flex", margin: "0 auto" }} />
+            </Grid>
+          ) : (
+            <Grid item lg={9} xs={12}>
+              <Fade
+                in={results.length >= 0}
+                timeout={1000}
+                mountOnEnter
+                unmountOnExit
               >
-                <Typography
-                  variant="subtitle2"
-                  sx={{ color: paletteFilter + "categoryColor" }}
-                >
-                  <b>{resultCount || 0}</b>{" "}
-                  {translationState.translation["Total results found"]}{" "}
-                </Typography>
-                <Box sx={{ display: "flex", gap: 2 }}>
-                  <Chip
-                    avatar={
-                      <CheckCircleOutlineIcon sx={{ color: "#1A2C54" }} />
-                    }
-                    label="Verified"
-                    onClick={() => setOnlyVerified(!onlyVerified)}
-                    variant="outlined"
-                    sx={{
-                      borderRadius: "8px",
-                      color: "#1A2C54",
-                      height: "35px",
-                      ".MuiChip-avatar": {
-                        color: "#1A2C54",
-                      },
-                      backgroundColor: onlyVerified && "#DEE2ED",
-                    }}
-                  />
-                  <Select
-                    defaultValue={sort ? sort : "indexed_ts desc"}
-                    startAdornment={
-                      <InputAdornment position="start">
-                        <Typography
-                          variant="subtitle2"
-                          sx={{ color: paletteFilter + "categoryColor" }}
+                <Box sx={{ display: "flex", gap: 2, flexDirection: "column" }}>
+                  <Stack spacing={2}>
+                    <Box
+                      display={{ xs: "none", lg: "flex" }}
+                      justifyContent={"space-between"}
+                      alignItems={"center"}
+                    >
+                      <Typography
+                        variant="subtitle2"
+                        sx={{ color: paletteFilter + "categoryColor" }}
+                      >
+                        <b>{resultCount || 0}</b>{" "}
+                        {translationState.translation["Total results found"]}{" "}
+                      </Typography>
+                      <Box sx={{ display: "flex", gap: 2 }}>
+                        <Chip
+                          avatar={
+                            <CheckCircleOutlineIcon sx={{ color: "#1A2C54" }} />
+                          }
+                          label="Verified"
+                          onClick={() => setOnlyVerified(!onlyVerified)}
+                          variant="outlined"
+                          disabled={results.length === 0}
+                          sx={{
+                            borderRadius: "8px",
+                            color: "#1A2C54",
+                            height: "35px",
+                            ".MuiChip-avatar": {
+                              color: "#1A2C54",
+                            },
+                            backgroundColor: onlyVerified && "#DEE2ED",
+                          }}
+                        />
+                        <Select
+                          defaultValue={sort ? sort : "indexed_ts desc"}
+                          disabled={results.length === 0}
+                          startAdornment={
+                            <InputAdornment position="start">
+                              <Typography
+                                variant="subtitle2"
+                                sx={{ color: paletteFilter + "categoryColor" }}
+                              >
+                                {translationState.translation["Sort by"]}:
+                              </Typography>
+                            </InputAdornment>
+                          }
+                          fullWidth
+                          sx={{
+                            color: "black",
+                            fontWeight: 600,
+                            fontSize: "12px",
+                            borderRadius: 2,
+                            height: "35px",
+                          }}
+                          onChange={(e) => {
+                            setPreviousParams({
+                              ...previousParams,
+                              sort: sort,
+                            });
+                            setSort(e.target.value);
+                            localStorage.setItem(
+                              "lastOperationUser",
+                              localStorage.getItem("operationUser")
+                                ? localStorage.getItem("operationUser")
+                                : ""
+                            );
+                            localStorage.setItem("operationUser", "sort");
+                          }}
                         >
-                          {translationState.translation["Sort by"]}:
-                        </Typography>
-                      </InputAdornment>
-                    }
-                    fullWidth
-                    sx={{
-                      color: "black",
-                      fontWeight: 600,
-                      fontSize: "12px",
-                      borderRadius: 2,
-                      height: "35px",
-                    }}
-                    onChange={(e) => setSort(e.target.value)}
-                  >
-                    <MenuItem value="indexed_ts desc">
-                      {translationState.translation["Recently updated"]}
-                    </MenuItem>
-                    <MenuItem value="indexed_ts asc">Last updated</MenuItem>
+                          <MenuItem value="indexed_ts desc">
+                            {translationState.translation["Recently updated"]}
+                          </MenuItem>
+                          <MenuItem value="indexed_ts asc">
+                            Last updated
+                          </MenuItem>
 
-                    {facets.map((f) => {
-                      const title = fieldTitleFromName(f.name);
-                      return [
-                        <MenuItem key={`${f.name}-asc`} value={`${f.name} asc`}>
-                          {title} ↑
-                        </MenuItem>,
-                        <MenuItem
-                          key={`${f.name}-desc`}
-                          value={`${f.name} desc`}
-                        >
-                          {title} ↓
-                        </MenuItem>,
-                      ];
-                    })}
-                  </Select>
+                          {facets.map((f) => {
+                            const title = fieldTitleFromName(f.name);
+                            return [
+                              <MenuItem
+                                key={`${f.name}-asc`}
+                                value={`${f.name} asc`}
+                              >
+                                {title} ↑
+                              </MenuItem>,
+                              <MenuItem
+                                key={`${f.name}-desc`}
+                                value={`${f.name} desc`}
+                              >
+                                {title} ↓
+                              </MenuItem>,
+                            ];
+                          })}
+                        </Select>
+                      </Box>
+                    </Box>
+                    {results.length === 0 ? (
+                      <>
+                        <Typography variant="body1">
+                          Uh oh! Your search returned no results... <br />
+                          Are you looking for something specific? You can open a
+                          request in our matchmaking tool.{" "}
+                          <Typography
+                            variant="body1"
+                            component={LinkMui}
+                            sx={{
+                              color: "#40AAD3",
+                              textDecoration: "none",
+                              cursor: "pointer",
+                              "&:hover": {
+                                textDecoration: "underline",
+                              },
+                            }}
+                            onClick={() => navigate("/matchmaking/demand")}
+                          >
+                            Learn more
+                          </Typography>
+                        </Typography>
+                      </>
+                    ) : (
+                      results.map((result) => {
+                        counterResult =
+                          counterResult > 10 ? 1 : counterResult + 1;
+                        return (
+                          <ResultValue
+                            totalPageNumber={Math.ceil(
+                              resultCount / (ITEMS_PER_PAGE + showMorePages)
+                            )}
+                            counterResult={counterResult}
+                            page={page}
+                            queryString={queryString}
+                            result={result}
+                            completeValue={100}
+                            key={result["id"]}
+                            onlyVerified={onlyVerified}
+                          />
+                        );
+                      })
+                    )}
+                  </Stack>
+                  <Button
+                    variant="outlined"
+                    disableElevation
+                    sx={{
+                      display: { xs: "block", lg: "none" },
+                      borderRadius: 1,
+                      fontWeight: 700,
+                      textTransform: "none",
+                      color: "black",
+                      width: "100%",
+                      marginTop: 2,
+                    }}
+                    onClick={() => setShowMorePages((prev) => prev + 5)}
+                  >
+                    Show more
+                  </Button>
+                  <Pagination
+                    showMorePages={showMorePages}
+                    searchType={searchType}
+                    resultCount={resultCount}
+                    setPage={setPage}
+                    page={page}
+                    setPreviousParams={setPreviousParams}
+                  />
+
+                  <Typography
+                    variant="body2"
+                    component={LinkMui}
+                    textAlign={"center"}
+                    sx={{
+                      color: "#40AAD3",
+                      textDecoration: "none",
+                      cursor: "pointer",
+                      "&:hover": {
+                        textDecoration: "underline",
+                      },
+                    }}
+                    onClick={() => navigate("/matchmaking/offer")}
+                  >
+                    How to share your data
+                  </Typography>
                 </Box>
-              </Box>
-              {results.map((result) => (
-                <ResultValue
-                  result={result}
-                  completeValue={100}
-                  key={result["id"]}
-                  onlyVerified={onlyVerified}
-                />
-              ))}
-            </Stack>
-            <Button
-              variant="outlined"
-              disableElevation
-              sx={{
-                display: { xs: "block", lg: "none" },
-                borderRadius: 1,
-                fontWeight: 700,
-                textTransform: "none",
-                color: "black",
-                width: "100%",
-                marginTop: 2,
-              }}
-              onClick={() => setShowMorePages((prev) => prev + 5)}
-            >
-              Show more
-            </Button>
-            <Pagination
-              showMorePages={showMorePages}
-              searchType={searchType}
-              resultCount={resultCount}
-              setPage={setPage}
-              page={page}
-            />
-          </Grid>
+              </Fade>
+            </Grid>
+          )}
         </Grid>
       </Container>
     </>

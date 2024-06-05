@@ -16,6 +16,10 @@ import Search from "../search/Search";
 import MapViewerEntrypoint from "./MapViewerEntrypoint";
 import CardTopic from "./CardTopic";
 import CarouselPortals from "./CarouselPortals";
+import Typography from "@mui/material/Typography";
+import LinkMui from "@mui/material/Link";
+import { defaultMatomoPageView } from "utilities/trackingUtility";
+import MatchmakingModal from "./MatchmakingModal";
 
 const doc_types = [
   "CreativeWork",
@@ -37,13 +41,6 @@ export default function TypesCount() {
   const [region] = useSearchParam("region");
   const translationState = useAppTranslation();
 
-  /*   const get_region_bounds = () => {
-    let bounds;
-    if (region) bounds = regionBoundsMap[region.replaceAll(" ", "_")];
-    if (bounds) return bounds;
-    else return "[-90,-180 TO 90,180]";
-  }; */
-
   useEffect(() => {
     fetch(
       `${dataServiceUrl}/search?rows=0&include_facets=false&${
@@ -52,23 +49,22 @@ export default function TypesCount() {
     )
       .then((response) => response.json())
       .then((json) => setCounts((prev) => ({ ...prev, ...json.counts })));
-
-    /*  fetch(
-      `${dataServiceUrl}/search?rows=0&include_facets=false&facetType=the_geom&facetName=${get_region_bounds()}${
-        region ? "&region=" + region : ""
-      }`
-    )
-      .then((response) => response.json())
-      .then((json) =>
-        setCounts((prev) => ({
-          ...prev,
-          SpatialData: Object.values(json.counts).reduce((x, y) => x + y, 0),
-        }))
-      ); */
   }, [region]);
 
-  const searchByType = (type) => (event) =>
+  useEffect(() => {
+    defaultMatomoPageView(true);
+  }, []);
+
+  const searchByType = (type) => () => {
+    localStorage.setItem(
+      "lastOperationUser",
+      localStorage.getItem("operationUser")
+        ? localStorage.getItem("operationUser")
+        : ""
+    );
+    localStorage.setItem("operationUser", "topic");
     navigate(`/results/${type}?${region ? "region=" + region : ""}`);
+  };
 
   const palette = "custom.homepage.tabs.";
   return (
@@ -85,15 +81,15 @@ export default function TypesCount() {
           >
             <Container maxWidth="xl" sx={{ py: { xs: 2, lg: 8 } }}>
               <Grid container spacing={2}>
-                <Grid item xs={12} lg={5}>
+                {/* <Grid item xs={12} lg={5}>
                   <SearchHubEntrypoint />
-                </Grid>
+                </Grid> */}
                 <Grid
                   item
                   container
                   spacing={2}
                   xs={12}
-                  lg={7} /* sx={{ p: "24px" }} */
+                  lg={12} /* sx={{ p: "24px" }} */
                 >
                   <Grid item xs={12}>
                     <Search />
@@ -118,6 +114,19 @@ export default function TypesCount() {
                           </Grid>
                         );
                     })}
+                    <Grid item lg={4} xs={12}></Grid>
+                    <Grid
+                      item
+                      lg={4}
+                      xs={12}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: { xs: "center", lg: "end" },
+                      }}
+                    >
+                      <MatchmakingModal />
+                    </Grid>
                   </Grid>
                 </Grid>
               </Grid>

@@ -19,6 +19,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { useAppTranslation } from "context/context/AppTranslation";
 import { fieldTitleFromName } from "utilities/generalUtility";
+import { useMediaQuery, useTheme } from "@mui/material";
 
 const GenericFacet = (props) => {
   const {
@@ -27,16 +28,17 @@ const GenericFacet = (props) => {
     title,
     facetSearch,
     clear,
-    setFilterChosenMobile,
-    filterChosenMobile,
+    setMobileAppliedFilters,
+    mobileAppliedFilters,
     isClearAll,
     setIsClearAll,
     facetQuery,
+    addQueryMobile,
+    setMobileSelectedFiltersTemp,
   } = props;
   const [searchInput, setSearchInput] = useState("");
   const [filteredFacet, setFilteredFacet] = useState(facet.counts);
   const [numberToShow, setNumberToShow] = useState(5);
-  const [checkedItems, setCheckedItems] = useState([]);
   const [selectedFacets, setSelectedFacets] = useState([]);
 
   const [selectedOrder, setSelectedOrder] = useState("Counts DESC");
@@ -70,6 +72,8 @@ const GenericFacet = (props) => {
           })
         );
         setSelectedOrder("Name DESC");
+        break;
+      default:
         break;
     }
   };
@@ -109,26 +113,32 @@ const GenericFacet = (props) => {
   }, [isClearAll]);
 
   useEffect(() => {
-    if (facetQuery) {
-      const pairs = facetQuery.split("&");
+    setSelectedFacets([]);
 
+    if (facetQuery) {
+      const pairs = facetQuery.split(" AND ");
       const extractedPairs = [];
 
-      for (let i = 0; i < pairs.length; i += 2) {
-        const facetType = pairs[i].split("=")[1];
-        if (fieldTitleFromName(facetType) === title) {
-          const facetName = decodeURIComponent(
-            pairs[i + 1].split("=")[1].replaceAll("+", " ")
-          );
+      pairs.forEach((p) => {
+        const temp = p.replace(/^\(|\)$/g, "");
+        const tempPairs = temp.split(" OR ");
+        tempPairs.forEach((t) => {
+          const splitted = t.split(":");
+          const facetType = splitted[0];
+          if (fieldTitleFromName(facetType) === title) {
+            const facetName = splitted[1].replace(/"/g, "");
+            extractedPairs.push(facetName);
+          }
+        });
+      });
 
-          extractedPairs.push(facetName);
-        }
-      }
       setSelectedFacets(extractedPairs);
     }
-  }, [facetQuery]);
+  }, [facetQuery, title]);
   const translationState = useAppTranslation();
   const palette = "custom.resultPage.filters.";
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   return (
     <>
       <Toolbar
@@ -191,16 +201,16 @@ const GenericFacet = (props) => {
       </Box>
       <List>
         {filteredFacet.slice(0, numberToShow).map((facetCount) => {
-          const labelId = `checkbox-list-label-${facetCount.name}`;
-
+          const value = facetCount.value || facetCount.name;
+          const labelId = `checkbox-list-label-${value}`;
           return (
-            <ListItem key={facetCount.name} disablePadding>
+            <ListItem key={value} disablePadding>
               <Tooltip
                 arrow
                 placement="right"
-                title={facetCount.name}
+                title={value}
                 sx={{
-                  display: facetCount.name.length < 15 ? "none" : "flex",
+                  display: value.length < 15 ? "none" : "flex",
                 }}
               >
                 <ListItemButton sx={{ display: "flex" }} dense>
@@ -208,33 +218,43 @@ const GenericFacet = (props) => {
                     <Checkbox
                       edge="start"
                       tabIndex={-1}
-                      checked={isChecked(facetCount.name)}
+                      checked={isChecked(value)}
                       onChange={(e) => {
+                        const checked = e.target.checked;
                         const updatedCheckedItems = e.target.checked
-                          ? [...selectedFacets, facetCount.name]
-                          : selectedFacets.filter(
-                              (item) => item !== facetCount.name
-                            );
+                          ? [...selectedFacets, value]
+                          : selectedFacets.filter((item) => item !== value);
 
                         setSelectedFacets(updatedCheckedItems);
-                        if (!e.target.checked) {
-                          clear();
-                          setFilterChosenMobile((f) =>
+                        !isMobile && facetSearch(facet.name, value, checked);
+                        if (!checked) {
+                          setMobileAppliedFilters((f) =>
                             f.filter((d) => d.type !== title.toLowerCase())
                           );
                         } else {
-                          facetSearch(facet.name, facetCount.name);
-                          const isGenericFilterSet = filterChosenMobile.find(
-                            (f) => f.type === facetCount.name
-                          );
-                          if (isGenericFilterSet ?? true)
-                            setFilterChosenMobile((prev) => [
+                          if (isMobile) {
+                            addQueryMobile(facet.name, value);
+                            setMobileSelectedFiltersTemp((prev) => [
                               ...prev,
                               {
-                                type: facetCount.name,
-                                text: facetCount.name,
+                                type: facet.name,
+                                text: value,
                               },
                             ]);
+                          } else {
+                            const isGenericFilterSet =
+                              mobileAppliedFilters.find(
+                                (f) => f.type === value
+                              );
+                            if (isGenericFilterSet ?? true)
+                              setMobileAppliedFilters((prev) => [
+                                ...prev,
+                                {
+                                  type: facet.name,
+                                  text: value,
+                                },
+                              ]);
+                          }
                         }
                       }}
                       disableRipple

@@ -50,5 +50,23 @@ export const reducer = (state, action) => {
         ...state,
         center: action.center,
       };
+    case "setShowSearchArea":
+      return {
+        ...state,
+        showSearchArea: action.showSearchArea,
+      };
+
+    case "setSelectedElem":
+      return {
+        ...state,
+        selectedElem: action.selectedElem,
+      };
+    case "setMapBounds":
+      return {
+        ...state,
+        mapBounds: action.mapBounds,
+      };
+    default:
+      break;
   }
 };

@@ -8,12 +8,32 @@ import Button from "@mui/material/Button";
 import { useAppTranslation } from "context/context/AppTranslation";
 import Alert from "@mui/material/Alert";
 import { CATEGORIES, PROMOTED_REGIONS } from "portability/configuration";
-import { fieldTitleFromName, useSearchParam } from "utilities/generalUtility";
+import {
+  fieldTitleFromName,
+  searchAdvanced,
+  useSearchParam,
+} from "utilities/generalUtility";
 import { dataServiceUrl } from "config/environment";
 import { useNavigate } from "react-router-dom";
 import PublicIcon from "@mui/icons-material/Public";
-import MobileAS from "./advancedSearch/MobileAS";
-import DesktopAS from "./advancedSearch/DesktopAS";
+import MobileAS from "./MobileAS";
+import DesktopAS from "./DesktopAS";
+
+const initialState = {
+  0: {
+    category: "Topic",
+    value: "Documents",
+    region: "Global",
+  },
+  1: [
+    {
+      id: 0,
+      category: "Provider",
+      operator: "Contains",
+      textfield: "",
+    },
+  ],
+};
 
 const AdvancedSearch = (props) => {
   const { setSearchQuery, searchQuery, facets } = props;
@@ -22,23 +42,17 @@ const AdvancedSearch = (props) => {
   const [facetsToShow, setFacetsToShow] = useState(facets);
   const [alertMessage, setAlertMessage] = useState("");
   const [sort, setSort] = useSearchParam("sort");
-  const [searchAdvancedQuery, setSearchAdvancedQuery] = useState({
-    0: {
-      category: "Topic",
-      value: "Documents",
-      region: "Global",
-    },
-    1: [
-      {
-        id: 0,
-        category: "Provider",
-        operator: "Contains",
-        textfield: "",
-      },
-    ],
-  });
+  const [isClear, setIsClear] = useState(false);
+  const [searchAdvancedQuery, setSearchAdvancedQuery] = useState(initialState);
   const navigate = useNavigate();
   const [region, setRegion] = useSearchParam("region", "global");
+
+  useEffect(() => {
+    if (isClear) {
+      setSearchAdvancedQuery(initialState);
+      setIsClear(false);
+    }
+  }, [isClear]);
 
   const changeTopic = (topic) => {
     const idTopic = CATEGORIES.find((c) => c.text === topic).id;
@@ -51,6 +65,23 @@ const AdvancedSearch = (props) => {
         setFacetsToShow(json.facets.filter((facet) => facet.counts.length > 0));
       });
   };
+
+  function checkTextfieldsValidity(data) {
+    for (const key in data) {
+      if (Array.isArray(data[key])) {
+        for (const item of data[key]) {
+          if (item.textfield === "") {
+            return false;
+          }
+        }
+      } else if (typeof data[key] === "object" && data[key] !== null) {
+        if (!checkTextfieldsValidity(data[key])) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
 
   const showCorrectSubFacets = (category) => {
     const correctFacet = facetsToShow.filter((f) => {
@@ -73,92 +104,38 @@ const AdvancedSearch = (props) => {
   }, []);
 
   const createSearchQuery = () => {
-    let searchQueryBuild = "{{";
-    // Build SOLR facet query
-    let facetQuery = "";
+    const isValid = checkTextfieldsValidity(searchAdvancedQuery);
 
-    const idTabName = CATEGORIES.find(
-      (c) => c.text === searchAdvancedQuery[0].value
-    ).id;
+    if (isValid) {
+      setAlertMessage("");
+      const [searchQueryBuild, facetQuery] =
+        searchAdvanced(searchAdvancedQuery);
+      console.log(facetQuery);
+      const idTabName = CATEGORIES.find(
+        (c) => c.text === searchAdvancedQuery[0].value
+      ).id;
 
-    const regionValue = searchAdvancedQuery[0].region;
-    searchQueryBuild +=
-      ' (Topic IS "' + searchAdvancedQuery[0].value + '") AND (';
-    /** @type {{id: number, category: string, value: string, operator: string, textfield: string}[][]} */
-    const groups = Object.values(searchAdvancedQuery).toSpliced(0, 1);
+      const regionValue = searchAdvancedQuery[0].region;
 
-    const categories = facetsToShow.reduce((acc, f) => {
-      const t = fieldTitleFromName(f.name);
-      acc[t] = f.name;
-      return acc;
-    }, {});
-
-    function valueMapper(text, operator) {
-      if (operator.endsWith("Contains")) {
-        return `*${text}*`;
-      }
-      return text;
+      setSearchQuery(searchQueryBuild);
+      console.log(searchAdvancedQuery);
+      const hrefFor = (region, query) =>
+        `/results/${idTabName}?${new URLSearchParams({
+          ...(query ? { fq: query } : {}),
+          ...(sort ? { sort: sort } : {}),
+          ...(region && region.toUpperCase() !== "GLOBAL" ? { region } : {}),
+        })}&advancedSearch=true`;
+      localStorage.setItem(
+        "lastOperationUser",
+        localStorage.getItem("operationUser")
+          ? localStorage.getItem("operationUser")
+          : ""
+      );
+      localStorage.setItem("operationUser", "advancedSearch");
+      navigate(hrefFor(regionValue, facetQuery));
+    } else {
+      setAlertMessage("Please fill all field before starting a search");
     }
-
-    let firstGroup = true;
-    for (const group of groups) {
-      if (firstGroup) {
-        facetQuery += "(";
-        firstGroup = false;
-      } else {
-        facetQuery += " AND (";
-        searchQueryBuild += " AND (";
-      }
-
-      for (const [index, value] of group.entries()) {
-        if (!value.textfield) {
-          setAlertMessage(
-            "Please kindly fill in all fields or, if not applicable, feel free to remove them"
-          );
-        }
-
-        if (group.length > 1) {
-          searchQueryBuild +=
-            "( " +
-            value.category +
-            " " +
-            value.operator.replace(/([a-z])([A-Z])/g, "$1 $2").toUpperCase() +
-            ' "' +
-            value.textfield +
-            '" )';
-        } else {
-          searchQueryBuild +=
-            value.category +
-            " " +
-            value.operator.replace(/([a-z])([A-Z])/g, "$1 $2").toUpperCase() +
-            ' "' +
-            value.textfield +
-            '"';
-        }
-
-        facetQuery +=
-          (value.operator.startsWith("Not") ? "-" : "") +
-          categories[value.category] +
-          ":" +
-          valueMapper(value.textfield, value.operator);
-
-        if (index < group.length - 1) {
-          facetQuery += " OR ";
-          searchQueryBuild += " OR ";
-        }
-      }
-      searchQueryBuild += ")";
-      facetQuery += ")";
-    }
-    searchQueryBuild += " }}";
-    setSearchQuery(searchQueryBuild);
-    const hrefFor = (region, query) =>
-      `/results/${idTabName}?${new URLSearchParams({
-        ...(query ? { fq: query } : {}),
-        ...(sort ? { sort: sort } : {}),
-        ...(region && region.toUpperCase() !== "GLOBAL" ? { region } : {}),
-      })}`;
-    navigate(hrefFor(regionValue, facetQuery));
   };
 
   return (
@@ -231,11 +208,14 @@ const AdvancedSearch = (props) => {
                 setSearchAdvancedQuery(resetObj);
               }}
             >
-              {CATEGORIES.map((c, index) => (
-                <MenuItem key={index} value={c.text}>
-                  {translationState.translation[c.text]}
-                </MenuItem>
-              ))}
+              {CATEGORIES.map(
+                (c, index) =>
+                  c.text !== "Spatial Search" && (
+                    <MenuItem key={index} value={c.text}>
+                      {translationState.translation[c.text]}
+                    </MenuItem>
+                  )
+              )}
             </Select>
             <Select
               startAdornment={
@@ -337,23 +317,7 @@ const AdvancedSearch = (props) => {
             <Button
               variant="text"
               disableElevation
-              onClick={() =>
-                setSearchAdvancedQuery({
-                  0: {
-                    category: "Topic",
-                    value: "Documents",
-                  },
-                  1: [
-                    {
-                      id: 0,
-                      category: "Provider",
-
-                      operator: "Contains",
-                      textfield: "",
-                    },
-                  ],
-                })
-              }
+              onClick={() => setIsClear(true)}
               sx={{
                 color: palette + "clearButtonColor",
                 textTransform: "none",

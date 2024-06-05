@@ -25,6 +25,8 @@ const HeaderDrawer = (props) => {
     searchText,
     setSearchText,
     handleSubmit,
+    setSelectedFacets,
+    clear,
   } = props;
 
   const translationState = useAppTranslation();

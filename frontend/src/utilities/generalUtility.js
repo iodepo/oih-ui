@@ -1,6 +1,11 @@
-import { SAMPLE_QUERIES, fieldNameMap } from "portability/configuration";
+import {
+  SAMPLE_QUERIES,
+  fieldNameMap,
+  idFacets,
+} from "portability/configuration";
 import { useSearchParams } from "react-router-dom";
 import { useCallback } from "react";
+import { dataServiceUrl } from "config";
 
 const randomSampleQueries = (n) =>
   SAMPLE_QUERIES.map((e) => [Math.random(), e])
@@ -36,4 +41,82 @@ function useSearchParam(param, def = undefined) {
   return [params.has(param) ? params.get(param) : def, setParam];
 }
 
-export { randomSampleQueries, fieldTitleFromName, useSearchParam };
+const fetchDetail = (id) =>
+  fetch(`${dataServiceUrl}/detail?id=${id}`).then((r) => r.json());
+
+const searchAdvanced = (searchAdvancedQuery) => {
+  let searchQueryBuild = "{{";
+  let facetQuery = "";
+
+  searchQueryBuild +=
+    ' ("Topic" is "' + searchAdvancedQuery[0].value + '") AND (';
+  /** @type {{id: number, category: string, value: string, operator: string, textfield: string}[][]} */
+  const groups = Object.values(searchAdvancedQuery).toSpliced(0, 1);
+
+  const categories = idFacets;
+
+  function valueMapper(text, operator) {
+    if (operator.toLowerCase().endsWith("contains")) {
+      return `*${text.replace(/ /g, "\\ ")}*`;
+    }
+
+    return '"' + text + '"';
+  }
+
+  let firstGroup = true;
+  for (const group of groups) {
+    if (firstGroup) {
+      facetQuery += "(";
+      firstGroup = false;
+    } else {
+      facetQuery += " AND (";
+      searchQueryBuild += " AND (";
+    }
+
+    for (const [index, value] of group.entries()) {
+      if (group.length > 1) {
+        searchQueryBuild +=
+          '( "' +
+          value.category +
+          '" ' +
+          value.operator +
+          ' "' +
+          value.textfield +
+          '" )';
+      } else {
+        searchQueryBuild +=
+          '"' +
+          value.category +
+          '" ' +
+          value.operator +
+          ' "' +
+          value.textfield +
+          '"';
+      }
+
+      facetQuery +=
+        (value.operator.startsWith("Not") ? "-" : "") +
+        categories[value.category.toLowerCase()] +
+        ":" +
+        valueMapper(value.textfield, value.operator) +
+        "";
+
+      if (index < group.length - 1) {
+        facetQuery += " OR ";
+        searchQueryBuild += " OR ";
+      }
+    }
+    searchQueryBuild += ")";
+    facetQuery += ")";
+  }
+  searchQueryBuild += " }}";
+  return [searchQueryBuild, facetQuery];
+};
+
+export {
+  randomSampleQueries,
+  fieldTitleFromName,
+  useSearchParam,
+  fetchDetail,
+  searchAdvanced,
+};

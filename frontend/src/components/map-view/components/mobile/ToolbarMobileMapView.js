@@ -6,6 +6,8 @@ import SearchMapMobile from "./SearchMapMobile";
 import FilterMapMobile from "./FilterMapMobile";
 import LayerMapMobile from "./LayerMapMobile";
 import ResultsMapMobile from "./ResultsMapMobile";
+import SearchIcon from "@mui/icons-material/Search";
+import Button from "@mui/material/Button";
 
 const ToolbarMobileMapView = (props) => {
   const {
@@ -37,6 +39,12 @@ const ToolbarMobileMapView = (props) => {
     setShowRegions,
     showPoints,
     showRegions,
+    selectedElem,
+    changeSelectedElem,
+    searchThisArea,
+    showSearchArea,
+    currentURI,
+    mapBounds,
   } = props;
   const translationState = useAppTranslation();
 
@@ -64,22 +72,23 @@ const ToolbarMobileMapView = (props) => {
 
   useEffect(() => {
     if (facetQuery) {
-      const pairs = facetQuery.split("&");
-
+      const pairs = facetQuery.split(" AND ");
       const extractedPairs = [];
 
-      for (let i = 0; i < pairs.length; i += 2) {
-        const facetType = pairs[i].split("=")[1];
-        const facetName = decodeURIComponent(
-          pairs[i + 1].split("=")[1].replaceAll("+", " ")
-        );
-
-        extractedPairs.push({ name: facetType, value: facetName });
-      }
+      pairs.forEach((p) => {
+        const temp = p.replace(/^\(|\)$/g, "");
+        const tempPairs = temp.split(" OR ");
+        tempPairs.forEach((t) => {
+          const splitted = t.split(":");
+          const facetType = splitted[0];
+          const facetName = splitted[1].replace(/"/g, "");
+          extractedPairs.push({ name: facetType, value: facetName });
+        });
+      });
 
       setSelectedFacets(extractedPairs);
     }
-  }, [facetQuery]);
+  }, [facetQuery, setSelectedFacets]);
 
   const handleInputChange = (value, name) => {
     setFilteredFacets(() => {
@@ -106,6 +115,7 @@ const ToolbarMobileMapView = (props) => {
           width: "100%",
           paddingLeft: "8px",
           paddingRight: "8px",
+          zIndex: 2,
         }}
       >
         <Stack spacing={2}>
@@ -126,6 +136,41 @@ const ToolbarMobileMapView = (props) => {
             selectedFacets={selectedFacets}
             facetSearch={facetSearch}
           />
+          {showSearchArea && (
+            <Box
+              sx={{
+                zIndex: 2,
+                position: "absolute",
+                right: "32%",
+                top: "100px",
+              }}
+            >
+              <Button
+                variant="contained"
+                sx={{
+                  textTransform: "unset",
+                  backgroundColor: "white",
+                  borderRadius: 8,
+                  color: "#1A2C54",
+                  "&:hover": {
+                    color: "white",
+                    backgroundColor: "#1A2C54",
+                    ".MuiSvgIcon-root": {
+                      color: "white",
+                    },
+                  },
+                }}
+                onClick={() => {
+                  searchThisArea();
+                  setOpenSwipeDrawer(true);
+                }}
+                startIcon={<SearchIcon sx={{ color: "#1A2C54" }} />}
+              >
+                Search this area
+              </Button>
+            </Box>
+          )}
+
           <LayerMapMobile
             setOpenLayerDrawer={setOpenLayerDrawer}
             applyZoom={applyZoom}
@@ -157,6 +202,10 @@ const ToolbarMobileMapView = (props) => {
             results={results}
             isLoading={isLoading}
             getDataSpatialSearch={getDataSpatialSearch}
+            selectedElem={selectedElem}
+            changeSelectedElem={changeSelectedElem}
+            currentURI={currentURI}
+            mapBounds={mapBounds}
           />
         </Stack>
       </Box>

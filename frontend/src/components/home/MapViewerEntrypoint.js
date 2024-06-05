@@ -27,20 +27,20 @@ export default function MapViewerEntrypoint() {
       <Grid
         container
         spacing={4}
-        sx={{ flexDirection: { xs: "column-reverse", lg: "unset" } }}
+        /*  sx={{ flexDirection: { xs: "column-reverse", lg: "unset" } }} */
       >
         <Grid
           item
           xs={12}
-          lg={7}
-          sx={{ display: "flex", justifyContent: "end" }}
+          lg={12}
+          sx={{ display: "flex", justifyContent: "center" }}
         >
           <Box
             sx={{
-              height: "370px",
+              height: "486px",
               borderRadius: "30px",
-              border: " 6px solid gray",
-              width: "1100px",
+              border: "10px solid gray",
+              width: "100%",
             }}
           >
             <Box
@@ -56,8 +56,13 @@ export default function MapViewerEntrypoint() {
             </Box>
           </Box>
         </Grid>
-        <Grid xs={12} item lg={5}>
-          <Typography
+        <Grid
+          xs={12}
+          item
+          lg={12}
+          sx={{ display: "flex", justifyContent: "center" }}
+        >
+          {/* <Typography
             fontWeight={{ xs: 800, lg: 700 }}
             sx={{ fontSize: "36px", color: palette + "colorTypography" }}
             gutterBottom
@@ -71,7 +76,7 @@ export default function MapViewerEntrypoint() {
             Lorem ipsum dolor sit amet consectetur. Sit scelerisque gravida
             commodo justo. Ut a sed nisl rutrum leo nulla. Semper a massa
             facilisis eu et orci nec justo.
-          </Typography>
+          </Typography> */}
           <Button
             variant="contained"
             disableElevation

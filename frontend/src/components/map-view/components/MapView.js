@@ -21,14 +21,18 @@ const MapView = (props) => {
     setCenter,
     initCenter,
     heatOpacity,
-    setMapBounds,
+    changeMapBounds,
     geoJson,
+    changeSelectedElem,
+    changeShowSearchArea,
+    selectedElem,
+    setInitMapBounds,
   } = props;
   const mapInitRef = useRef(null);
   var h3Resolution = 2;
 
   useEffect(() => {
-    if (container.current) {
+    if (container.current && !isHome) {
       mapInitRef.current &&
         manageLayers(
           mapInitRef.current,
@@ -38,18 +42,40 @@ const MapView = (props) => {
           showPoints,
           showRegions,
           h3Resolution,
-          geoJson
+          geoJson,
+          changeSelectedElem
         );
     }
-  }, [clustering, hexOpacity, showPoints, showRegions]);
+  }, [clustering, hexOpacity, showPoints, showRegions, geoJson]);
 
   useEffect(() => {
-    if (zoom > 0) {
-      mapInitRef.current.zoomIn();
-    } else if (zoom < 0) {
-      mapInitRef.current.zoomOut();
+    if (mapInitRef.current && zoom) {
+      const currentZoom = mapInitRef.current.getZoom();
+      if (currentZoom !== zoom) {
+        mapInitRef.current.zoomTo(zoom);
+      }
     }
   }, [zoom]);
+
+  useEffect(() => {
+    if (!selectedElem && mapInitRef.current) {
+      if (mapInitRef.current.getLayer("selected-point")) {
+        mapInitRef.current.removeLayer("selected-point");
+        mapInitRef.current.removeSource("selected-point");
+      }
+      manageLayers(
+        mapInitRef.current,
+        clustering,
+        hexOpacity,
+        heatOpacity,
+        showPoints,
+        showRegions,
+        h3Resolution,
+        geoJson,
+        changeSelectedElem
+      );
+    }
+  }, [selectedElem, mapInitRef]);
 
   useEffect(() => {
     manageChangeOpacity(mapInitRef.current, baseOpacity, baseLayer);
@@ -58,42 +84,28 @@ const MapView = (props) => {
   useEffect(() => {
     if (container.current) {
       container.current.innerHTML = "";
-      let zoom = 4;
-      if (mapInitRef.current) {
-        zoom = mapInitRef.current.getZoom();
+      let initZoom = zoom;
+      if (mapInitRef.current && !isHome) {
+        initZoom = mapInitRef.current.getZoom();
       }
       mapInitRef.current = initMap(
         container.current,
         initCenter,
         baseLayer,
         baseOpacity,
-        zoom
+        initZoom
       );
-
-      mapInitRef.current.on("load", function () {
-        mapInitRef.current &&
-          manageLayers(
-            mapInitRef.current,
-            clustering,
-            hexOpacity,
-            heatOpacity,
-            showPoints,
-            showRegions,
-            h3Resolution,
-            geoJson
-          );
-        mapInitRef.current &&
-          manageChangeOpacity(mapInitRef.current, baseOpacity, baseLayer);
-      });
+      setInitMapBounds(mapInitRef.current.getBounds());
+      manageChangeOpacity(mapInitRef.current, baseOpacity, baseLayer);
 
       mapInitRef.current.on("moveend", function () {
-        if (mapInitRef.current) {
+        if (mapInitRef.current && !isHome) {
           setCenter([
             mapInitRef.current.getCenter().lng,
             mapInitRef.current.getCenter().lat,
           ]);
-          console.log(mapInitRef.current.getBounds());
-          setMapBounds(mapInitRef.current.getBounds());
+          changeShowSearchArea(true);
+          changeMapBounds(mapInitRef.current.getBounds());
         }
       });
     }
@@ -105,9 +117,10 @@ const MapView = (props) => {
         const currentZoom = mapInitRef.current && mapInitRef.current.getZoom();
         let h3ResNew = calculateH3Resolution(currentZoom);
 
-        if (h3ResNew != h3Resolution) {
+        if (h3ResNew !== h3Resolution) {
           h3Resolution = h3ResNew;
           mapInitRef.current &&
+            !isHome &&
             manageLayers(
               mapInitRef.current,
               clustering,
@@ -116,11 +129,12 @@ const MapView = (props) => {
               showPoints,
               showRegions,
               h3Resolution,
-              geoJson
+              geoJson,
+              changeSelectedElem
             );
         }
       });
-  }, [clustering, hexOpacity, showPoints, showRegions]);
+  }, [clustering, hexOpacity, showPoints, showRegions, geoJson]);
 
   return (
     <Box

@@ -1,11 +1,11 @@
 import { useRef, useReducer, useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import ToolbarHome from "./components/ToolbarHome";
-import { EMODNET, NO_CLUSTER } from "./utils/constants";
+import { EMODNET, HEXAGON, NO_CLUSTER } from "./utils/constants";
 import { reducer } from "./utils/reducer";
 import MapView from "./components/MapView";
 import Box from "@mui/material/Box";
-import { ITEMS_PER_PAGE } from "portability/configuration";
+import { ITEMS_PER_PAGE, centerMap, initZoom } from "portability/configuration";
 import { dataServiceUrl } from "config/environment";
 import { mapLibreBounds_toQuery } from "utilities/mapUtility";
 import { throttle } from "lodash";
@@ -13,24 +13,26 @@ import { useSearchParam } from "utilities/generalUtility";
 import DesktopMapView from "./components/desktop/DesktopMapView";
 import MobileMapView from "./components/mobile/MobileMapView";
 import { useMediaQuery, useTheme } from "@mui/material";
+import { defaultMatomoPageView } from "utilities/trackingUtility";
 
 const MapContainer = (props) => {
   const { isHome } = props;
   const [params] = useSearchParams();
   const [state, dispatch] = useReducer(reducer, {
     baseLayer: EMODNET,
-    clustering: NO_CLUSTER,
-    hexOpacity: 0.4,
+    clustering: HEXAGON,
+    hexOpacity: 0.6,
     baseOpacity: 1,
     heatOpacity: 0.4,
     showPoints: false,
     showRegions: false,
-    zoom: 0,
+    zoom: initZoom,
     isLoading: false,
-    center: [65.468754, 44.57875],
+    center: centerMap,
+    showSearchArea: false,
+    selectedElem: undefined,
+    mapBounds: false,
   });
-
-  //Maybe move inside useReducer? Discuss
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -43,12 +45,13 @@ const MapContainer = (props) => {
     params.has("search_text") ? params.get("search_text") : ""
   );
   const [resultsCount, setResultsCount] = useState(0);
-  const [mapBounds, setMapBounds] = useState();
+  const [initMapBounds, setInitMapBounds] = useState(false);
   const [open, setOpen] = useState(true);
   const [facets, setFacets] = useState([]);
-  const [facetQuery, setFacetQuery] = useSearchParam("facet_query");
+  const [currentURI, setCurrentURI] = useState("");
+  const [facetQuery, setFacetQuery] = useSearchParam("fq");
   const [selectedFacets, setSelectedFacets] = useState([]);
-  const [initCenter, setInitCenter] = useState([65.468754, 44.57875]);
+  const [initCenter, setInitCenter] = useState(centerMap);
   const [geoJson, setGeoJson] = useState();
   const mapRef = useRef(null);
 
@@ -58,18 +61,20 @@ const MapContainer = (props) => {
     const lat = searchParams.get("lat");
 
     if (lng && lat) setInitCenter([lng, lat]);
+
+    !isHome && defaultMatomoPageView();
   }, []);
 
   const hrefFor = (region, query, facetQuery) =>
     `/map-viewer?${new URLSearchParams({
       ...(query ? { search_text: query } : {}),
-      ...(facetQuery ? { facet_query: facetQuery } : {}),
+      ...(facetQuery ? { fq: facetQuery } : {}),
       ...(region && region.toUpperCase() !== "GLOBAL" ? { region } : {}),
     })}`;
 
   const handleSubmit = useCallback(
     () => navigate(hrefFor(region, searchText, facetQuery)),
-    [navigate, searchText, region]
+    [navigate, searchText, region, facetQuery]
   );
   const changeBaseLayer = (layer) => {
     dispatch({ type: "setBaseLayer", baseLayer: layer });
@@ -92,18 +97,28 @@ const MapContainer = (props) => {
   const changeHeatOpacity = (heatOpacity) => {
     dispatch({ type: "setHeatOpacity", heatOpacity: heatOpacity });
   };
+  const changeShowSearchArea = (showSearchArea) => {
+    dispatch({ type: "setShowSearchArea", showSearchArea: showSearchArea });
+  };
+  const changeSelectedElem = (selectedElem) => {
+    dispatch({ type: "setSelectedElem", selectedElem: selectedElem });
+  };
+  const changeMapBounds = (mapBounds) => {
+    dispatch({ type: "setMapBounds", mapBounds: mapBounds });
+  };
+
+  const searchThisArea = () => {
+    getDataSpatialSearch(state.mapBounds);
+  };
+
   const applyZoom = (zoomType) => {
     let value;
     if (zoomType === "out") {
-      if (state.zoom >= 0) {
-        value = -1;
-      } else if (state.zoom < 0) {
+      if (state.zoom > 0) {
         value = state.zoom - 1;
       }
     } else if (zoomType === "in") {
-      if (state.zoom <= 0) {
-        value = 1;
-      } else if (state.zoom > 0) {
+      if (state.zoom > 0) {
         value = state.zoom + 1;
       }
     }
@@ -123,42 +138,72 @@ const MapContainer = (props) => {
   };
 
   const facetSearch = (name, value, checked) => {
-    const clickedFacetQuery = new URLSearchParams({
-      facetType: name,
-      facetName: value,
-    }).toString();
+    let facet = name + ":" + '"' + value + '"';
+    let isKeyContained = false;
+    let queryResult = "";
+
     if (checked) {
-      setFacetQuery([facetQuery, clickedFacetQuery].filter((e) => e).join("&"));
+      if (facetQuery) {
+        const pairs = facetQuery.split(" AND ");
+        pairs.forEach((p) => {
+          if (p.includes(name)) {
+            isKeyContained = true;
+            let temp =
+              "(" +
+              [p.replace(/^\(|\)$/g, ""), facet].filter((e) => e).join(" OR ") +
+              ")";
+            queryResult = [queryResult, temp].filter((e) => e).join(" AND ");
+          } else {
+            queryResult = [queryResult, p].filter((e) => e).join(" AND ");
+          }
+        });
+        if (!isKeyContained)
+          queryResult = [queryResult, "(" + facet + ")"]
+            .filter((e) => e)
+            .join(" AND ");
+      } else {
+        queryResult =
+          "(" + [queryResult, facet].filter((e) => e).join(" OR ") + ")";
+      }
     } else {
-      const filteredQuery = facetQuery.replace(clickedFacetQuery, "");
-      let cleanedQuery = filteredQuery.endsWith("&")
-        ? filteredQuery.slice(0, -1)
-        : filteredQuery;
-      cleanedQuery = cleanedQuery.startsWith("&")
-        ? cleanedQuery.slice(1)
-        : cleanedQuery;
-      cleanedQuery = cleanedQuery.replace("&&", "&");
-      setFacetQuery(cleanedQuery);
+      const pairs = facetQuery.split(" AND ");
+      pairs.forEach((p) => {
+        if (p.includes(name)) {
+          const temp = p
+            .replace(/^\(|\)$/g, "")
+            .split(" OR ")
+            .filter((f) => f !== facet)
+            .join(" OR ");
+
+          queryResult = [queryResult, temp === "" ? temp : "(" + temp + ")"]
+            .filter((e) => e)
+            .join(" AND ");
+        } else {
+          queryResult = [queryResult, p].filter((e) => e).join(" AND ");
+        }
+      });
     }
+    setFacetQuery(queryResult);
   };
 
-  useEffect(() => {
-    getDataSpatialSearch();
-  }, [navigate, params, mapBounds]);
-
-  const getGeoJSON = () => {
-    debugger;
+  const getGeoJSON = (bounds) => {
     let geoJsonUrl = `${dataServiceUrl}/spatial.geojson?`;
     const params = new URLSearchParams({
       /* ...(searchType !== "SpatialData" ? { document_type: searchType } : {}), */
       search_text: searchText,
-      facetType: "the_geom",
-      facetName: mapLibreBounds_toQuery(mapBounds, region),
     });
+
+    let fqResult = "(the_geom:" + mapLibreBounds_toQuery(bounds, region) + ")";
+
+    if (facetQuery) {
+      fqResult += " AND " + facetQuery;
+    }
     if (region !== "" && region.toUpperCase() !== "GLOBAL") {
       params.append("region", region);
     }
-    geoJsonUrl += [params.toString(), facetQuery].filter((e) => e).join("&");
+    geoJsonUrl += [params.toString(), "fq=" + fqResult]
+      .filter((e) => e)
+      .join("&");
 
     fetch(geoJsonUrl)
       .then((response) => response.json())
@@ -167,36 +212,75 @@ const MapContainer = (props) => {
       });
   };
 
-  const getDataSpatialSearch = throttle((page = 1) => {
-    page === 1 && setLoading(true);
-    let URI = `${dataServiceUrl}/search?`;
-    const params = new URLSearchParams({
-      facetType: "the_geom",
-      facetName: mapLibreBounds_toQuery(mapBounds, region),
-      rows: ITEMS_PER_PAGE * page,
-      start: 0,
-    });
-    if (searchText !== "") {
-      params.append("search_text", searchText);
-    }
-    if (region && region.toUpperCase() !== "GLOBAL") {
-      params.append("region", region);
-    }
-    URI += [params.toString(), facetQuery].filter((e) => e).join("&");
-
-    fetch(URI)
-      .then((response) => response.json())
-      .then((json) => {
-        setResults(json.docs);
-        const count = json.count;
-        setResultsCount(count);
-        setFacets(json.facets.filter((facet) => facet.counts.length > 0));
-        page === 1 && setLoading(false);
+  const getDataSpatialSearch = throttle((bounds, page = 1) => {
+    if (bounds) {
+      page === 1 && setLoading(true);
+      let URI = `${dataServiceUrl}/search?`;
+      const params = new URLSearchParams({
+        rows: ITEMS_PER_PAGE + 20 * page,
+        start: 0,
       });
+      if (searchText !== "") {
+        params.append("search_text", searchText);
+      }
+      if (region && region.toUpperCase() !== "GLOBAL") {
+        params.append("region", region);
+      }
+      let fqResult =
+        "(the_geom:" + mapLibreBounds_toQuery(bounds, region) + ")";
 
-    getGeoJSON();
+      if (facetQuery) {
+        fqResult += " AND " + facetQuery;
+      }
+      URI += [params.toString(), "fq=" + fqResult].filter((e) => e).join("&");
+      setCurrentURI(URI);
+      fetch(URI)
+        .then((response) => response.json())
+        .then((json) => {
+          setResults(json.docs);
+          const count = json.count;
+          setResultsCount(count);
+          /* setFacets(json.facets.filter((facet) => facet.counts.length > 0)); */
+          page === 1 && setLoading(false);
+          changeShowSearchArea(false);
+        });
+
+      getGeoJSON(bounds);
+    }
   }, 1000);
 
+  const getDefaultFacets = useCallback(
+    (bounds, page = 1) => {
+      let URI = `${dataServiceUrl}/search?`;
+      const params = new URLSearchParams({
+        start: 0,
+        rows: ITEMS_PER_PAGE + 20 * page,
+      });
+
+      if (region.toUpperCase() !== "GLOBAL") {
+        params.append("region", region);
+      }
+      let fqResult =
+        "(the_geom:" + mapLibreBounds_toQuery(bounds, region) + ")";
+
+      URI += [params.toString(), "fq=" + fqResult].filter((e) => e).join("&");
+
+      fetch(URI)
+        .then((response) => response.json())
+        .then((json) => {
+          setFacets(json.facets.filter((facet) => facet.counts.length > 0));
+        });
+    },
+    [region]
+  );
+  useEffect(() => {
+    getDataSpatialSearch(state.mapBounds || initMapBounds);
+  }, [navigate, params, facetQuery]);
+
+  useEffect(() => {
+    getDataSpatialSearch(initMapBounds);
+    !isHome && initMapBounds && getDefaultFacets(initMapBounds);
+  }, [initMapBounds, getDefaultFacets, isHome]);
   const clear = () => {
     setSelectedFacets([]);
     setFacetQuery("");
@@ -223,8 +307,9 @@ const MapContainer = (props) => {
           setCenter={setCenter}
           initCenter={initCenter}
           heatOpacity={state.heatOpacity}
-          setMapBounds={setMapBounds}
+          changeMapBounds={changeMapBounds}
           geoJson={geoJson}
+          setInitMapBounds={setInitMapBounds}
         />
       )}
 
@@ -235,8 +320,8 @@ const MapContainer = (props) => {
             setSearchText={setSearchText}
             searchText={searchText}
             resultsCount={resultsCount}
-            mapBounds={mapBounds}
             isLoading={state.loading}
+            mapBounds={state.mapBounds}
             getDataSpatialSearch={getDataSpatialSearch}
             handleSubmit={handleSubmit}
             setSelectedFacets={setSelectedFacets}
@@ -269,8 +354,16 @@ const MapContainer = (props) => {
             setShowRegions={setShowRegions}
             heatOpacity={state.heatOpacity}
             changeHeatOpacity={changeHeatOpacity}
-            setMapBounds={setMapBounds}
+            changeMapBounds={changeMapBounds}
             geoJson={geoJson}
+            showSearchArea={state.showSearchArea}
+            changeSelectedElem={changeSelectedElem}
+            selectedElem={state.selectedElem}
+            changeShowSearchArea={changeShowSearchArea}
+            searchThisArea={searchThisArea}
+            currentURI={currentURI}
+            setInitMapBounds={setInitMapBounds}
+            initMapBounds={initMapBounds}
           />
         </Box>
       )}
@@ -282,8 +375,8 @@ const MapContainer = (props) => {
             setSearchText={setSearchText}
             searchText={searchText}
             resultsCount={resultsCount}
-            mapBounds={mapBounds}
             isLoading={state.loading}
+            mapBounds={state.mapBounds}
             getDataSpatialSearch={getDataSpatialSearch}
             handleSubmit={handleSubmit}
             setSelectedFacets={setSelectedFacets}
@@ -314,8 +407,16 @@ const MapContainer = (props) => {
             changeHexOpacity={changeHexOpacity}
             setShowPoints={setShowPoints}
             setShowRegions={setShowRegions}
-            setMapBounds={setMapBounds}
+            changeMapBounds={changeMapBounds}
             geoJson={geoJson}
+            showSearchArea={state.showSearchArea}
+            changeSelectedElem={changeSelectedElem}
+            selectedElem={state.selectedElem}
+            changeShowSearchArea={changeShowSearchArea}
+            searchThisArea={searchThisArea}
+            currentURI={currentURI}
+            setInitMapBounds={setInitMapBounds}
+            initMapBounds={initMapBounds}
           />
         </Box>
       )}
