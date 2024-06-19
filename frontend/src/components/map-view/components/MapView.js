@@ -27,6 +27,7 @@ const MapView = (props) => {
     changeShowSearchArea,
     selectedElem,
     setInitMapBounds,
+    changeZoom,
   } = props;
   const mapInitRef = useRef(null);
   var h3Resolution = 2;
@@ -51,8 +52,10 @@ const MapView = (props) => {
   useEffect(() => {
     if (mapInitRef.current && zoom) {
       const currentZoom = mapInitRef.current.getZoom();
-      if (currentZoom !== zoom) {
+      if (currentZoom < zoom) {
         mapInitRef.current.zoomTo(zoom);
+      } else {
+        changeZoom(zoom + 1);
       }
     }
   }, [zoom]);
@@ -110,7 +113,7 @@ const MapView = (props) => {
       });
     }
   }, [baseLayer, initCenter]);
-
+  /* 
   useEffect(() => {
     mapInitRef.current &&
       mapInitRef.current.on("zoom", () => {
@@ -134,7 +137,7 @@ const MapView = (props) => {
             );
         }
       });
-  }, [clustering, hexOpacity, showPoints, showRegions, geoJson]);
+  }, [clustering, hexOpacity, showPoints, showRegions, geoJson]); */
 
   return (
     <Box
