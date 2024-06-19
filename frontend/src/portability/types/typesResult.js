@@ -91,6 +91,8 @@ const Course = [
   "txt_location",
 ];
 
+const Default = [];
+
 export {
   CreativeWork,
   Course,
@@ -99,4 +101,5 @@ export {
   Person,
   ResearchProject,
   Vehicle,
+  Default,
 };

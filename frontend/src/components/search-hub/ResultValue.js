@@ -91,7 +91,7 @@ const ResultValue = (props) => {
 
   var url = result["txt_url"] || "";
 
-  const { Component } = TypesMap[result["type"]];
+  const { Component } = TypesMap[result["type"]] || TypesMap.default;
   const [truncate, setTruncate] = useState(true);
   const jsonLdParams = new URLSearchParams({ id: result["id"] }).toString();
 

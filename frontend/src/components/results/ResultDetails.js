@@ -226,11 +226,6 @@ const ResultElem = ({ result, name, children, type = undefined }) => {
       <Component result={result[name]} topic={result["type"]} />
     </Typography>
   ) : null;
-  {
-    /* <p className="result-p">
-      <b>{children}:</b> <Component result={result[name]} />
-    </p> */
-  }
 };
 
 const Result = (spec) => {
