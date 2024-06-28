@@ -33,7 +33,7 @@ const MapView = (props) => {
   var h3Resolution = 2;
 
   useEffect(() => {
-    if (container.current && !isHome) {
+    if (container.current) {
       mapInitRef.current &&
         manageLayers(
           mapInitRef.current,

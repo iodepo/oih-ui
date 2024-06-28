@@ -16,6 +16,9 @@ ReactGA.initialize([
   },
 ]); */
 
+export const SITE_KEY_RECAPTCHA = "6LcEMgEqAAAAAF8U47d4n8ifSNWEPHfr8Jz334nM";
+export const SITE_KEY_AUTOCOMPLETE = "AIzaSyAn9_ET2uS44M9LkkT4q6xNqxmEGpC_1wo";
+
 export const ITEMS_PER_PAGE = 10;
 /*
 Field name -> Title mapping for facets.

@@ -17,12 +17,7 @@
     {
       "@context": "https://schema.org",
       "@type": "CreativeWork",
-      "@id": "CreativeWork"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "CreativeWork",
-      "@id": "CreativeWork1",
+      "@id": "CreativeWork",
       "name": "name",
       "url": "url",
       "description": "description"

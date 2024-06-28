@@ -84,6 +84,7 @@ export default function MapViewerEntrypoint() {
               borderRadius: { xs: 2, lg: 1 },
               width: "auto",
               backgroundColor: palette + "buttonBgColor",
+              fontSize: "20px",
               marginTop: 2,
               textTransform: "none",
             }}
