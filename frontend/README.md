@@ -163,7 +163,7 @@ const CATEGORIES = [
 
 ]
 ```
-2. After updating `configuration.js`, navigate to the `types` dir.
+2. After updating `configuration.js`, navigate to the `[INSTALLDIR]/frontend/frontend/src/portability/types` dir.
 Create a new object in the `typesResult.js` file similar to the others. 
 Remember to name it with the ID name entered in the `[INSTALLDIR]/frontend/frontend/src/portability/configuration.js`file. 
 Include in the object the fields that will be displayed in the search results on the Result Page. 
@@ -218,7 +218,7 @@ const TypesMap = {
 };
 ```
 
-4. In the `typesMap.js` file, you will also find another object called "createObjectExport," which is used to automate the Export functionality.
+4. In the`[INSTALLDIR]/frontend/frontend/src/portability/typesMap.js` file, you will also find another object called "createObjectExport," which is used to automate the Export functionality.
 
 Here, too, you will need to add a new case to the switch condition, following the logic of the others.
 
