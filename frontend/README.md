@@ -49,10 +49,10 @@ const primaryPalette = {
 
 To modify the labels of the site in different languages, follow these steps:
 
-1. Search through the project files for a folder named "context". 
+1. Search through the project files for a dir named "context". 
 Should be something like `[INSTALLDIR]/frontend/frontend/src/context/`
 
-2. Inside this folder, you'll find another folder named "stores" containing four JSON files, one for each language used on the site. 
+2. Inside this dir, you'll find another dir named "stores" containing four JSON files, one for each language used on the site. 
 Should be something like `[INSTALLDIR]/frontend/frontend/src/context/stores/`
 
 3. Starting with "en.json", you can easily locate the labels you're looking for along with their associated keys, which remain the same for every language.
@@ -123,7 +123,7 @@ const CATEGORIES = [
 
 All icon URLs are located at the beginning of the file. If you want to use different icons, follow these additional steps:
 
-1. Import the new icons into the /resources/svg/ folder.
+1. Import the new icons into the /resources/svg/ dir.
 
 2. Update the configuration.js file by importing the new icons and replacing the existing icon URLs within the category object.
 ```javascript
@@ -163,7 +163,7 @@ const CATEGORIES = [
 
 ]
 ```
-2. After updating configuration.js, navigate to the types folder.
+2. After updating `configuration.js`, navigate to the `types` dir.
 Create a new object in the `typesResult.js` file similar to the others. 
 Remember to name it with the ID name entered in the `[INSTALLDIR]/frontend/frontend/src/portability/configuration.js`file. 
 Include in the object the fields that will be displayed in the search results on the Result Page. 
@@ -192,7 +192,7 @@ const newSearchTab =
     "key": "txt_keywords",
     "type": "keywords"
   }
-]
+];
 
 .....
 
