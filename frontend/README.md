@@ -171,26 +171,25 @@ Be sure to export this new object.
 
 Example:
 ```javascript
-const newSearchTab =
-[
+const newSearchTab = [
   {
-    "key": "txt_provider",
-    "type": "circle"
+    key: "txt_provider",
+    type: "circle"
   },
   {
-    "key": "id",
-    "type": ["truncated", "link"]
+    key: "id",
+    type: ["truncated", "link"]
   },
 
   {
-    "key": "txt_author",
-    "type": "list",
-    "label": "Author(s)"
+    key: "txt_author",
+    type: "list",
+    label: "Author(s)"
   },
   "txt_identifier",
   {
-    "key": "txt_keywords",
-    "type": "keywords"
+    key: "txt_keywords",
+    type: "keywords"
   }
 ];
 
