@@ -126,7 +126,18 @@ All icon URLs are located at the beginning of the file. If you want to use diffe
 1. Import the new icons into the /resources/svg/ folder.
 
 2. Update the configuration.js file by importing the new icons and replacing the existing icon URLs within the category object.
+```javascript
+import documentstest from "../resources/svg/documentstest.svg";
+```
 
+```javascript
+const CATEGORIES = [
+  {
+    id: "CreativeWork",
+    text: "Documents",
+    icon: documentstest,
+  },
+```
 
 ### Adding a New Search Tab:
 
