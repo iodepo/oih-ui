@@ -1,82 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="OIH" content="OIH Global Search" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/maplibre-gl@4.1.2/dist/maplibre-gl.css"
-    />
-    <script src="https://unpkg.com/maplibre-gl@4.1.2/dist/maplibre-gl.js"></script>
-    <script src="https://www.unpkg.com/turf@3.0.14/turf.min.js"></script>
-    <script src="https://www.unpkg.com/@mapbox/mapbox-gl-draw@1.4.3/dist/mapbox-gl-draw.js"></script>
-    <link
-      rel="stylesheet"
-      href="https://www.unpkg.com/@mapbox/mapbox-gl-draw@1.4.3/dist/mapbox-gl-draw.css"
-      type="text/css"
-    />
-    <title>OIH Global Search</title>
-    <style>
-      .oih-popover {
-        margin: auto;
-        width: 100%;
-        padding: 20px;
-        background-color: #012e6a;
-        color: white;
-      }
-    </style>
-    <!-- Matomo -->
-    <script>
-      var _paq = (window._paq = window._paq || []);
-      /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-      /* _paq.push(["trackPageView"]); */
-      _paq.push(["enableLinkTracking"]);
-      (function () {
-        var u = "//analytics.iode.org/";
-        _paq.push(["setTrackerUrl", u + "matomo.php"]);
-        _paq.push(["setSiteId", "1"]);
-        var d = document,
-          g = d.createElement("script"),
-          s = d.getElementsByTagName("script")[0];
-        g.async = true;
-        g.src = u + "matomo.js";
-        s.parentNode.insertBefore(g, s);
-      })();
-    </script>
-    <!-- End Matomo Code -->
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <!-- <script>
-      //open first popover available in your page
-      let popover = document.getElementById("popover");
-      popover.style.display = "block";
-    </script>
-    <div
-      class="oih-popover"
-      role="dialog"
-      id="popover"
-      data-scrollable-element="#scrollable-element"
-    >
-      <h1>This is still a beta version.</h1>
-      This page is the beta-version of the search interface for the OIH project
-      proof of concept.<br />
-      Please visit the
-      <a href="https://oceaninfohub.org">project's website</a> for more
-      information.<br />
-      <br />
-      <a
-        href="#"
-        onclick="let popover = document.getElementById('popover');popover.style.display = 'none';"
-      >
-        close this warning
-      </a>
-    </div> -->
-    <div id="root"></div>
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="OIH" content="OIH Global Search"/>
+  <title>OIH Global Search</title>
+  <style>
+    .oih-popover {
+      margin: auto;
+      width: 100%;
+      padding: 20px;
+      background-color: #012e6a;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+<noscript>You need to enable JavaScript to run this app.</noscript>
+<script>
+  //we don't want people to visit this page, redirect to the homepage
+  window.location.replace("https://oceaninfohub.org");
+
+  //all what follows is useless as we are redirecting to the homepage
+
+  //open first popover available in your page
+  //let popover = document.getElementById('popover');
+  //popover.style.display = "block";
+</script>
+<!--
+<div
+        class="oih-popover"
+        role="dialog"
+        id="popover"
+        data-scrollable-element="#scrollable-element">
+  <h1>This is still a beta version.</h1>
+  This page is the beta-version of the search interface for the OIH project proof of concept.<br />
+  Please visit the <a href="https://oceaninfohub.org">project's website</a> for more information.<br />
+  <br />
+  <a
+         href="#"
+         onclick="let popover = document.getElementById('popover');popover.style.display = 'none';">
+    close this warning
+  </a>
+</div>
+-->
+<div id="root"></div>
+</body>
 </html>
