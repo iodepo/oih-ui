@@ -141,7 +141,11 @@ const CATEGORIES = [
 
 ### Adding a New Search Tab:
 
-1. Open the configuration.js file and locate the section marked -- START CATEGORIES REGION --. Below this section, you'll find an object containing the categories for each tab. Add the desired new tab by providing all the necessary data, following the pattern used for other categories.Remember to set a unique ID that will be used by the application to identify the new tab:
+1. Open the configuration.js file and locate the section marked -- START CATEGORIES REGION --. 
+Below this section, you'll find an object containing the categories for each tab. 
+Add the desired new tab by providing all the necessary data, following the pattern used for other categories.
+Add the icon URL at the top of the configuration.js file (see higher up).
+Remember to set a unique ID that will be used by the application to identify the new tab:
 
 ```javascript
 const CATEGORIES = [
@@ -159,7 +163,11 @@ const CATEGORIES = [
 
 ]
 ```
-2. After updating configuration.js, navigate to the types folder.Create a new object in the `typesResult.js` file similar to the others. Remember to name it with the ID name entered in the `[INSTALLDIR]/frontend/frontend/src/portability/configuration.js`file. Include in the object the fields that will be displayed in the search results on the Result Page. Be sure to export this new object.
+2. After updating configuration.js, navigate to the types folder.
+Create a new object in the `typesResult.js` file similar to the others. 
+Remember to name it with the ID name entered in the `[INSTALLDIR]/frontend/frontend/src/portability/configuration.js`file. 
+Include in the object the fields that will be displayed in the search results on the Result Page. 
+Be sure to export this new object.
 
 Example:
 ```javascript
