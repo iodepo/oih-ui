@@ -4,13 +4,13 @@
 
 To customize the site palette, follow these steps:
 
-1. Open the `configuration.js` file in your frontend project.
+1. Open the `[INSTALLDIR]/frontend/frontend/src/portability/configuration.js` file in your frontend project.
 
 2. Look for the section marked as "-- START REGION PALETTE --". This comment indicates the beginning of the primary site palette definition.
 
 3. Below this comment, you'll find the definition of the colors and of primary palette divided into its components, allowing easy manipulation of colors.
 
-Example section in the `configuration.js` file:
+Example section in the `[INSTALLDIR]/frontend/frontend/src/portability/configuration.js`file:
 
 ```javascript
 // -- START REGION PALETTE --
@@ -49,9 +49,11 @@ const primaryPalette = {
 
 To modify the labels of the site in different languages, follow these steps:
 
-1. Search through the project files for a folder named "context".
+1. Search through the project files for a folder named "context". 
+Should be something like `[INSTALLDIR]/frontend/frontend/src/context/`
 
-2. Inside this folder, you'll find another folder named "stores" containing four JSON files, one for each language used on the site.
+2. Inside this folder, you'll find another folder named "stores" containing four JSON files, one for each language used on the site. 
+Should be something like `[INSTALLDIR]/frontend/frontend/src/context/stores/`
 
 3. Starting with "en.json", you can easily locate the labels you're looking for along with their associated keys, which remain the same for every language.
 
@@ -62,11 +64,13 @@ To modify the labels of the site in different languages, follow these steps:
 
 So, if I want to change the translation of "Search" to Spanish, I would go to the file es.json, find the key "Search", and then change its value.
 
+***WARNING*** changes will not be reflected in other/new installations if they are not committed in this repository and if the linke between oih-ui-docker is not update!
+
 ### Modifying the Homepage Carousel
 
 To modify the carousel on the homepage, follow these simple steps:
 
-1. Open the `configuration.js` file.
+1. Open the `[INSTALLDIR]/frontend/frontend/src/portability/configuration.js` file.
 
 2. Look for the beginning of the section "-- START PARTNERS REGION --".
 
@@ -87,19 +91,20 @@ To modify the carousel on the homepage, follow these simple steps:
      ],
    ];
    ```
-4. Each array within the main array is a group of icons that will be displayed in the carousel. From here, you can modify, remove, and add groups or elements as desired. The important thing is to maintain the structure, meaning it should always remain as an array of arrays of objects.
+4. Each array within the main array is a group of icons that will be displayed in the carousel. From here, you can modify, remove, and add groups or elements as desired. 
+The important thing is to maintain the structure, meaning it should always remain as an array of arrays of objects.
 
 ### Modify Tab Icons on Homepage
 
 To customize the icons associated with the tabs on the homepage, follow these steps:
 
-1. Open the `configuration.js` file in your project.
+1. Open the `[INSTALLDIR]/frontend/frontend/src/portability/configuration.js`file in your project.
 
 2. Look for the section marked as "-- START CATEGORIES REGION --". This comment indicates the beginning of the categories definition for each tab.
 
 3. Below this comment, you'll find an object containing the categories for each tab. Each tab has a property called `icon` associated with the URL of its icon.
 
-Example section in the `configuration.js` file:
+Example section in the `[INSTALLDIR]/frontend/frontend/src/portability/configuration.js`file:
 
 ```javascript
 // -- START CATEGORIES REGION --
@@ -114,13 +119,14 @@ const CATEGORIES = [
 ]
 
 // -- END CATEGORIES REGION --
+```
 
 All icon URLs are located at the beginning of the file. If you want to use different icons, follow these additional steps:
 
 1. Import the new icons into the /resources/svg/ folder.
 
 2. Update the configuration.js file by importing the new icons and replacing the existing icon URLs within the category object.
-```
+
 
 ### Adding a New Search Tab:
 
@@ -141,9 +147,11 @@ const CATEGORIES = [
   }
 
 ]
-2. After updating configuration.js, navigate to the types folder. Create a new object in the `typesResult.js` file similar to the others. Remember to name it with the ID name entered in the `configuration.js` file. Include in the object the fields that will be displayed in the search results on the Result Page. Be sure to export this new object.
+```
+2. After updating configuration.js, navigate to the types folder.Create a new object in the `typesResult.js` file similar to the others. Remember to name it with the ID name entered in the `[INSTALLDIR]/frontend/frontend/src/portability/configuration.js`file. Include in the object the fields that will be displayed in the search results on the Result Page. Be sure to export this new object.
 
 Example:
+```javascript
 const newSearchTab =
 [
   {
