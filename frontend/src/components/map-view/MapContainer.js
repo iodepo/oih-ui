@@ -107,6 +107,9 @@ const MapContainer = (props) => {
     dispatch({ type: "setMapBounds", mapBounds: mapBounds });
   };
 
+  const changeZoom = (zoom) => {
+    dispatch({ type: "setZoom", zoom: zoom });
+  };
   const searchThisArea = () => {
     getDataSpatialSearch(state.mapBounds);
   };
@@ -122,7 +125,7 @@ const MapContainer = (props) => {
         value = state.zoom + 1;
       }
     }
-    dispatch({ type: "setZoom", zoom: value });
+    changeZoom(value);
   };
 
   const handleDrawer = (isOpen) => {
@@ -310,6 +313,7 @@ const MapContainer = (props) => {
           changeMapBounds={changeMapBounds}
           geoJson={geoJson}
           setInitMapBounds={setInitMapBounds}
+          changeZoom={changeZoom}
         />
       )}
 
@@ -364,6 +368,7 @@ const MapContainer = (props) => {
             currentURI={currentURI}
             setInitMapBounds={setInitMapBounds}
             initMapBounds={initMapBounds}
+            changeZoom={changeZoom}
           />
         </Box>
       )}
@@ -417,6 +422,7 @@ const MapContainer = (props) => {
             currentURI={currentURI}
             setInitMapBounds={setInitMapBounds}
             initMapBounds={initMapBounds}
+            changeZoom={changeZoom}
           />
         </Box>
       )}

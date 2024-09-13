@@ -20,7 +20,16 @@ import Button from "@mui/material/Button";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import TextField from "@mui/material/TextField";
 import DrawPolygonMap from "../DrawPolygonMap";
-import Autocomplete from "@mui/material/Autocomplete";
+import Autocomplete, { usePlacesWidget } from "react-google-autocomplete";
+import Tab from "@mui/material/Tab";
+import TabContext from "@mui/lab/TabContext";
+import TabList from "@mui/lab/TabList";
+import TabPanel from "@mui/lab/TabPanel";
+import ReCAPTCHA from "react-google-recaptcha";
+import {
+  SITE_KEY_AUTOCOMPLETE,
+  SITE_KEY_RECAPTCHA,
+} from "portability/configuration";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -38,13 +47,23 @@ const OfferForm = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid },
     setValue,
     getValues,
   } = useForm({
     resolver: yupResolver(schemaValidation),
+    mode: "onSubmit",
   });
 
+  const { ref: materialRef } = usePlacesWidget({
+    apiKey: SITE_KEY_AUTOCOMPLETE,
+    onPlaceSelected: (place) => console.log(place),
+    inputAutocompleteValue: "country",
+  });
+
+  const [typeCompilation, setTypeCompilation] = useState("form");
+  const [fileJsonld, setFileJsonld] = useState(null);
+  const [fileNamejsonld, setFileNamejsonld] = useState("");
   const [itemOffered, setItemOffered] = useState("creative-work");
   const [offeredBy, setOfferedBy] = useState("person");
   const [areaServed, setAreaServed] = useState("admin");
@@ -57,7 +76,354 @@ const OfferForm = () => {
   const [geoJsonAreaServed, setGeoJsonAreaServed] = useState();
   const [geoJsonEligibleRegion, setGeoJsonEligibleRegion] = useState();
   const [geoJsonIneligibleRegion, setGeoJsonIneligibleRegion] = useState();
-  const onSubmit = (data) => console.log(data);
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
+  const [imageProductSelect, setImageProductSelect] = useState("external");
+  const [imageSectionSelect, setImageSectionSelect] = useState("external");
+
+  const onSubmit = (data) => {
+    const jsonld = createJsonLd(data);
+    console.log(jsonld);
+  };
+
+  const onChangeRecaptcha = (value) => {
+    setRecaptchaToken(value);
+  };
+  const downloadJsonLD = () => {
+    if (isValid) {
+      const jsonld = createJsonLd(getValues());
+      const jsonString = JSON.stringify(jsonld);
+
+      const blob = new Blob([jsonString], { type: "application/json" });
+
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "offer.json";
+
+      link.click();
+
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  function createJsonLd(data) {
+    //Creation of Json-ld
+
+    let jsonld = {
+      "@context": "https://schema.org",
+      "@type": "Offer",
+      "@id": "Offer",
+    };
+    jsonld = {
+      ...jsonld,
+      name: data.name,
+      description: data.description,
+      disambiguatingDescription: data.disDescription,
+    };
+
+    //Identifier
+    jsonld = {
+      ...jsonld,
+      identifier: {
+        "@context": "https://schema.org",
+        "@type": "PropertyValue",
+        "@id": "PropertyValue",
+        url: data.identifierUrl,
+        description: data.identifierDescription,
+      },
+    };
+
+    //Item Offered
+    jsonld["itemOffered"] = [];
+    switch (itemOffered) {
+      case "creative-work":
+        jsonld["itemOffered"].push({
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "CreativeWork",
+          name: data.creativeName,
+          url: data.creativeURL,
+          description: data.creativeDescription,
+        });
+        break;
+      case "event":
+        jsonld["itemOffered"].push({
+          "@context": "https://schema.org",
+          "@type": "Event",
+          "@id": "Event",
+          startDate: data.eventStartDate,
+          endDate: data.eventEndDate,
+          name: data.eventName,
+          url: data.eventURL,
+          location: data.eventLocation,
+          description: data.eventDescription,
+        });
+        break;
+      case "product":
+        if (imageProductSelect === "external") {
+          jsonld["itemOffered"].push({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "@id": "Product",
+            name: data.productName,
+            url: data.productURL,
+            description: data.productDescription,
+            image: {
+              "@context": "https://schema.org",
+              "@type": "URL",
+              "@id": "URL",
+              downloadUrl: data.productImageExternalURL,
+            },
+          });
+        } else {
+          jsonld["itemOffered"].push({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "@id": "Product",
+            name: data.productName,
+            url: data.productURL,
+            description: data.productDescription,
+            image: {
+              "@context": "https://schema.org",
+              "@type": "ImageObject",
+              "@id": "ImageObject",
+              //content?
+              name: data.productImageName,
+              description: data.productImageDescription,
+            },
+          });
+        }
+
+        //Image TO INSERT
+        break;
+      case "service":
+        jsonld["itemOffered"].push({
+          "@context": "https://schema.org",
+          "@type": "Service",
+          "@id": "Service",
+          name: data.serviceName,
+          url: data.serviceURL,
+          providerMobility: data.serviceProvider,
+          serviceType: data.serviceType,
+          description: data.serviceDescription,
+        });
+        break;
+      default:
+        break;
+    }
+
+    //Image
+    if (imageSectionSelect === "external") {
+      jsonld = {
+        ...jsonld,
+        image: {
+          "@context": "https://schema.org",
+          "@type": "URL",
+          "@id": "URL",
+          downloadUrl: data.imageExternalURL,
+        },
+      };
+    } else {
+      jsonld = {
+        ...jsonld,
+        image: {
+          "@context": "https://schema.org",
+          "@type": "ImageObject",
+          "@id": "ImageObject",
+          //content?
+          name: data.imageName,
+          description: data.imageDescription,
+        },
+      };
+    }
+
+    /* MAIN ENTITY OF THE PAGE */
+    jsonld["mainEntityOfPage"] = data.mainUrl;
+
+    jsonld = {
+      ...jsonld,
+      serialNumber: data.serialNumber,
+      gtin: data.gtin,
+      url: data.gtinURL,
+      mpn: data.mpn,
+    };
+
+    //Offered by
+    jsonld["offeredBy"] = [];
+
+    switch (offeredBy) {
+      case "person":
+        jsonld["offeredBy"].push({
+          "@context": "https://schema.org",
+          "@type": "Person",
+          "@id": "Person",
+          givenName: data.givenName,
+          familyName: data.familyName,
+          email: data.personEmail,
+          jobTitle: {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "@id": "Organization",
+            legalName: data.affiliation,
+          },
+        });
+        break;
+      case "organization":
+        jsonld["offeredBy"].push({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "@id": "Organization",
+          name: data.organName,
+          email: data.organEmail,
+          address: data.organAddress,
+        });
+        break;
+
+      default:
+        break;
+    }
+
+    //Area Served
+    jsonld["areaServed"] = [];
+    switch (areaServed) {
+      case "admin":
+        jsonld["areaServed"].push({
+          "@context": "https://schema.org",
+          "@type": "AdministrativeArea",
+          "@id": "AdministrativeArea",
+          name: data.adminName,
+          address: data.adminAddress,
+          description: data.adminDescription,
+        });
+        break;
+      case "geo":
+        jsonld["areaServed"].push({
+          "@context": "https://schema.org",
+          "@type": "GeoShape",
+          "@id": "GeoShape",
+          polygon: geoJsonAreaServed,
+        });
+        break;
+      case "place":
+        jsonld["areaServed"].push({
+          "@context": "https://schema.org",
+          "@type": "Place",
+          "@id": "Place",
+          address: data.areaServedPlace,
+        });
+        break;
+      case "other":
+        jsonld["areaServed"].push({
+          "@context": "https://schema.org",
+          "@type": "Text",
+          "@id": "Text",
+          description: data.areaServedOther,
+        });
+        break;
+
+      default:
+        break;
+    }
+
+    //Eligible Region
+    jsonld["eligibleRegion"] = [];
+    switch (eligibleRegion) {
+      case "geo":
+        jsonld["eligibleRegion"].push({
+          "@context": "https://schema.org",
+          "@type": "GeoShape",
+          "@id": "GeoShape",
+          polygon: geoJsonEligibleRegion,
+        });
+        break;
+      case "place":
+        jsonld["eligibleRegion"].push({
+          "@context": "https://schema.org",
+          "@type": "Place",
+          "@id": "Place",
+          address: data.eligiblePlace,
+        });
+        break;
+      case "other":
+        jsonld["eligibleRegion"].push({
+          "@context": "https://schema.org",
+          "@type": "Text",
+          "@id": "Text",
+          description: data.eligibleOther,
+        });
+        break;
+
+      default:
+        break;
+    }
+
+    // ELIGIBLE Duration
+
+    jsonld = {
+      ...jsonld,
+      eligibleDuration: {
+        "@context": "https://schema.org",
+        "@type": "QuantitativeValue",
+        "@id": "QuantitativeValue",
+        unitCode: data.unitCode,
+        unitText: data.unitText,
+        value: data.durationValue,
+      },
+    };
+
+    //INELIGIBLE REGION
+
+    jsonld["ineligibleRegion"] = [];
+    switch (ineligibleRegion) {
+      case "geo":
+        jsonld["ineligibleRegion"].push({
+          "@context": "https://schema.org",
+          "@type": "GeoShape",
+          "@id": "GeoShape",
+          polygon: geoJsonIneligibleRegion,
+        });
+        break;
+      case "place":
+        jsonld["ineligibleRegion"].push({
+          "@context": "https://schema.org",
+          "@type": "Place",
+          "@id": "Place",
+          address: data.ineligiblePlace,
+        });
+        break;
+      case "other":
+        jsonld["ineligibleRegion"].push({
+          "@context": "https://schema.org",
+          "@type": "Text",
+          "@id": "Text",
+          description: data.ineligibleOther,
+        });
+        break;
+
+      default:
+        break;
+    }
+
+    jsonld = {
+      ...jsonld,
+      validFrom: data.validFrom,
+      validThrough: data.validThrough,
+      priceSpecification: {
+        "@context": "https://schema.org",
+        "@type": "PriceSpecification",
+        "@id": "PriceSpecification",
+        minPrice: data.minPrice,
+        maxPrice: data.maxPrice,
+        price: data.price,
+        priceCurrency: data.priceCurrency,
+      },
+      availabilityStarts: data.availabilityStarts,
+      availabilityEnds: data.availabilityEnds,
+    };
+
+    return jsonld;
+  }
 
   const handleFileChangeProduct = (e) => {
     const file = e.target.files[0];
@@ -68,6 +434,19 @@ const OfferForm = () => {
         setFileNameProduct(file.name);
       } else {
         alert("Please select an image file.");
+      }
+    }
+  };
+
+  const handleFileChangeJsonld = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.type.startsWith("application/json")) {
+        const jsonldUrl = URL.createObjectURL(file);
+        setFileJsonld(jsonldUrl);
+        setFileNamejsonld(file.name);
+      } else {
+        alert("Please select an jsonld file.");
       }
     }
   };
@@ -106,468 +485,1306 @@ const OfferForm = () => {
           Offer Form
         </Typography>
       </Box>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Box
-          sx={{
-            padding: "40px",
-            background: "#E8EDF27F",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <Grid container rowSpacing={4} columnSpacing={2}>
-            <Grid item xs={12} lg={6}>
-              <TextField
-                {...register("email")}
-                fullWidth
-                error={errors.email ? true : false}
-                label="Email"
-                variant="outlined"
-                helperText={errors.email?.message || ""}
-              />
-            </Grid>
-            <Grid item xs={12} lg={6}>
-              <TextField
-                fullWidth
-                {...register("name")}
-                error={errors.name ? true : false}
-                label="Name"
-                variant="outlined"
-                helperText={errors.name?.message || ""}
-              />
-            </Grid>
-            <Grid item xs={12} lg={6}>
-              <TextField
-                {...register("description")}
-                fullWidth
-                error={errors.description ? true : false}
-                label="Description"
-                multiline
-                minRows={4}
-                helperText={errors.description?.message || ""}
-              />
-            </Grid>
-            <Grid item xs={12} lg={6}>
-              <TextField
-                {...register("disDescription")}
-                fullWidth
-                error={errors.disDescription ? true : false}
-                label="Disambiguating Description"
-                multiline
-                minRows={4}
-                helperText={errors.disDescription?.message || ""}
-              />
-            </Grid>
-            {/* IDENTIFIER */}
-            <Grid
-              item
-              container
-              xs={12}
-              lg={12}
-              rowSpacing={2}
-              columnSpacing={2}
-            >
-              <Grid item xs={12} lg={12}>
-                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
-                  IDENTIFIER
-                </Divider>
-              </Grid>
-              <Grid item xs={12} lg={6}>
-                <TextField
-                  {...register("identifierUrl")}
-                  fullWidth
-                  error={errors.identifierUrl ? true : false}
-                  label="URL"
-                  variant="outlined"
-                  helperText={errors.identifierUrl?.message || ""}
-                />
-              </Grid>
-              <Grid item xs={12} lg={6}>
-                <TextField
-                  {...register("identifierDescription")}
-                  fullWidth
-                  error={errors.identifierDescription ? true : false}
-                  label="Description"
-                  variant="outlined"
-                  multiline
-                  minRows={4}
-                  helperText={errors.identifierDescription?.message || ""}
-                />
-              </Grid>
-            </Grid>
-            {/* ITEM OFFERED */}
-            <Grid
-              item
-              container
-              xs={12}
-              lg={12}
-              rowSpacing={2}
-              columnSpacing={2}
-            >
-              <Grid item xs={12} lg={12}>
-                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
-                  ITEM REQUESTED
-                </Divider>
-              </Grid>
-              <Grid item xs={12} lg={12}>
-                <RadioGroup
-                  row
-                  name="row-radio-item-requested"
-                  sx={{ display: "flex", justifyContent: "space-between" }}
-                  value={itemOffered}
-                  onChange={(e) => setItemOffered(e.target.value)}
+      <Box
+        sx={{
+          padding: "40px",
+          background: "#E8EDF27F",
+        }}
+      >
+        <TabContext value={typeCompilation}>
+          <TabList
+            onChange={(event, newValue) => {
+              setTypeCompilation(newValue);
+            }}
+            aria-label="lab API tabs example"
+          >
+            <Tab label="Compile form" value="form" />
+            <Tab label="Upload JsonLd" value="upload" />
+          </TabList>
+
+          <TabPanel value="form">
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Grid container rowSpacing={4} columnSpacing={2}>
+                <Grid item xs={12} lg={6}>
+                  <TextField
+                    {...register("email")}
+                    fullWidth
+                    error={errors.email ? true : false}
+                    label="Email"
+                    variant="outlined"
+                    helperText={errors.email?.message || ""}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={6}>
+                  <TextField
+                    fullWidth
+                    {...register("name")}
+                    error={errors.name ? true : false}
+                    label="Name"
+                    variant="outlined"
+                    helperText={errors.name?.message || ""}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={6}>
+                  <TextField
+                    {...register("description")}
+                    fullWidth
+                    error={errors.description ? true : false}
+                    label="Description"
+                    multiline
+                    minRows={4}
+                    helperText={errors.description?.message || ""}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={6}>
+                  <TextField
+                    {...register("disDescription")}
+                    fullWidth
+                    error={errors.disDescription ? true : false}
+                    label="Disambiguating Description"
+                    multiline
+                    minRows={4}
+                    helperText={errors.disDescription?.message || ""}
+                  />
+                </Grid>
+                {/* IDENTIFIER */}
+                <Grid
+                  item
+                  container
+                  xs={12}
+                  lg={12}
+                  rowSpacing={2}
+                  columnSpacing={2}
                 >
-                  <FormControlLabel
-                    value="creative-work"
-                    control={<Radio />}
-                    label="Creative Work"
-                  />
-                  <FormControlLabel
-                    value="event"
-                    control={<Radio />}
-                    label="Event"
-                  />
-                  <FormControlLabel
-                    value="product"
-                    control={<Radio />}
-                    label="Product"
-                  />
-                  <FormControlLabel
-                    value="service"
-                    control={<Radio />}
-                    label="Service"
-                  />
-                </RadioGroup>
-              </Grid>
-              {/* CREATIVE WORK */}
-              {itemOffered === "creative-work" && (
-                <>
-                  <Grid item xs={12} lg={4}>
-                    <TextField
-                      {...register("creativeName")}
-                      fullWidth
-                      error={errors.creativeName ? true : false}
-                      label="Name"
-                      variant="outlined"
-                      helperText={errors.creativeName?.message || ""}
-                    />
+                  <Grid item xs={12} lg={12}>
+                    <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                      IDENTIFIER
+                    </Divider>
                   </Grid>
-
-                  <Grid item xs={12} lg={4}>
+                  <Grid item xs={12} lg={6}>
                     <TextField
-                      {...register("creativeURL")}
+                      {...register("identifierUrl")}
                       fullWidth
-                      error={errors.creativeURL ? true : false}
+                      error={errors.identifierUrl ? true : false}
                       label="URL"
                       variant="outlined"
-                      helperText={errors.creativeURL?.message || ""}
+                      helperText={errors.identifierUrl?.message || ""}
                     />
                   </Grid>
-                  <Grid item xs={12} lg={4}>
+                  <Grid item xs={12} lg={6}>
                     <TextField
-                      {...register("creativeDescription")}
+                      {...register("identifierDescription")}
                       fullWidth
-                      error={errors.creativeDescription ? true : false}
+                      error={errors.identifierDescription ? true : false}
                       label="Description"
+                      variant="outlined"
                       multiline
                       minRows={4}
-                      variant="outlined"
-                      helperText={errors.creativeDescription?.message || ""}
+                      helperText={errors.identifierDescription?.message || ""}
                     />
                   </Grid>
-                </>
-              )}
-
-              {/* EVENT */}
-              {itemOffered === "event" && (
-                <>
-                  <Grid item xs={12} lg={4}>
-                    <TextField
-                      {...register("eventName")}
-                      fullWidth
-                      error={errors.eventName ? true : false}
-                      label="Name"
-                      variant="outlined"
-                      helperText={errors.eventName?.message || ""}
-                    />
+                </Grid>
+                {/* ITEM OFFERED */}
+                <Grid
+                  item
+                  container
+                  xs={12}
+                  lg={12}
+                  rowSpacing={2}
+                  columnSpacing={2}
+                >
+                  <Grid item xs={12} lg={12}>
+                    <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                      ITEM REQUESTED
+                    </Divider>
                   </Grid>
-
-                  <Grid item xs={12} lg={4}>
-                    <TextField
-                      {...register("eventURL")}
-                      fullWidth
-                      error={errors.eventURL ? true : false}
-                      label="URL"
-                      variant="outlined"
-                      helperText={errors.eventURL?.message || ""}
-                    />
-                  </Grid>
-                  <Grid item xs={12} lg={4}>
-                    <TextField
-                      {...register("eventDescription")}
-                      fullWidth
-                      error={errors.eventDescription ? true : false}
-                      label="Description"
-                      multiline
-                      minRows={4}
-                      variant="outlined"
-                      helperText={errors.eventDescription?.message || ""}
-                    />
-                  </Grid>
-                  <Grid item xs={12} lg={4}>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DesktopDatePicker
-                        onChange={(value) => setValue("eventStartDate", value)}
-                        value={getValues().eventStartDate}
-                        label="Start Date"
-                        renderInput={(params) => (
-                          <TextField
-                            error={errors.eventStartDate ? true : false}
-                            helperText={errors.eventStartDate?.message || ""}
-                            margin="normal"
-                            name="startDate"
-                            variant="standard"
-                            fullWidth
-                            {...params}
-                          />
-                        )}
-                        defaultValue={dayjs("2022-04-17")}
+                  <Grid item xs={12} lg={12}>
+                    <RadioGroup
+                      row
+                      name="row-radio-item-requested"
+                      sx={{ display: "flex", justifyContent: "space-between" }}
+                      value={itemOffered}
+                      onChange={(e) => setItemOffered(e.target.value)}
+                    >
+                      <FormControlLabel
+                        value="creative-work"
+                        control={<Radio />}
+                        label="Creative Work"
                       />
-                    </LocalizationProvider>
-                  </Grid>
-                  <Grid item xs={12} lg={4}>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DesktopDatePicker
-                        onChange={(value) => setValue("eventEndDate", value)}
-                        value={getValues().eventEndDate}
-                        label="End Date"
-                        renderInput={(params) => (
-                          <TextField
-                            error={errors.eventEndDate ? true : false}
-                            helperText={errors.eventEndDate?.message || ""}
-                            margin="normal"
-                            name="endDate"
-                            variant="standard"
-                            fullWidth
-                            {...params}
-                          />
-                        )}
-                        defaultValue={dayjs("2022-04-17")}
+                      <FormControlLabel
+                        value="event"
+                        control={<Radio />}
+                        label="Event"
                       />
-                    </LocalizationProvider>
+                      <FormControlLabel
+                        value="product"
+                        control={<Radio />}
+                        label="Product"
+                      />
+                      <FormControlLabel
+                        value="service"
+                        control={<Radio />}
+                        label="Service"
+                      />
+                    </RadioGroup>
                   </Grid>
-                  <Grid item xs={12} lg={4}>
-                    <TextField
-                      {...register("eventLocation")}
-                      fullWidth
-                      error={errors.eventLocation ? true : false}
-                      label="Location"
-                      variant="outlined"
-                      helperText={errors.eventLocation?.message || ""}
-                    />
-                  </Grid>
-                </>
-              )}
+                  {/* CREATIVE WORK */}
+                  {itemOffered === "creative-work" && (
+                    <>
+                      <Grid item xs={12} lg={4}>
+                        <TextField
+                          {...register("creativeName")}
+                          fullWidth
+                          error={errors.creativeName ? true : false}
+                          label="Name"
+                          variant="outlined"
+                          helperText={errors.creativeName?.message || ""}
+                        />
+                      </Grid>
 
-              {/* PRODUCT */}
-              {itemOffered === "product" && (
-                <>
-                  <Grid item xs={12} lg={4}>
-                    <TextField
-                      {...register("productName")}
-                      fullWidth
-                      error={errors.productName ? true : false}
-                      label="Name"
-                      variant="outlined"
-                      helperText={errors.productName?.message || ""}
-                    />
+                      <Grid item xs={12} lg={4}>
+                        <TextField
+                          {...register("creativeURL")}
+                          fullWidth
+                          error={errors.creativeURL ? true : false}
+                          label="URL"
+                          variant="outlined"
+                          helperText={errors.creativeURL?.message || ""}
+                        />
+                      </Grid>
+                      <Grid item xs={12} lg={4}>
+                        <TextField
+                          {...register("creativeDescription")}
+                          fullWidth
+                          error={errors.creativeDescription ? true : false}
+                          label="Description"
+                          multiline
+                          minRows={4}
+                          variant="outlined"
+                          helperText={errors.creativeDescription?.message || ""}
+                        />
+                      </Grid>
+                    </>
+                  )}
+
+                  {/* EVENT */}
+                  {itemOffered === "event" && (
+                    <>
+                      <Grid item xs={12} lg={4}>
+                        <TextField
+                          {...register("eventName")}
+                          fullWidth
+                          error={errors.eventName ? true : false}
+                          label="Name"
+                          variant="outlined"
+                          helperText={errors.eventName?.message || ""}
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} lg={4}>
+                        <TextField
+                          {...register("eventURL")}
+                          fullWidth
+                          error={errors.eventURL ? true : false}
+                          label="URL"
+                          variant="outlined"
+                          helperText={errors.eventURL?.message || ""}
+                        />
+                      </Grid>
+                      <Grid item xs={12} lg={4}>
+                        <TextField
+                          {...register("eventDescription")}
+                          fullWidth
+                          error={errors.eventDescription ? true : false}
+                          label="Description"
+                          multiline
+                          minRows={4}
+                          variant="outlined"
+                          helperText={errors.eventDescription?.message || ""}
+                        />
+                      </Grid>
+                      <Grid item xs={12} lg={4}>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <DesktopDatePicker
+                            onChange={(value) =>
+                              setValue("eventStartDate", value)
+                            }
+                            value={getValues().eventStartDate}
+                            label="Start Date"
+                            slotProps={{
+                              textField: {
+                                error: !!errors.eventStartDate,
+                                helperText:
+                                  errors.eventStartDate?.message || "",
+                                margin: "normal",
+                                name: "startDate",
+                                variant: "outlined",
+                                fullWidth: true,
+                              },
+                            }}
+                            defaultValue={dayjs("2022-04-17")}
+                          />
+                        </LocalizationProvider>
+                      </Grid>
+                      <Grid item xs={12} lg={4}>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <DesktopDatePicker
+                            onChange={(value) =>
+                              setValue("eventEndDate", value)
+                            }
+                            value={getValues().eventEndDate}
+                            label="End Date"
+                            defaultValue={dayjs("2022-04-17")}
+                            slotProps={{
+                              textField: {
+                                error: !!errors.eventEndDate,
+                                helperText: errors.eventEndDate?.message || "",
+                                margin: "normal",
+                                name: "endDate",
+                                variant: "outlined",
+                                fullWidth: true,
+                              },
+                            }}
+                          />
+                        </LocalizationProvider>
+                      </Grid>
+                      <Grid item xs={12} lg={4}>
+                        <TextField
+                          {...register("eventLocation")}
+                          fullWidth
+                          error={errors.eventLocation ? true : false}
+                          label="Location"
+                          variant="outlined"
+                          helperText={errors.eventLocation?.message || ""}
+                        />
+                      </Grid>
+                    </>
+                  )}
+
+                  {/* PRODUCT */}
+                  {itemOffered === "product" && (
+                    <>
+                      <Grid item xs={12} lg={4}>
+                        <TextField
+                          {...register("productName")}
+                          fullWidth
+                          error={errors.productName ? true : false}
+                          label="Name"
+                          variant="outlined"
+                          helperText={errors.productName?.message || ""}
+                        />
+                      </Grid>
+                      <Grid item xs={12} lg={4}>
+                        <TextField
+                          {...register("productURL")}
+                          fullWidth
+                          error={errors.productURL ? true : false}
+                          label="URL"
+                          variant="outlined"
+                          helperText={errors.productURL?.message || ""}
+                        />
+                      </Grid>
+                      <Grid item xs={12} lg={4}>
+                        <TextField
+                          {...register("productDescription")}
+                          fullWidth
+                          error={errors.productDescription ? true : false}
+                          label="Description"
+                          multiline
+                          minRows={4}
+                          variant="outlined"
+                          helperText={errors.productDescription?.message || ""}
+                        />
+                      </Grid>
+                      <Grid item xs={12} lg={12}>
+                        <RadioGroup
+                          row
+                          name="row-radio-item-requested"
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                          }}
+                          value={imageProductSelect}
+                          onChange={(e) =>
+                            setImageProductSelect(e.target.value)
+                          }
+                        >
+                          <FormControlLabel
+                            value="external"
+                            control={<Radio />}
+                            label="External URL"
+                          />
+                          <FormControlLabel
+                            value="imageUpload"
+                            control={<Radio />}
+                            label="Image Upload"
+                          />
+                        </RadioGroup>
+                      </Grid>
+                      {imageProductSelect === "external" && (
+                        <Grid item xs={12} lg={6}>
+                          <TextField
+                            {...register("productImageExternalURL")}
+                            fullWidth
+                            error={
+                              errors.productImageExternalURL ? true : false
+                            }
+                            label="External URL"
+                            variant="outlined"
+                            helperText={
+                              errors.productImageExternalURL?.message || ""
+                            }
+                          />
+                        </Grid>
+                      )}
+                      {imageProductSelect === "imageUpload" && (
+                        <>
+                          <Grid
+                            item
+                            xs={12}
+                            lg={12}
+                            display={"flex"}
+                            alignItems={"center"}
+                            gap={"24px"}
+                          >
+                            <Button
+                              component="label"
+                              role={undefined}
+                              variant="contained"
+                              tabIndex={-1}
+                              startIcon={<CloudUploadIcon />}
+                            >
+                              Upload file
+                              <VisuallyHiddenInput
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChangeProduct}
+                              />
+                            </Button>
+                            {imageProduct && (
+                              <Typography variant="body1">
+                                File name: <b>{fileNameProduct}</b>
+                              </Typography>
+                            )}
+                          </Grid>
+                          <Grid item xs={12} lg={6}>
+                            <TextField
+                              {...register("productImageName")}
+                              fullWidth
+                              error={errors.productImageName ? true : false}
+                              label="Name"
+                              variant="outlined"
+                              helperText={
+                                errors.productImageName?.message || ""
+                              }
+                            />
+                          </Grid>
+                          <Grid item xs={12} lg={6}>
+                            <TextField
+                              {...register("productImageDescription")}
+                              fullWidth
+                              error={
+                                errors.productImageDescription ? true : false
+                              }
+                              label="Description"
+                              variant="outlined"
+                              multiline
+                              minRows={4}
+                              helperText={
+                                errors.productImageDescription?.message || ""
+                              }
+                            />
+                          </Grid>
+                        </>
+                      )}
+                    </>
+                  )}
+
+                  {/* SERVICE */}
+                  {itemOffered === "service" && (
+                    <>
+                      <Grid item xs={12} lg={4}>
+                        <TextField
+                          {...register("serviceName")}
+                          fullWidth
+                          error={errors.serviceName ? true : false}
+                          label="Name"
+                          variant="outlined"
+                          helperText={errors.serviceName?.message || ""}
+                        />
+                      </Grid>
+                      <Grid item xs={12} lg={4}>
+                        <TextField
+                          {...register("serviceURL")}
+                          fullWidth
+                          error={errors.serviceURL ? true : false}
+                          label="URL"
+                          variant="outlined"
+                          helperText={errors.serviceURL?.message || ""}
+                        />
+                      </Grid>
+                      <Grid item xs={12} lg={4}>
+                        <TextField
+                          {...register("serviceProvider")}
+                          fullWidth
+                          error={errors.serviceProvider ? true : false}
+                          label="Provider"
+                          variant="outlined"
+                          helperText={errors.serviceProvider?.message || ""}
+                        />
+                      </Grid>
+                      <Grid item xs={12} lg={6}>
+                        <TextField
+                          {...register("serviceType")}
+                          fullWidth
+                          error={errors.serviceType ? true : false}
+                          label="Service Type"
+                          variant="outlined"
+                          helperText={errors.serviceType?.message || ""}
+                        />
+                      </Grid>
+                      <Grid item xs={12} lg={6}>
+                        <TextField
+                          {...register("serviceDescription")}
+                          fullWidth
+                          error={errors.serviceDescription ? true : false}
+                          label="Description"
+                          variant="outlined"
+                          multiline
+                          minRows={4}
+                          helperText={errors.serviceDescription?.message || ""}
+                        />
+                      </Grid>
+                    </>
+                  )}
+                </Grid>
+                {/* IMAGE */}
+                <Grid
+                  item
+                  container
+                  xs={12}
+                  lg={12}
+                  rowSpacing={2}
+                  columnSpacing={2}
+                >
+                  <Grid item xs={12} lg={12}>
+                    <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                      IMAGE
+                    </Divider>
                   </Grid>
-                  <Grid item xs={12} lg={4}>
-                    <TextField
-                      {...register("productURL")}
-                      fullWidth
-                      error={errors.productURL ? true : false}
-                      label="URL"
-                      variant="outlined"
-                      helperText={errors.productURL?.message || ""}
-                    />
+                  <Grid item xs={12} lg={12}>
+                    <RadioGroup
+                      row
+                      name="row-radio-item-requested"
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                      value={imageSectionSelect}
+                      onChange={(e) => setImageSectionSelect(e.target.value)}
+                    >
+                      <FormControlLabel
+                        value="external"
+                        control={<Radio />}
+                        label="External URL"
+                      />
+                      <FormControlLabel
+                        value="imageUpload"
+                        control={<Radio />}
+                        label="Image Upload"
+                      />
+                    </RadioGroup>
                   </Grid>
-                  <Grid item xs={12} lg={4}>
-                    <TextField
-                      {...register("productDescription")}
-                      fullWidth
-                      error={errors.productDescription ? true : false}
-                      label="Description"
-                      multiline
-                      minRows={4}
-                      variant="outlined"
-                      helperText={errors.productDescription?.message || ""}
-                    />
-                  </Grid>
-                  <Grid
-                    item
-                    container
-                    xs={12}
-                    lg={12}
-                    rowSpacing={2}
-                    columnSpacing={2}
-                    sx={{ padding: "24px" }}
-                  >
-                    <Grid item xs={12} lg={12}>
-                      <Divider textAlign="left" sx={{ fontWeight: 700 }}>
-                        IMAGE
-                      </Divider>
-                    </Grid>
+                  {imageSectionSelect === "external" && (
                     <Grid item xs={12} lg={6}>
                       <TextField
-                        {...register("productImageExternalURL")}
+                        {...register("imageExternalURL")}
                         fullWidth
-                        error={errors.productImageExternalURL ? true : false}
+                        error={errors.imageExternalURL ? true : false}
                         label="External URL"
                         variant="outlined"
-                        helperText={
-                          errors.productImageExternalURL?.message || ""
-                        }
+                        helperText={errors.imageExternalURL?.message || ""}
                       />
                     </Grid>
-                    <Grid
-                      item
-                      xs={12}
-                      lg={6}
-                      display={"flex"}
-                      alignItems={"center"}
-                      gap={"24px"}
-                    >
-                      <Button
-                        component="label"
-                        role={undefined}
-                        variant="contained"
-                        tabIndex={-1}
-                        startIcon={<CloudUploadIcon />}
+                  )}
+                  {imageSectionSelect === "imageUpload" && (
+                    <>
+                      <Grid
+                        item
+                        xs={12}
+                        lg={12}
+                        display={"flex"}
+                        alignItems={"center"}
+                        gap={"24px"}
                       >
-                        Upload file
-                        <VisuallyHiddenInput
-                          type="file"
-                          accept="image/*"
-                          onChange={handleFileChangeProduct}
+                        <Button
+                          component="label"
+                          role={undefined}
+                          variant="contained"
+                          tabIndex={-1}
+                          startIcon={<CloudUploadIcon />}
+                        >
+                          Upload file
+                          <VisuallyHiddenInput
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChangeSection}
+                          />
+                        </Button>
+                        {imageSection && (
+                          <Typography variant="body1">
+                            File name: <b>{fileNameSection}</b>
+                          </Typography>
+                        )}
+                      </Grid>
+                      <Grid item xs={12} lg={6}>
+                        <TextField
+                          {...register("imageName")}
+                          fullWidth
+                          error={errors.imageName ? true : false}
+                          label="Name"
+                          variant="outlined"
+                          helperText={errors.imageName?.message || ""}
                         />
-                      </Button>
-                      {imageProduct && (
-                        <Typography variant="body1">
-                          File name: <b>{fileNameProduct}</b>
-                        </Typography>
-                      )}
-                    </Grid>
-                    <Grid item xs={12} lg={6}>
-                      <TextField
-                        {...register("productImageName")}
-                        fullWidth
-                        error={errors.productImageName ? true : false}
-                        label="Name"
-                        variant="outlined"
-                        helperText={errors.productImageName?.message || ""}
-                      />
-                    </Grid>
-                    <Grid item xs={12} lg={6}>
-                      <TextField
-                        {...register("productImageDescription")}
-                        fullWidth
-                        error={errors.productImageDescription ? true : false}
-                        label="Description"
-                        variant="outlined"
-                        multiline
-                        minRows={4}
-                        helperText={
-                          errors.productImageDescription?.message || ""
-                        }
-                      />
-                    </Grid>
+                      </Grid>
+                      <Grid item xs={12} lg={6}>
+                        <TextField
+                          {...register("imageDescription")}
+                          fullWidth
+                          error={errors.imageDescription ? true : false}
+                          label="Description"
+                          variant="outlined"
+                          multiline
+                          minRows={4}
+                          helperText={errors.imageDescription?.message || ""}
+                        />
+                      </Grid>
+                    </>
+                  )}
+                </Grid>
+                {/* MAIN ENTITY OF THE PAGE */}
+                <Grid
+                  item
+                  container
+                  xs={12}
+                  lg={12}
+                  rowSpacing={2}
+                  columnSpacing={2}
+                >
+                  <Grid item xs={12} lg={12}>
+                    <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                      MAIN ENTITY OF THE PAGE
+                    </Divider>
                   </Grid>
-                </>
-              )}
-
-              {/* SERVICE */}
-              {itemOffered === "service" && (
-                <>
-                  <Grid item xs={12} lg={4}>
+                  <Grid item xs={12} lg={6}>
                     <TextField
-                      {...register("serviceName")}
+                      {...register("mainUrl")}
                       fullWidth
-                      error={errors.serviceName ? true : false}
-                      label="Name"
-                      variant="outlined"
-                      helperText={errors.serviceName?.message || ""}
-                    />
-                  </Grid>
-                  <Grid item xs={12} lg={4}>
-                    <TextField
-                      {...register("serviceURL")}
-                      fullWidth
-                      error={errors.serviceURL ? true : false}
+                      error={errors.mainUrl ? true : false}
                       label="URL"
                       variant="outlined"
-                      helperText={errors.serviceURL?.message || ""}
+                      helperText={errors.mainUrl?.message || ""}
+                    />
+                  </Grid>
+                </Grid>
+                <Grid item xs={12} lg={12}>
+                  <Divider />
+                </Grid>
+                <Grid item xs={12} lg={6}>
+                  <TextField
+                    {...register("serialNumber")}
+                    fullWidth
+                    error={errors.serialNumber ? true : false}
+                    label="Serial Number"
+                    variant="outlined"
+                    helperText={errors.serialNumber?.message || ""}
+                  />
+                </Grid>
+                {/* GTIN */}
+                <Grid
+                  item
+                  container
+                  xs={12}
+                  lg={12}
+                  rowSpacing={2}
+                  columnSpacing={2}
+                >
+                  <Grid item xs={12} lg={12}>
+                    <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                      GTIN
+                    </Divider>
+                  </Grid>
+                  <Grid item xs={12} lg={6}>
+                    <TextField
+                      {...register("gtin")}
+                      fullWidth
+                      error={errors.gtin ? true : false}
+                      label="GTIN"
+                      variant="outlined"
+                      helperText={errors.gtin?.message || ""}
+                    />
+                  </Grid>
+                  <Grid item xs={12} lg={6}>
+                    <TextField
+                      {...register("gtinURL")}
+                      fullWidth
+                      error={errors.gtinURL ? true : false}
+                      label="URL"
+                      variant="outlined"
+                      helperText={errors.gtinURL?.message || ""}
+                    />
+                  </Grid>
+                </Grid>
+                <Grid item xs={12} lg={12}>
+                  <Divider />
+                </Grid>
+                <Grid item xs={12} lg={6}>
+                  <TextField
+                    {...register("mpn")}
+                    fullWidth
+                    error={errors.mpn ? true : false}
+                    label="MPN"
+                    variant="outlined"
+                    helperText={errors.mpn?.message || ""}
+                  />
+                </Grid>
+                {/* OFFERED BY */}
+                <Grid
+                  item
+                  container
+                  xs={12}
+                  lg={12}
+                  rowSpacing={2}
+                  columnSpacing={2}
+                >
+                  <Grid item xs={12} lg={12}>
+                    <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                      OFFERED BY
+                    </Divider>
+                  </Grid>
+                  <Grid item xs={12} lg={12}>
+                    <RadioGroup
+                      row
+                      name="row-radio-item-requested"
+                      sx={{ display: "flex", justifyContent: "space-between" }}
+                      value={offeredBy}
+                      onChange={(e) => setOfferedBy(e.target.value)}
+                    >
+                      <FormControlLabel
+                        value="person"
+                        control={<Radio />}
+                        label="Person"
+                      />
+                      <FormControlLabel
+                        value="organization"
+                        control={<Radio />}
+                        label="Organization"
+                      />
+                    </RadioGroup>
+                  </Grid>
+                  {offeredBy === "person" && (
+                    <>
+                      <Grid item xs={12} lg={3}>
+                        <TextField
+                          {...register("givenName")}
+                          fullWidth
+                          error={errors.givenName ? true : false}
+                          label="Given Name"
+                          variant="outlined"
+                          helperText={errors.givenName?.message || ""}
+                        />
+                      </Grid>
+                      <Grid item xs={12} lg={3}>
+                        <TextField
+                          {...register("familyName")}
+                          fullWidth
+                          error={errors.familyName ? true : false}
+                          label="Family Name"
+                          variant="outlined"
+                          helperText={errors.familyName?.message || ""}
+                        />
+                      </Grid>
+                      <Grid item xs={12} lg={3}>
+                        <TextField
+                          {...register("personEmail")}
+                          fullWidth
+                          error={errors.personEmail ? true : false}
+                          label="Email"
+                          variant="outlined"
+                          helperText={errors.personEmail?.message || ""}
+                        />
+                      </Grid>
+                      <Grid item xs={12} lg={3}>
+                        <TextField
+                          {...register("affiliation")}
+                          fullWidth
+                          error={errors.affiliation ? true : false}
+                          label="Affiliation"
+                          variant="outlined"
+                          helperText={errors.affiliation?.message || ""}
+                        />
+                      </Grid>
+                    </>
+                  )}
+
+                  {offeredBy === "organization" && (
+                    <>
+                      <Grid item xs={12} lg={4}>
+                        <TextField
+                          {...register("organName")}
+                          fullWidth
+                          error={errors.organName ? true : false}
+                          label="Name"
+                          variant="outlined"
+                          helperText={errors.organName?.message || ""}
+                        />
+                      </Grid>
+                      <Grid item xs={12} lg={4}>
+                        <TextField
+                          {...register("organEmail")}
+                          fullWidth
+                          error={errors.organEmail ? true : false}
+                          label="Email"
+                          variant="outlined"
+                          helperText={errors.organEmail?.message || ""}
+                        />
+                      </Grid>
+                      <Grid item xs={12} lg={4}>
+                        <TextField
+                          {...register("organAddress")}
+                          fullWidth
+                          error={errors.organAddress ? true : false}
+                          label="Address"
+                          variant="outlined"
+                          helperText={errors.organAddress?.message || ""}
+                        />
+                      </Grid>
+                    </>
+                  )}
+                </Grid>
+                {/* AREA SERVED */}
+                <Grid
+                  item
+                  container
+                  xs={12}
+                  lg={12}
+                  rowSpacing={2}
+                  columnSpacing={2}
+                >
+                  <Grid item xs={12} lg={12}>
+                    <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                      AREA SERVED
+                    </Divider>
+                  </Grid>
+                  <Grid item xs={12} lg={12}>
+                    <RadioGroup
+                      row
+                      name="row-radio-item-requested"
+                      sx={{ display: "flex", justifyContent: "space-between" }}
+                      value={areaServed}
+                      onChange={(e) => setAreaServed(e.target.value)}
+                    >
+                      <FormControlLabel
+                        value="admin"
+                        control={<Radio />}
+                        label="Administrative Area"
+                      />
+                      <FormControlLabel
+                        value="geo"
+                        control={<Radio />}
+                        label="Geo Shape"
+                      />
+                      <FormControlLabel
+                        value="place"
+                        control={<Radio />}
+                        label="Place"
+                      />
+                      <FormControlLabel
+                        value="Other"
+                        control={<Radio />}
+                        label="other"
+                      />
+                    </RadioGroup>
+                  </Grid>
+                  {/* ADMINISTRATIVE AREA */}
+                  {areaServed === "admin" && (
+                    <>
+                      <Grid item xs={12} lg={4}>
+                        <TextField
+                          {...register("adminName")}
+                          fullWidth
+                          error={errors.adminName ? true : false}
+                          label="Name"
+                          variant="outlined"
+                          helperText={errors.adminName?.message || ""}
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} lg={4}>
+                        <TextField
+                          {...register("adminAddress")}
+                          fullWidth
+                          error={errors.adminAddress ? true : false}
+                          label="Address"
+                          variant="outlined"
+                          helperText={errors.adminAddress?.message || ""}
+                        />
+                      </Grid>
+                      <Grid item xs={12} lg={4}>
+                        <TextField
+                          {...register("adminDescription")}
+                          fullWidth
+                          error={errors.adminDescription ? true : false}
+                          label="adminDescription"
+                          multiline
+                          minRows={4}
+                          variant="outlined"
+                          helperText={errors.adminDescription?.message || ""}
+                        />
+                      </Grid>
+                    </>
+                  )}
+                  {/* GEO SHAPE */}
+                  {areaServed === "geo" && (
+                    <>
+                      <Grid item xs={12} lg={12}>
+                        <DrawPolygonMap
+                          setGeoJson={setGeoJsonAreaServed}
+                          id={"area_served_map"}
+                        />
+                      </Grid>
+                    </>
+                  )}
+                  {/* PLACE */}
+
+                  {areaServed === "place" && (
+                    <>
+                      <Grid item xs={12} lg={12}>
+                        <TextField
+                          fullWidth
+                          color="secondary"
+                          variant="outlined"
+                          inputRef={materialRef}
+                        />
+                      </Grid>
+                    </>
+                  )}
+
+                  {areaServed === "other" && (
+                    <>
+                      <Grid item xs={12} lg={12}>
+                        <TextField
+                          {...register("areaServedOther")}
+                          fullWidth
+                          error={errors.areaServedOther ? true : false}
+                          label="Other"
+                          variant="outlined"
+                          helperText={errors.areaServedOther?.message || ""}
+                        />
+                      </Grid>
+                    </>
+                  )}
+                </Grid>
+                {/* ELIGIBLE REGION */}
+                <Grid
+                  item
+                  container
+                  xs={12}
+                  lg={12}
+                  rowSpacing={2}
+                  columnSpacing={2}
+                >
+                  <Grid item xs={12} lg={12}>
+                    <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                      ELIGIBLE REGION
+                    </Divider>
+                  </Grid>
+                  <Grid item xs={12} lg={12}>
+                    <RadioGroup
+                      row
+                      name="row-radio-item-requested"
+                      sx={{ display: "flex", justifyContent: "space-between" }}
+                      value={eligibleRegion}
+                      onChange={(e) => setEligibleRegion(e.target.value)}
+                    >
+                      <FormControlLabel
+                        value="geo"
+                        control={<Radio />}
+                        label="Geo Shape"
+                      />
+                      <FormControlLabel
+                        value="place"
+                        control={<Radio />}
+                        label="Place"
+                      />
+                      <FormControlLabel
+                        value="other"
+                        control={<Radio />}
+                        label="Other"
+                      />
+                    </RadioGroup>
+                  </Grid>
+
+                  {/* GEO SHAPE */}
+                  {eligibleRegion === "geo" && (
+                    <>
+                      <Grid item xs={12} lg={12}>
+                        <DrawPolygonMap
+                          setGeoJson={setGeoJsonEligibleRegion}
+                          id={"eligible_region_map"}
+                        />
+                      </Grid>
+                    </>
+                  )}
+
+                  {/* PLACE */}
+
+                  {eligibleRegion === "place" && (
+                    <>
+                      <Grid item xs={12} lg={12}>
+                        <Autocomplete
+                          disablePortal
+                          options={[]}
+                          sx={{ width: 300 }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              {...register("eligiblePlace")}
+                              error={errors.eligiblePlace ? true : false}
+                              helperText={errors.eligiblePlace?.message || ""}
+                              label="Place"
+                            />
+                          )}
+                        />
+                      </Grid>
+                    </>
+                  )}
+
+                  {eligibleRegion === "other" && (
+                    <>
+                      <Grid item xs={12} lg={12}>
+                        <TextField
+                          {...register("eligibleOther")}
+                          fullWidth
+                          error={errors.eligibleOther ? true : false}
+                          label="Other"
+                          variant="outlined"
+                          helperText={errors.eligibleOther?.message || ""}
+                        />
+                      </Grid>
+                    </>
+                  )}
+                </Grid>
+                {/* ELIGIBLE DURATION */}
+                <Grid
+                  item
+                  container
+                  xs={12}
+                  lg={12}
+                  rowSpacing={2}
+                  columnSpacing={2}
+                >
+                  <Grid item xs={12} lg={12}>
+                    <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                      ELIGIBLE DURATION
+                    </Divider>
+                  </Grid>
+                  <Grid item xs={12} lg={4}>
+                    <TextField
+                      {...register("durationValue")}
+                      fullWidth
+                      error={errors.durationValue ? true : false}
+                      label="Value"
+                      variant="outlined"
+                      helperText={errors.durationValue?.message || ""}
                     />
                   </Grid>
                   <Grid item xs={12} lg={4}>
                     <TextField
-                      {...register("serviceProvider")}
+                      {...register("unitCode")}
                       fullWidth
-                      error={errors.serviceProvider ? true : false}
-                      label="Provider"
+                      error={errors.unitCode ? true : false}
+                      label="Unit Code"
                       variant="outlined"
-                      helperText={errors.serviceProvider?.message || ""}
+                      helperText={errors.unitCode?.message || ""}
                     />
                   </Grid>
-                  <Grid item xs={12} lg={6}>
+                  <Grid item xs={12} lg={4}>
                     <TextField
-                      {...register("serviceType")}
+                      {...register("unitText")}
                       fullWidth
-                      error={errors.serviceType ? true : false}
-                      label="Service Type"
+                      error={errors.unitText ? true : false}
+                      label="Unit Text"
                       variant="outlined"
-                      helperText={errors.serviceType?.message || ""}
+                      helperText={errors.unitText?.message || ""}
                     />
                   </Grid>
-                  <Grid item xs={12} lg={6}>
+                </Grid>
+                {/* INELIGIBLE REGION */}
+                <Grid
+                  item
+                  container
+                  xs={12}
+                  lg={12}
+                  rowSpacing={2}
+                  columnSpacing={2}
+                >
+                  <Grid item xs={12} lg={12}>
+                    <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                      INELIGIBLE REGION
+                    </Divider>
+                  </Grid>
+                  <Grid item xs={12} lg={12}>
+                    <RadioGroup
+                      row
+                      name="row-radio-item-requested"
+                      sx={{ display: "flex", justifyContent: "space-between" }}
+                      value={ineligibleRegion}
+                      onChange={(e) => setInEligibleRegion(e.target.value)}
+                    >
+                      <FormControlLabel
+                        value="geo"
+                        control={<Radio />}
+                        label="Geo Shape"
+                      />
+                      <FormControlLabel
+                        value="place"
+                        control={<Radio />}
+                        label="Place"
+                      />
+                      <FormControlLabel
+                        value="other"
+                        control={<Radio />}
+                        label="Other"
+                      />
+                    </RadioGroup>
+                  </Grid>
+
+                  {/* GEO SHAPE */}
+                  {ineligibleRegion === "geo" && (
+                    <>
+                      <Grid item xs={12} lg={12}>
+                        <DrawPolygonMap
+                          setGeoJson={setGeoJsonIneligibleRegion}
+                          id={"ineligible_region_map"}
+                        />
+                      </Grid>
+                    </>
+                  )}
+
+                  {/* PLACE */}
+
+                  {ineligibleRegion === "place" && (
+                    <>
+                      <Grid item xs={12} lg={12}>
+                        <Autocomplete
+                          disablePortal
+                          options={[]}
+                          sx={{ width: 300 }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              {...register("ineligiblePlace")}
+                              error={errors.ineligiblePlace ? true : false}
+                              helperText={errors.ineligiblePlace?.message || ""}
+                              label="Place"
+                            />
+                          )}
+                        />
+                      </Grid>
+                    </>
+                  )}
+
+                  {ineligibleRegion === "other" && (
+                    <>
+                      <Grid item xs={12} lg={12}>
+                        <TextField
+                          {...register("ineligibleOther")}
+                          fullWidth
+                          error={errors.ineligibleOther ? true : false}
+                          label="Other"
+                          variant="outlined"
+                          helperText={errors.ineligibleOther?.message || ""}
+                        />
+                      </Grid>
+                    </>
+                  )}
+                </Grid>
+                <Grid item xs={12}>
+                  <Grid item xs={12} lg={12}>
+                    <Divider />
+                  </Grid>
+                </Grid>
+                <Grid item xs={12} lg={6}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DesktopDatePicker
+                      onChange={(value) => setValue("validFrom", value)}
+                      value={getValues().validFrom}
+                      label="Valid From"
+                      slotProps={{
+                        textField: {
+                          error: !!errors.validFrom,
+                          helperText: errors.validFrom?.message || "",
+                          margin: "normal",
+                          name: "validFrom",
+                          variant: "outlined",
+                          fullWidth: true,
+                        },
+                      }}
+                      defaultValue={dayjs("2022-04-17")}
+                    />
+                  </LocalizationProvider>
+                </Grid>
+                <Grid item xs={12} lg={6}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DesktopDatePicker
+                      onChange={(value) => setValue("validThrough", value)}
+                      value={getValues().validThrough}
+                      label="Valid Through"
+                      slotProps={{
+                        textField: {
+                          error: !!errors.validThrough,
+                          helperText: errors.validThrough?.message || "",
+                          margin: "normal",
+                          name: "validThrough",
+                          variant: "outlined",
+                          fullWidth: true,
+                        },
+                      }}
+                      defaultValue={dayjs("2022-04-17")}
+                    />
+                  </LocalizationProvider>
+                </Grid>
+                {/* PRICE SPECIFICATION */}
+                <Grid
+                  item
+                  container
+                  xs={12}
+                  lg={12}
+                  rowSpacing={2}
+                  columnSpacing={2}
+                >
+                  <Grid item xs={12} lg={12}>
+                    <Divider textAlign="left" sx={{ fontWeight: 700 }}>
+                      PRICE SPECIFICATION
+                    </Divider>
+                  </Grid>
+                  <Grid item xs={12} lg={3}>
                     <TextField
-                      {...register("serviceDescription")}
+                      {...register("minPrice")}
                       fullWidth
-                      error={errors.serviceDescription ? true : false}
-                      label="Description"
+                      error={errors.minPrice ? true : false}
                       variant="outlined"
-                      multiline
-                      minRows={4}
-                      helperText={errors.serviceDescription?.message || ""}
+                      helperText={errors.minPrice?.message || ""}
+                      label="Min Price"
+                      type="number"
                     />
                   </Grid>
-                </>
-              )}
-            </Grid>
-            {/* IMAGE */}
-            <Grid
-              item
-              container
-              xs={12}
-              lg={12}
-              rowSpacing={2}
-              columnSpacing={2}
-            >
-              <Grid item xs={12} lg={12}>
-                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
-                  IMAGE
-                </Divider>
+                  <Grid item xs={12} lg={3}>
+                    <TextField
+                      {...register("maxPrice")}
+                      fullWidth
+                      error={errors.maxPrice ? true : false}
+                      variant="outlined"
+                      helperText={errors.maxPrice?.message || ""}
+                      label="Max Price"
+                      type="number"
+                    />
+                  </Grid>
+                  <Grid item xs={12} lg={3}>
+                    <TextField
+                      {...register("price")}
+                      fullWidth
+                      error={errors.price ? true : false}
+                      variant="outlined"
+                      helperText={errors.price?.message || ""}
+                      label="Price"
+                      type="number"
+                    />
+                  </Grid>
+                  <Grid item xs={12} lg={3}>
+                    <TextField
+                      {...register("priceCurrency")}
+                      fullWidth
+                      error={errors.priceCurrency ? true : false}
+                      variant="outlined"
+                      helperText={errors.priceCurrency?.message || ""}
+                      label="Price Currency"
+                    />
+                  </Grid>
+                </Grid>
+                <Grid item xs={12}>
+                  <Grid item xs={12} lg={12}>
+                    <Divider />
+                  </Grid>
+                </Grid>
+                <Grid item xs={12} lg={6}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DesktopDatePicker
+                      onChange={(value) =>
+                        setValue("availabilityStarts", value)
+                      }
+                      value={getValues().availabilityStarts}
+                      label="Availability Starts"
+                      slotProps={{
+                        textField: {
+                          error: !!errors.availabilityStarts,
+                          helperText: errors.availabilityStarts?.message || "",
+                          margin: "normal",
+                          name: "availabilityStarts",
+                          variant: "outlined",
+                          fullWidth: true,
+                        },
+                      }}
+                      defaultValue={dayjs("2022-04-17")}
+                    />
+                  </LocalizationProvider>
+                </Grid>
+                <Grid item xs={12} lg={6}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DesktopDatePicker
+                      onChange={(value) => setValue("availabilityEnds", value)}
+                      value={getValues().availabilityEnds}
+                      label="Availability Ends"
+                      slotProps={{
+                        textField: {
+                          error: !!errors.availabilityEnds,
+                          helperText: errors.availabilityEnds?.message || "",
+                          margin: "normal",
+                          name: "availabilityEnds",
+                          variant: "outlined",
+                          fullWidth: true,
+                        },
+                      }}
+                      defaultValue={dayjs("2022-04-17")}
+                    />
+                  </LocalizationProvider>
+                </Grid>
+                <Grid item xs={12} sx={{ display: "flex", gap: 4 }}>
+                  <ReCAPTCHA
+                    sitekey={SITE_KEY_RECAPTCHA}
+                    onChange={onChangeRecaptcha}
+                  />
+                  <Button
+                    variant="contained"
+                    onClick={downloadJsonLD}
+                    endIcon={<SendIcon />}
+                  >
+                    Download JSON-LD
+                  </Button>
+                  <Button
+                    variant="contained"
+                    type="submit"
+                    endIcon={<SendIcon />}
+                  >
+                    Send
+                  </Button>
+                </Grid>
               </Grid>
-              <Grid item xs={12} lg={6}>
-                <TextField
-                  {...register("imageExternalURL")}
-                  fullWidth
-                  error={errors.imageExternalURL ? true : false}
-                  label="External URL"
-                  variant="outlined"
-                  helperText={errors.imageExternalURL?.message || ""}
-                />
-              </Grid>
+            </form>
+          </TabPanel>
+          <TabPanel value="upload">
+            <Grid container rowSpacing={4} columnSpacing={2}>
               <Grid
                 item
                 xs={12}
@@ -586,755 +1803,44 @@ const OfferForm = () => {
                   Upload file
                   <VisuallyHiddenInput
                     type="file"
-                    accept="image/*"
-                    onChange={handleFileChangeSection}
+                    accept="application/*"
+                    onChange={handleFileChangeJsonld}
                   />
                 </Button>
-                {imageSection && (
+                {fileJsonld && (
                   <Typography variant="body1">
-                    File name: <b>{fileNameSection}</b>
+                    File name: <b>{fileNamejsonld}</b>
                   </Typography>
                 )}
               </Grid>
-              <Grid item xs={12} lg={6}>
-                <TextField
-                  {...register("imageName")}
-                  fullWidth
-                  error={errors.imageName ? true : false}
-                  label="Name"
-                  variant="outlined"
-                  helperText={errors.imageName?.message || ""}
-                />
-              </Grid>
-              <Grid item xs={12} lg={6}>
-                <TextField
-                  {...register("imageDescription")}
-                  fullWidth
-                  error={errors.imageDescription ? true : false}
-                  label="Description"
-                  variant="outlined"
-                  multiline
-                  minRows={4}
-                  helperText={errors.imageDescription?.message || ""}
-                />
+              <Grid
+                item
+                xs={12}
+                lg={12}
+                display={"flex"}
+                alignItems={"center"}
+                justifyContent={"end"}
+              >
+                {fileJsonld && (
+                  <>
+                    <ReCAPTCHA
+                      sitekey={SITE_KEY_RECAPTCHA}
+                      onChange={onChangeRecaptcha}
+                    />
+                    <Button
+                      variant="contained"
+                      type="submit"
+                      endIcon={<SendIcon />}
+                    >
+                      Send
+                    </Button>
+                  </>
+                )}
               </Grid>
             </Grid>
-            {/* MAIN ENTITY OF THE PAGE */}
-            <Grid
-              item
-              container
-              xs={12}
-              lg={12}
-              rowSpacing={2}
-              columnSpacing={2}
-            >
-              <Grid item xs={12} lg={12}>
-                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
-                  MAIN ENTITY OF THE PAGE
-                </Divider>
-              </Grid>
-              <Grid item xs={12} lg={6}>
-                <TextField
-                  {...register("mainUrl")}
-                  fullWidth
-                  error={errors.mainUrl ? true : false}
-                  label="URL"
-                  variant="outlined"
-                  helperText={errors.mainUrl?.message || ""}
-                />
-              </Grid>
-            </Grid>
-            <Grid item xs={12} lg={12}>
-              <Divider />
-            </Grid>
-            <Grid item xs={12} lg={6}>
-              <TextField
-                {...register("serialNumber")}
-                fullWidth
-                error={errors.serialNumber ? true : false}
-                label="Serial Number"
-                variant="outlined"
-                helperText={errors.serialNumber?.message || ""}
-              />
-            </Grid>
-            {/* GTIN */}
-            <Grid
-              item
-              container
-              xs={12}
-              lg={12}
-              rowSpacing={2}
-              columnSpacing={2}
-            >
-              <Grid item xs={12} lg={12}>
-                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
-                  GTIN
-                </Divider>
-              </Grid>
-              <Grid item xs={12} lg={6}>
-                <TextField
-                  {...register("gtin")}
-                  fullWidth
-                  error={errors.gtin ? true : false}
-                  label="GTIN"
-                  variant="outlined"
-                  helperText={errors.gtin?.message || ""}
-                />
-              </Grid>
-              <Grid item xs={12} lg={6}>
-                <TextField
-                  {...register("gtinURL")}
-                  fullWidth
-                  error={errors.gtinURL ? true : false}
-                  label="URL"
-                  variant="outlined"
-                  helperText={errors.gtinURL?.message || ""}
-                />
-              </Grid>
-            </Grid>
-            <Grid item xs={12} lg={12}>
-              <Divider />
-            </Grid>
-            <Grid item xs={12} lg={6}>
-              <TextField
-                {...register("mpn")}
-                fullWidth
-                error={errors.mpn ? true : false}
-                label="MPN"
-                variant="outlined"
-                helperText={errors.mpn?.message || ""}
-              />
-            </Grid>
-            {/* OFFERED BY */}
-            <Grid
-              item
-              container
-              xs={12}
-              lg={12}
-              rowSpacing={2}
-              columnSpacing={2}
-            >
-              <Grid item xs={12} lg={12}>
-                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
-                  OFFERED BY
-                </Divider>
-              </Grid>
-              <Grid item xs={12} lg={12}>
-                <RadioGroup
-                  row
-                  name="row-radio-item-requested"
-                  sx={{ display: "flex", justifyContent: "space-between" }}
-                  value={offeredBy}
-                  onChange={(e) => setOfferedBy(e.target.value)}
-                >
-                  <FormControlLabel
-                    value="person"
-                    control={<Radio />}
-                    label="Person"
-                  />
-                  <FormControlLabel
-                    value="organization"
-                    control={<Radio />}
-                    label="Organization"
-                  />
-                </RadioGroup>
-              </Grid>
-              {offeredBy === "person" && (
-                <>
-                  <Grid item xs={12} lg={3}>
-                    <TextField
-                      {...register("givenName")}
-                      fullWidth
-                      error={errors.givenName ? true : false}
-                      label="Given Name"
-                      variant="outlined"
-                      helperText={errors.givenName?.message || ""}
-                    />
-                  </Grid>
-                  <Grid item xs={12} lg={3}>
-                    <TextField
-                      {...register("familyName")}
-                      fullWidth
-                      error={errors.familyName ? true : false}
-                      label="Family Name"
-                      variant="outlined"
-                      helperText={errors.familyName?.message || ""}
-                    />
-                  </Grid>
-                  <Grid item xs={12} lg={3}>
-                    <TextField
-                      {...register("personEmail")}
-                      fullWidth
-                      error={errors.personEmail ? true : false}
-                      label="Email"
-                      variant="outlined"
-                      helperText={errors.personEmail?.message || ""}
-                    />
-                  </Grid>
-                  <Grid item xs={12} lg={3}>
-                    <TextField
-                      {...register("affiliation")}
-                      fullWidth
-                      error={errors.affiliation ? true : false}
-                      label="Affiliation"
-                      variant="outlined"
-                      helperText={errors.affiliation?.message || ""}
-                    />
-                  </Grid>
-                </>
-              )}
-
-              {offeredBy === "organization" && (
-                <>
-                  <Grid item xs={12} lg={4}>
-                    <TextField
-                      {...register("organName")}
-                      fullWidth
-                      error={errors.organName ? true : false}
-                      label="Name"
-                      variant="outlined"
-                      helperText={errors.organName?.message || ""}
-                    />
-                  </Grid>
-                  <Grid item xs={12} lg={4}>
-                    <TextField
-                      {...register("organEmail")}
-                      fullWidth
-                      error={errors.organEmail ? true : false}
-                      label="Email"
-                      variant="outlined"
-                      helperText={errors.organEmail?.message || ""}
-                    />
-                  </Grid>
-                  <Grid item xs={12} lg={4}>
-                    <TextField
-                      {...register("organAddress")}
-                      fullWidth
-                      error={errors.organAddress ? true : false}
-                      label="Address"
-                      variant="outlined"
-                      helperText={errors.organAddress?.message || ""}
-                    />
-                  </Grid>
-                </>
-              )}
-            </Grid>
-            {/* AREA SERVED */}
-            <Grid
-              item
-              container
-              xs={12}
-              lg={12}
-              rowSpacing={2}
-              columnSpacing={2}
-            >
-              <Grid item xs={12} lg={12}>
-                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
-                  AREA SERVED
-                </Divider>
-              </Grid>
-              <Grid item xs={12} lg={12}>
-                <RadioGroup
-                  row
-                  name="row-radio-item-requested"
-                  sx={{ display: "flex", justifyContent: "space-between" }}
-                  value={areaServed}
-                  onChange={(e) => setAreaServed(e.target.value)}
-                >
-                  <FormControlLabel
-                    value="admin"
-                    control={<Radio />}
-                    label="Administrative Area"
-                  />
-                  <FormControlLabel
-                    value="geo"
-                    control={<Radio />}
-                    label="Geo Shape"
-                  />
-                  <FormControlLabel
-                    value="place"
-                    control={<Radio />}
-                    label="Place"
-                  />
-                  <FormControlLabel
-                    value="Other"
-                    control={<Radio />}
-                    label="other"
-                  />
-                </RadioGroup>
-              </Grid>
-              {/* ADMINISTRATIVE AREA */}
-              {areaServed === "admin" && (
-                <>
-                  <Grid item xs={12} lg={4}>
-                    <TextField
-                      {...register("adminName")}
-                      fullWidth
-                      error={errors.adminName ? true : false}
-                      label="Name"
-                      variant="outlined"
-                      helperText={errors.adminName?.message || ""}
-                    />
-                  </Grid>
-
-                  <Grid item xs={12} lg={4}>
-                    <TextField
-                      {...register("adminAddress")}
-                      fullWidth
-                      error={errors.adminAddress ? true : false}
-                      label="Address"
-                      variant="outlined"
-                      helperText={errors.adminAddress?.message || ""}
-                    />
-                  </Grid>
-                  <Grid item xs={12} lg={4}>
-                    <TextField
-                      {...register("adminDescription")}
-                      fullWidth
-                      error={errors.adminDescription ? true : false}
-                      label="adminDescription"
-                      multiline
-                      minRows={4}
-                      variant="outlined"
-                      helperText={errors.adminDescription?.message || ""}
-                    />
-                  </Grid>
-                </>
-              )}
-              {/* GEO SHAPE */}
-              {areaServed === "geo" && (
-                <>
-                  <Grid item xs={12} lg={12}>
-                    <DrawPolygonMap
-                      setGeoJson={setGeoJsonAreaServed}
-                      id={"area_served_map"}
-                    />
-                  </Grid>
-                </>
-              )}
-              {/* PLACE */}
-
-              {areaServed === "place" && (
-                <>
-                  <Grid item xs={12} lg={12}>
-                    <Autocomplete
-                      disablePortal
-                      options={[]}
-                      sx={{ width: 300 }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          {...register("areaServedPlace")}
-                          error={errors.areaServedPlace ? true : false}
-                          helperText={errors.areaServedPlace?.message || ""}
-                          label="Place"
-                        />
-                      )}
-                    />
-                  </Grid>
-                </>
-              )}
-
-              {areaServed === "other" && (
-                <>
-                  <Grid item xs={12} lg={12}>
-                    <TextField
-                      {...register("areaServedOther")}
-                      fullWidth
-                      error={errors.areaServedOther ? true : false}
-                      label="Other"
-                      variant="outlined"
-                      helperText={errors.areaServedOther?.message || ""}
-                    />
-                  </Grid>
-                </>
-              )}
-            </Grid>
-            {/* ELIGIBLE REGION */}
-            <Grid
-              item
-              container
-              xs={12}
-              lg={12}
-              rowSpacing={2}
-              columnSpacing={2}
-            >
-              <Grid item xs={12} lg={12}>
-                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
-                  ELIGIBLE REGION
-                </Divider>
-              </Grid>
-              <Grid item xs={12} lg={12}>
-                <RadioGroup
-                  row
-                  name="row-radio-item-requested"
-                  sx={{ display: "flex", justifyContent: "space-between" }}
-                  value={eligibleRegion}
-                  onChange={(e) => setEligibleRegion(e.target.value)}
-                >
-                  <FormControlLabel
-                    value="geo"
-                    control={<Radio />}
-                    label="Geo Shape"
-                  />
-                  <FormControlLabel
-                    value="place"
-                    control={<Radio />}
-                    label="Place"
-                  />
-                  <FormControlLabel
-                    value="other"
-                    control={<Radio />}
-                    label="Other"
-                  />
-                </RadioGroup>
-              </Grid>
-
-              {/* GEO SHAPE */}
-              {eligibleRegion === "geo" && (
-                <>
-                  <Grid item xs={12} lg={12}>
-                    <DrawPolygonMap
-                      setGeoJson={setGeoJsonEligibleRegion}
-                      id={"eligible_region_map"}
-                    />
-                  </Grid>
-                </>
-              )}
-
-              {/* PLACE */}
-
-              {eligibleRegion === "place" && (
-                <>
-                  <Grid item xs={12} lg={12}>
-                    <Autocomplete
-                      disablePortal
-                      options={[]}
-                      sx={{ width: 300 }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          {...register("eligiblePlace")}
-                          error={errors.eligiblePlace ? true : false}
-                          helperText={errors.eligiblePlace?.message || ""}
-                          label="Place"
-                        />
-                      )}
-                    />
-                  </Grid>
-                </>
-              )}
-
-              {eligibleRegion === "other" && (
-                <>
-                  <Grid item xs={12} lg={12}>
-                    <TextField
-                      {...register("eligibleOther")}
-                      fullWidth
-                      error={errors.eligibleOther ? true : false}
-                      label="Other"
-                      variant="outlined"
-                      helperText={errors.eligibleOther?.message || ""}
-                    />
-                  </Grid>
-                </>
-              )}
-            </Grid>
-            {/* ELIGIBLE DURATION */}
-            <Grid
-              item
-              container
-              xs={12}
-              lg={12}
-              rowSpacing={2}
-              columnSpacing={2}
-            >
-              <Grid item xs={12} lg={12}>
-                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
-                  ELIGIBLE DURATION
-                </Divider>
-              </Grid>
-              <Grid item xs={12} lg={4}>
-                <TextField
-                  {...register("durationValue")}
-                  fullWidth
-                  error={errors.durationValue ? true : false}
-                  label="Value"
-                  variant="outlined"
-                  helperText={errors.durationValue?.message || ""}
-                />
-              </Grid>
-              <Grid item xs={12} lg={4}>
-                <TextField
-                  {...register("unitCode")}
-                  fullWidth
-                  error={errors.unitCode ? true : false}
-                  label="Unit Code"
-                  variant="outlined"
-                  helperText={errors.unitCode?.message || ""}
-                />
-              </Grid>
-              <Grid item xs={12} lg={4}>
-                <TextField
-                  {...register("unitText")}
-                  fullWidth
-                  error={errors.unitText ? true : false}
-                  label="Unit Text"
-                  variant="outlined"
-                  helperText={errors.unitText?.message || ""}
-                />
-              </Grid>
-            </Grid>
-            {/* INELIGIBLE REGION */}
-            <Grid
-              item
-              container
-              xs={12}
-              lg={12}
-              rowSpacing={2}
-              columnSpacing={2}
-            >
-              <Grid item xs={12} lg={12}>
-                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
-                  INELIGIBLE REGION
-                </Divider>
-              </Grid>
-              <Grid item xs={12} lg={12}>
-                <RadioGroup
-                  row
-                  name="row-radio-item-requested"
-                  sx={{ display: "flex", justifyContent: "space-between" }}
-                  value={ineligibleRegion}
-                  onChange={(e) => setInEligibleRegion(e.target.value)}
-                >
-                  <FormControlLabel
-                    value="geo"
-                    control={<Radio />}
-                    label="Geo Shape"
-                  />
-                  <FormControlLabel
-                    value="place"
-                    control={<Radio />}
-                    label="Place"
-                  />
-                  <FormControlLabel
-                    value="other"
-                    control={<Radio />}
-                    label="Other"
-                  />
-                </RadioGroup>
-              </Grid>
-
-              {/* GEO SHAPE */}
-              {ineligibleRegion === "geo" && (
-                <>
-                  <Grid item xs={12} lg={12}>
-                    <DrawPolygonMap
-                      setGeoJson={setGeoJsonIneligibleRegion}
-                      id={"ineligible_region_map"}
-                    />
-                  </Grid>
-                </>
-              )}
-
-              {/* PLACE */}
-
-              {ineligibleRegion === "place" && (
-                <>
-                  <Grid item xs={12} lg={12}>
-                    <Autocomplete
-                      disablePortal
-                      options={[]}
-                      sx={{ width: 300 }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          {...register("ineligiblePlace")}
-                          error={errors.ineligiblePlace ? true : false}
-                          helperText={errors.ineligiblePlace?.message || ""}
-                          label="Place"
-                        />
-                      )}
-                    />
-                  </Grid>
-                </>
-              )}
-
-              {ineligibleRegion === "other" && (
-                <>
-                  <Grid item xs={12} lg={12}>
-                    <TextField
-                      {...register("ineligibleOther")}
-                      fullWidth
-                      error={errors.ineligibleOther ? true : false}
-                      label="Other"
-                      variant="outlined"
-                      helperText={errors.ineligibleOther?.message || ""}
-                    />
-                  </Grid>
-                </>
-              )}
-            </Grid>
-            <Grid item xs={12}>
-              <Grid item xs={12} lg={12}>
-                <Divider />
-              </Grid>
-            </Grid>
-            <Grid item xs={12} lg={6}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DesktopDatePicker
-                  onChange={(value) => setValue("validFrom", value)}
-                  value={getValues().validFrom}
-                  label="Valid From"
-                  renderInput={(params) => (
-                    <TextField
-                      error={errors.validFrom ? true : false}
-                      helperText={errors.validFrom?.message || ""}
-                      margin="normal"
-                      name="validFrom"
-                      variant="standard"
-                      fullWidth
-                      {...params}
-                    />
-                  )}
-                  defaultValue={dayjs("2022-04-17")}
-                />
-              </LocalizationProvider>
-            </Grid>
-            <Grid item xs={12} lg={6}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DesktopDatePicker
-                  onChange={(value) => setValue("validThrough", value)}
-                  value={getValues().validThrough}
-                  label="Valid Through"
-                  renderInput={(params) => (
-                    <TextField
-                      error={errors.validThrough ? true : false}
-                      helperText={errors.validThrough?.message || ""}
-                      margin="normal"
-                      name="validThrough"
-                      variant="standard"
-                      fullWidth
-                      {...params}
-                    />
-                  )}
-                  defaultValue={dayjs("2022-04-17")}
-                />
-              </LocalizationProvider>
-            </Grid>
-            {/* PRICE SPECIFICATION */}
-            <Grid
-              item
-              container
-              xs={12}
-              lg={12}
-              rowSpacing={2}
-              columnSpacing={2}
-            >
-              <Grid item xs={12} lg={12}>
-                <Divider textAlign="left" sx={{ fontWeight: 700 }}>
-                  PRICE SPECIFICATION
-                </Divider>
-              </Grid>
-              <Grid item xs={12} lg={3}>
-                <TextField
-                  {...register("minPrice")}
-                  fullWidth
-                  error={errors.minPrice ? true : false}
-                  variant="outlined"
-                  helperText={errors.minPrice?.message || ""}
-                  label="Min Price"
-                  type="number"
-                />
-              </Grid>
-              <Grid item xs={12} lg={3}>
-                <TextField
-                  {...register("maxPrice")}
-                  fullWidth
-                  error={errors.maxPrice ? true : false}
-                  variant="outlined"
-                  helperText={errors.maxPrice?.message || ""}
-                  label="Max Price"
-                  type="number"
-                />
-              </Grid>
-              <Grid item xs={12} lg={3}>
-                <TextField
-                  {...register("price")}
-                  fullWidth
-                  error={errors.price ? true : false}
-                  variant="outlined"
-                  helperText={errors.price?.message || ""}
-                  label="Price"
-                  type="number"
-                />
-              </Grid>
-              <Grid item xs={12} lg={3}>
-                <TextField
-                  {...register("priceCurrency")}
-                  fullWidth
-                  error={errors.priceCurrency ? true : false}
-                  variant="outlined"
-                  helperText={errors.priceCurrency?.message || ""}
-                  label="Price Currency"
-                />
-              </Grid>
-            </Grid>
-            <Grid item xs={12}>
-              <Grid item xs={12} lg={12}>
-                <Divider />
-              </Grid>
-            </Grid>
-            <Grid item xs={12} lg={6}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DesktopDatePicker
-                  onChange={(value) => setValue("availabilityStarts", value)}
-                  value={getValues().availabilityStarts}
-                  label="Availability Starts"
-                  renderInput={(params) => (
-                    <TextField
-                      error={errors.availabilityStarts ? true : false}
-                      helperText={errors.availabilityStarts?.message || ""}
-                      margin="normal"
-                      name="availabilityStarts"
-                      variant="standard"
-                      fullWidth
-                      {...params}
-                    />
-                  )}
-                  defaultValue={dayjs("2022-04-17")}
-                />
-              </LocalizationProvider>
-            </Grid>
-            <Grid item xs={12} lg={6}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DesktopDatePicker
-                  onChange={(value) => setValue("availabilityEnds", value)}
-                  value={getValues().availabilityEnds}
-                  label="Availability Ends"
-                  renderInput={(params) => (
-                    <TextField
-                      error={errors.availabilityEnds ? true : false}
-                      helperText={errors.availabilityEnds?.message || ""}
-                      margin="normal"
-                      name="availabilityEnds"
-                      variant="standard"
-                      fullWidth
-                      {...params}
-                    />
-                  )}
-                  defaultValue={dayjs("2022-04-17")}
-                />
-              </LocalizationProvider>
-            </Grid>
-            <Grid item xs={12}>
-              <Button variant="contained" type="submit" endIcon={<SendIcon />}>
-                Send
-              </Button>
-            </Grid>
-          </Grid>
-        </Box>
-      </form>
+          </TabPanel>
+        </TabContext>
+      </Box>
     </Container>
   );
 };

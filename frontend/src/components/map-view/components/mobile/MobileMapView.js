@@ -50,6 +50,7 @@ const MobileMapView = (props) => {
     currentURI,
     setInitMapBounds,
     mapBounds,
+    changeZoom,
   } = props;
   return (
     <>
@@ -113,6 +114,7 @@ const MobileMapView = (props) => {
           changeShowSearchArea={changeShowSearchArea}
           selectedElem={selectedElem}
           setInitMapBounds={setInitMapBounds}
+          changeZoom={changeZoom}
         />
       </Box>
     </>

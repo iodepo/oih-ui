@@ -37,7 +37,7 @@ export default function MapViewerEntrypoint() {
         >
           <Box
             sx={{
-              height: "486px",
+              height: "600px",
               borderRadius: "30px",
               border: "10px solid gray",
               width: "100%",
@@ -84,6 +84,7 @@ export default function MapViewerEntrypoint() {
               borderRadius: { xs: 2, lg: 1 },
               width: "auto",
               backgroundColor: palette + "buttonBgColor",
+              fontSize: "20px",
               marginTop: 2,
               textTransform: "none",
             }}
