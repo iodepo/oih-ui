@@ -204,7 +204,7 @@ export {
 };
 ```
 
-3. In the `typesMap.js` file, add a new object to the TypesMap object at the end. Following the same logic, import the new object like related to the new tab and always use the same ID as a name.
+3. In the `[INSTALLDIR]/frontend/frontend/src/portability/typesMap.js` file, add a new object to the TypesMap object at the end. Following the same logic, import the new object like related to the new tab and always use the same ID as a name.
 
 ```javascript
 const TypesMap = {
