@@ -184,7 +184,7 @@ const LayerMapDesktop = (props) => {
               }}
               max={1}
               valueLabelDisplay="auto"
-              sx={{ color: "#2B498C !important" }}
+              sx={{ color: palette + "sliderColor !important" }}
             />
           </Box>
         </Stack>

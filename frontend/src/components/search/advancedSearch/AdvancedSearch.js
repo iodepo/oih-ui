@@ -142,12 +142,12 @@ const AdvancedSearch = (props) => {
     <>
       <Grid item container gap={1} sx={{ mt: 2 }}>
         <Grid item xs={12} lg={8}>
-          <Box sx={{ background: "#E8EDF23F", padding: "10px" }}>
+          <Box sx={{ backgroundColor: palette + "bgBox", padding: "10px" }}>
             <Typography
               variant="body1"
               alignItems={"start"}
               sx={{
-                color: "#BDC7DB",
+                color: palette + "colorTextProTip",
                 fontWeight: 700,
                 fontSize: "14px",
               }}

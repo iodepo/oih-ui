@@ -73,7 +73,9 @@ const SettingsMapDesktop = (props) => {
                         }
                       }}
                       sx={{
-                        ".Mui-checked": { color: "#2B498C !important" },
+                        ".Mui-checked": {
+                          color: palette + "sliderColor !important",
+                        },
                       }}
                     />
                   }
@@ -81,7 +83,7 @@ const SettingsMapDesktop = (props) => {
                     ".MuiTypography-root": {
                       fontSize: "12px",
                       fontWeight: 700,
-                      color: "#1A2C54",
+                      color: palette + "colorTypography",
                     },
                   }}
                   label={translationState.translation["Show Clustering"]}
@@ -152,7 +154,7 @@ const SettingsMapDesktop = (props) => {
                         fontWeight: 700,
                         color: showClusters
                           ? palette + "colorTypography"
-                          : "#DEE2ED !important",
+                          : palette + "colorTypographyLight !important",
                       }}
                     >
                       {translationState.translation["Opacity layer"]}
@@ -172,9 +174,9 @@ const SettingsMapDesktop = (props) => {
                       max={1}
                       valueLabelDisplay="auto"
                       sx={{
-                        color: "#2B498C !important",
+                        color: palette + "sliderColor !important",
                         "&.Mui-disabled": {
-                          color: "#DEE2ED !important",
+                          color: palette + "sliderDisabled !important",
                         },
                       }}
                     />
@@ -206,7 +208,9 @@ const SettingsMapDesktop = (props) => {
                         }
                       }}
                       sx={{
-                        ".Mui-checked": { color: "#2B498C !important" },
+                        ".Mui-checked": {
+                          color: palette + "checkedColor !important",
+                        },
                       }}
                     />
                   }
@@ -232,7 +236,9 @@ const SettingsMapDesktop = (props) => {
                         }
                       }}
                       sx={{
-                        ".Mui-checked": { color: "#2B498C !important" },
+                        ".Mui-checked": {
+                          color: palette + "checkedColor !important",
+                        },
                       }}
                     />
                   }

@@ -42,7 +42,7 @@ const RecordMetadata = () => {
           <Box
             sx={{
               padding: "40px",
-              background: "#E8EDF27F",
+              background: palette + "bgBox",
             }}
           >
             <JsonView src={jsonFormatted} />

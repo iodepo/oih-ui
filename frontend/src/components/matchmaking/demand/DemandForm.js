@@ -20,13 +20,13 @@ import Button from "@mui/material/Button";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import TextField from "@mui/material/TextField";
 import DrawPolygonMap from "../DrawPolygonMap";
-import Autocomplete from "@mui/material/Autocomplete";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import ReCAPTCHA from "react-google-recaptcha";
 import { SITE_KEY_RECAPTCHA } from "portability/configuration";
+import AutocompleteGoogle from "../components/Autocomplete";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -96,11 +96,37 @@ const DemandForm = () => {
     }
   };
 
+  function sendOffer() {
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    const raw = JSON.stringify({
+      "@context": {
+        "@vocab": "http://schema.org/",
+      },
+      "@type": "Offer",
+      "@id": "Offer",
+      description: "description",
+      disambiguatingDescription: "disambiguating",
+      name: "name",
+    });
+
+    const requestOptions = {
+      method: "POST",
+      body: raw,
+    };
+
+    fetch("http://localhost:6789/id/ldn/ID/inbox", requestOptions)
+      .then((response) => response.text())
+      .then((result) => console.log(result))
+      .catch((error) => console.error(error));
+  }
+
   function createJsonLd(data) {
     //Creation of Json-ld
 
     let jsonld = {
-      "@context": "https://schema.org",
+      "@context": { "@vocab": "http://schema.org/" },
       "@type": "Demand",
       "@id": "Demand",
     };
@@ -115,7 +141,6 @@ const DemandForm = () => {
     jsonld = {
       ...jsonld,
       identifier: {
-        "@context": "https://schema.org",
         "@type": "PropertyValue",
         "@id": "PropertyValue",
         url: data.identifierUrl,
@@ -128,7 +153,6 @@ const DemandForm = () => {
     switch (itemRequested) {
       case "creative-work":
         jsonld["itemOffered"].push({
-          "@context": "https://schema.org",
           "@type": "CreativeWork",
           "@id": "CreativeWork",
           name: data.creativeName,
@@ -138,7 +162,6 @@ const DemandForm = () => {
         break;
       case "event":
         jsonld["itemOffered"].push({
-          "@context": "https://schema.org",
           "@type": "Event",
           "@id": "Event",
           startDate: data.eventStartDate,
@@ -152,14 +175,12 @@ const DemandForm = () => {
       case "product":
         if (imageProductSelect === "external") {
           jsonld["itemOffered"].push({
-            "@context": "https://schema.org",
             "@type": "Product",
             "@id": "Product",
             name: data.productName,
             url: data.productURL,
             description: data.productDescription,
             image: {
-              "@context": "https://schema.org",
               "@type": "URL",
               "@id": "URL",
               downloadUrl: data.productImageExternalURL,
@@ -167,14 +188,12 @@ const DemandForm = () => {
           });
         } else {
           jsonld["itemOffered"].push({
-            "@context": "https://schema.org",
             "@type": "Product",
             "@id": "Product",
             name: data.productName,
             url: data.productURL,
             description: data.productDescription,
             image: {
-              "@context": "https://schema.org",
               "@type": "ImageObject",
               "@id": "ImageObject",
               //content?
@@ -187,7 +206,6 @@ const DemandForm = () => {
         break;
       case "service":
         jsonld["itemOffered"].push({
-          "@context": "https://schema.org",
           "@type": "Service",
           "@id": "Service",
           name: data.serviceName,
@@ -206,7 +224,6 @@ const DemandForm = () => {
       jsonld = {
         ...jsonld,
         image: {
-          "@context": "https://schema.org",
           "@type": "URL",
           "@id": "URL",
           downloadUrl: data.imageExternalURL,
@@ -216,7 +233,6 @@ const DemandForm = () => {
       jsonld = {
         ...jsonld,
         image: {
-          "@context": "https://schema.org",
           "@type": "ImageObject",
           "@id": "ImageObject",
           //content?
@@ -234,7 +250,6 @@ const DemandForm = () => {
     switch (areaServed) {
       case "admin":
         jsonld["areaServed"].push({
-          "@context": "https://schema.org",
           "@type": "AdministrativeArea",
           "@id": "AdministrativeArea",
           name: data.adminName,
@@ -244,7 +259,6 @@ const DemandForm = () => {
         break;
       case "geo":
         jsonld["areaServed"].push({
-          "@context": "https://schema.org",
           "@type": "GeoShape",
           "@id": "GeoShape",
           polygon: geoJsonAreaServed,
@@ -252,7 +266,6 @@ const DemandForm = () => {
         break;
       case "place":
         jsonld["areaServed"].push({
-          "@context": "https://schema.org",
           "@type": "Place",
           "@id": "Place",
           address: data.areaServedPlace,
@@ -260,7 +273,6 @@ const DemandForm = () => {
         break;
       case "other":
         jsonld["areaServed"].push({
-          "@context": "https://schema.org",
           "@type": "Text",
           "@id": "Text",
           description: data.areaServedOther,
@@ -276,7 +288,6 @@ const DemandForm = () => {
     switch (eligibleRegion) {
       case "geo":
         jsonld["eligibleRegion"].push({
-          "@context": "https://schema.org",
           "@type": "GeoShape",
           "@id": "GeoShape",
           polygon: geoJsonEligibleRegion,
@@ -284,7 +295,6 @@ const DemandForm = () => {
         break;
       case "place":
         jsonld["eligibleRegion"].push({
-          "@context": "https://schema.org",
           "@type": "Place",
           "@id": "Place",
           address: data.eligiblePlace,
@@ -292,7 +302,6 @@ const DemandForm = () => {
         break;
       case "other":
         jsonld["eligibleRegion"].push({
-          "@context": "https://schema.org",
           "@type": "Text",
           "@id": "Text",
           description: data.eligibleOther,
@@ -308,7 +317,6 @@ const DemandForm = () => {
       validFrom: data.validFrom,
       validThrough: data.validThrough,
       priceSpecification: {
-        "@context": "https://schema.org",
         "@type": "PriceSpecification",
         "@id": "PriceSpecification",
         minPrice: data.minPrice,
@@ -360,6 +368,7 @@ const DemandForm = () => {
       }
     }
   };
+  const palette = "custom.matchmaking.demand.";
   return (
     <Container maxWidth="lg">
       <Box
@@ -385,7 +394,7 @@ const DemandForm = () => {
       <Box
         sx={{
           padding: "40px",
-          background: "#E8EDF27F",
+          backgroundColor: palette + "bgBox",
         }}
       >
         <TabContext value={typeCompilation}>
@@ -402,6 +411,9 @@ const DemandForm = () => {
             <form onSubmit={handleSubmit(onSubmit)}>
               <Grid container rowSpacing={4} columnSpacing={2}>
                 <Grid item xs={12} lg={6}>
+                  <Button variant="text" color="primary" onClick={sendOffer}>
+                    Click me
+                  </Button>
                   <TextField
                     {...register("email")}
                     fullWidth
@@ -1085,19 +1097,10 @@ const DemandForm = () => {
                   {areaServed === "place" && (
                     <>
                       <Grid item xs={12} lg={12}>
-                        <Autocomplete
-                          disablePortal
-                          options={[]}
-                          sx={{ width: 300 }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              {...register("areaServedPlace")}
-                              error={errors.areaServedPlace ? true : false}
-                              helperText={errors.areaServedPlace?.message || ""}
-                              label="Place"
-                            />
-                          )}
+                        <AutocompleteGoogle
+                          onSelectPlace={(place) =>
+                            setValue("areaServedPlace", place)
+                          }
                         />
                       </Grid>
                     </>
@@ -1175,19 +1178,10 @@ const DemandForm = () => {
                   {eligibleRegion === "place" && (
                     <>
                       <Grid item xs={12} lg={12}>
-                        <Autocomplete
-                          disablePortal
-                          options={[]}
-                          sx={{ width: 300 }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              {...register("eligiblePlace")}
-                              error={errors.eligiblePlace ? true : false}
-                              helperText={errors.eligiblePlace?.message || ""}
-                              label="Place"
-                            />
-                          )}
+                        <AutocompleteGoogle
+                          onSelectPlace={(place) =>
+                            setValue("eligiblePlace", place)
+                          }
                         />
                       </Grid>
                     </>

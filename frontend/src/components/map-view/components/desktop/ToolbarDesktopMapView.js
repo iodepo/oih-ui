@@ -148,19 +148,19 @@ const ToolbarDesktopMapView = (props) => {
             variant="contained"
             sx={{
               textTransform: "unset",
-              backgroundColor: "white",
+              backgroundColor: palette + "bgBox2",
               borderRadius: 8,
-              color: "#1A2C54",
+              color: palette + "colorButton",
               "&:hover": {
-                color: "white",
-                backgroundColor: "#1A2C54",
+                color: palette + "colorBox",
+                backgroundColor: palette + "bgBox",
                 ".MuiSvgIcon-root": {
-                  color: "white",
+                  color: palette + "colorBox",
                 },
               },
             }}
             onClick={() => searchThisArea()}
-            startIcon={<SearchIcon sx={{ color: "#1A2C54" }} />}
+            startIcon={<SearchIcon sx={{ color: palette + "colorIcon" }} />}
           >
             Search this area
           </Button>

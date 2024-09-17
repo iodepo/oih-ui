@@ -30,7 +30,7 @@ const MatchmakingModal = (props) => {
     <>
       <LinkMui
         sx={{
-          color: "#40AAD3",
+          color: palette + "colorLink",
           textDecoration: "none",
           cursor: "pointer",
           transition: "transform 0.3s",

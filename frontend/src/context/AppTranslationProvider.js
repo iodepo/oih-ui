@@ -11,7 +11,7 @@ const SupportedLangugesEnum = {
   Es: "ES",
   En: "EN",
   Fr: "FR",
-  Ru: "RU",
+  Ru: "Py",
 };
 function AppTranslationProvider(props) {
   const { children } = props;
@@ -23,7 +23,7 @@ function AppTranslationProvider(props) {
   if (useCookies.getCookie("language") === "EN") {
     data = EnDataTranslation;
     key = SupportedLangugesEnum.En;
-  } else if (useCookies.getCookie("language") === "RU") {
+  } else if (useCookies.getCookie("language") === "Py") {
     data = RuDataTranslation;
     key = SupportedLangugesEnum.Ru;
   } else if (useCookies.getCookie("language") === "ES") {

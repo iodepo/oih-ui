@@ -108,7 +108,7 @@ const LayerMapMobile = (props) => {
         orientation="vertical"
         variant="contained"
         sx={{
-          backgroundColor: "#FFFFFF",
+          backgroundColor: palette + "bgButton",
           borderRadius: 2,
           width: "45px",
           boxShadow: 0,
@@ -292,7 +292,7 @@ const LayerMapMobile = (props) => {
               }}
               max={1}
               valueLabelDisplay="auto"
-              sx={{ color: "#2B498C !important" }}
+              sx={{ color: palette + "colorSlider !important" }}
             />
           </Box>
         </Stack>
@@ -345,7 +345,9 @@ const LayerMapMobile = (props) => {
                             }
                           }}
                           sx={{
-                            ".Mui-checked": { color: "#2B498C !important" },
+                            ".Mui-checked": {
+                              color: palette + "checkedColor !important",
+                            },
                           }}
                         />
                       }
@@ -353,7 +355,7 @@ const LayerMapMobile = (props) => {
                         ".MuiTypography-root": {
                           fontSize: "12px",
                           fontWeight: 700,
-                          color: "#1A2C54",
+                          color: palette + "colorTypography",
                         },
                       }}
                       label={translationState.translation["Show Clustering"]}
@@ -438,7 +440,7 @@ const LayerMapMobile = (props) => {
                           }}
                           max={1}
                           valueLabelDisplay="auto"
-                          sx={{ color: "#2B498C !important" }}
+                          sx={{ color: palette + "colorSlider !important" }}
                         />
                       </Box>
                     )}
@@ -465,7 +467,9 @@ const LayerMapMobile = (props) => {
                             }
                           }}
                           sx={{
-                            ".Mui-checked": { color: "#2B498C !important" },
+                            ".Mui-checked": {
+                              color: palette + "checkedColor !important",
+                            },
                           }}
                         />
                       }
@@ -491,7 +495,9 @@ const LayerMapMobile = (props) => {
                             }
                           }}
                           sx={{
-                            ".Mui-checked": { color: "#2B498C !important" },
+                            ".Mui-checked": {
+                              color: palette + "checkedColor !important",
+                            },
                           }}
                         />
                       }

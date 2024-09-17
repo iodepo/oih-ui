@@ -106,6 +106,7 @@ const ToolbarMobileMapView = (props) => {
       });
     });
   };
+  const palette = "custom.mapView.mobile.toolbar.";
   return (
     <>
       <Box
@@ -149,14 +150,14 @@ const ToolbarMobileMapView = (props) => {
                 variant="contained"
                 sx={{
                   textTransform: "unset",
-                  backgroundColor: "white",
+                  backgroundColor: palette + "bgButton",
                   borderRadius: 8,
-                  color: "#1A2C54",
+                  color: palette + "colorButton",
                   "&:hover": {
-                    color: "white",
-                    backgroundColor: "#1A2C54",
+                    color: palette + "bgButton",
+                    backgroundColor: palette + "colorButton",
                     ".MuiSvgIcon-root": {
-                      color: "white",
+                      color: palette + "bgButton",
                     },
                   },
                 }}
@@ -164,7 +165,9 @@ const ToolbarMobileMapView = (props) => {
                   searchThisArea();
                   setOpenSwipeDrawer(true);
                 }}
-                startIcon={<SearchIcon sx={{ color: "#1A2C54" }} />}
+                startIcon={
+                  <SearchIcon sx={{ color: palette + "colorButton" }} />
+                }
               >
                 Search this area
               </Button>

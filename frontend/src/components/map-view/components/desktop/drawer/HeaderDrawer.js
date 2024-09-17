@@ -11,15 +11,15 @@ import { cutWithDots } from "components/results/ResultDetails";
 import Stack from "@mui/material/Stack";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import Avatar from "@mui/material/Avatar";
 import useCookies from "context/useCookies";
 import { SupportedLangugesEnum } from "context/AppTranslationProvider";
 import { useAppTranslation } from "context/context/AppTranslation";
+import TranslateIcon from "@mui/icons-material/Translate";
 
 const HeaderDrawer = (props) => {
   const {
     changeTranslation,
-    languageIcon,
+    
     selectedFacets,
     facetSearch,
     searchText,
@@ -109,7 +109,7 @@ const HeaderDrawer = (props) => {
             alignItems: "center",
           }}
         >
-          <Avatar src={languageIcon} sx={{ width: 20, height: 20 }} />
+          <TranslateIcon sx={{ width: 20, height: 20 }} />
         </Box>
       </Box>
       <Box p={"10px 20px 40px 20px"}>
@@ -189,7 +189,7 @@ const HeaderDrawer = (props) => {
             <TextField
               fullWidth
               sx={{
-                color: "#7B8FB7",
+                color: palette + "colorTypography",
                 backgroundColor: palette + "bgTextfield",
                 borderRadius: "4px",
                 ".MuiInputBase-root": {

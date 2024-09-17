@@ -161,7 +161,7 @@ const MobileAS = (props) => {
                     sx={{
                       border: " 1px solid #aaa",
                       borderRadius: "6px",
-                      backgroundColor: "#FBE5E6",
+                      backgroundColor: palette + "bgIconDelete",
                     }}
                     onClick={() => {
                       setSearchAdvancedQuery((prevState) => {
@@ -184,7 +184,7 @@ const MobileAS = (props) => {
                       });
                     }}
                   >
-                    <DeleteIcon sx={{ color: "#CC0000" }} />
+                    <DeleteIcon sx={{ color: palette + "colorIconRed" }} />
                   </IconButton>
                 )}
               </Grid>

@@ -33,11 +33,7 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AdvancedSearch from "./advancedSearch/AdvancedSearch";
 import { Export } from "../search-hub/Export";
-import Avatar from "@mui/material/Avatar";
-import FrenchFlag from "../../resources/svg/FrenchFlag.svg";
-import RussianFlag from "../../resources/svg/RussianFlag.svg";
-import EnglishFlag from "../../resources/svg/EnglishFlag.svg";
-import SpanishFlag from "../../resources/svg/SpanishFlag.svg";
+import TranslateIcon from "@mui/icons-material/Translate";
 import Tooltip from "@mui/material/Tooltip";
 import { trackingMatomo } from "utilities/trackingUtility";
 
@@ -61,7 +57,6 @@ export default function Search(props) {
 
   const changeTranslation = (languageCode) => {
     translationState.updateTranslation(languageCode);
-    changeLanguageIcon(languageCode);
   };
 
   const [_, url, tabName = ""] = window.location.pathname.split("/");
@@ -201,29 +196,6 @@ export default function Search(props) {
     );
   };
 
-  const [languageIcon, setLanguageIcon] = useState(EnglishFlag);
-
-  useEffect(() => {
-    changeLanguageIcon(translationState.getTranslationKey());
-  }, []);
-  const changeLanguageIcon = (languageCode) => {
-    switch (languageCode) {
-      case SupportedLangugesEnum.En:
-        setLanguageIcon(EnglishFlag);
-        break;
-      case SupportedLangugesEnum.Fr:
-        setLanguageIcon(FrenchFlag);
-        break;
-      case SupportedLangugesEnum.Es:
-        setLanguageIcon(SpanishFlag);
-        break;
-      case SupportedLangugesEnum.Ru:
-        setLanguageIcon(RussianFlag);
-        break;
-      default:
-        break;
-    }
-  };
   return isResults ? (
     <SearchResult
       region={region}
@@ -240,7 +212,6 @@ export default function Search(props) {
       searchType={searchType}
       resultCount={resultCount}
       facets={facets}
-      languageIcon={languageIcon}
       setPreviousParams={setPreviousParams}
     />
   ) : (
@@ -337,7 +308,10 @@ const SearchHome = (props) => {
                         borderWidth: { xs: 0, lg: "1px" },
                       },
                       ".MuiSelect-icon": {
-                        color: { xs: "#FFFFFF", lg: palette + "iconsColor" },
+                        color: {
+                          xs: palette + "colorIconNeutral",
+                          lg: palette + "iconsColor",
+                        },
                       },
                     }}
                   >
@@ -356,7 +330,10 @@ const SearchHome = (props) => {
             <TextField
               fullWidth
               sx={{
-                backgroundColor: { xs: "#DFE1E71A", lg: palette + "bgColor" },
+                backgroundColor: {
+                  xs: palette + "bgTextfieldMobile",
+                  lg: palette + "bgColor",
+                },
                 "& .MuiFormLabel-root": {
                   fontSize: { xs: "14px", lg: "20px" },
                 },
@@ -365,7 +342,7 @@ const SearchHome = (props) => {
                   borderTopLeftRadius: { xs: 4, lg: 0 },
                   borderBottomRightRadius: 4,
                   borderTopRightRadius: 4,
-                  color: { xs: "#7B8FB7", lg: "unset" },
+                  color: { xs: palette + "colorOutlined", lg: "unset" },
                 },
                 borderBottomRightRadius: 4,
                 borderTopRightRadius: 4,
@@ -436,7 +413,7 @@ const SearchHome = (props) => {
             key={ix}
             sx={{
               color: palette + "colorLink",
-              textDecorationColor: "#FFFFFF",
+              textDecorationColor: palette + "colorUnderline",
               cursor: "pointer",
               fontSize: "14px",
               whiteSpace: "noWrap",
@@ -466,12 +443,101 @@ const SearchHome = (props) => {
           variant="body2"
           alignItems={"start"}
           display={{ xs: "flex", lg: "none" }}
-          sx={{ color: "#BDC7DB", my: 2 }}
+          sx={{ color: palette + "colorTypography", my: 2 }}
         >
-          <LightbulbOutlinedIcon sx={{ color: "#F8BB27" }} />
+          <LightbulbOutlinedIcon sx={{ color: palette + "iconProtip" }} />
           {translationState.translation["Pro Tip"]}
         </Typography>
       </Grid>
+      <Grid
+        item
+        xs={12}
+        sx={{
+          display: { xs: "flex", lg: "none" },
+        }}
+        justifyContent={"end"}
+      >
+        <Box
+          sx={{
+            width: "100px",
+            display: "flex",
+            height: "max-content",
+          }}
+        >
+          <Select
+            defaultValue={"EN"}
+            value={
+              useCookies.getCookie("language")
+                ? useCookies.getCookie("language")
+                : SupportedLangugesEnum.En
+            }
+            name="languageChoice"
+            onChange={(e) => changeTranslation(e.target.value)}
+            sx={{
+              backgroundColor: palette + "bgColorSelectDesktop",
+
+              color: palette + "iconsColor",
+              fontWeight: 600,
+              borderRadius: 1,
+              height: "34px",
+              width: "70px",
+              ".MuiSelect-outlined": {
+                overflow: "unset",
+              },
+              ".MuiOutlinedInput-notchedOutline": {
+                borderColor: palette + "borderColorSelect",
+                borderRight: 0,
+              },
+              borderTopRightRadius: 0,
+              borderBottomRightRadius: 0,
+              ".MuiSelect-icon": {
+                color: palette + "iconsColor",
+              },
+            }}
+          >
+            <MenuItem
+              key={SupportedLangugesEnum.En}
+              value={SupportedLangugesEnum.En}
+            >
+              {SupportedLangugesEnum.En}
+            </MenuItem>
+            <MenuItem
+              key={SupportedLangugesEnum.Es}
+              value={SupportedLangugesEnum.Es}
+            >
+              {SupportedLangugesEnum.Es}
+            </MenuItem>
+            <MenuItem
+              key={SupportedLangugesEnum.Ru}
+              value={SupportedLangugesEnum.Ru}
+            >
+              {SupportedLangugesEnum.Ru}
+            </MenuItem>
+            <MenuItem
+              key={SupportedLangugesEnum.Fr}
+              value={SupportedLangugesEnum.Fr}
+            >
+              {SupportedLangugesEnum.Fr}
+            </MenuItem>
+          </Select>
+          <Box
+            sx={{
+              width: "30px",
+              border: "1px solid",
+              borderColor: palette + "borderColorSelect",
+              borderTopRightRadius: 3,
+              borderBottomRightRadius: 3,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: palette + "bgColorSelectDesktop",
+            }}
+          >
+            <TranslateIcon sx={{ width: 20, height: 20 }} />
+          </Box>
+        </Box>
+      </Grid>
+
       <Grid
         item
         xs={12}
@@ -502,9 +568,89 @@ const SearchHome = (props) => {
         item
         display={{ xs: "flex", lg: "flex" }}
         justifyContent={{ xs: "center", lg: "end" }}
+        gap={2}
         xs={12}
         lg={2}
       >
+        <Box
+          sx={{
+            width: "100px",
+            display: { xs: "none", lg: "flex" },
+            height: "max-content",
+          }}
+        >
+          <Select
+            defaultValue={"EN"}
+            value={
+              useCookies.getCookie("language")
+                ? useCookies.getCookie("language")
+                : SupportedLangugesEnum.En
+            }
+            name="languageChoice"
+            onChange={(e) => changeTranslation(e.target.value)}
+            sx={{
+              backgroundColor: palette + "bgColorSelectDesktop",
+
+              color: palette + "iconsColor",
+              fontWeight: 600,
+              borderRadius: 1,
+              height: "34px",
+              width: "70px",
+              ".MuiSelect-outlined": {
+                overflow: "unset",
+              },
+              ".MuiOutlinedInput-notchedOutline": {
+                borderColor: palette + "borderColorSelect",
+                borderRight: 0,
+              },
+              borderTopRightRadius: 0,
+              borderBottomRightRadius: 0,
+              ".MuiSelect-icon": {
+                color: palette + "iconsColor",
+              },
+            }}
+          >
+            <MenuItem
+              key={SupportedLangugesEnum.En}
+              value={SupportedLangugesEnum.En}
+            >
+              {SupportedLangugesEnum.En}
+            </MenuItem>
+            <MenuItem
+              key={SupportedLangugesEnum.Es}
+              value={SupportedLangugesEnum.Es}
+            >
+              {SupportedLangugesEnum.Es}
+            </MenuItem>
+            <MenuItem
+              key={SupportedLangugesEnum.Ru}
+              value={SupportedLangugesEnum.Ru}
+            >
+              {SupportedLangugesEnum.Ru}
+            </MenuItem>
+            <MenuItem
+              key={SupportedLangugesEnum.Fr}
+              value={SupportedLangugesEnum.Fr}
+            >
+              {SupportedLangugesEnum.Fr}
+            </MenuItem>
+          </Select>
+          <Box
+            sx={{
+              width: "30px",
+              border: "1px solid",
+              borderColor: palette + "borderColorSelect",
+              borderTopRightRadius: 3,
+              borderBottomRightRadius: 3,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: palette + "bgColorSelectDesktop",
+            }}
+          >
+            <TranslateIcon sx={{ width: 20, height: 20 }} />
+          </Box>
+        </Box>
         <LinkMui
           sx={{
             color: palette + "bgColorButton",
@@ -543,7 +689,6 @@ const SearchResult = (props) => {
     searchType,
     resultCount,
     facets,
-    languageIcon,
     setPreviousParams,
   } = props;
   const [openAdvancedSearch, setOpenAdvancedSearch] = useState(false);
@@ -915,7 +1060,9 @@ const SearchResult = (props) => {
                       alignItems: "center",
                     }}
                   >
-                    <Avatar src={languageIcon} sx={{ width: 20, height: 20 }} />
+                    
+                      <TranslateIcon sx={{ width: 20, height: 20 }} />
+                   
                   </Box>
                 </Box>
               </Box>

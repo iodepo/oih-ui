@@ -141,7 +141,8 @@ const RowData = (props) => {
       key={row.id}
       sx={{
         cursor: "pointer",
-        background: i % 2 === 0 ? "#FFFFFF" : "#E8EDF2",
+        background:
+          i % 2 === 0 ? palette + "bgTableNeutral" : palette + "bgTable",
         ".MuiTableCell-root": {
           border: 0,
         },

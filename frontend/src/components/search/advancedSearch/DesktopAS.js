@@ -246,9 +246,9 @@ const DesktopAS = (props) => {
                 <IconButton
                   aria-label="remove"
                   sx={{
-                    border: " 1px solid #aaa",
+                    border: "1px solid #aaa",
                     borderRadius: "6px",
-                    backgroundColor: "#FBE5E6",
+                    backgroundColor: palette + "bgIconDelete",
                   }}
                   onClick={() => {
                     setSearchAdvancedQuery((prevState) => {
@@ -271,7 +271,7 @@ const DesktopAS = (props) => {
                     });
                   }}
                 >
-                  <DeleteIcon sx={{ color: "#CC0000" }} />
+                  <DeleteIcon sx={{ color: palette + "colorIconRed" }} />
                 </IconButton>
               )}
             </Box>

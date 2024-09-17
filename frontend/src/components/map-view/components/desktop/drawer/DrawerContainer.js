@@ -5,13 +5,9 @@ import { Export } from "components/search-hub/Export";
 import Stack from "@mui/material/Stack";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import Avatar from "@mui/material/Avatar";
 import useCookies from "context/useCookies";
 import { SupportedLangugesEnum } from "context/AppTranslationProvider";
-import FrenchFlag from "../../../../../resources/svg/FrenchFlag.svg";
-import RussianFlag from "../../../../../resources/svg/RussianFlag.svg";
-import EnglishFlag from "../../../../../resources/svg/EnglishFlag.svg";
-import SpanishFlag from "../../../../../resources/svg/SpanishFlag.svg";
+import TranslateIcon from "@mui/icons-material/Translate";
 import { useAppTranslation } from "context/context/AppTranslation";
 import ResultValue from "components/search-hub/ResultValue";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
@@ -72,35 +68,12 @@ const DrawerContainer = (props) => {
   const [page, setPage] = useState(1);
   const mainBoxRef = useRef(null);
   const [mainBoxHeight, setMainBoxHeight] = useState(0);
-  const [languageIcon, setLanguageIcon] = useState(EnglishFlag);
   const [selectedResult, setSelectedResult] = useState(undefined);
-
-  useEffect(() => {
-    changeLanguageIcon(translationState.getTranslationKey());
-  }, []);
 
   useEffect(() => {
     setSelectedResult(selectedElem);
   }, [selectedElem]);
 
-  const changeLanguageIcon = (languageCode) => {
-    switch (languageCode) {
-      case SupportedLangugesEnum.En:
-        setLanguageIcon(EnglishFlag);
-        break;
-      case SupportedLangugesEnum.Fr:
-        setLanguageIcon(FrenchFlag);
-        break;
-      case SupportedLangugesEnum.Es:
-        setLanguageIcon(SpanishFlag);
-        break;
-      case SupportedLangugesEnum.Ru:
-        setLanguageIcon(RussianFlag);
-        break;
-      default:
-        break;
-    }
-  };
   useEffect(() => {
     !selectedResult &&
       setDataTable(
@@ -130,7 +103,6 @@ const DrawerContainer = (props) => {
 
   const changeTranslation = (languageCode) => {
     translationState.updateTranslation(languageCode);
-    changeLanguageIcon(languageCode);
   };
 
   useEffect(() => {
@@ -158,6 +130,7 @@ const DrawerContainer = (props) => {
     return () => mainBoxObserver.unobserve(mainBox);
   }, [selectedResult]);
 
+  const palette = "custom.mapView.desktop.drawer.";
   const translationState = useAppTranslation();
   return (
     <Box sx={{ height: "100%" }}>
@@ -165,7 +138,6 @@ const DrawerContainer = (props) => {
         <Stack sx={{ height: "100%" }}>
           <HeaderDrawer
             changeTranslation={changeTranslation}
-            languageIcon={languageIcon}
             selectedFacets={selectedFacets}
             facetSearch={facetSearch}
             searchText={searchText}
@@ -206,7 +178,11 @@ const DrawerContainer = (props) => {
             />
             <Typography
               variant="subtitle"
-              sx={{ color: "#0F1A31", fontSize: "14px", fontWeight: 700 }}
+              sx={{
+                color: palette + "colorTypography",
+                fontSize: "14px",
+                fontWeight: 700,
+              }}
             >
               {resultsCount +
                 " " +
@@ -220,7 +196,7 @@ const DrawerContainer = (props) => {
           result={selectedResult}
           setSelectedResult={setSelectedResult}
           changeTranslation={changeTranslation}
-          languageIcon={languageIcon}
+          languageIcon={TranslateIcon}
           changeSelectedElem={changeSelectedElem}
         />
       )}
@@ -233,10 +209,10 @@ const ResultDetails = (props) => {
     result,
     setSelectedResult,
     changeTranslation,
-    languageIcon,
     changeSelectedElem,
   } = props;
 
+   const palette = "custom.mapView.desktop.resultsDetails.";
   return (
     <Stack sx={{ height: "100%", ".MuiPaper-root": { border: 0 } }}>
       <Box
@@ -255,7 +231,7 @@ const ResultDetails = (props) => {
         >
           <KeyboardBackspaceIcon
             sx={{
-              color: "grey",
+              color: palette + "iconKeyboardColor",
             }}
           />
         </IconButton>
@@ -280,9 +256,9 @@ const ResultDetails = (props) => {
             sx={{
               backgroundColor: {
                 xs: "transparent",
-                lg: "#FFFFFF",
+                lg: palette + "bgSelectNeutral",
               },
-              color: "#1A2C54",
+              color: palette + "colorSelect",
               fontWeight: 600,
               borderRadius: 1,
               height: "34px",
@@ -291,13 +267,13 @@ const ResultDetails = (props) => {
                 textOverflow: "initial !important",
               },
               ".MuiOutlinedInput-notchedOutline": {
-                borderColor: "#BDC7DB",
+                borderColor: palette + "borderOutlineSelect",
                 borderRight: 0,
               },
               borderTopRightRadius: 0,
               borderBottomRightRadius: 0,
               ".MuiSelect-icon": {
-                color: "#1A2C54",
+                color: palette + "colorSelect",
               },
             }}
           >
@@ -330,7 +306,7 @@ const ResultDetails = (props) => {
             sx={{
               width: "30px",
               border: "1px solid",
-              borderColor: "#BDC7DB",
+              borderColor: palette + "borderOutlineSelect",
               borderTopRightRadius: 3,
               borderBottomRightRadius: 3,
               display: "flex",
@@ -338,7 +314,7 @@ const ResultDetails = (props) => {
               alignItems: "center",
             }}
           >
-            <Avatar src={languageIcon} sx={{ width: 20, height: 20 }} />
+            <TranslateIcon sx={{ width: 20, height: 20 }} />
           </Box>
         </Box>
       </Box>

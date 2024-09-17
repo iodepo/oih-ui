@@ -25,7 +25,7 @@ const SearchMapMobile = (props) => {
         fullWidth
         sx={{
           color: palette + "colorTextfield",
-          backgroundColor: "#E8EDF266",
+          backgroundColor: palette + "bgTextfield",
           borderRadius: "4px",
           ".MuiInputBase-root": {
             height: "30px",

@@ -8,6 +8,7 @@ import projects from "../resources/svg/projects.svg";
 import datasets from "../resources/svg/datasets.svg";
 import examplePartner from "../resources/partners/example.png";
 import backgroundImageUrl from "../resources/landing-bg_1400.jpeg";
+import { color } from "@mui/system";
 /* import ReactGA from "react-ga4";
 
 ReactGA.initialize([
@@ -16,7 +17,7 @@ ReactGA.initialize([
   },
 ]); */
 
-export const SITE_KEY_RECAPTCHA = "6LcEMgEqAAAAAF8U47d4n8ifSNWEPHfr8Jz334nM";
+export const SITE_KEY_RECAPTCHA = "6LfIRQYqAAAAAMyNprNBdj35HqjvaUpn82es5p_G";
 export const SITE_KEY_AUTOCOMPLETE = "AIzaSyAn9_ET2uS44M9LkkT4q6xNqxmEGpC_1wo";
 
 export const ITEMS_PER_PAGE = 10;
@@ -167,6 +168,16 @@ const colors = {
     darker: "#0F1A31",
     darker3: "#7B8FB7",
   },
+  secondaryColor: {
+    lightYellow: "#F8BB27",
+    lightGreen: "#1A7F37",
+    darkGreen: "#2DA44E",
+    lightGrey: "#EAEDF4",
+    darkerGrey: "#DFE1E6",
+    lightRed: "#FBE5E6",
+    darkRed: "#CC0000",
+  },
+
   accentColor: {
     main: "#40AAD3",
   },
@@ -184,7 +195,15 @@ const primaryPalette = {
       bgColor: colors.primaryColor.light,
       searchIcon: colors.primaryColor.light2,
       bgColorButton: colors.accentColor.main,
+      bgColorSelectDesktop: colors.neutral.main,
+      borderColorSelect: colors.primaryColor.light2,
       colorLink: colors.primaryColor.light,
+      colorIconNeutral: colors.neutral.main,
+      bgTextfieldMobile: colors.secondaryColor.darkerGrey,
+      colorOutlined: colors.primaryColor.darker3,
+      colorUnderline: colors.neutral.main,
+      colorTypography: colors.primaryColor.light2,
+      iconProtip: colors.secondaryColor.lightYellow
     },
     tabs: {
       bgColorBox: colors.primaryColor.darker,
@@ -217,13 +236,13 @@ const primaryPalette = {
       bgColorTextfieldMobile: colors.primaryColor.light,
       colorTextfield: colors.primaryColor.main,
       searchIcon: colors.primaryColor.darker3,
-      iconProtip: "#F8BB27",
+      iconProtip: colors.secondaryColor.lightYellow,
       bgColorButton: colors.accentColor.main,
       bgExportButton: colors.primaryColor.light,
       borderColorSelect: colors.primaryColor.light2,
       colorTextProTip: colors.primaryColor.light2,
       advancedSearch: {
-        iconProtip: "#F8BB27",
+        iconProtip: colors.secondaryColor.lightYellow,
         colorTextProTip: colors.primaryColor.light2,
         colorTypography: colors.primaryColor.dark2,
         dividerColor: colors.primaryColor.darker3,
@@ -231,6 +250,9 @@ const primaryPalette = {
         andOrColor: colors.primaryColor.light,
         buttonBgColor: colors.accentColor.main,
         clearButtonColor: colors.primaryColor.main,
+        bgBox: colors.brightLight.main,
+        bgIconDelete: colors.secondaryColor.lightRed,
+        colorIconRed: colors.secondaryColor.darkRed
       },
     },
     filters: {
@@ -252,13 +274,13 @@ const primaryPalette = {
       keywordsBorderColor: colors.primaryColor.light2,
       topicColor: colors.primaryColor.main,
       providerColor: colors.accentColor.main,
-      colorChipVerified: "#1A7F37",
-      colorVerifiedAvatar: "#2DA44E",
+      colorChipVerified: colors.secondaryColor.lightGreen,
+      colorVerifiedAvatar: colors.secondaryColor.darkGreen,
       colorTypography: colors.primaryColor.darker,
-      completenessColor: "#42526E",
-      contributorColor: "#42526E",
-      bgContributor: "#DFE1E6",
-      bgViewJson: "#EAEDF4",
+      completenessColor: colors.secondaryColor.lightGreen,
+      contributorColor: colors.secondaryColor.lightGreen,
+      bgContributor: colors.secondaryColor.darkerGrey,
+      bgViewJson: colors.secondaryColor.lightGrey,
       colorViewJson: colors.primaryColor.dark2,
     },
     support: {
@@ -267,12 +289,14 @@ const primaryPalette = {
       iconColor: colors.primaryColor.dark2,
       colorTypography: colors.primaryColor.dark2,
       colorSubTypography: colors.primaryColor.light2,
+      colorLink: colors.accentColor.main,
     },
     pagination: {
       colorItem: colors.primaryColor.main,
     },
     recordMetadata: {
       colorTypography: colors.primaryColor.light2,
+      bgBox: colors.brightLight.main
     },
   },
   mapView: {
@@ -293,12 +317,15 @@ const primaryPalette = {
         colorLanguage: colors.primaryColor.dark2,
         borderColorLanguage: colors.primaryColor.light2,
         colorSelectedFilter: colors.primaryColor.dark2,
-        bgSelectedFilter: "#F6F8FA",
+        bgSelectedFilter: colors.secondaryColor.lightGrey,
         colorIcon: colors.primaryColor.darker3,
+        bgTableNeutral: colors.neutral.main,
+        bgTable: colors.brightLight.main,
+        colorTypography: colors.primaryColor.darker3,
         colorDivider: colors.primaryColor.dark2,
         bgButton: colors.accentColor.main,
-        bgTextfield: "#E8EDF266",
-        bgHeaderTable: "#F8FAFB",
+        bgTextfield: colors.secondaryColor.lightGrey,
+        bgHeaderTable: colors.secondaryColor.lightGrey,
       },
       toolbar: {
         bgButton: colors.neutral.main,
@@ -308,10 +335,19 @@ const primaryPalette = {
         bgBox: colors.primaryColor.dark2,
         bgBox2: colors.neutral.main,
         borderColor: colors.primaryColor.light,
-        checkedSliderColor: colors.primaryColor.main,
+        colorTypographyLight: colors.primaryColor.light,
+        sliderDisabled: colors.primaryColor.light,
+        sliderColor: colors.primaryColor.main,
+        checkedColor: colors.primaryColor.main,
         colorTypography: colors.primaryColor.dark2,
         colorTypographyLayer: colors.primaryColor.darker,
         colorSelectedLayer: colors.accentColor.main,
+      },
+      resultsDetails: {
+        bgSelectNeutral: colors.neutral.main,
+        iconKeyboardColor: colors.secondaryColor.darkerGrey,
+        colorSelect: colors.primaryColor.dark2,
+        borderOutlineSelect: colors.primaryColor.light2,
       },
     },
     mobile: {
@@ -329,19 +365,36 @@ const primaryPalette = {
         colorCloseIconTypo: colors.primaryColor.darker,
         colorSelectedLayer: colors.accentColor.main,
         colorTypography: colors.primaryColor.dark2,
+        colorSlider: colors.primaryColor.main,
+        checkedColor: colors.primaryColor.main,
       },
       resultsMap: {
         colorTypography: colors.primaryColor.darker,
-        bgButton: "#F6F8FA",
+        bgButton: colors.secondaryColor.lightGrey,
         colorButton: colors.primaryColor.dark2,
         colorButtonClear: colors.accentColor.main,
         colorProvider: colors.accentColor.main,
+        bgTableNeutral: colors.neutral.main,
+        bgTable: colors.brightLight.main,
       },
       searchMap: {
         bgBox: colors.neutral.main,
         colorTextfield: colors.primaryColor.darker3,
         bgButton: colors.accentColor.main,
+        bgTextfield: colors.secondaryColor.lightGrey,
       },
+      toolbar: {
+        colorButton: colors.primaryColor.dark2,
+        bgButton: colors.neutral.main,
+      },
+    },
+  },
+  matchmaking: {
+    demand: {
+      bgBox: "#E8EDF27F",
+    },
+    offer: {
+      bgBox: "#E8EDF27F",
     },
   },
 };

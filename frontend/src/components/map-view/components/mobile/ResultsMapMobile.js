@@ -252,7 +252,9 @@ const ResultsMapMobile = (props) => {
                               sx={{
                                 cursor: "pointer",
                                 background:
-                                  index2 % 2 === 0 ? "#FFFFFF" : "#E8EDF2",
+                                  index2 % 2 === 0
+                                    ? palette + "bgTableNeutral"
+                                    : palette + "bgTable",
                                 ".MuiTableCell-root": {
                                   border: 0,
                                 },
