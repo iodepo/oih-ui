@@ -141,52 +141,59 @@ const MapContainer = (props) => {
   };
 
   const facetSearch = (name, value, checked) => {
-    let facet = name + ":" + '"' + value + '"';
-    let isKeyContained = false;
-    let queryResult = "";
+    try {
+      let facet = name + ":" + '"' + value + '"';
+      let isKeyContained = false;
+      let queryResult = "";
 
-    if (checked) {
-      if (facetQuery) {
+      if (checked) {
+        if (facetQuery) {
+          const pairs = facetQuery.split(" AND ");
+          pairs.forEach((p) => {
+            if (p.includes(name)) {
+              isKeyContained = true;
+              let temp =
+                "(" +
+                [p.replace(/^\(|\)$/g, ""), facet]
+                  .filter((e) => e)
+                  .join(" OR ") +
+                ")";
+              queryResult = [queryResult, temp].filter((e) => e).join(" AND ");
+            } else {
+              queryResult = [queryResult, p].filter((e) => e).join(" AND ");
+            }
+          });
+          if (!isKeyContained)
+            queryResult = [queryResult, "(" + facet + ")"]
+              .filter((e) => e)
+              .join(" AND ");
+        } else {
+          queryResult =
+            "(" + [queryResult, facet].filter((e) => e).join(" OR ") + ")";
+        }
+      } else {
         const pairs = facetQuery.split(" AND ");
         pairs.forEach((p) => {
           if (p.includes(name)) {
-            isKeyContained = true;
-            let temp =
-              "(" +
-              [p.replace(/^\(|\)$/g, ""), facet].filter((e) => e).join(" OR ") +
-              ")";
-            queryResult = [queryResult, temp].filter((e) => e).join(" AND ");
+            const temp = p
+              .replace(/^\(|\)$/g, "")
+              .split(" OR ")
+              .filter((f) => f !== facet)
+              .join(" OR ");
+
+            queryResult = [queryResult, temp === "" ? temp : "(" + temp + ")"]
+              .filter((e) => e)
+              .join(" AND ");
           } else {
             queryResult = [queryResult, p].filter((e) => e).join(" AND ");
           }
         });
-        if (!isKeyContained)
-          queryResult = [queryResult, "(" + facet + ")"]
-            .filter((e) => e)
-            .join(" AND ");
-      } else {
-        queryResult =
-          "(" + [queryResult, facet].filter((e) => e).join(" OR ") + ")";
       }
-    } else {
-      const pairs = facetQuery.split(" AND ");
-      pairs.forEach((p) => {
-        if (p.includes(name)) {
-          const temp = p
-            .replace(/^\(|\)$/g, "")
-            .split(" OR ")
-            .filter((f) => f !== facet)
-            .join(" OR ");
-
-          queryResult = [queryResult, temp === "" ? temp : "(" + temp + ")"]
-            .filter((e) => e)
-            .join(" AND ");
-        } else {
-          queryResult = [queryResult, p].filter((e) => e).join(" AND ");
-        }
-      });
+      setFacetQuery(queryResult);
+    } catch (error) {
+      
     }
-    setFacetQuery(queryResult);
+    
   };
 
   const getGeoJSON = (bounds) => {

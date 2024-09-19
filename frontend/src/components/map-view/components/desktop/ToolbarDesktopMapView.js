@@ -72,26 +72,31 @@ const ToolbarDesktopMapView = (props) => {
   };
 
   useEffect(() => {
-    if (facetQuery) {
-      const pairs = facetQuery.split(" AND ");
-      const extractedPairs = [];
+    try {
+       if (facetQuery) {
+         const pairs = facetQuery.split(" AND ");
+         const extractedPairs = [];
 
-      pairs.forEach((p) => {
-        const temp = p.replace(/^\(|\)$/g, "");
-        const tempPairs = temp.split(" OR ");
-        tempPairs.forEach((t) => {
-          let index = t.indexOf(":");
-          let facetType = t.substring(0, index);
-          let facetName = t.substring(index + 1).slice(1, -1);
-          /* const splitted = t.split(":");
+         pairs.forEach((p) => {
+           const temp = p.replace(/^\(|\)$/g, "");
+           const tempPairs = temp.split(" OR ");
+           tempPairs.forEach((t) => {
+             let index = t.indexOf(":");
+             let facetType = t.substring(0, index);
+             let facetName = t.substring(index + 1).slice(1, -1);
+             /* const splitted = t.split(":");
           const facetType = splitted[0];
           const facetName = splitted[1].replace(/"/g, ""); */
-          extractedPairs.push({ name: facetType, value: facetName });
-        });
-      });
+             extractedPairs.push({ name: facetType, value: facetName });
+           });
+         });
 
-      setSelectedFacets(extractedPairs);
+         setSelectedFacets(extractedPairs);
+       }
+    } catch (error) {
+      console.log(error)
     }
+   
   }, [facetQuery, setSelectedFacets]);
 
   const handleInputChange = (value, name) => {

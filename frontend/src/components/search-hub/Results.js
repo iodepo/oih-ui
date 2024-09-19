@@ -92,9 +92,16 @@ export default function Results() {
   let counterResult = 0;
 
   useEffect(() => {
-    const category = CATEGORIES.find((category) => category.id === searchType);
+    try {
+      const category = CATEGORIES.find(
+        (category) => category.id === searchType
+      );
 
-    setMobileAppliedFilters([{ type: "searchType", text: category.text }]);
+      setMobileAppliedFilters([{ type: "searchType", text: category.text }]);
+    } catch (error) {
+      
+    }
+    
   }, [searchType]);
 
   useEffect(() => {
