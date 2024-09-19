@@ -93,6 +93,10 @@ To modify the carousel on the homepage, follow these simple steps:
    ```
 4. Each array within the main array is a group of icons that will be displayed in the carousel. From here, you can modify, remove, and add groups or elements as desired. 
 The important thing is to maintain the structure, meaning it should always remain as an array of arrays of objects.
+5. Upload the new image you want to see in the carousel to the `[INSTALLDIR]/frontend/frontend/src/resources/partners/` dir.
+6. Update the configuration.js file and import the new image at the top of the page (e.g. 'import newIcon from "../resources/partners/newIcon.jpg";')
+7. Replace the existing icon ('examplePartner') URL within the object (e.g. { icon: newIcon, url: "#" }).
+8. Replace the URL with the desired link for the image (e.g. { icon: newIcon, url: "https://www.example.com" }).
 
 ### Modify Tab Icons on Homepage
 
@@ -123,7 +127,7 @@ const CATEGORIES = [
 
 All icon URLs are located at the beginning of the file. If you want to use different icons, follow these additional steps:
 
-1. Import the new icons into the /resources/svg/ dir.
+1. Import the new icons into the `[INSTALLDIR]/frontend/frontend/src/resources/svg/` dir.
 
 2. Update the configuration.js file by importing the new icons and replacing the existing icon URLs within the category object.
 ```javascript
