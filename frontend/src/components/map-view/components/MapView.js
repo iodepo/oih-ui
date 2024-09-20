@@ -27,7 +27,7 @@ const MapView = (props) => {
     changeShowSearchArea,
     selectedElem,
     setInitMapBounds,
-    changeZoom,
+    setMapInstance,
   } = props;
   const mapInitRef = useRef(null);
   var h3Resolution = 2;
@@ -49,16 +49,7 @@ const MapView = (props) => {
     }
   }, [clustering, hexOpacity, showPoints, showRegions, geoJson]);
 
-  useEffect(() => {
-    if (mapInitRef.current && zoom) {
-      const currentZoom = mapInitRef.current.getZoom();
-      if (currentZoom < zoom) {
-        mapInitRef.current.zoomTo(zoom);
-      } else {
-        changeZoom(zoom + 1);
-      }
-    }
-  }, [zoom]);
+
 
   useEffect(() => {
     if (!selectedElem && mapInitRef.current) {
@@ -98,6 +89,7 @@ const MapView = (props) => {
         baseOpacity,
         initZoom
       );
+      setMapInstance(mapInitRef.current)
       setInitMapBounds(mapInitRef.current.getBounds());
       manageChangeOpacity(mapInitRef.current, baseOpacity, baseLayer);
 

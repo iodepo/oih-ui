@@ -58,7 +58,7 @@ const DesktopMapView = (props) => {
     setInitMapBounds,
     mapBounds,
     initMapBounds,
-    changeZoom,
+    setMapInstance
   } = props;
 
   const palette = "custom.mapView.desktop.";
@@ -199,7 +199,7 @@ const DesktopMapView = (props) => {
           changeSelectedElem={changeSelectedElem}
           selectedElem={selectedElem}
           setInitMapBounds={setInitMapBounds}
-          changeZoom={changeZoom}
+          setMapInstance={setMapInstance}
         />
       </Box>
     </>
