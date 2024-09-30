@@ -42,9 +42,10 @@ export default function TypesCount() {
   const translationState = useAppTranslation();
 
   useEffect(() => {
+    
     fetch(
-      `${dataServiceUrl}/search?rows=0&include_facets=false&${
-        region ? "&region=" + region : ""
+      `${dataServiceUrl}/search?rows=0&include_facets=false${
+        region === "Global" || region=== undefined ?  "" : "&region=" + region 
       }`
     )
       .then((response) => response.json())
