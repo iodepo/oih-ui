@@ -44,6 +44,7 @@ const MapContainer = (props) => {
   const [searchText, setSearchText] = useState(
     params.has("search_text") ? params.get("search_text") : ""
   );
+  const [mapInstance, setMapInstance] = useState();
   const [resultsCount, setResultsCount] = useState(0);
   const [initMapBounds, setInitMapBounds] = useState(false);
   const [open, setOpen] = useState(true);
@@ -107,25 +108,19 @@ const MapContainer = (props) => {
     dispatch({ type: "setMapBounds", mapBounds: mapBounds });
   };
 
-  const changeZoom = (zoom) => {
-    dispatch({ type: "setZoom", zoom: zoom });
-  };
+
   const searchThisArea = () => {
     getDataSpatialSearch(state.mapBounds);
   };
 
   const applyZoom = (zoomType) => {
-    let value;
+    
     if (zoomType === "out") {
-      if (state.zoom > 0) {
-        value = state.zoom - 1;
-      }
+     mapInstance.zoomOut();
     } else if (zoomType === "in") {
-      if (state.zoom > 0) {
-        value = state.zoom + 1;
-      }
+    mapInstance.zoomIn();
     }
-    changeZoom(value);
+    
   };
 
   const handleDrawer = (isOpen) => {
@@ -305,6 +300,7 @@ const MapContainer = (props) => {
       )}
       {state && isHome && (
         <MapView
+          setMapInstance={setMapInstance}
           container={mapRef}
           baseLayer={state.baseLayer}
           baseOpacity={state.baseOpacity}
@@ -320,13 +316,13 @@ const MapContainer = (props) => {
           changeMapBounds={changeMapBounds}
           geoJson={geoJson}
           setInitMapBounds={setInitMapBounds}
-          changeZoom={changeZoom}
         />
       )}
 
       {state && !isHome && !isMobile && (
         <Box display={{ xs: "none", md: "block" }}>
           <DesktopMapView
+            setMapInstance={setMapInstance}
             results={results}
             setSearchText={setSearchText}
             searchText={searchText}
@@ -375,7 +371,6 @@ const MapContainer = (props) => {
             currentURI={currentURI}
             setInitMapBounds={setInitMapBounds}
             initMapBounds={initMapBounds}
-            changeZoom={changeZoom}
           />
         </Box>
       )}
@@ -383,6 +378,7 @@ const MapContainer = (props) => {
       {state && !isHome && isMobile && (
         <Box>
           <MobileMapView
+            setMapInstance={setMapInstance}
             results={results}
             setSearchText={setSearchText}
             searchText={searchText}
@@ -429,7 +425,6 @@ const MapContainer = (props) => {
             currentURI={currentURI}
             setInitMapBounds={setInitMapBounds}
             initMapBounds={initMapBounds}
-            changeZoom={changeZoom}
           />
         </Box>
       )}

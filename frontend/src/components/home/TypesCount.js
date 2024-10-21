@@ -42,9 +42,10 @@ export default function TypesCount() {
   const translationState = useAppTranslation();
 
   useEffect(() => {
+    
     fetch(
-      `${dataServiceUrl}/search?rows=0&include_facets=false&${
-        region ? "&region=" + region : ""
+      `${dataServiceUrl}/search?rows=0&include_facets=false${
+        region === "Global" || region=== undefined ?  "" : "&region=" + region 
       }`
     )
       .then((response) => response.json())
@@ -117,7 +118,7 @@ export default function TypesCount() {
                     <Grid item lg={4} xs={12}></Grid>
                     <Grid
                       item
-                      lg={4}
+                      lg={12}
                       xs={12}
                       sx={{
                         display: "flex",
