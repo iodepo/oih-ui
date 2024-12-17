@@ -1,14 +1,18 @@
-DEFAULT_FACET_FIELDS = ['txt_knowsAbout', 'name', 'txt_knowsLanguage', 'txt_nationality', 'txt_jobTitle',
-                        'txt_contributor', 'txt_keywords', 'txt_memberOf', 'txt_parentOrganization', 'id_provider',
-                        'has_geom',
-                        'id_includedInDataCatalog', 'id_identifier', 'id', 'keys', 'type'
-                        ]
+import json
+from pathlib import Path
+
+with open(str(Path(__file__).resolve().parent.parent) + '/config.json') as f:
+    config_json = f.read()
+
+config = json.loads(config_json)
+
+DEFAULT_FACET_FIELDS = config.get('default_facet_fields', {})
 
 
 class SolrQueryBuilder:
 
     def __init__(self, rows=10, facet_min_count=1, start=0,
-                 query='*:*', sort='score desc, indexed_ts desc',
+                 query='*:*', sort='indexed_ts desc',
                  facet='true', flList=None):
         self.params = {
             'q.op':'AND',  # default op to AND  # applies to dismax and standard query parser
@@ -49,6 +53,9 @@ class SolrQueryBuilder:
             self.params['fq'] = []
 
         self.params['fq'].append(self._fmt(name) % {'name': name, 'value':value})
+
+    def add_raw_fq(self, value):
+        self.params['fq'] = value
 
     def add_facet_interval(self, interval_fields, facet_intervals):
         self.params["facet.interval"] = interval_fields
