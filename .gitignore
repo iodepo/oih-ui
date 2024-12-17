@@ -6,7 +6,6 @@
 venv/
 __pycache__
 
-solr/sample-solr-data
 package-lock.json
 
 solrlog.txt

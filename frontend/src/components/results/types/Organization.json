@@ -1,0 +1,8 @@
+[
+  { "key": "txt_url", "type": ["link", "truncated"], "label": "URL" },
+  "txt_telephone",
+  { "key": "txt_memberOf", "type": "list" },
+  { "key": "txt_knowsAbout", "type": "list" },
+  { "key": "id_provider", "type": ["list", "link"], "label": "Provider ID" },
+  { "key": "txt_provider", "type": "list" }
+]

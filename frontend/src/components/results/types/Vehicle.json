@@ -1,0 +1,6 @@
+[
+  { "key": "txt_additionalProperty", "type": "list" },
+  "txt_category",
+  { "key": "txt_vehicleConfiguration", "label": "Configuration" },
+  { "key": "txt_vehicleSpecialUsage", "label": "Special Usage" }
+]

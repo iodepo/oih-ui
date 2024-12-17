@@ -1,4 +1,4 @@
-FROM node:lts-alpine3.19
+FROM node:18-alpine3.15
 
 WORKDIR /app
 
@@ -10,4 +10,4 @@ RUN npm install --legacy-peer-deps
 
 COPY ./ ./
 
-CMD ["nodemon", "start"]
+CMD ["npm", "start"]

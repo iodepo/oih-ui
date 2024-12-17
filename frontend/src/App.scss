@@ -1,0 +1,394 @@
+#root {
+  background: url("resources/landing-bg_1400.jpeg");
+  background-size: 100%;
+  background-repeat: no-repeat;
+  // note, this is positioning y based on the width to keep the manta on the page
+  background-position-y: -40vw;
+  min-height: 100vh;
+//  background-attachment: fixed;
+}
+
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction:column;
+  // Undo this to make the front page less scrolly
+  .search__container {
+    //margin-top: 20vh;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  // Also possibly 35vh;
+  // again, we're doing positioning in Y based on the width, to keep it under the manta.
+  //Arno 23/02/23 this creates too much 'white'space
+  .category-section {
+    //margin-top: 20vw;
+  }
+}
+
+.results {
+  .search__container {
+    @extend .mt-4;
+  }
+}
+
+#headerLogo {
+  width: 60px;
+  height: 60px;
+  @extend .d-inline-block, .align-top
+}
+
+nav.navbar-oih.navbar.navbar-expand-lg.navbar-light {
+   background: #21295c;
+}
+
+nav .navbar-collapse {
+  position: absolute;
+  top: 0;
+  background: rgba(0,24,49, 1);
+  right: -100%; /* pull the menu out of the viewport from right */
+  width: 25vw;
+  height: 100vh;
+  display: block;
+  padding-top: 2em;
+  transition: right 0.3s ease; /* transition for smooth sliding */
+  z-index: 10;
+}
+
+nav .navbar-collapse.show {
+  right: 0; /* push the menu back to viewport */
+}
+
+a.text-light.menu-text.nav-link {
+    text-align: left;
+}
+
+.close-btn {
+  position: absolute;
+  top: 1em;
+  right: 2em;
+  cursor: pointer;
+}
+
+.primary-bg {
+  background-color: #21295c;
+}
+
+.text-light-alt {
+  color: white;
+  font-weight: 700;
+  font-size: 2em;
+  margin: auto;
+}
+
+.text-light-tab {
+  margin: auto;
+}
+
+.primary-color-alt {
+  color: #06bce5;
+}
+
+.primary-color {
+  color: #21295c;
+}
+
+a.text-light.menu-text.nav-link {
+  padding-left: 5em;
+  font-weight: 600;
+}
+
+.bg-alt {
+  color: #06bce5;
+}
+
+.searchbg {
+  max-height: 40vh;
+  background: url("resources/Photo Africa Coast Original.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: 75% 60%;
+}
+
+.searchbg-alt {
+  min-height: 10vh;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: 75% 60%;
+  padding-top: 2em;
+  //background-color: #21295c;
+}
+
+.result-search {
+  margin: 0 auto;
+}
+
+.spacer {
+  margin-top: 4em;
+  margin-bottom: 10em;
+}
+
+.clear-btn {
+  all: unset;
+  cursor: pointer;
+  color: #06bce5;
+}
+
+.result-item {
+  border-bottom: 1.2px solid #95a5a6;
+}
+
+.result-title {
+  text-decoration: none;
+  color: #ffffff;
+}
+
+.result-title:hover {
+  text-decoration: underline;
+}
+
+p.result-p {
+  text-align: left;
+  margin-bottom: 0.5em;
+  word-wrap: break-word;
+}
+
+p.result-p.truncate {
+  width: 50%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wrap-text {
+  width: 80vw;
+  flex-wrap: wrap;
+}
+
+.description-truncate {
+  display: -webkit-box;
+  max-width: 100%;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pagination {
+  text-transform: capitalize;
+
+}
+
+.container__categories {
+  display: flex;
+  justify-content: space-between;
+  align-content: middle;
+  flex-wrap: wrap;
+  div.category__button {
+    /* height: 228px;*/
+    /* show 4 across for most larger ones, don't kick up to 5, nor down to 3 on the HD sized display */
+    /*width: (min(max(228px, 18vw), 300px));*/
+    height: 180px;
+    width: min(max(19px, 16vw), 280px);
+  }
+}
+
+.bubble-container {
+  z-index: 5;
+}
+
+.bubble {
+  display: flex;
+  padding: 10%;
+  height: 10em;
+  width: 10em;
+  font-size: 0.5em;
+  z-index: 2;
+  border: 1px solid #fff;
+}
+
+.bubble-alt {
+  display: flex;
+  padding: 0.18rem;
+  height: 3em;
+  width: 3em;
+  font-size: 1em;
+  font-weight: 500;
+  z-index: 2;
+  border: 1px solid #fff;
+  color: white;
+}
+
+.bubble-textarea {
+  position: relative;
+  top: 0.8em;
+  left: -1em;
+  background-color: #2f5592;
+  color: white;
+  padding: 1em;
+  padding-left: 1.5em;
+  border-radius: 0.8em;
+}
+
+.bubble-textarea-alt {
+  position: relative;
+  height: fit-content;
+  padding: 0.2em 0.5em 0.3em 1.2em;
+  top: 0.5em;
+  left: -1em;
+  margin-right: -1rem;
+  background-color: #2f5592;
+  color: white;
+  border-radius: 0.8em;
+}
+
+.bubble-textarea-selected {
+  position: relative;
+  height: fit-content;
+  padding: 0.2em 0.5em 0.3em 1.2em;
+  top: 0.5em;
+  left: -1.0em;
+  margin-right: -1rem;
+  background-color: white;
+  color: #21295c;
+  border-radius: 0.8em;
+}
+
+.bg-selected {
+  background-color: white;
+  color: #21295c;
+}
+
+.category-icon {
+  position: relative;
+  bottom: -1em;
+  right: -4em;
+  max-width: 40%;
+}
+
+#category-heading {
+  position: relative;
+  background-color: black;
+  margin-top: -4em;
+  padding: 1em 4em;
+  width: fit-content;
+  border-radius: 1em;
+}
+
+.category-section {
+//  background-color: rgba(0,24,49, 0.8);
+  padding: 2em;
+  border-radius: 3em;
+  /*margin-top: 5em;*/
+  /*margin-bottom: 7em;*/
+  margin-bottom: 5em;
+}
+
+#result-section {
+  background-color: rgba(0,24,49, 1);
+  padding: 2em;
+  color: white;
+  opacity: 100%;
+  a {
+    color: #eee;
+    &:hover, &:visited, &:active {
+      color:#ddd;
+      text-decoration: underline;
+    }
+  }
+}
+
+#ResTabs {
+
+  .react-tabs__tab {
+    // tighten horizontal spacing on tabs.
+    padding: 6px 0;
+    margin-right: .3rem;
+    margin-left: .3rem;
+  }
+  ul {
+    padding-left: 0;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+  }
+  margin-bottom: calc(-1.0rem + 3px);
+  // give us a bit of overhang to go single line @ 1280 px.
+  margin-right: -1.3rem;
+  margin-left: -1.3rem
+}
+
+.footer-bg{
+  background: #21295c;
+}
+
+.footer-logos__container {
+  column-gap: 1rem;
+}
+/* use px height for integer scaling on logos */
+.footer-logos {
+  max-height: 110px;
+  align-self: center;
+  img {
+    max-height: 110px;
+  }
+}
+
+
+#resultsPaginate {
+  margin-top: 2em;
+  display:flex;
+  justify-content: center;
+  .page-link {
+    background-color: rgba(0,24,49, 1);
+  }
+}
+
+#result-container {
+  padding: 0 6% 2em 6%;
+}
+
+.react-tabs__tab:focus::after {
+  display: none !important;
+}
+
+/*=====*/
+/* results*/
+#expert {
+  width: 300%;
+}
+
+.narrow {
+  max-width: 20%;
+}
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: white;
+}
+
+.truncate a {
+    color: white;
+}
+
+/* UNDONE, super hacky css to get the map to show up */
+.exp-map {
+  min-height: 500px;
+  height: 500px;
+  width: 112%;
+  color: black;
+}
+
+.exp-map__title {
+  display: none;
+}
+
+#resultsDiv {
+  width: 100%;
+}
+
+.buttonHolder {
+  margin-top: 1% !important;
+}

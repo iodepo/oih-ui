@@ -1,32 +1,37 @@
-import React from "react";
-import { Route, BrowserRouter } from "react-router-dom";
-import TypesCount from "../components/home/TypesCount";
-import Results from "../components/search-hub/Results";
+import React, {useState} from 'react';
+import {Route, BrowserRouter, useLocation} from 'react-router-dom';
+
+import Search from "../components/Search";
+import TypesCount from "../components/TypesCount";
+import Results from "../components/Results";
+import Footer from "../components/Footer";
+import Header from "../components/Header";
 import { AppContainer } from "../components/AppContainer";
-import { Routes } from "react-router";
-import MapContainer from "components/map-view/MapContainer";
-import RecordMetadata from "components/search-hub/RecordMetadata";
-import OfferForm from "components/matchmaking/offer/OfferForm";
-import DemandForm from "components/matchmaking/demand/DemandForm";
+import {Routes} from "react-router";
+import ReactGA from "react-ga4";
+
+ReactGA.initialize([
+    {
+        trackingId: "G-QJ5XJMZFXW",
+    },
+]);
 
 function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="results/:searchType" element={<Results />} />
-        <Route path="results/" element={<Results />} />
-        <Route path="/map-viewer" element={<MapContainer isHome={false} />} />
-        <Route
-          path="/map-viewer/:searchType"
-          element={<MapContainer isHome={false} />}
-        />
-        <Route path="/record/:jsonld" element={<RecordMetadata />} />
-        <Route path="/matchmaking/demand" element={<DemandForm />} />
-        <Route path="/matchmaking/offer" element={<OfferForm />} />
-        <Route path="/" element={<TypesCount />}></Route>
-      </Routes>
-    </BrowserRouter>
-  );
+    return (
+        <BrowserRouter>
+          <AppContainer>
+            <Header />
+            <Search />
+            <Routes>
+              <Route path="results/:searchType" element={<Results />}/>
+              <Route path="results/" element={<Results />}/>
+              <Route path="/" element={<TypesCount />}>
+              </Route>
+            </Routes>
+            <Footer />
+          </AppContainer>
+        </BrowserRouter>
+    );
 }
 
 export default App;
