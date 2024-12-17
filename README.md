@@ -6,6 +6,6 @@ This repo contains the code for the Ocean Info Hub Global Search Portal.
 * `/indexer` contains all of the code to ingest the OIH graph into the SOLR Instance
 * `/solr` contains the configuration required for the solr instance, including the schema. 
 * `/frontend` contains the code for the static javascript app. This will produce a container in dev mode running a live server, and a static html/javascript site in production mode. 
-* `/regions` contains the QGIS file defining the gographical regions. 
+* `/regions` contains the QGIS file defining the geographical regions. 
 
 See the individual README files for more information. 

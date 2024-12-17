@@ -151,10 +151,9 @@ def genericType_toAtts(orig, rid=None):
         if orig['@type'] == 'Project' or orig['@type'] == 'ResearchProject':
           print('***changing type:Project to type:ResearchProject')
           origType = 'ResearchProject'
-        #handle type:DigitalDocument as type:CreativeWork (see https://github.com/iodepo/odis-arch/issues/337 )
-        elif orig['@type'] == 'CreativeWork' or orig['@type'] == 'DigitalDocument':
-          print('***changing type:DigitalDocument to type:CreativeWork')
-          origType = 'CreativeWork'
+        #handle CreativeWork subsets as type:CreativeWork (see https://github.com/iodepo/odis-arch/issues/337 )
+        elif orig['@type'] == 'CreativeWork' or orig['@type'] == 'DigitalDocument' or orig['@type'] == 'Movie' or orig['@type'] == 'SoftwareSourceCode':
+          print('***changing type:' + orig['@type'] + ' to type:CreativeWork')
         else:
           origType = orig['@type']                
 
@@ -185,14 +184,18 @@ def genericType_toAtts(orig, rid=None):
                     #handle case of name as list
                     for i in v:
                         pos = 0
-                        print(i.values()) 
-                        for val in i.values():
-                            if val == "en":
-                                listForm = list(i.values())
-                                print('***Name: ' + listForm[pos+1])
-                                data.append(Att(None, listForm[pos+1], k))
-                                data.append(Att('txt', listForm[pos+1], k))
-                                data.append(Att('txt', regions.regionForName(listForm[pos+1]), 'region'))
+                        if isinstance(i, dict) == True:
+                            print(i.values()) 
+                            for val in i.values():
+                                if val == "en":
+                                    listForm = list(i.values())
+                                    print('***Name: ' + listForm[pos+1])
+                                    data.append(Att(None, listForm[pos+1], k))
+                                    data.append(Att('txt', listForm[pos+1], k))
+                                    data.append(Att('txt', regions.regionForName(listForm[pos+1]), 'region'))
+                        else:
+                            data.append(Att(None, i, k))
+                            data.append(Att('txt', i, k))
             elif k == 'description':
                 if isinstance(v, list) == False:
                     #print('type is: ',type(v))
@@ -330,7 +333,11 @@ def genericType_toAtts(orig, rid=None):
     if 'txt_region' in ret:
         ret['txt_region'] = list(set(ret['txt_region']))
     if 'txt_nationality' in ret:
-        ret['txt_nationality'] = list(set(ret['txt_nationality']))        
+        ret['txt_nationality'] = list(set(ret['txt_nationality']))
+    if 'txt_license' in ret:
+        #remove trailing slash in urls, for performing comparison
+        stripped_vals = [url.rstrip('/') for url in ret['txt_license']]
+        ret['txt_license'] = list(set(stripped_vals))        
     return ret
 
 def _merge_prov(orig, prov):

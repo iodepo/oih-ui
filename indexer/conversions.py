@@ -131,6 +131,18 @@ def GeoShape(geo):
             return _geo(field, fmt % val)
     raise UnhandledFormatException("Didn't handle %s in GeoShape" % json.dumps(geo))
 
+def GeoCoordinates(geo):
+    #print('here [GeoCoordinates]')
+
+    lat = geo.get("latitude",None)
+    long = geo.get("longitude",None)
+    if lat is not None and long is not None:
+        print ("Generating a Point from the GeoCoordinates...")
+        newPoint = "POINT (" + str(long) + " " + str(lat) + ")"
+        print(newPoint)
+        return _geo('point', newPoint)      
+
+    raise UnhandledFormatException("Didn't handle %s in GeoCoordinates" % json.dumps(geo))
 
 def CourseInstance(data):
     atts = [_dispatch(field, data.get(field, None)) for field in ('startDate', 'endDate')]
@@ -239,7 +251,7 @@ def _parseDate(field, d):
     try:
         dt = isoparse(d)
         return [
-            Att('dt', dt.isoformat(), field),
+            Att('dt', dt.isoformat(timespec='seconds').replace('+00:00', 'Z'), field),
             Att('n', dt.year, field.replace('Date', 'Year')),
         ]
     except ValueError:
