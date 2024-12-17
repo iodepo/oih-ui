@@ -154,6 +154,7 @@ def genericType_toAtts(orig, rid=None):
         #handle CreativeWork subsets as type:CreativeWork (see https://github.com/iodepo/odis-arch/issues/337 )
         elif orig['@type'] == 'CreativeWork' or orig['@type'] == 'DigitalDocument' or orig['@type'] == 'Movie' or orig['@type'] == 'SoftwareSourceCode':
           print('***changing type:' + orig['@type'] + ' to type:CreativeWork')
+          origType = 'CreativeWork'
         else:
           origType = orig['@type']                
 
